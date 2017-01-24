@@ -1,5 +1,5 @@
 # T(ea)RDrop 
-<img src="images/trdrop_logo_text.svg" alt="Teardrop logo" width="250" height="200">
+<img src="images/trdrop_logo_text.png" alt="Teardrop logo" width="250" height="200">
 
 trdrop - a cross platform fps analyzer for raw video data
 
