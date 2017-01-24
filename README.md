@@ -1,4 +1,5 @@
-# T(ea)RDrop
+# T(ea)RDrop 
+<img src="images/trdrop_logo_text.svg" alt="Teardrop logo" width="250" height="200">
 
 trdrop - a cross platform fps analyzer for raw video data
 
@@ -15,7 +16,7 @@ This project is based of `Qt 5.8` with an embedded OpenGL viewport and `libvlc`.
 
 The user will be presented a simple GUI with following functionality
 
-![This is a the pitch screenshot](trdrop-pitch.png "Pitch Scetch")
+![This is a the pitch screenshot](images/trdrop_pitch.png "Pitch Scetch")
 
 #### Milestones
 
