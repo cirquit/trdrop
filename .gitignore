@@ -36,3 +36,5 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user
 
+# local images folder
+local-images
