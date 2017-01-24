@@ -15,4 +15,4 @@ This project is based of `Qt 5.8` with an embedded OpenGL viewport and `libvlc`.
 
 The user will be presented a simple GUI with following functionality
 
-TODO
+![This is a the pitch screenshot](trdrop-pitch.png "Pitch Scetch")
