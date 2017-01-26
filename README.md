@@ -23,11 +23,11 @@ The user will be presented a simple GUI with following functionality
 | Milestone     | Feature         											  								  | Time  | Completed |
 | ------------- |:----------------											  								  | -----:|----------:|
 | **Nr.1**      | run `Qt` on Linux 											  							  |    2h |           |
-| 			    | setup a build system, learn simple `cmake`, `qt-developer`     							  |    2d |			  |
+| 			    | setup a build system, learn simple `cmake`, `qt-developer`, lookup conan 					  |    2d |			  |
 | 			    | setup travis      										  								  |    2h |			  |
 | 			    | 														      								  | 2d,4h |			  |
 | 			    | 														      								  |       |			  |
-| **Nr.2**      | create a simple gui with a viewport which can load a `raw` video							  |    3d |           |
+| **Nr.2**      | create a simple gui with a viewport in 1080p which can load a `raw` video 				  |    3d |           |
 | 			    | create a custom fps field which has a predefined settings and let is calculate the fps      |    3d |			  |
 | 			    | create the run/stop buttons     				   			  				     			  |    2h |			  |
 | 			    | run `Qt` on Windows and test the previous work     			  			     			  |    4h |			  |
@@ -56,8 +56,10 @@ The user will be presented a simple GUI with following functionality
 | 			    | save configs and tears for videos based on filename	      								  |    2h |			  |
 | 			    | 														      								  |  3d,2h|			  |
 |**Summary**    | trdrop alpha v0.1										      								  | 20d,7h|			  |
-
-
+**Features:**
+* `.avi` container with raw *encoding* 
+* 1080p export, with futureproof 2k and 4k extension
+* centering videos and fit to height
 
 
 **Extra goodies:**
