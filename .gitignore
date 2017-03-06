@@ -38,3 +38,12 @@ CMakeLists.txt.user
 
 # local images folder
 local-images
+
+# latex
+.ps
+.log
+.aux
+.out
+.dvi
+.bbl
+.blg
