@@ -1,7 +1,9 @@
+[![Build Status](https://travis-ci.org/cirquit/trdrop.svg?branch=master)](https://travis-ci.org/cirquit/trdrop)
+
 # T(ea)RDrop 
 <img src="images/trdrop_logo_text.png" alt="Teardrop logo" width="200" height="330">
 
-trdrop - a cross platform fps analyzer for raw video data
+trdrop - a cross platform fps analyzer for raw video data 
 
 ## Description
 
