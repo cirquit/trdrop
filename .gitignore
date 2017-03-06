@@ -47,3 +47,10 @@ local-images
 .dvi
 .bbl
 .blg
+
+# C++ build
+
+trdrop_lib/build/*
+trdrop_c/build/*
+trdrop_v/build/*
+
