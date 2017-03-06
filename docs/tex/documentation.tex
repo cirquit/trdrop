@@ -59,6 +59,25 @@ The following features are to be included in \textbf{v0.1}:
 \includegraphics[width=500pt,left]{../../images/trdrop_diagram.eps}
 \end{figure}
 
+\section{Example usage}
+
+\subsection{Command Line Interface}
+
+\begin{verbatim}
+# Creates a new annotated video with defaults
+#
+$ trdrop_cbin video_01.raw > converted_video.mp4
+
+# Creates a new annotated video and VLC is used to visualize the result
+#
+$ trdrop_cbin video_01.raw > converted_video.mp4 | vlc
+
+# Creates a new annotated video from multiple inputs
+#
+$ trdrop_cbin video_01.raw video_02.raw video_03.raw video_04.raw > converted_video.mp4
+\end{verbatim}
+
+
 \section{Future work}
 
 \end{document}

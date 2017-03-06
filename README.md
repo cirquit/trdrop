@@ -3,22 +3,34 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
-#### Description
+## Description
 
 This software is used for analyzing raw video data, calculating framedrops and visualizing tears.
-The result can be exported with an overlay displaying the information.
+The result can be exported with an overlay displaying the information. For a more detailed description, look up the documentation in `docs/`.
+
+The projects is split in 3 parts, the **trdrop\_lib**, **trdrop\_cbin** and the **trdrop\_vbin**.
+
+##### Library
+The library provides an extendable interface to design the overlay, save the processed data und peek into result.
+
+##### Command Line Program
+The command line program uses the library and/or a config file and/or command line flags to configure the overlay. The result should be streamable with vlc. Example usage:
+
+```
+$ trdrop_cbin video_01.raw video_02.raw > processed_video.mp4 | vlc
+```  
+
+##### GUI Program
+The GUI program will be developed in `Qt` if there is time left. It may look like this.
+![This is a the pitch screenshot](images/trdrop_pitch.png "Pitch Scetch")
 
 #### Cross Platform
 
-This project is based of `Qt 5.8` with an embedded OpenGL viewport and `libvlc`. It will be developed for Linux and Windows. MacOS will maybe supported in the future.
-
-#### Usage
-
-The user will be presented a simple GUI with following functionality
-
-![This is a the pitch screenshot](images/trdrop_pitch.png "Pitch Scetch")
+Because this project is being developed with C++, `ffmpeg` and CMake, it should be portable to Windows atleast, even if the development is being done on Linux.
 
 #### Milestones
+
+TODO Refactoring
 
 | Milestone     | Feature         											  								  | Time  | Completed |
 | ------------- |:----------------											  								  | -----:|----------:|
