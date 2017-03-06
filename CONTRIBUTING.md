@@ -5,7 +5,7 @@ I use clang-3.9, cmake-3.5.2.
 ### Build process for Linux
 
 Clone or fork the repo. (cloning in the example)
-```
+```bash
 $ git clone https://github.com/cirquit/trdrop
 $ cd trdrop
 ```
