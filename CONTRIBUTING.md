@@ -12,17 +12,20 @@ $ cd trdrop
 
 Build the library:
 ```bash
-cd trdrop_lib/build && cmake .. && make
+$ cd trdrop_lib && mkdir build
+$ cd build && cmake .. && make
 ```
 
 Or if you want to install the library globally:
 ```bash
-cd trdrop_lib/build && cmake .. && sudo make install
+$ cd trdrop_lib && mkdir build
+$ cd build && cmake .. && sudo make install
 ```
 
 Build your executable (analogue for `trdrop_v`)
 ```bash
-$ cd trdrop_c/build && cmake .. && make
+$ cd trdrop_c && mkdir build
+$ cd build && cmake .. && make
 $ ./trdrop_c
 ```
 
