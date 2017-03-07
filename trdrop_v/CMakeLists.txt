@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(trdrop_v)
 
+##################################
+##          trdrop_v            ##
+##################################
+
 # set flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
@@ -17,3 +21,22 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(trdrop_v ${SOURCES})
 target_link_libraries(trdrop_v ${PROJECT_LINK_LIBS})
+
+##################################
+##        trdrop_v_tests        ##
+##################################
+
+# create an interface for catch
+add_library(Catch INTERFACE)
+
+# tell cmake where the header of catch lies
+target_include_directories(Catch INTERFACE ../ext/)
+
+# tell cmake where the tests lie
+file(GLOB TEST_SOURCES "tests/*.cpp")
+add_executable(trdrop_v_tests ${TEST_SOURCES})
+
+# create the test
+enable_testing()
+target_link_libraries(trdrop_v_tests Catch)
+add_test(NAME Test COMMAND trdrop_v_tests)

@@ -27,8 +27,9 @@ before_script:
   - cd trdrop_v/build && cmake .. && cd ../..
 
 script:
-  - cd trdrop_c/build && make && ./trdrop_c; cd ../..
-  - cd trdrop_v/build && make && ./trdrop_v
+  - cd trdrop_lib/build && ./trdrop_lib_tests; cd ../..
+  - cd trdrop_c/build && make && ./trdrop_c_tests; cd ../..
+  - cd trdrop_v/build && make && ./trdrop_v_tests
 
 compiler:
   - clang
