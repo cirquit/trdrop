@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(trdrop_c)
 
+# set flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
 # static library of trdrop
 set (PROJECT_LINK_LIBS libtrdrop.a )
 link_directories( ../trdrop_lib/build )

@@ -2,8 +2,6 @@ sudo: required
 
 language: cpp
 
-sudo: false
-
 addons:
   apt:
     sources:
@@ -24,16 +22,13 @@ install:
 
 
 before_script:
-  - echo $PWD
   - cd trdrop_lib/build && cmake .. && make && cd ../..
-  - echo $PWD
   - cd trdrop_c/build && cmake .. && cd ../..
-  - echo $PWD
   - cd trdrop_v/build && cmake .. && cd ../..
 
 script:
-  - echo $PWD; cd trdrop_c/build && make && ./trdrop_c; cd ../..
-  - echo $PWD; cd trdrop_v/build && make && ./trdrop_v
+  - cd trdrop_c/build && make && ./trdrop_c; cd ../..
+  - cd trdrop_v/build && make && ./trdrop_v
 
 compiler:
   - clang

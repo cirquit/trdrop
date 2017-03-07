@@ -1,6 +1,6 @@
 ### Prerequesites
 
-I use clang-3.9, cmake-3.5.2.
+I use `clang-3.9`, `cmake-3.5.2` for local development. Travis runs tests with `cmake-2.8.7`, `clang-3.9` and `gcc-4.6.3` (even if I specifiy `gcc-5`).
 
 ### Build process for Linux
 

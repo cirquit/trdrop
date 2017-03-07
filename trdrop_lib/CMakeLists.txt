@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8.7)
 project(trdrop_lib)
 set(CMAKE_BUILD_TYPE Release)
 
+# set flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
 # headers lie in the folder "include"
 include_directories(include)
 
