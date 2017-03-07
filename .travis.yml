@@ -7,11 +7,13 @@ addons:
     sources:
       - llvm-toolchain-precise-3.9
       - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
     packages:
       - clang-3.9
       - g++-5
       - gcc-5
       - cmake
+      - cmake-data
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
@@ -22,6 +24,7 @@ install:
 
 
 before_script:
+  - cmake --version
   - cd trdrop_lib/build && cmake .. && make && cd ../..
   - cd trdrop_c/build && cmake .. && cd ../..
   - cd trdrop_v/build && cmake .. && cd ../..
