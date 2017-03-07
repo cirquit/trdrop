@@ -24,12 +24,13 @@ install:
 
 
 before_script:
-  - cd trdrop_lib/build; cmake ..; make
+  - cd trdrop_lib/build; cmake ..
   - cd ../../trdrop_c/build; cmake ..
   - cd ../../trdrop_v/build; cmake ..
 
 script:
-  - cd trdrop_c/build; make
+  - cd trdrop_lib/build; make
+  - cd ../../trdrop_c/build; make
   - ./trdrop_c
   - cd ../../trdrop_v/build; make
   - ./trdrop_v
