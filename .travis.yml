@@ -13,7 +13,6 @@ addons:
       - g++-5
       - gcc-5
       - cmake
-      - cmake-data
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
@@ -21,10 +20,10 @@ install:
   - mkdir trdrop_c/build
   - mkdir trdrop_lib/build
   - mkdir trdrop_v/build
+  - cmake --version
 
 
 before_script:
-  - cmake --version
   - cd trdrop_lib/build && cmake .. && make && cd ../..
   - cd trdrop_c/build && cmake .. && cd ../..
   - cd trdrop_v/build && cmake .. && cd ../..
