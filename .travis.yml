@@ -24,16 +24,16 @@ install:
 
 
 before_script:
-  - cd trdrop_lib/build; cmake ..
-  - cd ../../trdrop_c/build; cmake ..
-  - cd ../../trdrop_v/build; cmake ..
+  - echo $PWD
+  - cd trdrop_lib/build && cmake .. && make && cd ../..
+  - echo $PWD
+  - cd trdrop_c/build && cmake .. && cd ../..
+  - echo $PWD
+  - cd trdrop_v/build && cmake .. && cd ../..
 
 script:
-  - cd trdrop_lib/build; make
-  - cd ../../trdrop_c/build; make
-  - ./trdrop_c
-  - cd ../../trdrop_v/build; make
-  - ./trdrop_v
+  - echo $PWD; cd trdrop_c/build && make && ./trdrop_c; cd ../..
+  - echo $PWD; cd trdrop_v/build && make && ./trdrop_v
 
 compiler:
   - clang
