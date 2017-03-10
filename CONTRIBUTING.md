@@ -1,6 +1,6 @@
 ### Prerequesites
 
-I use `clang-3.9`, `cmake-3.5.2` for local development. Travis runs tests with `cmake-2.8.7`, `clang-3.9` and `gcc-4.6.3` (even if I specifiy `gcc-5`).
+I use `clang-3.9`, `cmake-3.5.2` for local development. Travis runs tests with `cmake-2.8.7`, `clang-3.9` and `gcc-4.6.3` (even if I specifiy `gcc-5`). Documentation for `trdrop_lib` is generated with [`doxygen-1.8.14`](http://www.stack.nl/~dimitri/doxygen/download.html).
 
 ### Build process for Linux
 
@@ -27,6 +27,13 @@ Build your executable (analogue for `trdrop_v`)
 $ cd trdrop_c && mkdir build
 $ cd build && cmake .. && make
 $ ./trdrop_c
+```
+
+To generate the documentation for `trdrop_lib`
+```bash
+$ cd trdrop_lib
+$ doxygen Doxyfile
+$ cd apidocs/html && firefox index.html
 ```
 
 ### Code style
