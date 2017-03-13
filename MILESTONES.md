@@ -3,25 +3,26 @@
 | Milestone     | Feature                                                                                     | Time  | Completed |
 | ------------- |:----------------                                                                            | -----:|----------:|
 | **Nr.1**      | setup a build system with cmake and project directories                                     |    3h |         ✓ |
-|               | setup test environment & possibly travis/circleci                                           |    3h |           |
+|               | setup test environment & possibly travis/circleci                                           |    3h |         ✓ |
 |               |                                                                                             |       |           |
 | **Nr.2**      | create a dummy command line interface                                                       |    3h |           |
 |               | read a raw video file and encode it so it's viewable                                        |    1d |           |
 |               | encode it into YT-Format                                                                    |    1d |           |
 |               | calculate fps and dump it into a csv-file                                                   |    2d |           |
 |               | calculate tears and dump it into a csv-file                                                 |    1d |           |
-|               | show the results in the video                                                               |    2d |           |
+|               | show the results in the video (only fps)                                                    |    2d |           |
 |               | follow the possibility to show the results as a stream in vls                               |    1d |           |
 |               |                                                                                             |       |           |
 | **Nr.3:**     | read from two videos simultaneously and write to one with overlay                           |    2d |           |
 |               | think of an interface to make the overlay configurable                                      |    3d |           |
+|               | alpha graph overlay for fps                                                                 |    2d |           |
 |               |                                                                                             |       |           |
 | **Nr.4**      | command line interface should be reworked                                                   |    4d |           |
 |               | ...                                                                                         |       |           |
 |               |                                                                                             |       |           |
 | **Nr.5**      | From here on we have time to do any of the possible features                                |       |           |
 |               |                                                                                             |       |           |
-|**Summary**    | trdrop alpha v0.1                                                                           | > 18d |           |
+|**Summary**    | trdrop alpha v0.1                                                                           | > 20d |           |
 
 
 **Possible features:**
