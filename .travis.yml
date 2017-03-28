@@ -20,7 +20,6 @@ addons:
       - libavcodec-dev    #
       - libswscale-dev    #
       - libavutil-dev     #
-      - libavresample-dev #
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
@@ -29,7 +28,10 @@ install:
   - mkdir trdrop_lib/build
   - mkdir trdrop_v/build
   - cmake --version
-  - 
+  - git clone -b n2.7.2 --depth=1 git://source.ffmpeg.org/ffmpeg.git
+  - cd ffmpeg
+  - ./configure --enable-shared --enable-swscale --enable-gpl  --enable-libx264 --enable-libvpx --enable-libvorbis --enable-libtheora 
+  - make -j `grep processor /proc/cpuinfo|wc -l` 
 
 before_script:
   - cd ext/avTranscoder && mkdir build && cd build && cmake .. -DAVTRANSCODER_DISABLE_APPS=True -DAVTRANSCODER_DISABLE_BINDINGS=True && sudo make install
