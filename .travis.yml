@@ -30,17 +30,9 @@ install:
   - mkdir trdrop_lib/build
   - mkdir trdrop_v/build
   - cmake --version
-  - cd /opt
-  - wget http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.gz
-  - tar xzvf libtheora-1.1.1.tar.gz
-  - cd libtheora-1.1.1
-  - ./configure --prefix="$HOME/ffmpeg_build" --with-ogg="$HOME/ffmpeg_build" --disable-examples --disable-shared --disable-sdltest --disable-vorbistest
-  - make
-  - make install
-  - cd /
   - git clone -b n2.7.2 --depth=1 git://source.ffmpeg.org/ffmpeg.git
   - cd ffmpeg
-  - ./configure --enable-shared --enable-swscale --enable-gpl  --enable-libx264 --enable-libvpx --enable-libvorbis --enable-libtheora 
+  - ./configure --enable-shared --enable-swscale --enable-gpl  --enable-libx264 --enable-libvpx --enable-libtheora 
   - make -j `grep processor /proc/cpuinfo|wc -l` 
 
 before_script:
