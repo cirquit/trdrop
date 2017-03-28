@@ -14,6 +14,12 @@ addons:
       - gcc-5
       - cmake
       - cmake-data
+      - libavdevice-dev # ffmpeg
+      - libavformat-dev #
+      - libavfilter-dev #
+      - libavcodec-dev  #
+      - libswscale-dev  #
+      - libavutil-dev   #
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
@@ -22,7 +28,7 @@ install:
   - mkdir trdrop_lib/build
   - mkdir trdrop_v/build
   - cmake --version
-
+  - 
 
 before_script:
   - cd ext/avTranscoder && mkdir build && cd build && cmake .. -DAVTRANSCODER_DISABLE_APPS=True -DAVTRANSCODER_DISABLE_BINDINGS=True && sudo make install
