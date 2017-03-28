@@ -54,3 +54,5 @@ trdrop_lib/build/*
 trdrop_c/build/*
 trdrop_v/build/*
 
+#docs
+trdrop_lib/apidocs/*

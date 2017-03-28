@@ -1,11 +1,11 @@
-#include "trdrop.h"
+#include "trdrop.hpp"
 #include <iostream>
 
-namespace trdrop {
+#include <AvTranscoder/file/InputFile.hpp>
+#include <AvTranscoder/progress/ConsoleProgress.hpp>
+#include <AvTranscoder/properties/VideoProperties.hpp>
+#include <AvTranscoder/util.hpp> // PropertyVector
 
-void print_hello_from_lib()
-{
-    std::cout << "Hello World from the trdrop library" << '\n';
-}
+namespace trdrop {
 
 } // namespace trdrop

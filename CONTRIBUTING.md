@@ -2,6 +2,29 @@
 
 I use `clang-3.9`, `cmake-3.5.2` for local development. Travis runs tests with `cmake-2.8.7`, `clang-3.9` and `gcc-4.6.3` (even if I specifiy `gcc-5`). Documentation for `trdrop_lib` is generated with [`doxygen-1.8.14`](http://www.stack.nl/~dimitri/doxygen/download.html).
 
+Using `ffmpeg-libs`. Install with `sudo apt-get install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswscale-dev libavutil-dev`.
+Using `https://github.com/avTranscoder/avTranscoder` as C++ wrapper for `ffmpeg`. Install with:
+
+```bash
+$ cd ext/avTranscoder 
+$ mkdir build && cd build
+$ cmake ..
+$ make
+$ sudo make install
+```
+
+Create docs for `avtranscoder`:
+
+```bash
+$ cd ext/avTranscoder
+$ cd build/src
+
+Modify the Doxyfile so OUTPUT_DIRECTORY points to .
+
+$ doxygen Doxyfile
+$ firefox html/index.html
+```
+
 ### Build process for Linux
 
 Clone or fork the repo. (cloning in the example)
