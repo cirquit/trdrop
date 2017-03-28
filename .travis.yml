@@ -14,12 +14,13 @@ addons:
       - gcc-5
       - cmake
       - cmake-data
-      - libavdevice-dev # ffmpeg
-      - libavformat-dev #
-      - libavfilter-dev #
-      - libavcodec-dev  #
-      - libswscale-dev  #
-      - libavutil-dev   #
+      - libavdevice-dev   # ffmpeg
+      - libavformat-dev   #
+      - libavfilter-dev   #
+      - libavcodec-dev    #
+      - libswscale-dev    #
+      - libavutil-dev     #
+      - libavresample-dev #
 
 install:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
