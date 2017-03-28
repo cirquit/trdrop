@@ -38,9 +38,10 @@ install:
   - cd ffmpeg
   - ./configure --enable-shared --enable-swscale --enable-gpl  --enable-libx264 --enable-libvpx --enable-libtheora --enable-libvorbis 
   - make -j `grep processor /proc/cpuinfo|wc -l` 
-
-before_script:
+  - cd ..
   - cd ext/avTranscoder && mkdir build && cd build && cmake .. -DAVTRANSCODER_DISABLE_APPS=True -DAVTRANSCODER_DISABLE_BINDINGS=True && sudo make install
+  
+before_script:
   - cd trdrop_lib/build && cmake .. && make && cd ../..
   - cd trdrop_c/build && cmake .. && cd ../..
   - cd trdrop_v/build && cmake .. && cd ../..
