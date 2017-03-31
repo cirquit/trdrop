@@ -1,0 +1,1 @@
+TODO - Create command-line-project in VS2017
