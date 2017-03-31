@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++14   CMakeFiles/trdrop_v_tests.dir/tests/runner.cpp.o CMakeFiles/trdrop_v_tests.dir/tests/tests-example.cpp.o  -o trdrop_v_tests  -L/home/rewrite/Documents/github-repos/trdrop/trdrop_v/../trdrop_lib/build -rdynamic -Wl,-rpath,/home/rewrite/Documents/github-repos/trdrop/trdrop_v/../trdrop_lib/build 

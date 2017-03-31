@@ -27,4 +27,12 @@ The GUI program will be developed in `Qt` if there is time left. [It may look li
 
 #### Cross Platform
 
-Because this project is being developed with C++, `ffmpeg` and `CMake`, it should be portable to Windows, even if the development is being done on Linux.
+Because of dependecy hell, there are now two different projects, a `windows/` one, and a `linux/` one.
+
+##### Linux
+
+Development is done with `avTranscoder`, `ffmpeg` and `CMake`.
+
+##### Windows
+
+Development is done with `avTranscoder`, `ffmpeg` and whatever compiler Visual Studio 2017 is using.

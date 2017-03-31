@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtrdrop.a  CMakeFiles/trdrop.dir/src/trdrop.cpp.o
+/usr/bin/ranlib libtrdrop.a

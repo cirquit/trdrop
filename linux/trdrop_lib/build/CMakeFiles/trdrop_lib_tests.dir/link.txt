@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++14 -O3 -DNDEBUG   CMakeFiles/trdrop_lib_tests.dir/tests/runner.cpp.o CMakeFiles/trdrop_lib_tests.dir/tests/tests-example.cpp.o  -o trdrop_lib_tests -rdynamic 

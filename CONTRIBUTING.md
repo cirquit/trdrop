@@ -1,4 +1,6 @@
-### Prerequesites
+## Linux
+
+#### Prerequesites
 
 I use `clang-3.9`, `cmake-3.5.2` for local development. Travis runs tests with `cmake-2.8.7`, `clang-3.9` and `gcc-4.6.3` (even if I specifiy `gcc-5`). Documentation for `trdrop_lib` is generated with [`doxygen-1.8.14`](http://www.stack.nl/~dimitri/doxygen/download.html).
 
@@ -15,7 +17,6 @@ $ cd ext/ffmpeg
 $ ./configure --enable-shared --enable-swscale --enable-gpl  --enable-libx264 --enable-libvpx --enable-libtheora --enable-libvorbis
 $ make -j4 
 ```
-
 
 Using `https://github.com/avTranscoder/avTranscoder` as C++ wrapper for `ffmpeg`. Install with:
 
@@ -39,7 +40,7 @@ $ doxygen Doxyfile
 $ firefox html/index.html
 ```
 
-### Build process for Linux
+#### Build process for Linux
 
 Clone or fork the repo. (cloning in the example)
 ```bash
@@ -73,7 +74,7 @@ $ doxygen Doxyfile
 $ cd apidocs/html && firefox index.html
 ```
 
-### Code style
+#### Code style
 
 I use `clang-format` with the WebKit style. 
 
@@ -91,6 +92,23 @@ Install Clang-Format Package in Sublime Text. `Preferences -> Package Settings -
 }
 ```
 
-### Code completion
+#### Code completion
 
 I use the sublime package [C++ Completions](https://github.com/tushortz/CPP-Completions). 
+
+
+
+## Windows
+
+#### Prerequesites
+
+I'm using Visual Studio 2017 Enterprise Edition.
+
+`ffpmeg` - precompiled for Windows [Version 3.24, 64-bit, Dev](https://ffmpeg.zeranoe.com/builds/), I will probably ship it in this repository
+`avTranscoder` - hopefully I can provide a compiled version in some time
+
+I'll have to link the precompiled `.dll`'s in the project with a relative path.
+
+#### Build process
+
+`Build` -> `Rebuild`

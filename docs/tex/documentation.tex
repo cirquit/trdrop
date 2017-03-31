@@ -51,9 +51,8 @@ The following features are to be included in \textbf{v0.1}:
     \item show the fps as text in the video
     \item import up to 4 \texttt{.raw} video files with a size greater than 150 \texttt{GB}
     \item export the resulting video into a youtube friendly format (\href{https://support.google.com/youtube/answer/1722171}{google-terms})
-    \item the resulting video can be streamed using VLC while it's being created
     \item a log file is created with the framerate and every tear + fps
-    \item a graph can be plotted with an alpha channel embedded into the video
+    %\item a graph can be plotted with an alpha channel embedded into the video
 \end{itemize}
 
 \subsection{Program Diagram}
@@ -70,15 +69,15 @@ The following features are to be included in \textbf{v0.1}:
 \begin{verbatim}
 # Creates a new annotated video with defaults
 #
-$ trdrop_cbin video_01.raw > converted_video.mp4
+$ trdrop_cbin video_01.raw
 
-# Creates a new annotated video and VLC is used to visualize the result
+# Creates a new annotated video with name flag
 #
-$ trdrop_cbin video_01.raw > converted_video.mp4 | vlc
+$ trdrop_cbin video_01.raw -n converted_video.mp4
 
 # Creates a new annotated video from multiple inputs
 #
-$ trdrop_cbin video_01.raw video_02.raw video_03.raw video_04.raw > converted_video.mp4
+$ trdrop_cbin video_01.raw video_02.raw video_03.raw video_04.raw
 \end{verbatim}
 
 

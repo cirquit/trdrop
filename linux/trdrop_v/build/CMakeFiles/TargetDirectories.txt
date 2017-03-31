@@ -1,0 +1,5 @@
+/home/rewrite/Documents/github-repos/trdrop/trdrop_v/build/CMakeFiles/test.dir
+/home/rewrite/Documents/github-repos/trdrop/trdrop_v/build/CMakeFiles/trdrop_v_tests.dir
+/home/rewrite/Documents/github-repos/trdrop/trdrop_v/build/CMakeFiles/edit_cache.dir
+/home/rewrite/Documents/github-repos/trdrop/trdrop_v/build/CMakeFiles/trdrop_v.dir
+/home/rewrite/Documents/github-repos/trdrop/trdrop_v/build/CMakeFiles/rebuild_cache.dir
