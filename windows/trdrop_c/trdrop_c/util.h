@@ -5,23 +5,6 @@
 #include <string>
 
 namespace trdrop {
-	
-	namespace utilvideo {
-
-		const std::string videoFrameName("Trdrop - VideoFrame");
-
-		void initVideoFrame() {
-			cv::namedWindow(videoFrameName, CV_WINDOW_NORMAL);
-		}
-
-		void showFrame(cv::Mat & frame, int delay = 0) {
-			cv::imshow(videoFrameName, frame);
-			if (delay > 0) cv::waitKey(delay);
-		}
-
-		
-
-	} // namespace utilvideo
 
 	namespace util {
 

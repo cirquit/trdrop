@@ -16,6 +16,15 @@
     <Filter Include="Header Files\tasks">
       <UniqueIdentifier>{be7e6cf1-5d7f-4269-a760-7b81a72d3969}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{80404b16-d8fe-47e3-9a71-4b1d9dc28466}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config">
+      <UniqueIdentifier>{34882674-1958-4e4a-97d5-7b87b54497b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\algorithm">
+      <UniqueIdentifier>{676d5aff-0697-4cd6-8fe5-26f7b7ca6de0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -23,17 +32,29 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="framealgorithm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Task.h">
       <Filter>Header Files\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSTask.h">
+      <Filter>Header Files\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="utilvideo.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskContainer.h">
+      <Filter>Header Files\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="Either.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="framealgorithm.h">
+      <Filter>Header Files\algorithm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

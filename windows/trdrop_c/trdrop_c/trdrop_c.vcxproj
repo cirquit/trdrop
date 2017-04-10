@@ -157,9 +157,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="FPSTask.h" />
     <ClInclude Include="framealgorithm.h" />
+    <ClInclude Include="Either.h" />
     <ClInclude Include="Task.h" />
+    <ClInclude Include="TaskContainer.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="utilvideo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
