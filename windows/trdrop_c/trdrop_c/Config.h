@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_CONFIG_H
+#define TRDROP_CONFIG_H
 
 #include <string>
 #include <iostream>
@@ -56,3 +58,5 @@ namespace trdrop {
 		};
 	} // namespace config
 } // namespace trdrop
+
+#endif // !TRDROP_CONFIG_H

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_TASKS_TASKCONTAINER_H
+#define TRDROP_TASKS_TASKCONTAINER_H
 
 #include <functional>
 
@@ -64,3 +66,5 @@ namespace trdrop {
 
 	} // namespace tasks
 } // namespace trdrop
+
+#endif // !TRDROP_TASKS_TASKCONTAINER_H

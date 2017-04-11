@@ -1,4 +1,7 @@
 #pragma once
+#ifndef TRDROP_UTIL_H
+#define TRDROP_UTIL_H
+
 #include <functional>
 #include <ctime>
 #include <iostream>
@@ -64,3 +67,5 @@ namespace trdrop {
 
 	} // namespace util
 } // namespace trdrop
+
+#endif // !TRDROP_UTIL_H

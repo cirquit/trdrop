@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_TASKS_H
+#define TRDROP_TASKS_H
 
 #include <opencv2/core.hpp>
 
@@ -30,3 +32,5 @@ namespace trdrop {
 
 	} // namespace tasks
 } //namespace trdrop
+
+#endif // ! TRDROP_TASKS_H

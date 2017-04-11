@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_TASKS_FSDTASK_H
+#define TRDROP_TASKS_FSDTASK_H
 
 #include <math.h>
 
@@ -65,3 +67,5 @@ namespace trdrop {
 		};
 	} // namespace tasks
 } // namespace trdrop
+
+#endif // !TDROP_TASKS_FSDTASK_H

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_EITHER_H
+#define TRDROP_EITHER_H
 
 namespace trdrop {
 
@@ -100,3 +102,5 @@ namespace trdrop {
 		bool success = false;
 	};
 } // namespace trdrop
+
+#endif // !TRDROP_EITHER_H

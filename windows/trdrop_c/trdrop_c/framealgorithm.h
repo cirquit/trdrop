@@ -1,4 +1,7 @@
 #pragma once
+#ifndef TRDROP_FRAMEALGORITHM_H
+#define TRDROP_FRAMEALGORITHM_H
+
 #include <iostream>
 
 #include<opencv2/core/core.hpp>
@@ -34,3 +37,5 @@ namespace trdrop {
 
 	} // namespace algorithm
 } // namespace trdrop
+
+#endif // !TRDROP_FRAMEALGORITHM_H

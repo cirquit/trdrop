@@ -1,4 +1,6 @@
 #pragma once
+#ifndef TRDROP_UTIL_VIDEO_H
+#define TRDROP_UTIL_VIDEO_H
 
 #include <ctime>
 #include <iostream>
@@ -25,3 +27,5 @@ namespace util {
 
 	} // namespace video
 } // namespace util
+
+#endif // !TRDROP_UTIL_VIDEO_H
