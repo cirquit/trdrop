@@ -8,6 +8,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "Tasks.h"
 #include "Config.h"
 
 namespace trdrop {
@@ -27,27 +28,49 @@ namespace trdrop {
 
 			// specialized member
 		public:
-			TaskContainer(cv::VideoCapture & input, cv::VideoWriter & output, trdrop::config::Config & config)
-				: input(input)
-				, output(output)
-				, config(config) {
+			TaskContainer(trdrop::config::Config & config, std::vector<cv::VideoCapture> inputs)
+				: config(config)
+				, inputs(inputs) {
 
 			}
 
-			TaskContainer(trdrop::config::Config & config)
-				: TaskContainer(cv::VideoCapture(), cv::VideoWriter(), config) {}
+			void addPreTask(trdrop::tasks::pretask task) {
+				preTasks.push_back(task);
+			}
 
-			template<class T>
-			int add(Task<T> task) {
-				tasks.push_back([&] {
-					task.process(prev, cur, currentFrameIndex);
-				});
-				return tasks.size() - 1;
-
+			void addPostTask(trdrop::tasks::posttask task) {
+				postTasks.push_back(task);
 			}
 			
 			bool next() {
-				std::for_each(tasks.begin(), tasks.end(), [](std::function<void()> f) { f(); });
+				static bool readSuccessful;
+				
+				if (currentFrameIndex == 0) {
+					readSuccessful = inputs[0].read(prev);
+					std::cout << "read success!\n";
+					readSuccessful = inputs[0].read(cur);
+					std::cout << "read success!\n";
+				}
+				else {
+					cur.copyTo(prev);
+					readSuccessful = inputs[0].read(cur);
+				}
+
+				if (readSuccessful) {
+
+					if (currentFrameIndex == 0) {
+						std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(prev); });
+					}
+
+					currentFrameIndex += 1;
+
+					//std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) { f(prev, cur, currentFrameIndex); });
+					//std::cout << cur.at<cv::Vec3b>(0,0) << '\n';
+					//
+					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(cur); });
+				}
+				
+				return readSuccessful;
 			}
 
 			// public member
@@ -56,12 +79,12 @@ namespace trdrop {
 
 			// private member
 		private:
-			cv::VideoCapture input;
-			cv::VideoWriter output;
-			std::vector<std::function<void()>> tasks;
+			std::vector<cv::VideoCapture> inputs;
+			std::vector<trdrop::tasks::pretask> preTasks;
+			std::vector<trdrop::tasks::posttask> postTasks;
 			cv::Mat cur;
 			cv::Mat prev;
-			size_t currentFrameIndex;
+			size_t currentFrameIndex = 0;
 		};
 
 	} // namespace tasks

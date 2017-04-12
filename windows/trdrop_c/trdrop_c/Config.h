@@ -32,17 +32,18 @@ namespace trdrop {
 		public:
 
 			// multiple video files
-			Config(std::vector<std::string> inputNames, std::string outputName, bool writeDelta)
+			Config(std::vector<std::string> inputNames, std::string outputName, int codec, bool writeDelta)
 				: inputNames(inputNames)
 				, outputName(outputName)
+				, codec(codec)
 				, writeDelta(writeDelta)
 				, inputVideoCount(inputNames.size())
 			{}
-
+			/*
 			// single video file
-			Config(std::string inputName, std::string outputName = "output.avi", bool writeDelta = false)
-				: Config(std::vector<std::string>{inputName}, outputName, writeDelta) 
-			{}
+			Config(std::string inputName, std::string outputName = "output.avi", int codec, bool writeDelta = false)
+				: Config(std::vector<std::string>{inputName}, outputName, codec, writeDelta) 
+			{} */
 
 			
 		// public member
@@ -50,10 +51,12 @@ namespace trdrop {
 			const std::vector<std::string> inputNames;
 			const std::string outputName;
 			const std::size_t inputVideoCount;
+			const int codec;
 
 		// private member
 		private:
 			bool writeDelta = false;
+
 
 		};
 	} // namespace config

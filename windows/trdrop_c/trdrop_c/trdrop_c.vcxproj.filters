@@ -25,6 +25,12 @@
     <Filter Include="Header Files\algorithm">
       <UniqueIdentifier>{676d5aff-0697-4cd6-8fe5-26f7b7ca6de0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tasks\post">
+      <UniqueIdentifier>{b33f2b6d-f7eb-4814-b228-ddac1d044338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tasks\pre">
+      <UniqueIdentifier>{7fff1611-f713-4e43-be73-d77bab8c6105}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,12 +38,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Task.h">
-      <Filter>Header Files\tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="FPSTask.h">
-      <Filter>Header Files\tasks</Filter>
-    </ClInclude>
     <ClInclude Include="util.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -55,6 +55,21 @@
     </ClInclude>
     <ClInclude Include="framealgorithm.h">
       <Filter>Header Files\algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks.h">
+      <Filter>Header Files\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSPostTask.h">
+      <Filter>Header Files\tasks\post</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSPreTask.h">
+      <Filter>Header Files\tasks\pre</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewerTask.h">
+      <Filter>Header Files\tasks\post</Filter>
+    </ClInclude>
+    <ClInclude Include="WriterTask.h">
+      <Filter>Header Files\tasks\post</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

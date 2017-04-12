@@ -75,6 +75,7 @@ namespace trdrop {
 	public:
 		// using left_t = Left<Error>::value_t;
 		// using right_t = Right<Success>::value_t;
+		Either() = default;
 
 	public:
 		Either(Left<Error> left)
