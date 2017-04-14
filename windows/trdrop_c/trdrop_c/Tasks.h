@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TRDROP_POSTPROCESS_TASKS_H
-#define TRDROP_POSTPROCESS_TASKS_H
+#ifndef TRDROP_TASKS_H
+#define TRDROP_TASKS_H
 
 #include <functional>
 
@@ -16,7 +16,7 @@ namespace trdrop {
 		//
 		// these tasks will be ran asynchronous with threads because we only read from the frames
 		// therefore they have to be commutative
-		using pretask = std::function<void(const cv::Mat & prev, const cv::Mat & cur, const int currentFrame)>;
+		using pretask = std::function<void(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrame)>;
 
 		// postprocessing task which gets
 		// * the resulting frame which is to be modified
@@ -27,4 +27,4 @@ namespace trdrop {
 	} // namespace tasks
 } //namespace trdrop
 
-#endif // ! TRDROP_POSTPROCESS_TASKS_H
+#endif // ! TRDROP_TASKS_H

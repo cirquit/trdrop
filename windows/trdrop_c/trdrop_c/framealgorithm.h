@@ -35,6 +35,21 @@ namespace trdrop {
 			return true;
 		}
 
+		/*
+		* Specialisation for implemented difference map, works only on 3 dimensions
+		*/
+		template <>
+		bool are_equal<int>(const cv::Mat & frameA, const cv::Mat & frameB) {
+			cv::Mat res = frameA != frameB;
+			return (cv::countNonZero(res) == 0);
+			/*
+			std::vector<cv::Mat> channels(3);
+			cv::split(res, channels);
+			return (cv::countNonZero(channels[0]) == 0)
+				&& (cv::countNonZero(channels[1]) == 0)
+				&& (cv::countNonZero(channels[2]) == 0); */
+		}
+
 	} // namespace algorithm
 } // namespace trdrop
 

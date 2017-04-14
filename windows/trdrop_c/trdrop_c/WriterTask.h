@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include <opencv2\core\core.hpp>
+#include <opencv2/highgui/highgui.hpp>  // VideoWriter
 
 #include "Tasks.h"
 
@@ -22,9 +23,9 @@ namespace trdrop {
 				// default member
 			public:
 				WriterTask() = delete;
-				WriterTask(const WriterTask & other) = delete;
+				WriterTask(const WriterTask & other) = default;
 				WriterTask & operator=(const WriterTask & other) = delete;
-				WriterTask(WriterTask && other) = delete;
+				WriterTask(WriterTask && other) = default;
 				WriterTask & operator=(WriterTask && other) = delete;
 				~WriterTask() = default;
 
@@ -35,29 +36,32 @@ namespace trdrop {
 					, codec(codec)
 					, bakedFps(bakedFps)
 					, frameSize(frameSize)
+				    , output(filename, codec, bakedFps, frameSize)
 					, posttask(std::bind(&WriterTask::process
 						, this
-						, std::placeholders::_1)) {
-
-					// TODO
+						, std::placeholders::_1)) {	
+					
+					// DEBUG
+					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
 				}
 
 				// interface methods
 			public:
 				void process(const cv::Mat & res) {
-
+					output.write(res);
 				}
-
 				// private methods
 			private:
+
 				// private member
 			private:
+				cv::VideoWriter output;
 				const std::string filename;
 				const int codec;
 				const double bakedFps;
 				const cv::Size frameSize;
 			};
-		} // namespace pre
+		} // namespace post
 	} // namespace tasks
 } // namespace trdrop
 

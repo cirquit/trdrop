@@ -28,9 +28,9 @@ namespace trdrop {
 
 			// specialized member
 		public:
-			TaskContainer(trdrop::config::Config & config, std::vector<cv::VideoCapture> inputs)
+			TaskContainer(trdrop::config::Config & config)
 				: config(config)
-				, inputs(inputs) {
+				, inputs(config.inputs) {
 
 			}
 
@@ -47,9 +47,7 @@ namespace trdrop {
 				
 				if (currentFrameIndex == 0) {
 					readSuccessful = inputs[0].read(prev);
-					std::cout << "read success!\n";
 					readSuccessful = inputs[0].read(cur);
-					std::cout << "read success!\n";
 				}
 				else {
 					cur.copyTo(prev);
@@ -63,14 +61,17 @@ namespace trdrop {
 					}
 
 					currentFrameIndex += 1;
+					std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) { f(prev, cur, currentFrameIndex); });
 
-					//std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) { f(prev, cur, currentFrameIndex); });
-					//std::cout << cur.at<cv::Vec3b>(0,0) << '\n';
-					//
-					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(cur); });
+					cur.copyTo(res);
+					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(res); });
 				}
 				
 				return readSuccessful;
+			}
+
+			size_t getCurrentFrameIndex() {
+				return currentFrameIndex;
 			}
 
 			// public member
@@ -84,6 +85,7 @@ namespace trdrop {
 			std::vector<trdrop::tasks::posttask> postTasks;
 			cv::Mat cur;
 			cv::Mat prev;
+			cv::Mat res;
 			size_t currentFrameIndex = 0;
 		};
 

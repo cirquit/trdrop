@@ -3,9 +3,12 @@
 #define TRDROP_UTIL_H
 
 #include <functional>
+#include <iterator>
 #include <ctime>
 #include <iostream>
 #include <string>
+#include <memory>
+#include <cstdio>
 
 namespace trdrop {
 
@@ -64,6 +67,38 @@ namespace trdrop {
 			f();
 			std::cout << "Elapsed time: " << (std::clock() - start) / static_cast<double>(CLOCKS_PER_SEC / 1000) << "ms\n";
 		}
+
+		template<typename ... Args>
+		std::string string_format(const std::string& format, Args ... args)
+		{
+			size_t size = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+			std::unique_ptr<char[]> buf(new char[size]);
+			std::snprintf(buf.get(), size, format.c_str(), args ...);
+			return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
+		}
+
+		template <typename Iterator>
+		void advance_all(Iterator & iterator) {
+			++iterator;
+		}
+		template <typename Iterator, typename ... Iterators>
+		void advance_all(Iterator & iterator, Iterators& ... iterators) {
+			++iterator;
+			advance_all(iterators...);
+		}
+		template <typename Function, typename InputIt, typename OutputIt, typename ... Iterators>
+		OutputIt zipWith(Function func,
+			InputIt first,
+			InputIt last,
+			OutputIt d_first,
+			Iterators ... iterators)
+		{
+			for (; first != last; ++first, advance_all(iterators...))
+				*d_first++ = func(*first, *(iterators)...);
+			return d_first;
+		}
+
+
 
 	} // namespace util
 } // namespace trdrop

@@ -41,6 +41,9 @@ namespace trdrop {
 					trdrop::util::video::resize(size);
 				}
 
+				ViewerTask(cv::Size size)
+					: ViewerTask(1, size) {}
+
 				// interface methods
 			public:
 				void process(cv::Mat & res) {
@@ -53,7 +56,7 @@ namespace trdrop {
 			private:
 				const int delay;
 			};
-		} // namespace pre
+		} // namespace post
 	} // namespace tasks
 } // namespace trdrop
 

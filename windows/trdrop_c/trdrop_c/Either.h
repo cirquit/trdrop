@@ -76,6 +76,11 @@ namespace trdrop {
 		// using left_t = Left<Error>::value_t;
 		// using right_t = Right<Success>::value_t;
 		Either() = default;
+		Either(const Either & other) = default;
+		Either & operator=(const Either & other) = default;
+		Either(Either && other) = default;
+		Either & operator=(Either && other) = default;
+		~Either() = default;
 
 	public:
 		Either(Left<Error> left)
@@ -89,11 +94,11 @@ namespace trdrop {
 			return success;
 		}
 
-		Right<Success> getSuccess() {
+		Success getSuccess() {
 			return right;
 		}
 
-		Left<Error> getError() {
+		Error getError() {
 			return left;
 		}
 

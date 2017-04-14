@@ -33,7 +33,7 @@ namespace trdrop {
 					, point(point)
 					, precision(precision)
 					, shadows(shadows)
-					, colorshift(colorshift)
+					, colorshift(colorshift) // TODO
 					, posttask(std::bind(&FPSPostTask::process
 						, this
 						, std::placeholders::_1)) {}
@@ -41,14 +41,12 @@ namespace trdrop {
 				// interface methods
 			public:
 				void process(cv::Mat & res) {
-					std::stringstream text;
-					text << std::setprecision(precision) << "FPS: " << framerate << '\n';
-					cv::putText(res, text.str(), point+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 1+2, CV_AA);
-					cv::putText(res, text.str(), point, CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 1, CV_AA);
+					// stringstream + setprecision does not add zeros to e.g 0 /=> 0.00
+					std::string text = trdrop::util::string_format("FPS: %." + std::to_string(precision) + "f", framerate);
+					if (shadows) cv::putText(res, text, point+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 4, CV_AA);
+					cv::putText(res, text, point, CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
 				}
 
-				// private methods
-			private:
 				// private member
 			private:
 				double & framerate;
@@ -56,9 +54,8 @@ namespace trdrop {
 				const int precision;
 				const bool shadows;
 				const bool colorshift;
-
 			};
-		} // namespace pre
+		} // namespace post
 	} // namespace tasks
 } // namespace trdrop
 

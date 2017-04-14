@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <time.h>
 #include <vector>
+#include <functional>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -11,85 +12,83 @@
 #include "framealgorithm.h"
 #include "util.h"
 #include "utilvideo.h"
+#include "Config.h"
+#include "Either.h"
+#include "CSVFile.h"
+
+#include "TaskContainer.h"
 #include "FPSPreTask.h"
 #include "FPSPostTask.h"
-#include "Config.h"
-#include "TaskContainer.h"
-#include "Either.h"
 #include "ViewerTask.h"
+#include "WriterTask.h"
+#include "LoggerTask.h"
 
 int main(int argc, char *argv) {
-
 	std::string video01("skyrim.avi");
-	std::string video02("20sec.avi");
+	std::string video02("test-video-01.avi");
+	std::string video03("20sec.avi");
 	std::string outputVideo01("output.avi");
 
-	trdrop::config::Config config(std::vector<std::string>{ video01 }, outputVideo01, cv::VideoWriter::fourcc('D', 'I', 'V', 'X'), false);
-
-	// create captures...TODO move away
-	std::vector<cv::VideoCapture> inputs;
-	std::for_each(config.inputNames.begin(), config.inputNames.end(),
-		[&](std::string name) { inputs.push_back(cv::VideoCapture(name)); });
+	// parse from somewhere
+	trdrop::config::Config config(std::vector<std::string>{ video01 }           // inputNames
+								, outputVideo01                                 // outputName
+								, "log.csv"                                     // logName
+								, -1 //cv::VideoWriter::fourcc('D', 'I', 'V', 'X')   // codec
+								, false											// write delta
+								, cv::Size(50,50)                               // text location
+								, cv::Size(960, 540)                            // viewer size
+								, 2                                             // fpsPrecision
+									);
 
 	// create container
-	trdrop::tasks::TaskContainer container(config, inputs);
-	
-	// Task information
-	double bakedFPS(trdrop::util::getFrameRate(inputs[0]));
+	trdrop::tasks::TaskContainer container(config);
 	
 	// FPSPreTask
-	trdrop::Either<std::string, double> fpsSource;
-	trdrop::Either<std::string, double> & tmpFPSSource = fpsSource;
-	trdrop::tasks::pre::FPSPreTask fpsPreT(tmpFPSSource, 60, bakedFPS);
-	
+	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", static_cast<int>(std::floor(config.bakedFPS)), config.bakedFPS);
+
 	// FPSPostTask
-	double framerate = 0.00;
-	double & tmp = framerate;
-	trdrop::tasks::post::FPSPostTask fpsPostT(tmp, cv::Point(50, 50));
+	double framerate = 0.0;
+	trdrop::tasks::post::FPSPostTask fpsPostT(framerate, config.textLocation, config.fpsPrecision);
 
 	// ViewerTask
-	trdrop::tasks::post::ViewerTask viewer(1, cv::Size(800, 600));
+	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 
-	//container.addPreTask(fpsPreT);
+	// WriterTask
+	trdrop::tasks::post::WriterTask writerT(config.outputName, config.codec, config.bakedFPS, config.getVideoFrameSize(0));
+
+	// LoggerTask
+	using tostring = trdrop::tasks::post::LoggerTask<trdrop::util::CSVFile>::tostring;
+	std::vector<tostring> convertions;
+	std::ofstream out;
+	trdrop::util::CSVFile file(config.logName, { "Frame", "   FPS" }, &out);
+	trdrop::tasks::post::LoggerTask<trdrop::util::CSVFile> loggerT(config.logName, 1, file, convertions);
+
+	// PreTasks - order does not matter
+	container.addPreTask(fpsPreT);
+	
+	// PostTask - order matters
 	container.addPostTask(fpsPostT);
-	container.addPostTask(viewer);
+	container.addPostTask(viewerT);
+	container.addPostTask(loggerT);
+	// container.addPostTask(writerT);
+
+	convertions.push_back([&]() { return trdrop::util::string_format("%5i", container.getCurrentFrameIndex()); });
+	convertions.push_back([&]() { return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerate); });
 
 	while (container.next()) {
-		/*if (fpsSource.successful()) {
-			tmp = fpsSource.getSuccess().get();
-			std::cout << "Next frame - FPS: " << std::to_string(tmp) << '\n';
 
-		}*/
+		if (trdrop::util::video::pushedKey(27)) return 0; // ESC -> terminate
+
+		// glue FPS source -> FPS consumer
+		if (fpsPreT.result.successful()) {
+			framerate = fpsPreT.result.getSuccess();
+		}
+		
+		// Logger consumer
+		
+		//};
+
 	}
 
-	/*
-
-	cv::VideoCapture input(video01);
-	double bakedFPS(trdrop::util::getFrameRate(input));
-	cv::Size bakedSize(trdrop::util::getSize(input));
-
-	cv::VideoWriter  output;
-	output.open(outputVideo01, cv::VideoWriter::fourcc('D', 'I', 'V', 'X'), bakedFPS, bakedSize);
-
-	
-	std::cout << "Baked Fps: " << bakedFPS << '\n';
-	std::cout << "Baked Framecount: " << trdrop::util::getFrameCount(input) << '\n';
-	std::cout << "Videolength in seconds: " << trdrop::util::getVideoLengthInSec(input) << '\n';
-	std::cout << "Current Frameindex: " << trdrop::util::getCurrentFrameIndex(input) << '\n';
-		
-	cv::Mat a;
-	cv::Mat b;
-
-	input.read(a);
-	input.read(b);
-
-	trdrop::util::timeit_([&]() {
-		std::cout << "Equal? " << (trdrop::algorithm::are_equal<uchar*>(a, b) ? "true" : "false") << '\n';
-	});
-
-	trdrop::util::timeit_([&]() {
-		std::cout << "Equal? " << (trdrop::algorithm::are_equal<cv::Vec3b>(a, b) ? "true" : "false") << '\n';
-	});
-	*/
 	return EXIT_SUCCESS;
 } 
