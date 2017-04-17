@@ -1,4 +1,4 @@
-## Linux
+# LINUX ON HOLD FOR NOW (starting 17.4.2017)
 
 #### Prerequesites
 
@@ -96,19 +96,3 @@ Install Clang-Format Package in Sublime Text. `Preferences -> Package Settings -
 
 I use the sublime package [C++ Completions](https://github.com/tushortz/CPP-Completions). 
 
-
-
-## Windows
-
-#### Prerequesites
-
-I'm using Visual Studio 2017 Enterprise Edition.
-
-`ffpmeg` - precompiled for Windows [Version 3.24, 64-bit, Dev](https://ffmpeg.zeranoe.com/builds/), I will probably ship it in this repository
-`avTranscoder` - hopefully I can provide a compiled version in some time
-
-I'll have to link the precompiled `.dll`'s in the project with a relative path.
-
-#### Build process
-
-`Build` -> `Rebuild`

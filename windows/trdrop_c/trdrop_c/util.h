@@ -68,6 +68,7 @@ namespace trdrop {
 			std::cout << "Elapsed time: " << (std::clock() - start) / static_cast<double>(CLOCKS_PER_SEC / 1000) << "ms\n";
 		}
 
+		// safe snprintf
 		template<typename ... Args>
 		std::string string_format(const std::string& format, Args ... args)
 		{
@@ -81,11 +82,13 @@ namespace trdrop {
 		void advance_all(Iterator & iterator) {
 			++iterator;
 		}
+
 		template <typename Iterator, typename ... Iterators>
 		void advance_all(Iterator & iterator, Iterators& ... iterators) {
 			++iterator;
 			advance_all(iterators...);
 		}
+
 		template <typename Function, typename InputIt, typename OutputIt, typename ... Iterators>
 		OutputIt zipWith(Function func,
 			InputIt first,

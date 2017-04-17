@@ -6,7 +6,6 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-
 #include "Tasks.h"
 
 namespace trdrop {
@@ -45,6 +44,20 @@ namespace trdrop {
 					std::string text = trdrop::util::string_format("FPS: %." + std::to_string(precision) + "f", framerate);
 					if (shadows) cv::putText(res, text, point+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 4, CV_AA);
 					cv::putText(res, text, point, CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+
+					
+					cv::Size frameSize(res.size());
+					cv::Scalar graphColor(200, 200, 200);
+					
+					int x = frameSize.width / 5;
+					int y = frameSize.height / 3; //  *2;
+					int height = frameSize.height / 3;
+					int width = frameSize.width / 5 * 3;
+					//y-line
+					cv::line(res, cv::Point(x, y), cv::Point(x, y+height), graphColor, 3, 10);
+					//x-line
+					cv::line(res, cv::Point(x, y+height), cv::Point(x + width, y+height), graphColor, 3, 10);
+
 				}
 
 				// private member

@@ -65,7 +65,6 @@ namespace trdrop {
 				}, begin, end, commaSeparated.begin(), commas.begin());
 				
 				write(csvFile, commaSeparated.begin(), commaSeparated.end());
-				// write(csvFile, begin, end);
 				
 				std::cout << "Log() was called with: ";
 				std::for_each(commaSeparated.begin(), commaSeparated.end(), [&](Iterator::value_type e) {std::cout << e; });

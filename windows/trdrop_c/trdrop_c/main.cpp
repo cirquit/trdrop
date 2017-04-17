@@ -9,6 +9,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "yaml-cpp\yaml-cpp-header\yaml.h"
+
 #include "framealgorithm.h"
 #include "util.h"
 #include "utilvideo.h"
@@ -28,6 +30,15 @@ int main(int argc, char *argv) {
 	std::string video02("test-video-01.avi");
 	std::string video03("20sec.avi");
 	std::string outputVideo01("output.avi");
+
+
+	YAML::Node yamlConfig = YAML::LoadFile("config.yaml");
+
+	if (yamlConfig["input-file"]) {
+		std::cout << "Got input-file: " << yamlConfig["input-file"].as<std::string>() << '\n';
+	}
+
+	return 0;
 
 	// parse from somewhere
 	trdrop::config::Config config(std::vector<std::string>{ video01 }           // inputNames
