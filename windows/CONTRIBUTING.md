@@ -11,5 +11,6 @@ I'm using Visual Studio 2017 Enterprise Edition on Win8.1.
   * [My steps, because the ones in the instruction are not enough](open-cv.md)
 
 * [Yaml-CPP](https://github.com/jbeder/yaml-cpp)
-  * installation since VS 2015 bugs out because of different stl types (**??**), so I had no other choice that copying the whole source as `.h` and `.cpp` files to the project. Hoping that [#451](https://github.com/jbeder/yaml-cpp/issues/461) will be fixed someday
+  * installation since VS 2015 bugs out because of different stl types (**??**), so I had no other choice that copying the whole source as `.cpp` files to the project. Hoping that [#451](https://github.com/jbeder/yaml-cpp/issues/461) will be fixed someday
   * currently at [#0fdb1b9](https://github.com/jbeder/yaml-cpp/commit/11607eb5bf1258641d80f7051e7cf09e317b4746)
+  * still need to build it with cmake + VS2017 with admin rights and reference it in `VC++ -> Include Dirs` and `Libraries` to the generated files 

@@ -73,8 +73,7 @@ namespace trdrop {
 	class Either {
 
 	public:
-		// using left_t = Left<Error>::value_t;
-		// using right_t = Right<Success>::value_t;
+
 		Either() = default;
 		Either(const Either & other) = default;
 		Either & operator=(const Either & other) = default;

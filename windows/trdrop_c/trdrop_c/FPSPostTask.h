@@ -27,25 +27,27 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				FPSPostTask(double & framerate, cv::Point point, int precision = 2,  bool shadows = true, bool colorshift = true)
+				FPSPostTask(double & framerate, std::vector<cv::Point> points, int precision = 2, bool shadows = true, bool colorshift = true)
 					: framerate(framerate)
-					, point(point)
+					, points(points)
 					, precision(precision)
 					, shadows(shadows)
 					, colorshift(colorshift) // TODO
 					, posttask(std::bind(&FPSPostTask::process
 						, this
-						, std::placeholders::_1)) {}
+						, std::placeholders::_1
+						, std::placeholders::_2))
+				{}
 
 				// interface methods
 			public:
-				void process(cv::Mat & res) {
+				void process(cv::Mat & res, const size_t frameIndex) {
 					// stringstream + setprecision does not add zeros to e.g 0 /=> 0.00
 					std::string text = trdrop::util::string_format("FPS: %." + std::to_string(precision) + "f", framerate);
-					if (shadows) cv::putText(res, text, point+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 4, CV_AA);
-					cv::putText(res, text, point, CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+					if (shadows) cv::putText(res, text, points[frameIndex]+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 4, CV_AA);
+					cv::putText(res, text, points[frameIndex], CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
 
-					
+					/*
 					cv::Size frameSize(res.size());
 					cv::Scalar graphColor(200, 200, 200);
 					
@@ -57,16 +59,16 @@ namespace trdrop {
 					cv::line(res, cv::Point(x, y), cv::Point(x, y+height), graphColor, 3, 10);
 					//x-line
 					cv::line(res, cv::Point(x, y+height), cv::Point(x + width, y+height), graphColor, 3, 10);
-
+					*/
 				}
 
 				// private member
 			private:
-				double & framerate;
-				const cv::Point point;
-				const int precision;
-				const bool shadows;
-				const bool colorshift;
+				double &			   framerate;
+				std::vector<cv::Point> points;
+				const int			   precision;
+				const bool		       shadows;
+				const bool		       colorshift;
 			};
 		} // namespace post
 	} // namespace tasks

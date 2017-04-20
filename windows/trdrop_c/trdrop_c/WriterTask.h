@@ -39,15 +39,17 @@ namespace trdrop {
 				    , output(filename, codec, bakedFps, frameSize)
 					, posttask(std::bind(&WriterTask::process
 						, this
-						, std::placeholders::_1)) {	
+						, std::placeholders::_1
+						, std::placeholders::_2)) {	
 					
-					// DEBUG
+#if _DEBUG
 					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
+#endif
 				}
 
 				// interface methods
 			public:
-				void process(const cv::Mat & res) {
+				void process(const cv::Mat & res, const size_t frameIndex) {
 					output.write(res);
 				}
 				// private methods

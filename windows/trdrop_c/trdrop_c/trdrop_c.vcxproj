@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\rewrite\Documents\github-repos\yaml-cpp\include;C:\Users\rewrite\Documents\cpp-libs\OpenCV-3.2.0\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\rewrite\Documents\github-repos\yaml-cpp\build\Debug;C:\Users\rewrite\Documents\cpp-libs\OpenCV-3.2.0\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\YAML_CPP\include;C:\Users\rewrite\Documents\cpp-libs\OpenCV-3.2.0\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\YAML_CPP\lib;C:\Users\rewrite\Documents\cpp-libs\OpenCV-3.2.0\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -114,7 +114,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>yaml-cpp.lib;opencv_world320.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world320.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -200,43 +200,6 @@
     <ClInclude Include="utilvideo.h" />
     <ClInclude Include="ViewerTask.h" />
     <ClInclude Include="WriterTask.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\anchor.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\binary.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\contrib\anchordict.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\contrib\graphbuilder.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\dll.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitfromevents.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitter.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitterdef.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emittermanip.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitterstyle.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\eventhandler.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\exceptions.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\mark.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\convert.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\bool_type.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\impl.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\iterator.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\iterator_fwd.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\memory.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_data.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_iterator.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_ref.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\emit.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\impl.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\iterator.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\node.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\parse.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\ptr.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\type.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\noncopyable.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\null.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\ostream_wrapper.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\parser.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\stlemitter.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\traits.h" />
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\yaml.h" />
     <ClInclude Include="yaml-cpp\yaml-cpp-source\collectionstack.h" />
     <ClInclude Include="yaml-cpp\yaml-cpp-source\contrib\graphbuilderadapter.h" />
     <ClInclude Include="yaml-cpp\yaml-cpp-source\directives.h" />
@@ -259,12 +222,6 @@
     <ClInclude Include="yaml-cpp\yaml-cpp-source\stringsource.h" />
     <ClInclude Include="yaml-cpp\yaml-cpp-source\tag.h" />
     <ClInclude Include="yaml-cpp\yaml-cpp-source\token.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="trdrop_c.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\images\trdrop_logo_notext.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\tasks">
       <UniqueIdentifier>{be7e6cf1-5d7f-4269-a760-7b81a72d3969}</UniqueIdentifier>
     </Filter>
@@ -31,20 +27,8 @@
     <Filter Include="Header Files\tasks\pre">
       <UniqueIdentifier>{7fff1611-f713-4e43-be73-d77bab8c6105}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\yaml-cpp-header">
-      <UniqueIdentifier>{b6798c8d-e7e9-44ec-931f-0f3b601ec870}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\yaml-cpp-source">
       <UniqueIdentifier>{a2159b04-3efc-45f0-9663-3a80d09f0545}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\yaml-cpp-header\contrib">
-      <UniqueIdentifier>{cdbc2b93-b623-43aa-a627-e2a7f0698153}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\yaml-cpp-header\node">
-      <UniqueIdentifier>{c498854a-1e77-439a-a346-2c5d8c06038b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\yaml-cpp-header\node\detail">
-      <UniqueIdentifier>{99f87793-38f0-49a4-94f6-cddc06f79388}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\yaml-cpp-source\contrib">
       <UniqueIdentifier>{467790cc-883f-4940-b4f4-a61fd85c8510}</UniqueIdentifier>
@@ -188,117 +172,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\anchor.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\binary.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\dll.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitfromevents.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitter.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitterdef.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emittermanip.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\emitterstyle.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\eventhandler.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\exceptions.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\mark.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\noncopyable.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\null.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\ostream_wrapper.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\parser.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\stlemitter.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\traits.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\yaml.h">
-      <Filter>Header Files\yaml-cpp-header</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\contrib\anchordict.h">
-      <Filter>Header Files\yaml-cpp-header\contrib</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\contrib\graphbuilder.h">
-      <Filter>Header Files\yaml-cpp-header\contrib</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\convert.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\emit.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\impl.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\iterator.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\node.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\parse.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\ptr.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\type.h">
-      <Filter>Header Files\yaml-cpp-header\node</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\bool_type.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\impl.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\iterator.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\iterator_fwd.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\memory.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_data.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_iterator.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml-cpp\yaml-cpp-header\node\detail\node_ref.h">
-      <Filter>Header Files\yaml-cpp-header\node\detail</Filter>
-    </ClInclude>
     <ClInclude Include="yaml-cpp\yaml-cpp-source\collectionstack.h">
       <Filter>Source Files\yaml-cpp-source</Filter>
     </ClInclude>
@@ -365,15 +238,5 @@
     <ClInclude Include="yaml-cpp\yaml-cpp-source\contrib\graphbuilderadapter.h">
       <Filter>Source Files\yaml-cpp-source\contrib</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="trdrop_c.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\images\trdrop_logo_notext.png">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

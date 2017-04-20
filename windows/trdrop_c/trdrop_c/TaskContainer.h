@@ -3,10 +3,12 @@
 #define TRDROP_TASKS_TASKCONTAINER_H
 
 #include <functional>
+#include <future>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
 
 #include "Tasks.h"
 #include "Config.h"
@@ -57,14 +59,22 @@ namespace trdrop {
 				if (readSuccessful) {
 
 					if (currentFrameIndex == 0) {
-						std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(prev); });
+						std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(prev, 0); });
 					}
 
 					currentFrameIndex += 1;
-					std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) { f(prev, cur, currentFrameIndex); });
+
+					// transform does not work for some reason
+					std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) {
+							taskFinished.push_back(std::move(std::async(std::launch::async, f, prev, cur, currentFrameIndex, 0))); });
+
+					std::for_each(taskFinished.begin(), taskFinished.end(), [](std::future<void> & future){
+						future.wait();
+					}); 
+					taskFinished.clear();
 
 					cur.copyTo(res);
-					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(res); });
+					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(res, 0); });
 				}
 				
 				return readSuccessful;
@@ -76,12 +86,13 @@ namespace trdrop {
 
 			// public member
 		public:
-			const trdrop::config::Config config;
+			const trdrop::config::Config & config;
 
 			// private member
 		private:
 			std::vector<cv::VideoCapture> inputs;
 			std::vector<trdrop::tasks::pretask> preTasks;
+			std::vector<std::future<void>> taskFinished;
 			std::vector<trdrop::tasks::posttask> postTasks;
 			cv::Mat cur;
 			cv::Mat prev;

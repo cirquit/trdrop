@@ -36,7 +36,7 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				FPSPreTask(std::string id, int window, double bakedFps)
+				FPSPreTask(std::string id, std::vector<int> window, double bakedFps)
 					: id(id)
 					, window(window)       // window size to pool until fps calculation
 					, bakedFps(bakedFps)   // baked fps which was provided by the video === sample rate
@@ -45,35 +45,43 @@ namespace trdrop {
 						, std::placeholders::_1
 						, std::placeholders::_2
 						, std::placeholders::_3))
-				{ }
+				{
+					if (window[0] == -1) {
+						this -> window[0] = static_cast<int>(std::floor(bakedFps));;
+					}
+				}
 
 				// interface methods
 			public:
 				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex) {
 					static int differentFramesCount;
+#if _DEBUG
 					trdrop::util::timeit_([&] {
-						differentFramesCount += trdrop::algorithm::are_equal<cv::Vec3b> (prev, cur) ? 0 : 1;
+						differentFramesCount += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
 					});
-					if (currentFrameIndex % window == 0) {
-						realFps = bakedFps * differentFramesCount / window;
+#else
+					differentFramesCount += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
+#endif
+					if (currentFrameIndex % window[0] == 0) {
+						realFps = bakedFps * differentFramesCount / window[0];
 						differentFramesCount = 0;
 						result = EitherSD(RightD(realFps));
 					}
 					else {
-						result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window) + " to go."));
+						result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window[0]) + " to go."));
 					}
 				}
 
 				// public member
 			public:
 				EitherSD result;
-				
+				const std::string id;
+
 				// private member
 			private:
-				const std::string id;
-				const int window;
-				const double bakedFps;
-				double realFps = 0;
+				std::vector<int>  window;
+				const double      bakedFps;
+				double            realFps = 0;
 
 			};
 		} // namespace pre

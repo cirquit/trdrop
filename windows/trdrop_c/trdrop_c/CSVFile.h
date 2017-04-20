@@ -32,16 +32,18 @@ namespace trdrop {
 				csvFile = out;
 				(*csvFile).open(filename);
 
-				// DEBUG
-				std::cout << "CSVFile - Output opened: " << ((*csvFile).is_open() ? "true" : "false") << '\n';
-
+#if _DEBUG
+					std::cout << "CSVFile - Output opened: " << ((*csvFile).is_open() ? "true" : "false") << '\n';
+#endif
 				log(columns.begin(), columns.end());
 			}
 		
 			~CSVFile()
 			{
 				(*csvFile).close();
+#if _DEBUG
 				std::cout << "CSVFile - Output closed: " << ((*csvFile).is_open() ? "false" : "true") << '\n';
+#endif
 			}
 			
 			// public methods
@@ -65,10 +67,11 @@ namespace trdrop {
 				}, begin, end, commaSeparated.begin(), commas.begin());
 				
 				write(csvFile, commaSeparated.begin(), commaSeparated.end());
-				
+#if _DEBUG
 				std::cout << "Log() was called with: ";
 				std::for_each(commaSeparated.begin(), commaSeparated.end(), [&](Iterator::value_type e) {std::cout << e; });
 				std::cout << '\n';
+#endif
 			}
 
 			// private methods

@@ -35,9 +35,9 @@ namespace trdrop {
 					: delay(delay)
 					, posttask(std::bind(&ViewerTask::process
 						, this
-						, std::placeholders::_1)) {
-					
-					trdrop::util::video::initVideoFrame();
+						, std::placeholders::_1
+						, std::placeholders::_2)) {
+
 					trdrop::util::video::resize(size);
 				}
 
@@ -46,15 +46,17 @@ namespace trdrop {
 
 				// interface methods
 			public:
-				void process(cv::Mat & res) {
+				void process(cv::Mat & res, const size_t frameIndex) {
 					trdrop::util::video::showFrame(res, delay);
 				}
 
-				// private methods
-			private:
+				// public member
+			public:
+				std::function<void()> init = [&]() { trdrop::util::video::initVideoFrame(); };
 				// private member
 			private:
 				const int delay;
+				
 			};
 		} // namespace post
 	} // namespace tasks

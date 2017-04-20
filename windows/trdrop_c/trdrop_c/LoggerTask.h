@@ -44,18 +44,16 @@ namespace trdrop {
 					, convertions(convertions)
 					, posttask(std::bind(&LoggerTask::process
 						, this
-						, std::placeholders::_1))
-				{ }
-
+						, std::placeholders::_1
+						, std::placeholders::_2))
+				{}
 				// interface methods
 			public:
-				void process(cv::Mat & res) {
+				void process(cv::Mat & res, const size_t index) {
 					static size_t counter;
 					if (counter % sleepFrames == 0) {
-						std::cout << "Process tries to log something with these values - FPS: " << convertions[0]() << ", Framecount: " << convertions[1]() << '\n';
-						std::vector<std::string> values = { "2.0", "60" };
+						std::vector<std::string> values(2);
 						std::transform(convertions.begin(), convertions.end(), values.begin(), [&](tostring f) { return f(); });
-						// std::for_each(values.begin(), values.end(), [&](std::string e) { std::cout << e; });
 						log.log(values.begin(), values.end());
 					}
 					counter += 1;
