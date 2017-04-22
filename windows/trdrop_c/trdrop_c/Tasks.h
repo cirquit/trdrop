@@ -19,12 +19,18 @@ namespace trdrop {
 		// therefore they have to be commutative
 		using pretask = std::function<void(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrame, const size_t videoIndex)>;
 
-		// postprocessing task which gets
+		// intermediate task which gets
 		// * the resulting frame which is to be modified
 		// * the video index to access the respective configuration
 		//
+		// this task may be asynchronous for different videoIndex'es
+		using intertask = std::function<void(cv::Mat & res, const size_t videoIndex)>;
+
+		// postprocessing task which gets
+		// * the possibly merged frame from all videos which is to be modified
+		//
 		// these task should be appended in order to the schedueler because they modify the written frame
-		using posttask = std::function<void(cv::Mat & res, const size_t videoIndex)>;
+		using posttask = std::function<void(cv::Mat & res)>;
 
 	} // namespace tasks
 } //namespace trdrop

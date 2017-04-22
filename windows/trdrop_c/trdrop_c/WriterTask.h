@@ -32,16 +32,11 @@ namespace trdrop {
 				// specialized member
 			public:
 				WriterTask(std::string filename, int codec, double bakedFps, cv::Size frameSize)
-					: filename(filename)
-					, codec(codec)
-					, bakedFps(bakedFps)
-					, frameSize(frameSize)
-				    , output(filename, codec, bakedFps, frameSize)
+					: output(filename, codec, bakedFps, frameSize)
 					, posttask(std::bind(&WriterTask::process
 						, this
-						, std::placeholders::_1
-						, std::placeholders::_2)) {	
-					
+						, std::placeholders::_1))
+				{	
 #if _DEBUG
 					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
 #endif
@@ -49,19 +44,13 @@ namespace trdrop {
 
 				// interface methods
 			public:
-				void process(const cv::Mat & res, const size_t frameIndex) {
+				void process(const cv::Mat & res) {
 					output.write(res);
 				}
-				// private methods
-			private:
 
 				// private member
 			private:
 				cv::VideoWriter output;
-				const std::string filename;
-				const int codec;
-				const double bakedFps;
-				const cv::Size frameSize;
 			};
 		} // namespace post
 	} // namespace tasks

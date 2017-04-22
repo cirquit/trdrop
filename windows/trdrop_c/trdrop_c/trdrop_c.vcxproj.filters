@@ -33,6 +33,9 @@
     <Filter Include="Source Files\yaml-cpp-source\contrib">
       <UniqueIdentifier>{467790cc-883f-4940-b4f4-a61fd85c8510}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tasks\inter">
+      <UniqueIdentifier>{76b752da-1156-4448-95c8-f08d654938a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -151,9 +154,6 @@
     <ClInclude Include="Tasks.h">
       <Filter>Header Files\tasks</Filter>
     </ClInclude>
-    <ClInclude Include="FPSPostTask.h">
-      <Filter>Header Files\tasks\post</Filter>
-    </ClInclude>
     <ClInclude Include="FPSPreTask.h">
       <Filter>Header Files\tasks\pre</Filter>
     </ClInclude>
@@ -237,6 +237,9 @@
     </ClInclude>
     <ClInclude Include="yaml-cpp\yaml-cpp-source\contrib\graphbuilderadapter.h">
       <Filter>Source Files\yaml-cpp-source\contrib</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSInterTask.h">
+      <Filter>Header Files\tasks\inter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

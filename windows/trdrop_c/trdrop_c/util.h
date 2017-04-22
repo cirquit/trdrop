@@ -100,8 +100,18 @@ namespace trdrop {
 				*d_first++ = func(*first, *(iterators)...);
 			return d_first;
 		}
-
-
+		
+		// blatantly copied from http://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
+		template <typename InputT, typename Function>
+		Function enumerate(InputT first,
+			InputT last,
+			typename std::iterator_traits<InputT>::difference_type initial,
+			Function func)
+		{
+			for (; first != last; ++first, ++initial)
+				func(initial, *first);
+			return func;
+		}
 
 	} // namespace util
 } // namespace trdrop

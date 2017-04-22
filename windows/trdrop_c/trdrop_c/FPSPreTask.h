@@ -21,8 +21,8 @@ namespace trdrop {
 
 				// types
 			private:
-				using EitherSD = Either<std::string, double>;
-				using RightD = Right<double>;
+				using EitherSD = Either<std::string, std::vector<double>>;
+				using RightD = Right<std::vector<double>>;
 				using LeftS = Left<std::string>;
 
 				// default member
@@ -36,39 +36,49 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				FPSPreTask(std::string id, std::vector<int> window, double bakedFps)
-					: id(id)
+				FPSPreTask(std::string id, std::vector<int> window, std::vector<double> bakedFps)
+					: id(id)			   // id used for the csv header
 					, window(window)       // window size to pool until fps calculation
 					, bakedFps(bakedFps)   // baked fps which was provided by the video === sample rate
+					, fps(window.size())   // allocate enough memory for all videos
+					, differentFramesCount(window.size()) // allocate enough memory for all videos
 					, pretask(std::bind(&FPSPreTask::process
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2
-						, std::placeholders::_3))
+						, std::placeholders::_3
+						, std::placeholders::_4))
 				{
-					if (window[0] == -1) {
-						this -> window[0] = static_cast<int>(std::floor(bakedFps));;
-					}
+					trdrop::util::zipWith([&](int w, double bFps) {
+						if (w == -1) {
+							return static_cast<int>(std::floor(bFps));
+						}
+						else {
+							return w;
+						}
+					}, window.begin(), window.end(), this -> window.begin(), bakedFps.begin());
 				}
 
 				// interface methods
 			public:
-				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex) {
-					static int differentFramesCount;
+				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
+					//std::cout << "FPSPre - curFrameIndex: " << currentFrameIndex << ", vix: " << vix << '\n';
 #if _DEBUG
 					trdrop::util::timeit_([&] {
-						differentFramesCount += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
+						differentFramesCount[vix] += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
 					});
 #else
-					differentFramesCount += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
+					differentFramesCount[vix] += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
 #endif
-					if (currentFrameIndex % window[0] == 0) {
-						realFps = bakedFps * differentFramesCount / window[0];
-						differentFramesCount = 0;
-						result = EitherSD(RightD(realFps));
+					if (currentFrameIndex % window[vix] == 0) {
+						realFps = bakedFps[vix] * differentFramesCount[vix] / window[vix];
+						fps[vix] = realFps;
+						differentFramesCount[vix] = 0;
+						std::cout << "FPSPreTask - vix: " << vix << ", returning fps[0]: " << fps[0] << ", fps[1]: " << fps[1] << '\n';
+						result = EitherSD(RightD(fps));
 					}
 					else {
-						result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window[0]) + " to go."));
+						result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window[vix]) + " to go."));
 					}
 				}
 
@@ -79,9 +89,11 @@ namespace trdrop {
 
 				// private member
 			private:
-				std::vector<int>  window;
-				const double      bakedFps;
-				double            realFps = 0;
+				std::vector<int> differentFramesCount;
+				std::vector<double> fps;
+				std::vector<int>    window;
+				std::vector<double> bakedFps;
+				double              realFps = 0;
 
 			};
 		} // namespace pre

@@ -1,4 +1,4 @@
-#define _DEBUG 1
+#define _DEBUG 0
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -19,14 +19,15 @@
 
 #include "TaskContainer.h"
 #include "FPSPreTask.h"
-#include "FPSPostTask.h"
+#include "FPSInterTask.h"
 #include "ViewerTask.h"
 #include "WriterTask.h"
-#include "LoggerTask.h"
+// #include "LoggerTask.h"
 
 int main(int argc, char *argv) {
 
-	trdrop::config::Config config(-1);  // opencv gives a popup for the installed codecs with configuration options. Currently it's not possible to configure them from code, because of the missing interface
+	trdrop::config::Config config(-1);  // opencv gives a popup for the installed codecs with configuration options
+										// it's currently not possible to configure them from code, because of the missing interface
 
 	if (!config.parsing.successful()) {
 		std::cerr << "trdrop_c terminating!\n"
@@ -35,18 +36,18 @@ int main(int argc, char *argv) {
 		std::for_each(errors.begin(), errors.end(), [&](std::string & err) {
 			std::cerr << "  " << err;
 		});
-		return 0;
+		return EXIT_FAILURE;
 	}
 
 	// create container
-	trdrop::tasks::TaskContainer container(config);
+	trdrop::tasks::TaskContainer container(config.inputs);
 	
 	// FPSPreTask
-	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.captureWindows, config.getBakedFPS(0));
+	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.captureWindows, config.getBakedFPS());
 
-	// FPSPostTask
-	double framerate = 0.0;
-	trdrop::tasks::post::FPSPostTask fpsPostT(framerate, config.textLocations, config.fpsPrecision, config.shadows);
+	// FPSIntermediateTask
+	std::vector<double> framerates(config.inputs.size());
+	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.fpsPrecision, config.shadows);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
@@ -56,21 +57,23 @@ int main(int argc, char *argv) {
 	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.getVideoFrameSize(0));
 
 	// LoggerTask
-	using tostring = trdrop::tasks::post::LoggerTask<trdrop::util::CSVFile>::tostring;
+	/*using tostring = trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFile>::tostring;
 	std::vector<tostring> convertions;
 	std::ofstream out;
 	trdrop::util::CSVFile file(config.logFile, { "Frame", "   " + fpsPreT.id }, &out);
-	trdrop::tasks::post::LoggerTask<trdrop::util::CSVFile> loggerT(config.logFile, 1, file, convertions);
+	trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFile> loggerT(config.logFile, 1, file, convertions);
 	convertions.push_back([&]() { return trdrop::util::string_format("%5i", container.getCurrentFrameIndex()); });
 	convertions.push_back([&]() { return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerate); });
-
+	*/
 	// PreTasks - order does not matter
 	container.addPreTask(fpsPreT);
 	
+	// IntermediateTasks - order does not matter
+	container.addInterTask(fpsInterT);
+	//container.addInterTask(loggerT);
+
 	// PostTask - order matters
-	container.addPostTask(fpsPostT);
 	if (config.viewerActive) container.addPostTask(viewerT);
-	container.addPostTask(loggerT);
 	container.addPostTask(writerT);
 
 	while (container.next()) {
@@ -79,7 +82,8 @@ int main(int argc, char *argv) {
 
 		// glue FPS source -> FPS consumer
 		if (fpsPreT.result.successful()) {
-			framerate = fpsPreT.result.getSuccess();
+			framerates = fpsPreT.result.getSuccess();
+			//std::cout << "Main loop: framerates:" << framerates[0] << ", " << framerates[1] << '\n';
 		}
 
 	}

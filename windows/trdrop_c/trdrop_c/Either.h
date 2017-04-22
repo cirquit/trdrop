@@ -2,6 +2,8 @@
 #ifndef TRDROP_EITHER_H
 #define TRDROP_EITHER_H
 
+// TODO constexpr
+
 namespace trdrop {
 
 	// Left constructor (error-case)

@@ -44,6 +44,7 @@ namespace trdrop {
 		public:
 			
 			// parsed config
+			// not using the stream approach because of the custom error handling
 			Config(int codec)
 				: codec(codec)
 			{
@@ -122,6 +123,15 @@ namespace trdrop {
 
 			double getBakedFPS(int index) {
 				return trdrop::util::getFrameRate(inputs[index]);
+			}
+
+			std::vector<double> getBakedFPS() {
+				std::vector<double> bakedFps;
+				std::transform(inputs.begin(), inputs.end(), std::back_inserter(bakedFps),
+					[&](cv::VideoCapture input) {
+					return trdrop::util::getFrameRate(input);
+				});
+				return bakedFps;
 			}
 
 			// private methods

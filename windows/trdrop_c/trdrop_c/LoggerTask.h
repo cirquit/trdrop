@@ -1,6 +1,6 @@
 #pragma once
-#ifndef TRDROP_TASKS_POST_LOGGER_H
-#define TRDROP_TASKS_POST_LOGGER_H
+#ifndef TRDROP_TASKS_INTER_LOGGER_H
+#define TRDROP_TASKS_INTER_LOGGER_H
 
 #include <functional>
 #include <math.h>
@@ -14,13 +14,12 @@
 
 namespace trdrop {
 	namespace tasks {
-		namespace post {
+		namespace inter {
 
-			using trdrop::tasks::posttask;
-
+			using trdrop::tasks::intertask;
 
 			template <class LoggerType>
-			class LoggerTask : public posttask {
+			class LoggerTask : public intertask {
 
 			// types
 			public:
@@ -37,37 +36,44 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				LoggerTask(std::string filename, size_t sleepFrames, LoggerType & log, std::vector<tostring> & convertions)
-					: filename(filename)
-					, sleepFrames(sleepFrames)  // every sleepFrames-Frame log information
-					, log(log)                 
-					, convertions(convertions)
-					, posttask(std::bind(&LoggerTask::process
+				LoggerTask(size_t sleepFrames, std::vector<tostring> & conversions
+											 , std::vector<string> ids
+											 , std::vector<string> logFileNames)
+					: sleepFrames(sleepFrames)  // dump information every sleep frames
+					, conversions(conversions)
+					, ids(ids)
+					, intertask(std::bind(&LoggerTask::process
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2))
-				{}
+				{
+					std::transform(logFileNames.begin(), logFileNames.end(),std::back_inserter(loggers),
+						[&](std::string logName) {
+						return CSVFile(logName, ids, nullptr);
+					};
+				}
+
 				// interface methods
 			public:
-				void process(cv::Mat & res, const size_t index) {
-					static size_t counter;
-					if (counter % sleepFrames == 0) {
+				void process(cv::Mat & res, const size_t vix) {
+					static std::vector<size_t> counter;
+					if (counter[vix] % sleepFrames == 0) {
 						std::vector<std::string> values(2);
-						std::transform(convertions.begin(), convertions.end(), values.begin(), [&](tostring f) { return f(); });
-						log.log(values.begin(), values.end());
+						std::transform(conversions.begin(), conversions.end(), values.begin(), [&](tostring f) { return f(); });
+						loggers[vix].log(values.begin(), values.end());
 					}
-					counter += 1;
+					counter[vix] += 1;
 				}
 
 				// private member
 			private:
-				LoggerType & log;
-				std::vector<tostring> & convertions;
+				std::vector<LoggerType> loggers;
+				std::vector<tostring> & conversions;
 				const std::string filename;
 				const size_t sleepFrames;
 			};	
-		} // namespace post
+		} // namespace inter
 	} // namespace tasks
 } // namespace trdrop
 
-#endif // !TDROP_TASKS_POST_LOGGER
+#endif // !TDROP_TASKS_INTER_LOGGER

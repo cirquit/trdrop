@@ -60,7 +60,6 @@ namespace trdrop {
 				std::vector<std::string> commas(std::distance(begin, end));
 				std::fill(commas.begin(), commas.end() - 1, separator);
 				commas.push_back(" ");
-
 				
 				zipWith([&](typename std::iterator_traits<Iterator>::value_type value, std::string comma) {
 					return value + comma;
