@@ -47,6 +47,10 @@ namespace trdrop {
 					std::string text = trdrop::util::string_format("FPS: %." + std::to_string(precision) + "f", framerates[vix]);
 					if (shadows) cv::putText(res, text, points[vix]+cv::Point(3,3), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0), 4, CV_AA);
 					cv::putText(res, text, points[vix], CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+
+#if _DEBUG
+					std::cout << "DEBUG: FPSInterTask[" << vix << "] - drawing \"" << text << "\"\n";
+#endif
 				}
 
 				// private member

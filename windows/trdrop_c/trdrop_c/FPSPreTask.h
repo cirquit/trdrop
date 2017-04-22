@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <math.h>
+#include <mutex>
 
 #include "Tasks.h"
 #include "Either.h"
@@ -63,22 +64,30 @@ namespace trdrop {
 			public:
 				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
 					//std::cout << "FPSPre - curFrameIndex: " << currentFrameIndex << ", vix: " << vix << '\n';
-#if _DEBUG
-					trdrop::util::timeit_([&] {
-						differentFramesCount[vix] += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
-					});
-#else
+//#if _DEBUG
+//					trdrop::util::timeit_([&] {
+//						differentFramesCount[vix] += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
+//					});
+//#else
 					differentFramesCount[vix] += trdrop::algorithm::are_equal<cv::Vec3b>(prev, cur) ? 0 : 1;
-#endif
+//#endif
 					if (currentFrameIndex % window[vix] == 0) {
 						realFps = bakedFps[vix] * differentFramesCount[vix] / window[vix];
 						fps[vix] = realFps;
 						differentFramesCount[vix] = 0;
-						std::cout << "FPSPreTask - vix: " << vix << ", returning fps[0]: " << fps[0] << ", fps[1]: " << fps[1] << '\n';
+#if _DEBUG
+						std::cout << "DEBUG: FPSPreTask - vix: " << vix << ", returning fps[0]: " << fps[0] << ", fps[1]: " << fps[1] << std::endl;
+#endif					
+						static std::mutex mutex;
+						std::lock_guard<std::mutex> lock(mutex);
+
+						resultIndex = currentFrameIndex;
 						result = EitherSD(RightD(fps));
 					}
 					else {
-						result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window[vix]) + " to go."));
+						if (currentFrameIndex != resultIndex) {
+							result = EitherSD(LeftS("FPSPreTask: Not calculated yet, " + std::to_string(currentFrameIndex % window[vix]) + " to go."));
+						}
 					}
 				}
 
@@ -89,10 +98,11 @@ namespace trdrop {
 
 				// private member
 			private:
-				std::vector<int> differentFramesCount;
+				std::vector<int>    differentFramesCount;
 				std::vector<double> fps;
 				std::vector<int>    window;
 				std::vector<double> bakedFps;
+				size_t			    resultIndex;
 				double              realFps = 0;
 
 			};

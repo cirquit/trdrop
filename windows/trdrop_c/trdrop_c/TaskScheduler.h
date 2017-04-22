@@ -17,20 +17,20 @@ namespace trdrop {
 
 	namespace tasks {
 
-		class TaskContainer {
+		class TaskScheduler {
 
 			// default member
 		public:
-			TaskContainer() = delete;
-			TaskContainer(const TaskContainer & other) = delete;
-			TaskContainer & operator=(const TaskContainer & other) = delete;
-			TaskContainer(TaskContainer && other) = delete;
-			TaskContainer & operator=(TaskContainer && other) = delete;
-			~TaskContainer() = default;
+			TaskScheduler() = delete;
+			TaskScheduler(const TaskScheduler & other) = delete;
+			TaskScheduler & operator=(const TaskScheduler & other) = delete;
+			TaskScheduler(TaskScheduler && other) = delete;
+			TaskScheduler & operator=(TaskScheduler && other) = delete;
+			~TaskScheduler() = default;
 
 			// specialized member
 		public:
-			TaskContainer(std::vector<cv::VideoCapture> & inputs)
+			TaskScheduler(std::vector<cv::VideoCapture> & inputs)
 				: inputs(inputs)
 				, prev(inputs.size())
 				, cur(inputs.size())
@@ -49,8 +49,6 @@ namespace trdrop {
 			}
 			
 			void merge(std::vector<cv::Mat> & frames, cv::Mat & result) {
-				// resize based on config
-				// merge and return
 
 				int x = /*frames[0].size().width */  1920 / 4; // TODO only works for max 2 videos
 				int y = 0;
@@ -60,16 +58,12 @@ namespace trdrop {
 				cv::Rect box(x, y, width, height);
 				cv::Rect left(0, 0, width, height);
 				cv::Rect right(x*2, 0, width, height);
-				std::cout << "started merging\n";
 
 				if (frames.size() == 1) {
 					result = cv::Mat(frames[0].size(), true);
 					frames[0].copyTo(result);
 				} else if (frames.size() == 2) {
 					frames[0].copyTo(result);
-					// std::cout << "result is resized: " << result.size() << '\n';
-//					std::cout << "result is resized to left: " << result(left).size() << '\n';
-//					std::cout << "result is resized to right: " << result(right).size() << '\n';
 					cv::Mat cropped0 = frames[0](box);
 					cv::Mat cropped1 = frames[1](box);
 					cropped0.copyTo(result(left));
@@ -78,8 +72,9 @@ namespace trdrop {
 			}
 
 			bool next() {
-				std::cout << "next()\n";
-				std::cout << "input size: " << inputs.size() << '\n';
+#if _DEBUG
+				std::cout << "\nDEBUG: TaskScheduler.next() - currentFrameIndex\n";
+#endif
 				if (currentFrameIndex == 0) {
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						readSuccessful &= input.read(prev[vix]);
@@ -99,26 +94,33 @@ namespace trdrop {
 				if (readSuccessful) {
 					// if this is the first frame, we load two frames
 					currentFrameIndex += currentFrameIndex == 0 ? 2 : 1;
-					std::cout << "readSuccesful, frame: " << currentFrameIndex << '\n';
-
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler.readSuccesful, currentFrameIndex: " << currentFrameIndex << '\n';
+#endif
+					
 					// pretasks - parallel
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) {
 							//f(prev[vix], cur[vix], currentFrameIndex, vix);
 							preTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], cur[vix], currentFrameIndex, vix)));
 						});
-					});
+					}); 
 
-					std::cout << "launched pretasks\n";
+					//preTasks[0](prev[0], cur[0], currentFrameIndex, 0);
+					//preTasks[0](prev[1], cur[1], currentFrameIndex, 1);
 
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - launched " << preTasksFinished.size() << " pretasks\n";
+#endif				
 					// pretasks - waiting
 					std::for_each(preTasksFinished.begin(), preTasksFinished.end(), [](std::future<void> & future){
 						future.wait();
 					}); 
 					preTasksFinished.clear();
-
-					std::cout << "finished pretasks\n";
-
+					
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - finished all pretasks - size: " << preTasksFinished.size() << "\n";
+#endif
 					// intermediate tasks - not parallel yet
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						std::for_each(interTasks.begin(), interTasks.end(), [&](trdrop::tasks::intertask f) {
@@ -126,18 +128,19 @@ namespace trdrop {
 							f(prev[vix], vix);
 						});
 					});
-
-					std::cout << "finished intermediate tasks\n";
-
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks\n";
+#endif
 					// merging
 					merge(prev, merged);
-					
-					std::cout << "merged is done\n";
-
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - merged frames\n";
+#endif
 					// post tasks - sequential
 					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(merged); });
-
-					std::cout << "finished posttasks\n";
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - finished all posttasks\n";
+#endif
 				}
 				
 				return readSuccessful;

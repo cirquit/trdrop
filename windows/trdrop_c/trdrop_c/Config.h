@@ -114,6 +114,10 @@ namespace trdrop {
 				else {
 					parsing = Either<std::vector<std::string>, std::string>(Left<std::vector<std::string>>(errors));
 				}
+
+#if _DEBUG
+				std::cout << "DEBUG: Config.successful(): " << parsing.successful() << '\n';
+#endif
 			}
 			
 

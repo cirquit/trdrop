@@ -54,6 +54,7 @@ namespace trdrop {
 					cv::Mat differenceMat;
 					cv::absdiff(prev, cur, differenceMat);
 
+					// TODO refactor with STL (e.g find_if)
 					bool tear = false;
 					int zeroRows = 0;
 					for (int i = 0; i < differenceMat.rows; ++i) {

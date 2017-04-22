@@ -139,9 +139,6 @@
     <ClInclude Include="utilvideo.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="TaskContainer.h">
-      <Filter>Header Files\tasks</Filter>
-    </ClInclude>
     <ClInclude Include="Config.h">
       <Filter>Header Files\config</Filter>
     </ClInclude>
@@ -240,6 +237,12 @@
     </ClInclude>
     <ClInclude Include="FPSInterTask.h">
       <Filter>Header Files\tasks\inter</Filter>
+    </ClInclude>
+    <ClInclude Include="TearPreTask.h">
+      <Filter>Header Files\tasks\pre</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskScheduler.h">
+      <Filter>Header Files\tasks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

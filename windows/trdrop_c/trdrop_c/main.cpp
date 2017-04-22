@@ -1,4 +1,5 @@
-#define _DEBUG 0
+#define _DEBUG 1
+
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -17,8 +18,9 @@
 #include "Either.h"
 #include "CSVFile.h"
 
-#include "TaskContainer.h"
+#include "TaskScheduler.h"
 #include "FPSPreTask.h"
+#include "TearPreTask.h"
 #include "FPSInterTask.h"
 #include "ViewerTask.h"
 #include "WriterTask.h"
@@ -40,10 +42,13 @@ int main(int argc, char *argv) {
 	}
 
 	// create container
-	trdrop::tasks::TaskContainer container(config.inputs);
+	trdrop::tasks::TaskScheduler scheduler(config.inputs);
 	
 	// FPSPreTask
 	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.captureWindows, config.getBakedFPS());
+
+	// TearPreTask - TODO think about configurability
+	trdrop::tasks::pre::TearPreTask tearPreT("Tear", 20, 5);
 
 	// FPSIntermediateTask
 	std::vector<double> framerates(config.inputs.size());
@@ -65,25 +70,39 @@ int main(int argc, char *argv) {
 	convertions.push_back([&]() { return trdrop::util::string_format("%5i", container.getCurrentFrameIndex()); });
 	convertions.push_back([&]() { return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerate); });
 	*/
+
 	// PreTasks - order does not matter
-	container.addPreTask(fpsPreT);
-	
+	scheduler.addPreTask(fpsPreT);
+	//scheduler.addPreTask(tearPreT);
+
 	// IntermediateTasks - order does not matter
-	container.addInterTask(fpsInterT);
+	scheduler.addInterTask(fpsInterT);
 	//container.addInterTask(loggerT);
 
 	// PostTask - order matters
-	if (config.viewerActive) container.addPostTask(viewerT);
-	container.addPostTask(writerT);
+	if (config.viewerActive) scheduler.addPostTask(viewerT);
+	scheduler.addPostTask(writerT);
 
-	while (container.next()) {
+	while (scheduler.next()) {
 
 		if (trdrop::util::video::pushedKey(27)) return 0; // ESC -> terminate
+
+#if _DEBUG
+		std::cout << "DEBUG: Main loop: fpsPreT.result.success(): " << fpsPreT.result.successful() << '\n';
+#endif
 
 		// glue FPS source -> FPS consumer
 		if (fpsPreT.result.successful()) {
 			framerates = fpsPreT.result.getSuccess();
-			//std::cout << "Main loop: framerates:" << framerates[0] << ", " << framerates[1] << '\n';
+#if _DEBUG
+			std::cout << "DEBUG: Main loop: got framerates: " << framerates[0] << ", " << framerates[1] << '\n';
+#endif
+		}
+
+		if (tearPreT.result.successful()) {
+#if _DEBUG
+			std::cout << "TearTask: " << tearPreT.result.getSuccess() << '\n';
+#endif
 		}
 
 	}
