@@ -44,12 +44,13 @@ namespace trdrop {
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2
-						, std::placeholders::_3))
+						, std::placeholders::_3
+						, std::placeholders::_4))
 				{ }
 
 				// interface methods
 			public:
-				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex) {
+				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
 					cv::Mat differenceMat;
 					cv::absdiff(prev, cur, differenceMat);
 
