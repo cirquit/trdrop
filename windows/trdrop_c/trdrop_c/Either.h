@@ -19,16 +19,16 @@ namespace trdrop {
 		Left() = delete;
 		Left(const Left & other) = delete;
 		Left & operator=(const Left & other) = delete;
-		Left(Left && other) = default;
+		constexpr Left(Left && other) = default;
 		Left & operator=(Left && other) = delete;
 		~Left() = default;
 
 	// specialized member
 	public:
-		Left(L left)
+		constexpr Left(L left)
 			: left(left) {}
 
-		L get() const {
+		constexpr L get() const {
 			return left;
 		}
 
@@ -51,16 +51,16 @@ namespace trdrop {
 		Right() = delete;
 		Right(const Right & other) = delete;
 		Right & operator=(const Right & other) = delete;
-		Right(Right && other) = default;
+		constexpr Right(Right && other) = default;
 		Right & operator=(Right && other) = delete;
 		~Right() = default;
 
 	// specialized member
 	public:
-		Right(R right)
+		constexpr Right(R right)
 			: right(right) {}
 
-		R get() {
+		constexpr R get() {
 			return right;
 		}
 
@@ -76,30 +76,30 @@ namespace trdrop {
 
 	public:
 
-		Either() = default;
-		Either(const Either & other) = default;
-		Either & operator=(const Either & other) = default;
-		Either(Either && other) = default;
-		Either & operator=(Either && other) = default;
+		constexpr Either() = default;
+		constexpr Either(const Either & other) = default;
+		constexpr Either & operator=(const Either & other) = default;
+		constexpr Either(Either && other) = default;
+		constexpr Either & operator=(Either && other) = default;
 		~Either() = default;
 
 	public:
-		Either(Left<Error> left)
+		constexpr Either(Left<Error> left)
 			: left(left.get()) {}
 
-		Either(Right<Success> right)
+		constexpr Either(Right<Success> right)
 			: right(right.get())
 			, success(true) {}
 
-		bool successful() const {
+		constexpr bool successful() const {
 			return success;
 		}
 
-		Success getSuccess() {
+		constexpr Success getSuccess() {
 			return right;
 		}
 
-		Error getError() {
+		constexpr Error getError() {
 			return left;
 		}
 
