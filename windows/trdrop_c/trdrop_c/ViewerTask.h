@@ -33,13 +33,11 @@ namespace trdrop {
 			public:
 				ViewerTask(int delay, cv::Size size)
 					: delay(delay)
+					, size(size)
 					, posttask(std::bind(&ViewerTask::process
 						, this
 						, std::placeholders::_1))
-				{
-					std::cout << "Config - setting size to " << size << '\n';
-					trdrop::util::video::resize(size);
-				}
+				{}
 
 				ViewerTask(cv::Size size)
 					: ViewerTask(1, size) {}
@@ -52,11 +50,12 @@ namespace trdrop {
 
 				// public member
 			public:
-				std::function<void()> init = [&]() { trdrop::util::video::initVideoFrame(); };
+				std::function<void()> init = [&]() { trdrop::util::video::initVideoFrame(); trdrop::util::video::resize(size); };
 
 				// private member
 			private:
 				const int delay;
+				const cv::Size size;
 			};
 		} // namespace post
 	} // namespace tasks
