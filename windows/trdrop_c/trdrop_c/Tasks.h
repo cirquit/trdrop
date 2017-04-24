@@ -24,7 +24,7 @@ namespace trdrop {
 		// * the video index to access the respective configuration
 		//
 		// this task may be asynchronous for different videoIndex'es
-		using intertask = std::function<void(cv::Mat & res, const size_t videoIndex)>;
+		using intertask = std::function<void(cv::Mat & res, const size_t currentFrame, const size_t videoIndex)>;
 
 		// postprocessing task which gets
 		// * the possibly merged frame from all videos which is to be modified

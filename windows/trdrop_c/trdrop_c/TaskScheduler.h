@@ -3,6 +3,7 @@
 #define TRDROP_TASKS_TASKCONTAINER_H
 
 #include <functional>
+#include <algorithm>
 #include <future>
 
 #include <opencv2/core.hpp>
@@ -101,13 +102,9 @@ namespace trdrop {
 					// pretasks - parallel
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) {
-							//f(prev[vix], cur[vix], currentFrameIndex, vix);
 							preTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], cur[vix], currentFrameIndex, vix)));
 						});
 					}); 
-
-					//preTasks[0](prev[0], cur[0], currentFrameIndex, 0);
-					//preTasks[0](prev[1], cur[1], currentFrameIndex, 1);
 
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - launched " << preTasksFinished.size() << " pretasks\n";
@@ -121,13 +118,32 @@ namespace trdrop {
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all pretasks - size: " << preTasksFinished.size() << "\n";
 #endif
-					// intermediate tasks - not parallel yet
+					// intermediate tasks - parallel of different videos
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+						/*
+						std::function<void()> videoTask = [&]() {
+							std::for_each(interTasks.begin(), interTasks.end(), [&](trdrop::tasks::intertask f) {
+								// interTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], vix)));
+								f(prev[vix], currentFrameIndex, vix);
+							});
+						};
+						
+						interTasksFinished.push_back(std::move(std::async(std::launch::async, videoTask)));
+						*/
 						std::for_each(interTasks.begin(), interTasks.end(), [&](trdrop::tasks::intertask f) {
-							// interTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], vix)));
-							f(prev[vix], vix);
-						});
+							interTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], currentFrameIndex, vix)));
+							//f(prev[vix], currentFrameIndex, vix);
+						}); 
 					});
+#if _DEBUG
+					std::cout << "DEBUG: TaskScheduler - launched " << interTasksFinished.size() * interTasks.size() << " intermediate tasks\n";
+#endif
+					// intermediate tasks - waiting
+					std::for_each(interTasksFinished.begin(), interTasksFinished.end(), [](std::future<void> & future) {
+						future.wait();
+					});
+					interTasksFinished.clear();
+
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks\n";
 #endif

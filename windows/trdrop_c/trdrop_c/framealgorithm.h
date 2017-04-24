@@ -36,18 +36,27 @@ namespace trdrop {
 		}
 
 		/*
-		* Specialisation for implemented difference map, works only on 3 dimensions
+		* Specialisation for compare in greyscale + only every 7 pixels and a pixelDifference
+		* 
+		* TODO test for performance with skipping pixels & Greyscale
 		*/
-		template <>
-		bool are_equal<int>(const cv::Mat & frameA, const cv::Mat & frameB) {
-			cv::Mat res = frameA != frameB;
-			return (cv::countNonZero(res) == 0);
-			/*
-			std::vector<cv::Mat> channels(3);
-			cv::split(res, channels);
-			return (cv::countNonZero(channels[0]) == 0)
-				&& (cv::countNonZero(channels[1]) == 0)
-				&& (cv::countNonZero(channels[2]) == 0); */
+		template <typename T>
+		bool are_equal_with(const cv::Mat & frameA, const cv::Mat & frameB, int pixelDifference) {
+			cv::Mat bw_a;
+			cv::Mat bw_b;
+			cv::cvtColor(frameA, bw_a, CV_BGR2GRAY);
+			cv::cvtColor(frameB, bw_b, CV_BGR2GRAY);
+
+			for (int i = 0; i < bw_a.rows; ++i) {
+				for (int j = 0; j < bw_a.cols; j += 7) {
+					int ac(std::max(bw_a.at<uchar>(i, j), bw_b.at<uchar>(i, j)));
+					int bc(std::min(bw_a.at<uchar>(i, j), bw_b.at<uchar>(i, j)));
+					if (ac - bc > pixelDifference) {
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 
 	} // namespace algorithm

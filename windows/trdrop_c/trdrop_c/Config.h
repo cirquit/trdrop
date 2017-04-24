@@ -63,7 +63,10 @@ namespace trdrop {
 					logFile = yamlConfig[tag].as<std::string>();
 				});
 
-				
+				fromTag("pixel-difference", yamlConfig, errors, [&](std::string tag) {
+					pixelDifference = yamlConfig[tag].as<int>();
+				});
+
 				fromSequenceTag("fps-text-locations", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					textLocations.push_back(cv::Size(it -> second["x"].as<int>(), it -> second["y"].as<int>()));
 				});
@@ -76,10 +79,11 @@ namespace trdrop {
 					shadows = yamlConfig[tag].as<bool>();
 				});
 				
-				fromSequenceTag("fps-capture-windows", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
-					captureWindows.push_back(it->second["window"].as<int>());
+				fromSequenceTag("fps-refresh-rate", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					refreshRate.push_back(it->second["rate"].as<int>());
 				});
-
+				std::cout << "DEBUG: Config - refreshRate[0]: " << refreshRate[0] << '\n';
+				std::cout << "DEBUG: Config - refreshRate[1]: " << refreshRate[1] << '\n';
 				fromTag("viewer-active", yamlConfig, errors, [&](std::string tag) {
 					viewerActive = yamlConfig[tag].as<bool>();
 				});
@@ -96,7 +100,9 @@ namespace trdrop {
 						});
 					});
 				}
-
+#if _DEBUG				
+				std::cout << "DEBUG: Config - viewer-size: " << viewerSize << '\n';
+#endif				
 				fromTag("writer-size", yamlConfig, errors, [&](std::string tag) {
 					fromTag("writer-width", yamlConfig[tag], errors, [&](std::string tag_) {
 						writerSize.width = yamlConfig[tag][tag_].as<int>();
@@ -117,6 +123,9 @@ namespace trdrop {
 
 #if _DEBUG
 				std::cout << "DEBUG: Config.successful(): " << parsing.successful() << '\n';
+				util::enumerate(inputs.begin(), inputs.end(), 0, [&](size_t ix, cv::VideoCapture input) {
+					std::cout << "DEBUG: Config - FrameCounts: input[" << ix << "]: " << util::getFrameCount(input) << '\n';
+				});
 #endif
 			}
 			
@@ -179,8 +188,10 @@ namespace trdrop {
 			int		    codec;
 			std::string outputFile;
 
+			int			pixelDifference;
+
 			std::vector<cv::Point> textLocations;
-			std::vector<int>	   captureWindows;
+			std::vector<int>	   refreshRate;
 			int				       fpsPrecision;
 			bool				   shadows;
 

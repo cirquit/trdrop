@@ -37,6 +37,7 @@ namespace trdrop {
 						, this
 						, std::placeholders::_1))
 				{
+					std::cout << "Config - setting size to " << size << '\n';
 					trdrop::util::video::resize(size);
 				}
 

@@ -45,14 +45,14 @@ int main(int argc, char *argv) {
 	trdrop::tasks::TaskScheduler scheduler(config.inputs);
 	
 	// FPSPreTask
-	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.captureWindows, config.getBakedFPS());
+	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference);
 
 	// TearPreTask - TODO think about configurability
 	trdrop::tasks::pre::TearPreTask tearPreT("Tear", 20, 5);
 
 	// FPSIntermediateTask
 	std::vector<double> framerates(config.inputs.size());
-	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.fpsPrecision, config.shadows);
+	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.refreshRate, config.fpsPrecision, config.shadows);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
