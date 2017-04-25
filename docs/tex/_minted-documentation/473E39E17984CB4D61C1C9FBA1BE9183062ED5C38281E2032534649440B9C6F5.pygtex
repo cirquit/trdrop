@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{using} \PYG{n}{pretask} \PYG{o}{=} \PYG{n}{std}\PYG{o}{::}\PYG{n}{function}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{void}\PYG{p}{(}\PYG{k}{const} \PYG{n}{cv}\PYG{o}{::}\PYG{n}{Mat} \PYG{o}{\PYGZam{}} \PYG{n}{prev}
+                                 \PYG{p}{,} \PYG{k}{const} \PYG{n}{cv}\PYG{o}{::}\PYG{n}{Mat} \PYG{o}{\PYGZam{}} \PYG{n}{cur}
+                                 \PYG{p}{,} \PYG{k}{const} \PYG{k+kt}{size\PYGZus{}t} \PYG{n}{currentFrame}
+                                 \PYG{p}{,} \PYG{k}{const} \PYG{k+kt}{size\PYGZus{}t} \PYG{n}{videoIndex}\PYG{p}{)}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{using} \PYG{n}{intertask} \PYG{o}{=} \PYG{n}{std}\PYG{o}{::}\PYG{n}{function}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{void}\PYG{p}{(}\PYG{n}{cv}\PYG{o}{::}\PYG{n}{Mat} \PYG{o}{\PYGZam{}} \PYG{n}{res}
+                                   \PYG{p}{,} \PYG{k}{const} \PYG{k+kt}{size\PYGZus{}t} \PYG{n}{currentFrame}
+                                   \PYG{p}{,} \PYG{k}{const} \PYG{k+kt}{size\PYGZus{}t} \PYG{n}{videoIndex}\PYG{p}{)}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{using} \PYG{n}{posttask} \PYG{o}{=} \PYG{n}{std}\PYG{o}{::}\PYG{n}{function}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{void}\PYG{p}{(}\PYG{n}{cv}\PYG{o}{::}\PYG{n}{Mat} \PYG{o}{\PYGZam{}} \PYG{n}{merged}
+                                  \PYG{p}{,} \PYG{k}{const} \PYG{k+kt}{size\PYGZus{}t} \PYG{n}{currentFrame}\PYG{p}{)}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+\end{Verbatim}
