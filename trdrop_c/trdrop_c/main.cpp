@@ -27,6 +27,8 @@
 #include "WriterTask.h"
 #include "CMDProgressTask.h"
 // #include "LoggerTask.h"
+#include "PlotTask.h"
+#include "ResizeTask.h"
 
 
 int main(int argc, char **argv) {
@@ -55,14 +57,20 @@ int main(int argc, char **argv) {
 
 	// FPSIntermediateTask
 	std::vector<double> framerates(config.inputs.size());
-	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.refreshRate, config.fpsPrecision, config.shadows);
+	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.refreshRate, config.colors, config.fpsText, config.fpsPrecision, config.shadows);
+
+	// ResizeTaks
+	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
+
+	// PlotTask
+	trdrop::tasks::post::PlotTask plotT(framerates, config.colors, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.getVideoFrameSize(0));
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize);
 
 	// CMDProgressTask
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
@@ -86,9 +94,14 @@ int main(int argc, char **argv) {
 	//container.addInterTask(loggerT);
 
 	// PostTask - order matters
+	scheduler.addPostTask(resizeT);
+	scheduler.addPostTask(plotT);
 	if (config.viewerActive) scheduler.addPostTask(viewerT);
 	scheduler.addPostTask(writerT);
+
+#if !_DEBUG
 	scheduler.addPostTask(cmdProgressT);
+#endif
 
 	while (scheduler.next()) {
 

@@ -195,6 +195,7 @@
     <ClInclude Include="Either.h" />
     <ClInclude Include="LoggerTask.h" />
     <ClInclude Include="PlotTask.h" />
+    <ClInclude Include="ResizeTask.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Tasks.h" />
     <ClInclude Include="TaskScheduler.h" />

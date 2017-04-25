@@ -72,12 +72,24 @@ namespace trdrop {
 					logFile = yamlConfig[tag].as<std::string>();
 				});
 
+				
+				fromSequenceTag("colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					int r = it->second["r"].as<int>();
+					int g = it->second["g"].as<int>();
+					int b = it->second["b"].as<int>();
+					colors.push_back(cv::Scalar(b, g, r));
+				});
+
 				fromTag("pixel-difference", yamlConfig, errors, [&](std::string tag) {
 					pixelDifference = yamlConfig[tag].as<int>();
 				});
 
 				fromSequenceTag("fps-text-locations", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					textLocations.push_back(cv::Size(it -> second["x"].as<int>(), it -> second["y"].as<int>()));
+				});
+
+				fromSequenceTag("fps-text", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					fpsText.push_back(it->second["text"].as<std::string>());
 				});
 
 				fromTag("fps-precision", yamlConfig, errors, [&](std::string tag) {
@@ -156,7 +168,7 @@ namespace trdrop {
 			}
 
 			int getMinFrameIndex() {
-				return std::accumulate(inputs.begin(), inputs.end(), trdrop::util::getFrameCount(inputs[0]), [&](int acc, cv::VideoCapture input){
+				return std::accumulate(inputs.begin(), inputs.end(), static_cast<int>(trdrop::util::getFrameCount(inputs[0])), [&](int acc, cv::VideoCapture input){
 					return std::min(acc, static_cast<int>(trdrop::util::getFrameCount(input)));
 				});
 			}
@@ -204,10 +216,12 @@ namespace trdrop {
 
 			int			pixelDifference;
 
-			std::vector<cv::Point> textLocations;
-			std::vector<int>	   refreshRate;
-			int				       fpsPrecision;
-			bool				   shadows;
+			std::vector<cv::Point>   textLocations;
+			std::vector<std::string> fpsText;
+			std::vector<cv::Scalar>  colors;
+			std::vector<int>	     refreshRate;
+			int				         fpsPrecision;
+			bool				     shadows;
 
 			cv::Size viewerSize;
 			bool	 viewerActive;

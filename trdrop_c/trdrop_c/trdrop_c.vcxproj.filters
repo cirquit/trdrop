@@ -250,5 +250,8 @@
     <ClInclude Include="LoggerTask.h">
       <Filter>Header Files\tasks\inter</Filter>
     </ClInclude>
+    <ClInclude Include="ResizeTask.h">
+      <Filter>Header Files\tasks\post</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
