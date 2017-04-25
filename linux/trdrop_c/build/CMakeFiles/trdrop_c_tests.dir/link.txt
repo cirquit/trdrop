@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++14 -lavtranscoder   CMakeFiles/trdrop_c_tests.dir/tests/runner.cpp.o CMakeFiles/trdrop_c_tests.dir/tests/tests-example.cpp.o  -o trdrop_c_tests  -L/home/rewrite/Documents/github-repos/trdrop/trdrop_c/../trdrop_lib/build -rdynamic -Wl,-rpath,/home/rewrite/Documents/github-repos/trdrop/trdrop_c/../trdrop_lib/build 

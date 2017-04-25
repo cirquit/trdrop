@@ -1,9 +1,0 @@
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/list_install_components.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/install.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/rebuild_cache.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/test.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/edit_cache.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/trdrop.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/trdrop_lib_tests.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/install/local.dir
-/home/rewrite/Documents/github-repos/trdrop/trdrop_lib/build/CMakeFiles/install/strip.dir
