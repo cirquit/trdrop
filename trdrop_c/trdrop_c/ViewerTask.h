@@ -36,7 +36,8 @@ namespace trdrop {
 					, size(size)
 					, posttask(std::bind(&ViewerTask::process
 						, this
-						, std::placeholders::_1))
+						, std::placeholders::_1
+						, std::placeholders::_2))
 				{}
 
 				ViewerTask(cv::Size size)
@@ -44,7 +45,7 @@ namespace trdrop {
 
 				// interface methods
 			public:
-				void process(cv::Mat & res) {
+				void process(cv::Mat & res, const size_t currentFrameIndex) {
 					trdrop::util::video::showFrame(res, delay);
 				}
 
@@ -61,4 +62,4 @@ namespace trdrop {
 	} // namespace tasks
 } // namespace trdrop
 
-#endif // !TDROP_TASKS_POST_VIEWER
+#endif // !TDROP_TASKS_POST_VIEWER_H

@@ -30,7 +30,7 @@ namespace trdrop {
 		// * the possibly merged frame from all videos which is to be modified
 		//
 		// these task should be appended in order to the schedueler because they modify the written frame
-		using posttask = std::function<void(cv::Mat & res)>;
+		using posttask = std::function<void(cv::Mat & res, const size_t currentFrameIndex)>;
 
 	} // namespace tasks
 } //namespace trdrop

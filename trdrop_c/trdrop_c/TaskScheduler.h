@@ -152,7 +152,7 @@ namespace trdrop {
 					std::cout << "DEBUG: TaskScheduler - merged frames\n";
 #endif
 					// post tasks - sequential
-					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(merged); });
+					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(merged, currentFrameIndex); });
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all posttasks\n";
 #endif

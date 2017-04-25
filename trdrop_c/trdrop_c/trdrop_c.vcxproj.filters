@@ -160,9 +160,6 @@
     <ClInclude Include="WriterTask.h">
       <Filter>Header Files\tasks\post</Filter>
     </ClInclude>
-    <ClInclude Include="LoggerTask.h">
-      <Filter>Header Files\tasks\post</Filter>
-    </ClInclude>
     <ClInclude Include="CSVFile.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -243,6 +240,15 @@
     </ClInclude>
     <ClInclude Include="TaskScheduler.h">
       <Filter>Header Files\tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="PlotTask.h">
+      <Filter>Header Files\tasks\post</Filter>
+    </ClInclude>
+    <ClInclude Include="CMDProgressTask.h">
+      <Filter>Header Files\tasks\post</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggerTask.h">
+      <Filter>Header Files\tasks\inter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

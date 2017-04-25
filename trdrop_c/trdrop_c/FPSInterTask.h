@@ -49,7 +49,9 @@ namespace trdrop {
 				void process(cv::Mat & res, const size_t currentFrameIndex, const size_t vix) {
 					if (currentFrameIndex % refreshRate[vix] == 0) {
 						tempFrameRates.assign(framerates.begin(), framerates.end());
+#if _DEBUG
 						std::cout << "DEBUG - FPSInterTask - copied the framerates\n";
+#endif
 					}
 		
 					// stringstream + setprecision does not add zeros to e.g 0 /=> 0.00

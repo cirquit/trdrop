@@ -1,4 +1,4 @@
-#define _DEBUG 1
+#define _DEBUG 0
 
 #include <iostream>
 #include <string>
@@ -10,6 +10,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/flann/logger.h>
 
 #include "framealgorithm.h"
 #include "util.h"
@@ -24,7 +25,9 @@
 #include "FPSInterTask.h"
 #include "ViewerTask.h"
 #include "WriterTask.h"
+#include "CMDProgressTask.h"
 // #include "LoggerTask.h"
+
 
 int main(int argc, char **argv) {
 
@@ -61,6 +64,9 @@ int main(int argc, char **argv) {
 	// WriterTask
 	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.getVideoFrameSize(0));
 
+	// CMDProgressTask
+	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
+
 	// LoggerTask
 	/*using tostring = trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFile>::tostring;
 	std::vector<tostring> convertions;
@@ -82,6 +88,7 @@ int main(int argc, char **argv) {
 	// PostTask - order matters
 	if (config.viewerActive) scheduler.addPostTask(viewerT);
 	scheduler.addPostTask(writerT);
+	scheduler.addPostTask(cmdProgressT);
 
 	while (scheduler.next()) {
 

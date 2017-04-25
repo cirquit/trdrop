@@ -7,6 +7,8 @@
 #include <vector>
 #include <functional>
 #include <experimental/filesystem>
+#include <algorithm>
+#include <numeric>
 
 #include "yaml-cpp/yaml-cpp-header/yaml.h"
 #include "Either.h"	
@@ -151,6 +153,12 @@ namespace trdrop {
 					return trdrop::util::getFrameRate(input);
 				});
 				return bakedFps;
+			}
+
+			int getMinFrameIndex() {
+				return std::accumulate(inputs.begin(), inputs.end(), trdrop::util::getFrameCount(inputs[0]), [&](int acc, cv::VideoCapture input){
+					return std::min(acc, static_cast<int>(trdrop::util::getFrameCount(input)));
+				});
 			}
 
 			// private methods

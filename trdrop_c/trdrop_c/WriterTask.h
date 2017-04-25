@@ -36,7 +36,8 @@ namespace trdrop {
 					, frameSize(frameSize)
 					, posttask(std::bind(&WriterTask::process
 						, this
-						, std::placeholders::_1))
+						, std::placeholders::_1
+						, std::placeholders::_2))
 				{	
 #if _DEBUG
 					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
@@ -45,7 +46,7 @@ namespace trdrop {
 
 				// interface methods
 			public:
-				void process(const cv::Mat & res) {
+				void process(const cv::Mat & res, const size_t currentFrameIndex) {
 					if (res.size() != frameSize) {
 						cv::resize(res, res, frameSize);
 					}
