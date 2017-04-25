@@ -6,17 +6,12 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <experimental/filesystem>
 
 #include "yaml-cpp/yaml-cpp-header/yaml.h"
 #include "Either.h"	
 
-// file exists
-#ifdef _WIN32
-#include <io.h> 
-#define access    _access_s
-#else
-#include <unistd.h>
-#endif
+
 
 namespace trdrop {
 
@@ -161,8 +156,8 @@ namespace trdrop {
 			// private methods
 		private:
 
-			bool doesFileExist(const std::string & filepath) {
-				return access(filepath.c_str(), 0) == 0;
+			bool doesFileExist(const std::string& name) {
+				return std::experimental::filesystem::exists(name);
 			}
 			
 			void error(std::vector<std::string> & vec, const std::string & msg) {

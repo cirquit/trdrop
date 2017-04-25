@@ -10,7 +10,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-
 #include "Tasks.h"
 #include "Config.h"
 
@@ -51,10 +50,10 @@ namespace trdrop {
 			
 			void merge(std::vector<cv::Mat> & frames, cv::Mat & result) {
 
-				int x = /*frames[0].size().width */  1920 / 4; // TODO only works for max 2 videos
+				int x = frames[0].size().width / 4; // TODO only works for max 2 videos
 				int y = 0;
-				int width = /*frames[0].size().width */ 1920 / 2; // static_cast<int>(frames.size());
-				int height = 1080; // frames[0].size().height;
+				int width = frames[0].size().width / 2; // static_cast<int>(frames.size());
+				int height = frames[0].size().height;
 
 				cv::Rect box(x, y, width, height);
 				cv::Rect left(0, 0, width, height);
