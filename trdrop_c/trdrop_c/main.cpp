@@ -26,10 +26,10 @@
 #include "WriterTask.h"
 // #include "LoggerTask.h"
 
-int main(int argc, char *argv) {
+int main(int argc, char **argv) {
 
-	trdrop::config::Config config(-1);  // opencv gives a popup for the installed codecs with configuration options
-										// it's currently not possible to configure them from code, because of the missing interface
+	trdrop::config::Config config(-1, argc, argv);  // opencv gives a popup for the installed codecs with configuration options
+										      // it's currently not possible to configure them from code, because of the missing interface
 
 	if (!config.parsing.successful()) {
 		std::cerr << "trdrop_c terminating!\n"
@@ -95,7 +95,11 @@ int main(int argc, char *argv) {
 		if (fpsPreT.result.successful()) {
 			framerates = fpsPreT.result.getSuccess();
 #if _DEBUG
-			std::cout << "DEBUG: Main loop: got framerates: " << framerates[0] << ", " << framerates[1] << '\n';
+			std::cout << "DEBUG: Main loop: got framerates: ";
+			std::for_each(framerates.begin(), framerates.end(), [&](int framerates) {
+				std::cout << framerates << ", ";
+			});
+			std::cout << '\n';
 #endif
 		}
 

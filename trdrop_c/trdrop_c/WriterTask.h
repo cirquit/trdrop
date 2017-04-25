@@ -33,6 +33,7 @@ namespace trdrop {
 			public:
 				WriterTask(std::string filename, int codec, double bakedFps, cv::Size frameSize)
 					: output(filename, codec, bakedFps, frameSize)
+					, frameSize(frameSize)
 					, posttask(std::bind(&WriterTask::process
 						, this
 						, std::placeholders::_1))
@@ -45,12 +46,16 @@ namespace trdrop {
 				// interface methods
 			public:
 				void process(const cv::Mat & res) {
+					if (res.size() != frameSize) {
+						cv::resize(res, res, frameSize);
+					}
 					output.write(res);
 				}
 
 				// private member
 			private:
 				cv::VideoWriter output;
+				const cv::Size frameSize;
 			};
 		} // namespace post
 	} // namespace tasks

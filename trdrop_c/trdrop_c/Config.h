@@ -45,10 +45,22 @@ namespace trdrop {
 			
 			// parsed config
 			// not using the stream approach because of the custom error handling
-			Config(int codec)
+			Config(int codec, int argc, char** argv)
 				: codec(codec)
 			{
-				YAML::Node yamlConfig = YAML::LoadFile(trdropYAMLConfig);
+				std::string path = trdropYAMLConfig;
+				if (argc >= 2) {
+					std::string maybePath(argv[1]);
+					if (doesFileExist(maybePath)) {
+						path = maybePath;
+						std::cout << "trdrop: Using config-path \"" << maybePath << "\"\n";
+					}
+				}
+				else {
+					std::cout << "trdrop: Using default config-path \"" << path << "\"\n";
+				}
+
+				YAML::Node yamlConfig = YAML::LoadFile(path);
 				std::vector<std::string> errors;
 				
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
@@ -82,8 +94,7 @@ namespace trdrop {
 				fromSequenceTag("fps-refresh-rate", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					refreshRate.push_back(it->second["rate"].as<int>());
 				});
-				std::cout << "DEBUG: Config - refreshRate[0]: " << refreshRate[0] << '\n';
-				std::cout << "DEBUG: Config - refreshRate[1]: " << refreshRate[1] << '\n';
+
 				fromTag("viewer-active", yamlConfig, errors, [&](std::string tag) {
 					viewerActive = yamlConfig[tag].as<bool>();
 				});
@@ -205,7 +216,7 @@ namespace trdrop {
 
 		// private member
 		private:
-			const std::string trdropYAMLConfig = "trdrop_c-config.yaml";
+			std::string trdropYAMLConfig = "trdrop-config.yaml";
 
 		};
 	} // namespace config
