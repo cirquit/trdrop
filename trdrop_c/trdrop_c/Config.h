@@ -6,17 +6,14 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <experimental/filesystem>
+#include <algorithm>
+#include <numeric>
 
 #include "yaml-cpp/yaml-cpp-header/yaml.h"
 #include "Either.h"	
 
-// file exists
-#ifdef _WIN32
-#include <io.h> 
-#define access    _access_s
-#else
-#include <unistd.h>
-#endif
+
 
 namespace trdrop {
 
@@ -45,14 +42,27 @@ namespace trdrop {
 			
 			// parsed config
 			// not using the stream approach because of the custom error handling
-			Config(int codec)
+			Config(int codec, int argc, char** argv)
 				: codec(codec)
 			{
-				YAML::Node yamlConfig = YAML::LoadFile(trdropYAMLConfig);
+				std::string path = trdropYAMLConfig;
+				if (argc >= 2) {
+					std::string maybePath(argv[1]);
+					if (doesFileExist(maybePath)) {
+						path = maybePath;
+						std::cout << "trdrop: Using config-path \"" << maybePath << "\"\n";
+					}
+				}
+				else {
+					std::cout << "trdrop: Using default config-path \"" << path << "\"\n";
+				}
+
+				YAML::Node yamlConfig = YAML::LoadFile(path);
 				std::vector<std::string> errors;
 				
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
+					inputNames.push_back(it->as<std::string>());
 				});
 
 				fromTag("output-file", yamlConfig, errors, [&](std::string tag) {
@@ -60,7 +70,15 @@ namespace trdrop {
 				});
 
 				fromTag("log-file", yamlConfig, errors, [&](std::string tag) {
-					logFile = yamlConfig[tag].as<std::string>();
+					logName = yamlConfig[tag].as<std::string>();
+				});
+
+				
+				fromSequenceTag("colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					int r = it->second["r"].as<int>();
+					int g = it->second["g"].as<int>();
+					int b = it->second["b"].as<int>();
+					colors.push_back(cv::Scalar(b, g, r));
 				});
 
 				fromTag("pixel-difference", yamlConfig, errors, [&](std::string tag) {
@@ -69,6 +87,13 @@ namespace trdrop {
 
 				fromSequenceTag("fps-text-locations", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					textLocations.push_back(cv::Size(it -> second["x"].as<int>(), it -> second["y"].as<int>()));
+				});
+
+				fromSequenceTag("fps-text", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					fpsText.push_back(it->second["text"].as<std::string>());
+#if _DEBUG
+					std::cout << "DEBUG: Config - fps-text - got \"" << fpsText.back() << "\"\n";
+#endif
 				});
 
 				fromTag("fps-precision", yamlConfig, errors, [&](std::string tag) {
@@ -82,8 +107,7 @@ namespace trdrop {
 				fromSequenceTag("fps-refresh-rate", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					refreshRate.push_back(it->second["rate"].as<int>());
 				});
-				std::cout << "DEBUG: Config - refreshRate[0]: " << refreshRate[0] << '\n';
-				std::cout << "DEBUG: Config - refreshRate[1]: " << refreshRate[1] << '\n';
+
 				fromTag("viewer-active", yamlConfig, errors, [&](std::string tag) {
 					viewerActive = yamlConfig[tag].as<bool>();
 				});
@@ -147,11 +171,17 @@ namespace trdrop {
 				return bakedFps;
 			}
 
+			int getMinFrameIndex() {
+				return std::accumulate(inputs.begin(), inputs.end(), static_cast<int>(trdrop::util::getFrameCount(inputs[0])), [&](int acc, cv::VideoCapture input){
+					return std::min(acc, static_cast<int>(trdrop::util::getFrameCount(input)));
+				});
+			}
+
 			// private methods
 		private:
 
-			bool doesFileExist(const std::string & filepath) {
-				return access(filepath.c_str(), 0) == 0;
+			bool doesFileExist(const std::string& name) {
+				return std::experimental::filesystem::exists(name);
 			}
 			
 			void error(std::vector<std::string> & vec, const std::string & msg) {
@@ -190,22 +220,24 @@ namespace trdrop {
 
 			int			pixelDifference;
 
-			std::vector<cv::Point> textLocations;
-			std::vector<int>	   refreshRate;
-			int				       fpsPrecision;
-			bool				   shadows;
+			std::vector<cv::Point>   textLocations;
+			std::vector<std::string> fpsText;
+			std::vector<cv::Scalar>  colors;
+			std::vector<int>	     refreshRate;
+			int				         fpsPrecision;
+			bool				     shadows;
 
 			cv::Size viewerSize;
 			bool	 viewerActive;
 
 			cv::Size writerSize;
 
-			std::string								              logFile;
+			std::string								              logName;
 			trdrop::Either<std::vector<std::string>, std::string> parsing;
 
 		// private member
 		private:
-			const std::string trdropYAMLConfig = "trdrop_c-config.yaml";
+			std::string trdropYAMLConfig = "trdrop-config.yaml";
 
 		};
 	} // namespace config

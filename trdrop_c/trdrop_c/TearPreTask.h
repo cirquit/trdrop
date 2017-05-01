@@ -21,8 +21,8 @@ namespace trdrop {
 
 				// types
 			private:
-				using EitherSI = Either<std::string, int>;
-				using RightI = Right<int>;
+				using EitherSVI = Either<std::string, std::vector<int>>;
+				using RightVI = Right<std::vector<int>>;
 				using LeftS = Left<std::string>;
 
 				// default member
@@ -36,8 +36,9 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				TearPreTask(std::string id, int lineTolerance, int pixelTolerance)
+				TearPreTask(std::string id, size_t videoCount, int lineTolerance, int pixelTolerance)
 					: id(id)
+					, tears(videoCount)
 					, lineTolerance(lineTolerance)
 					, pixelTolerance(pixelTolerance)
 					, pretask(std::bind(&TearPreTask::process
@@ -46,7 +47,10 @@ namespace trdrop {
 						, std::placeholders::_2
 						, std::placeholders::_3
 						, std::placeholders::_4))
-				{ }
+				{ 
+					tears.insert(tears.end(), videoCount, -1);
+
+				}
 
 				// interface methods
 			public:
@@ -56,6 +60,7 @@ namespace trdrop {
 
 					// TODO refactor with STL (e.g find_if)
 					bool tear = false;
+					tears[vix] = -1;
 					int zeroRows = 0;
 					for (int i = 0; i < differenceMat.rows; ++i) {
 						if (differenceMat.at<uchar>(i, 0) <= pixelTolerance) {
@@ -63,30 +68,33 @@ namespace trdrop {
 							for (int j = 0; j < differenceMat.cols; ++j) {
 								if (differenceMat.at<uchar>(i, j) > pixelTolerance) {
 									tear = false;
+									tears[vix] = -1;
 									break;
 								}
 							}
 							if (tear) ++zeroRows;
 							if (zeroRows == lineTolerance) {
 								tearIndex = i;
-								result = EitherSI(RightI(tearIndex));
+								tears[vix] = tearIndex;
+								result = EitherSVI(RightVI(tears));
 								return;
 							}
-						}
+						} 
 					}
-					result = EitherSI(LeftS("No tear found within the given tolerances."));
+					result = EitherSVI(RightVI(tears));
 				}
 
 				// public member
 			public:
-				EitherSI result;
+				EitherSVI result;
+				const std::string id;
 
 				// private member
 			private:
-				const std::string id;
 				int lineTolerance;
 				int pixelTolerance;
 				int tearIndex = -1;
+				std::vector<int> tears;
 			};
 		} // namespace pre
 	} // namespace tasks

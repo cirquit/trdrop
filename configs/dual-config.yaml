@@ -1,0 +1,82 @@
+# Configuration file for trdrop
+
+
+########################################
+# GENERAL Configuration
+
+# input files path
+input-files:
+  - skyrim.avi
+  - Sample 1 1080p FPS Drop Zelda Wii U.avi
+  
+
+# output file name (currently only name supported, not a path)
+# watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
+output-file: output-dual.avi
+
+# log file name 
+log-file:    log.csv
+
+# Pixel Difference Margin 
+# min: 0 - means that any changes in the color of two pixels means "different"
+# max: 765 - means that every possible change of color means "same"
+#
+# if the pixel difference is 0, then the computation is ~ 100% faster
+# but games like watchdogs will be falsly calculated because of the frame "afterglow"
+# a sane choice for this would be ~ 5
+pixel-difference: 0
+
+########################################
+# FPS CALCULATION Configuration
+
+# fps text location in px, starting from the left top (always relative to the referenced video)
+#
+#  (0,0) --------------- (max-x, 0)
+#    |                         |
+#    |                         |
+#  (max-y, 0) ---------- (max-x, max-y)
+fps-text-locations:
+    # x: 50, y: 50 for single video
+    # x: 500, y: 50 for double video
+    first-video:
+        x: 500
+        y: 50
+    second-video:
+        x: 500
+        y: 50
+
+# fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
+fps-precision: 1
+
+# create a shadow behind the text for improved visibility
+fps-shadow: true
+
+# update fps-text every X frames
+# min-bound: 1
+# max-bound: max-frames-count
+fps-refresh-rate:
+    first-video:
+        rate: 20
+    second-video:
+        rate: 60
+
+
+########################################
+# VIEWER Configuration
+
+# do you want to view the resulting video while processing? (true/false)
+viewer-active: true
+
+# how big is the viewer window
+viewer-size:
+    viewer-width:  960 #1920 #960
+    viewer-height: 540 #1080 #540
+
+
+########################################
+# WRITER Configuration
+
+# how big is the writer size
+writer-size:
+    writer-width:  1920
+    writer-height: 1080

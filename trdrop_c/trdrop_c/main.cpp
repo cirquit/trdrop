@@ -1,4 +1,4 @@
-#define _DEBUG 1
+#define _DEBUG 0
 
 #include <iostream>
 #include <string>
@@ -10,13 +10,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/flann/logger.h>
 
 #include "framealgorithm.h"
 #include "util.h"
 #include "utilvideo.h"
 #include "Config.h"
 #include "Either.h"
-#include "CSVFile.h"
+#include "CSVFormatter.h"
 
 #include "TaskScheduler.h"
 #include "FPSPreTask.h"
@@ -24,12 +25,16 @@
 #include "FPSInterTask.h"
 #include "ViewerTask.h"
 #include "WriterTask.h"
-// #include "LoggerTask.h"
+#include "CMDProgressTask.h"
+#include "LoggerTask.h"
+#include "PlotTask.h"
+#include "ResizeTask.h"
 
-int main(int argc, char *argv) {
 
-	trdrop::config::Config config(-1);  // opencv gives a popup for the installed codecs with configuration options
-										// it's currently not possible to configure them from code, because of the missing interface
+int main(int argc, char **argv) {
+
+	trdrop::config::Config config(-1, argc, argv);  // opencv gives a popup for the installed codecs with configuration options
+										            // it's currently not possible to configure them from code, because of the missing interface
 
 	if (!config.parsing.successful()) {
 		std::cerr << "trdrop_c terminating!\n"
@@ -48,40 +53,75 @@ int main(int argc, char *argv) {
 	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference);
 
 	// TearPreTask - TODO think about configurability
-	trdrop::tasks::pre::TearPreTask tearPreT("Tear", 20, 5);
+	std::vector<int> tears(config.inputs.size());
+	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), 20, 5);
 
 	// FPSIntermediateTask
 	std::vector<double> framerates(config.inputs.size());
-	trdrop::tasks::inter::FPSInterTask fpsInterT(framerates, config.textLocations, config.refreshRate, config.fpsPrecision, config.shadows);
+	trdrop::tasks::inter::FPSInterTask fpsInterT(
+			framerates,
+			config.textLocations,
+			config.refreshRate,
+			config.colors,
+			config.fpsText,
+			config.fpsPrecision,
+			config.shadows)
+	;
+
+	// ResizeTaks
+	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
+
+	// PlotTask
+	trdrop::tasks::post::PlotTask plotT(framerates, config.colors, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.getVideoFrameSize(0));
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, cv::VideoWriter::fourcc('X','2','6','4'), config.getBakedFPS(0), config.writerSize);
+
+	// CMDProgressTask
+	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
 
 	// LoggerTask
-	/*using tostring = trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFile>::tostring;
+	using tostring = trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter>::tostring;
 	std::vector<tostring> convertions;
-	std::ofstream out;
-	trdrop::util::CSVFile file(config.logFile, { "Frame", "   " + fpsPreT.id }, &out);
-	trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFile> loggerT(config.logFile, 1, file, convertions);
-	convertions.push_back([&]() { return trdrop::util::string_format("%5i", container.getCurrentFrameIndex()); });
-	convertions.push_back([&]() { return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerate); });
-	*/
+	trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter> loggerT(
+		convertions,
+		{ "Frameindex", "   " + fpsPreT.id }, // "      " + tearPreT.id
+		config.inputNames,
+		config.logName
+	);
+	convertions.push_back([&](int ix){
+		return trdrop::util::string_format("%10i", scheduler.getCurrentFrameIndex());
+	});
+	convertions.push_back([&](int ix){
+		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerates[ix]);
+    });
+	/*convertions.push_back([&](int ix) {
+		std::string res = tears[ix] == -1 ? " false" : ("  true - " + std::to_string(tears[ix]));
+		return res;
+	});*/
+
 
 	// PreTasks - order does not matter
-	scheduler.addPreTask(fpsPreT);
-	//scheduler.addPreTask(tearPreT);
+	scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::FPSPreTask>(fpsPreT));
+	//scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::TearPreTask>(tearPreT));
 
 	// IntermediateTasks - order does not matter
-	scheduler.addInterTask(fpsInterT);
-	//container.addInterTask(loggerT);
+	scheduler.addInterTask(std::make_shared<trdrop::tasks::inter::FPSInterTask>(fpsInterT));
+	scheduler.addInterTask(std::make_shared<trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter>>(loggerT));
 
 	// PostTask - order matters
-	if (config.viewerActive) scheduler.addPostTask(viewerT);
-	scheduler.addPostTask(writerT);
+	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::ResizeTask>(resizeT));
+	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::PlotTask>(plotT));
+	if (config.viewerActive) scheduler.addPostTask(std::make_shared<trdrop::tasks::post::ViewerTask>(viewerT));
+	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::WriterTask>(writerT));
+
+#if !_DEBUG
+	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::CMDProgressTask>(cmdProgressT));
+#endif
 
 	while (scheduler.next()) {
 
@@ -95,13 +135,22 @@ int main(int argc, char *argv) {
 		if (fpsPreT.result.successful()) {
 			framerates = fpsPreT.result.getSuccess();
 #if _DEBUG
-			std::cout << "DEBUG: Main loop: got framerates: " << framerates[0] << ", " << framerates[1] << '\n';
+			std::cout << "DEBUG: Main loop: got framerates: ";
+			std::for_each(framerates.begin(), framerates.end(), [&](double framerates) {
+				std::cout << framerates << ", ";
+			});
+			std::cout << '\n';
 #endif
 		}
 
 		if (tearPreT.result.successful()) {
+			// tears = tearPreT.result.getSuccess();
 #if _DEBUG
-			std::cout << "TearTask: " << tearPreT.result.getSuccess() << '\n';
+			std::cout << "DEBUG: Main loop: got tears: ";
+			std::for_each(tears.begin(), tears.end(), [&](int tear) {
+				std::cout << tear << ", ";
+			});
+			std::cout << '\n';
 #endif
 		}
 
