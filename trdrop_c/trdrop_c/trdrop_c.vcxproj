@@ -188,7 +188,7 @@
   <ItemGroup>
     <ClInclude Include="CMDProgressTask.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="CSVFile.h" />
+    <ClInclude Include="CSVFormatter.h" />
     <ClInclude Include="FPSInterTask.h" />
     <ClInclude Include="FPSPreTask.h" />
     <ClInclude Include="framealgorithm.h" />

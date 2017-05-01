@@ -62,6 +62,7 @@ namespace trdrop {
 				
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
+					inputNames.push_back(it->as<std::string>());
 				});
 
 				fromTag("output-file", yamlConfig, errors, [&](std::string tag) {
@@ -69,7 +70,7 @@ namespace trdrop {
 				});
 
 				fromTag("log-file", yamlConfig, errors, [&](std::string tag) {
-					logFile = yamlConfig[tag].as<std::string>();
+					logName = yamlConfig[tag].as<std::string>();
 				});
 
 				
@@ -90,6 +91,9 @@ namespace trdrop {
 
 				fromSequenceTag("fps-text", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					fpsText.push_back(it->second["text"].as<std::string>());
+#if _DEBUG
+					std::cout << "DEBUG: Config - fps-text - got \"" << fpsText.back() << "\"\n";
+#endif
 				});
 
 				fromTag("fps-precision", yamlConfig, errors, [&](std::string tag) {
@@ -228,7 +232,7 @@ namespace trdrop {
 
 			cv::Size writerSize;
 
-			std::string								              logFile;
+			std::string								              logName;
 			trdrop::Either<std::vector<std::string>, std::string> parsing;
 
 		// private member

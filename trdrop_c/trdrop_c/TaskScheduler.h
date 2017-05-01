@@ -5,6 +5,7 @@
 #include <functional>
 #include <algorithm>
 #include <future>
+#include <memory>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -36,16 +37,16 @@ namespace trdrop {
 				, cur(inputs.size())
 			{ }
 
-			void addPreTask(trdrop::tasks::pretask task) {
-				preTasks.push_back(task);
+			void addPreTask(std::shared_ptr<trdrop::tasks::pretask> taskptr) {
+				preTasks.push_back(taskptr);
 			}
 
-			void addInterTask(trdrop::tasks::intertask task) {
-				interTasks.push_back(task);
+			void addInterTask(std::shared_ptr<trdrop::tasks::intertask> taskptr) {
+				interTasks.push_back(taskptr);
 			}
 
-			void addPostTask(trdrop::tasks::posttask task) {
-				postTasks.push_back(task);
+			void addPostTask(std::shared_ptr<trdrop::tasks::posttask> taskptr) {
+				postTasks.push_back(taskptr);
 			}
 			
 			void merge(std::vector<cv::Mat> & frames, cv::Mat & result) {
@@ -100,8 +101,8 @@ namespace trdrop {
 					
 					// pretasks - parallel
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
-						std::for_each(preTasks.begin(), preTasks.end(), [&](trdrop::tasks::pretask f) {
-							preTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], cur[vix], currentFrameIndex, vix)));
+						std::for_each(preTasks.begin(), preTasks.end(), [&](std::shared_ptr<trdrop::tasks::pretask> f) {
+							preTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], cur[vix], currentFrameIndex, vix)));
 						});
 					}); 
 
@@ -129,13 +130,13 @@ namespace trdrop {
 						
 						interTasksFinished.push_back(std::move(std::async(std::launch::async, videoTask)));
 						*/
-						std::for_each(interTasks.begin(), interTasks.end(), [&](trdrop::tasks::intertask f) {
-							interTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], currentFrameIndex, vix)));
+						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
+							interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], currentFrameIndex, vix)));
 							//f(prev[vix], currentFrameIndex, vix);
 						}); 
 					});
 #if _DEBUG
-					std::cout << "DEBUG: TaskScheduler - launched " << interTasksFinished.size() * interTasks.size() << " intermediate tasks\n";
+					std::cout << "DEBUG: TaskScheduler - launched " << interTasksFinished.size() << " intermediate tasks\n";
 #endif
 					// intermediate tasks - waiting
 					std::for_each(interTasksFinished.begin(), interTasksFinished.end(), [](std::future<void> & future) {
@@ -152,7 +153,7 @@ namespace trdrop {
 					std::cout << "DEBUG: TaskScheduler - merged frames\n";
 #endif
 					// post tasks - sequential
-					std::for_each(postTasks.begin(), postTasks.end(), [&](trdrop::tasks::posttask f) { f(merged, currentFrameIndex); });
+					std::for_each(postTasks.begin(), postTasks.end(), [&](std::shared_ptr<trdrop::tasks::posttask> f) { (*f)(merged, currentFrameIndex); });
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all posttasks\n";
 #endif
@@ -170,13 +171,13 @@ namespace trdrop {
 			std::vector<cv::VideoCapture> & inputs;
 			bool readSuccessful = true;
 
-			std::vector<trdrop::tasks::pretask> preTasks;
+			std::vector<std::shared_ptr<trdrop::tasks::pretask>> preTasks;
 			std::vector<std::future<void>>		preTasksFinished;
 			
-			std::vector<trdrop::tasks::intertask> interTasks;
+			std::vector<std::shared_ptr<trdrop::tasks::intertask>> interTasks;
 			std::vector<std::future<void>>		  interTasksFinished;
 			
-			std::vector<trdrop::tasks::posttask> postTasks;
+			std::vector<std::shared_ptr<trdrop::tasks::posttask>> postTasks;
 			
 			std::vector<cv::Mat> cur;
 			std::vector<cv::Mat> prev;

@@ -143,7 +143,7 @@ namespace trdrop {
 
 					// determine the opacity of the foregrond pixel, using its fourth (alpha) channel.
 					double opacity =
-						((double)foreground.data[fY * foreground.step + fX * foreground.channels() + 3])
+						(static_cast<double>(foreground.data[fY * foreground.step + fX * foreground.channels() + 3]))
 
 						/ 255.;
 
@@ -153,12 +153,12 @@ namespace trdrop {
 					// but only if opacity > 0.
 					for (int c = 0; opacity > 0 && c < output.channels(); ++c)
 					{
-						unsigned char foregroundPx =
-							foreground.data[fY * foreground.step + fX * foreground.channels() + c];
-						unsigned char backgroundPx =
-							background.data[y * background.step + x * background.channels() + c];
-						output.data[y*output.step + output.channels()*x + c] =
-							backgroundPx * (1. - opacity) + foregroundPx * opacity;
+						unsigned char foregroundPx = static_cast<unsigned char>(
+							foreground.data[fY * foreground.step + fX * foreground.channels() + c]);
+						unsigned char backgroundPx = static_cast<unsigned char>(
+							background.data[y * background.step + x * background.channels() + c]);
+						output.data[y*output.step + output.channels()*x + c] = static_cast<unsigned char>(
+							backgroundPx * (1. - opacity) + foregroundPx * opacity);
 					}
 				}
 			}
