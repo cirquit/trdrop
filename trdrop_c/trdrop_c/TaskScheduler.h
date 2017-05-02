@@ -120,19 +120,18 @@ namespace trdrop {
 #endif
 					// intermediate tasks - parallel of different videos
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+						
 						/*
 						std::function<void()> videoTask = [&]() {
-							std::for_each(interTasks.begin(), interTasks.end(), [&](trdrop::tasks::intertask f) {
-								// interTasksFinished.push_back(std::move(std::async(std::launch::async, f, prev[vix], vix)));
-								f(prev[vix], currentFrameIndex, vix);
+							std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
+								(*f)(prev[vix], currentFrameIndex, vix);
 							});
-						};
+						}; */
 						
-						interTasksFinished.push_back(std::move(std::async(std::launch::async, videoTask)));
-						*/
+						// interTasksFinished.push_back(std::move(std::async(std::launch::async, videoTask)));
+						
 						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
 							interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], currentFrameIndex, vix)));
-							//f(prev[vix], currentFrameIndex, vix);
 						}); 
 					});
 #if _DEBUG

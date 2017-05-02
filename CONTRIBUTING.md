@@ -11,6 +11,16 @@ I'm using Visual Studio 2017 Enterprise Edition on Win8.1.
   * [My steps, because the ones in the instruction are not enough](open-cv.md)
 
 * [Yaml-CPP](https://github.com/jbeder/yaml-cpp)
-  * installation since VS 2015 bugs out because of different stl types (**??**), so I had no other choice that copying the whole source as `.cpp` files to the project. Hoping that [#451](https://github.com/jbeder/yaml-cpp/issues/461) will be fixed someday
-  * currently at [#0fdb1b9](https://github.com/jbeder/yaml-cpp/commit/11607eb5bf1258641d80f7051e7cf09e317b4746)
-  * still need to build it with cmake + VS2017 with admin rights and reference it in `VC++ -> Include Dirs` and `Libraries` to the generated files 
+  * `git clone https://github.com/jbeder/yaml-cpp`
+  * `cd yaml-cpp`
+  * `mkdir build`
+  * `cd build`
+  * `cmake -G "Visual Studio 15 2017 Win64" -DBUILD_SHARED_LIBS=OFF ..`
+  * Open the `YAML_CPP.sln` file located in the build folder with VS2017
+  * Build the project `ALL_BUILD`
+
+  * if you want to link against this library, go to your project:
+    * `Properties -> VC++ Directories -> Include Directories -> Add YOUR-PATH-TO-REPOSITORY\yaml-cpp\include`
+    * `Properties -> VC++ Directories -> Library Directories -> Add YOUR-PATH-TO-REPOSITORY\yaml-cpp\build\Debug`
+    * `Properties -> Linker -> Input -> Additional Dependencies -> Add libyaml-cppmdd.lib`
+    * use header `<yaml-cpp/yaml.h>`

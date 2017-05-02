@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "yaml-cpp/yaml-cpp-header/yaml.h"
+#include <yaml-cpp/yaml.h>
 #include "Either.h"	
 
 

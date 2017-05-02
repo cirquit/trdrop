@@ -1,4 +1,14 @@
-#define _DEBUG 0
+#define _DEBUG 1
+#define DEBUG(context, x) do { \
+	if (_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ": " << x << std::endl; } \
+ while (0)
+
+#define DEBUGV(context, vector) do { \
+	if (_DEBUG) { \
+		int i = 0; \
+		std::cerr << "DEBUG: " << context << " - " << #vector << ": \n"; \
+		for (auto & v : vector) { std::cerr << "         " << std::string(" ", sizeof context) << #vector << '[' << i++ << "]: " << v << '\n'; } \
+	} } while (0)
 
 #include <iostream>
 #include <string>
@@ -6,6 +16,7 @@
 #include <time.h>
 #include <vector>
 #include <functional>
+#include <cstdlib>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -127,34 +138,17 @@ int main(int argc, char **argv) {
 
 		if (trdrop::util::video::pushedKey(27)) return 0; // ESC -> terminate
 
-#if _DEBUG
-		std::cout << "DEBUG: Main loop: fpsPreT.result.success(): " << fpsPreT.result.successful() << '\n';
-#endif
-
 		// glue FPS source -> FPS consumer
 		if (fpsPreT.result.successful()) {
 			framerates = fpsPreT.result.getSuccess();
-#if _DEBUG
-			std::cout << "DEBUG: Main loop: got framerates: ";
-			std::for_each(framerates.begin(), framerates.end(), [&](double framerates) {
-				std::cout << framerates << ", ";
-			});
-			std::cout << '\n';
-#endif
+			DEBUGV("Main loop: Framerates", framerates);
 		}
 
 		if (tearPreT.result.successful()) {
 			// tears = tearPreT.result.getSuccess();
-#if _DEBUG
-			std::cout << "DEBUG: Main loop: got tears: ";
-			std::for_each(tears.begin(), tears.end(), [&](int tear) {
-				std::cout << tear << ", ";
-			});
-			std::cout << '\n';
-#endif
+			DEBUGV("Main loop: Tears", tears);
 		}
 
 	}
-
 	return EXIT_SUCCESS;
 } 
