@@ -87,7 +87,7 @@ namespace trdrop {
 					}
 				} else {
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
-						cur[vix].copyTo(prev[vix]);  // TODO swap pointers
+						cur[vix].copyTo(prev[vix]);  // no need to swap pointers, cv::Mat uses smart pointers by itself
 						readSuccessful &= input.read(cur[vix]);
 					});
 				}
