@@ -6,15 +6,13 @@
 
 # input files path
 input-files:
-  - skyrim.avi
   - Sample 1 1080p FPS Drop Zelda Wii U.avi
-  
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
-output-file: output-dual.avi
+output-file: output-single.avi
 
-# log file name 
+# log file name (the name gets splitted on the dot and the corresponding filename is inserted e.g log-my-video-filename.csv)
 log-file:    log.csv
 
 # Pixel Difference Margin 
@@ -25,6 +23,17 @@ log-file:    log.csv
 # but games like watchdogs will be falsly calculated because of the frame "afterglow"
 # a sane choice for this would be ~ 5
 pixel-difference: 0
+
+# defines the color of the text field and the plot color
+colors:
+    first-video:
+        r: 93
+        g: 194
+        b: 30
+#    second-video:
+#        r: 0
+#        g: 55
+#        b: 145
 
 ########################################
 # FPS CALCULATION Configuration
@@ -39,11 +48,18 @@ fps-text-locations:
     # x: 50, y: 50 for single video
     # x: 500, y: 50 for double video
     first-video:
-        x: 500
+        x: 50
         y: 50
-    second-video:
-        x: 500
-        y: 50
+#    second-video:
+#        x: 500
+#        y: 50
+
+# text which is placed before the number (currently always white)
+fps-text:
+    first-video:
+        text: "FPS: "
+#    second-video:
+#        text: "FPS:"
 
 # fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
 fps-precision: 1
@@ -57,8 +73,8 @@ fps-shadow: true
 fps-refresh-rate:
     first-video:
         rate: 20
-    second-video:
-        rate: 60
+#   second-video:
+#        rate: 60
 
 
 ########################################

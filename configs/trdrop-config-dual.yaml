@@ -6,23 +6,36 @@
 
 # input files path
 input-files:
-  - skyrim.avi
+  - Sample 2 1080p FPS Stable Skyrim XB1.avi
+  - Sample 1 1080p FPS Drop Zelda Wii U.avi
+  
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
-output-file: output-single.avi
+output-file: output-dual.avi
 
-# log file name 
+# log file name (the name gets splitted on the dot and the corresponding filename is inserted e.g log-my-video-filename.csv)
 log-file:    log.csv
 
 # Pixel Difference Margin 
 # min: 0 - means that any changes in the color of two pixels means "different"
 # max: 765 - means that every possible change of color means "same"
 #
-# if the pixel difference is 0, then the computation is ~ 100% faster
+# if the pixel difference is 0, then the computation is ~ 30x faster
 # but games like watchdogs will be falsly calculated because of the frame "afterglow"
 # a sane choice for this would be ~ 5
 pixel-difference: 0
+
+# defines the color of the text field and the plot color
+colors:
+    first-video:
+        r: 0
+        g: 55
+        b: 145
+    second-video:
+        r: 0
+        g: 154
+        b: 199
 
 ########################################
 # FPS CALCULATION Configuration
@@ -37,11 +50,18 @@ fps-text-locations:
     # x: 50, y: 50 for single video
     # x: 500, y: 50 for double video
     first-video:
-        x: 50
+        x: 500
         y: 50
-#    second-video:
-#        x: 500
-#        y: 50
+    second-video:
+        x: 500
+        y: 50
+
+# text which is placed before the number (currently always white)
+fps-text:
+    first-video:
+        text: "PS4: "
+    second-video:
+        text: "Wii U: "
 
 # fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
 fps-precision: 1
@@ -55,8 +75,8 @@ fps-shadow: true
 fps-refresh-rate:
     first-video:
         rate: 20
-#   second-video:
-#        rate: 60
+    second-video:
+        rate: 20
 
 
 ########################################
@@ -67,8 +87,8 @@ viewer-active: true
 
 # how big is the viewer window
 viewer-size:
-    viewer-width:  960 #1920 #960
-    viewer-height: 540 #1080 #540
+    viewer-width:  1920 #960
+    viewer-height: 1080 #540
 
 
 ########################################
