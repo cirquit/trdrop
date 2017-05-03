@@ -95,7 +95,7 @@ namespace trdrop {
 					// separation lines
 					for (int i = 1; i < 6; ++i) {
 						int lineY = (60 - 10 * i*height / 60) + frameSize.height - 60 - margin;
-						cv::line(res, cv::Point(x, lineY), cv::Point(x + width, lineY), graphColor);
+						cv::line(res, cv::Point(x, lineY-4), cv::Point(x + width, lineY-4), graphColor);
 						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(22, 23));
 						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - 28, lineY-9));
 					}
@@ -113,14 +113,17 @@ namespace trdrop {
 					
 					cv::Point lastPoint(margin + 6, frameSize.height - margin - 4);
 					std::vector<cv::Point> lastPoints(framerates.size(), lastPoint);
+
 					
 					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
 						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned vix, std::deque<double> fpsDeque) {
 							int currentFps = static_cast<int>(fpsDeque[i]);
 							int y = (60 - currentFps*height / 60) + frameSize.height - 60 - margin - 4;
 							cv::Point currentPoint(pointDistance + 6, y);
+							if (i == 0) lastPoints[vix] = currentPoint;
 							cv::line(res, lastPoints[vix], currentPoint, colors[vix], 2, CV_AA);
 							lastPoints[vix] = currentPoint;
+
 						});
 						pointDistance += pointDistanceIncrement;
 					});
