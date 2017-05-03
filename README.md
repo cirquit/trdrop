@@ -15,6 +15,7 @@ Current releases are found [here](https://github.com/cirquit/trdrop/releases). (
 ## Features
 
 * fps feature extraction
+* support for up to two videos
 * csv logger
 * plot visualization
 * yaml-configuration
