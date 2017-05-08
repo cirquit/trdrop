@@ -33,17 +33,25 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				PlotTask(std::vector<double> & framerates, std::vector<cv::Scalar> colors, cv::Size frameSize)
+				PlotTask(std::vector<double> & framerates, std::vector<double> & tears, std::vector<cv::Scalar> colors, cv::Size frameSize)
 					: framerates(framerates)
+					, tears(tears)
 					, colors(colors)
 					, fpsContainer(framerates.size())
+					, tearContainer(tears.size())
 					, frameSize(frameSize)
+					, height(frameSize.height / 4)
+					, width(frameSize.width - 2 * margin)
 					, posttask(std::bind(&PlotTask::process
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2))
 				{
 					std::for_each(fpsContainer.begin(), fpsContainer.end(), [&](std::deque<double> & dd) {
+						dd.insert(dd.end(), plotWindow(), 0.0);
+					});
+
+					std::for_each(tearContainer.begin(), tearContainer.end(), [&](std::deque<double> & dd) {
 						dd.insert(dd.end(), plotWindow(), 0.0);
 					});
 				}
@@ -54,13 +62,19 @@ namespace trdrop {
 					int plotWindow_ = plotWindow();
 					
 					// remove oldest values
-				    util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
+					util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
 						dd.push_back(framerates[i]);
+						dd.pop_front();
+					});
+
+					util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
+						dd.push_back(tears[i]);
 						dd.pop_front();
 					});
 
 					drawGrid(res);
 					drawLines(res);
+					drawTears(res);
 				}
 
 				// public member
@@ -68,10 +82,6 @@ namespace trdrop {
 
 				std::function<int()> plotWindow = [&]() { return (frameSize.width - 2 * margin) / 10;  };
 				std::function<void(cv::Mat & res)> drawGrid = [&](cv::Mat & res) {
-					
-					// graph size
-					int height = frameSize.height / 4;
-					int width = frameSize.width - 2 * margin;
 					
 					// graph starting points
 					int x = margin;
@@ -104,17 +114,13 @@ namespace trdrop {
 
 				std::function<void(cv::Mat & res)> drawLines = [&](cv::Mat & res) {
 
-					// graph size
-					int height = frameSize.height / 4;
-					int width = frameSize.width - 2 * margin;
-
 					int pointDistance = margin;
 					int pointDistanceIncrement = width / plotWindow();
-					
+
 					cv::Point lastPoint(margin + 6, frameSize.height - margin - 4);
 					std::vector<cv::Point> lastPoints(framerates.size(), lastPoint);
 
-					
+
 					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
 						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned vix, std::deque<double> fpsDeque) {
 							int currentFps = static_cast<int>(fpsDeque[i]);
@@ -128,17 +134,40 @@ namespace trdrop {
 						pointDistance += pointDistanceIncrement;
 					});
 				};
+
+				std::function<void(cv::Mat & res)> drawTears = [&](cv::Mat & res) {
+
+					int pointDistance = margin;
+					int pointDistanceIncrement = width / plotWindow();
+					int tearHeight = height / 3;
+
+					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](unsigned i, double tear) {
+						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned vix, std::deque<double> tearDeque) {
+							int tear = static_cast<int>(tearDeque[i]);
+							if (tear == 1) {
+								cv::Point basePoint(pointDistance + 6, frameSize.height - margin);
+								cv::Point topPoint(pointDistance + 6, frameSize.height - margin - tearHeight);
+								cv::line(res, basePoint, topPoint, colors[vix], 2, CV_AA);
+							}
+						});
+						pointDistance += pointDistanceIncrement;
+					});
+				};
 					
 
 				// private member
 			private:
 				std::vector<double> & framerates;
+				std::vector<double> & tears;
 				std::vector<std::deque<double>> fpsContainer;
+				std::vector<std::deque<double>> tearContainer;
 
 				std::vector<cv::Scalar> colors;
 				const cv::Scalar graphColor = cv::Scalar(255, 255, 255);
 				const int margin = 30; // px
 				const cv::Size frameSize;
+				const int height; 
+				const int width;
 				
 				cv::Mat fps_sprite    = cv::imread("trdrop_sprites/fps_sprite.png", -1);
 				cv::Mat ten_sprite    = cv::imread("trdrop_sprites/10_sprite.png",  -1);
