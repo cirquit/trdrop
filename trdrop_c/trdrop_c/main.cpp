@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
 	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference);
 
 	// TearPreTask - TODO think about configurability
-	std::vector<int> tears(config.inputs.size());
-	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), 20, 5);
+	std::vector<double> tears(config.inputs.size());
+	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), 5);
 
 	// FPSIntermediateTask
 	std::vector<double> framerates(config.inputs.size());
@@ -83,14 +83,14 @@ int main(int argc, char **argv) {
 	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
 
 	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(framerates, config.colors, config.writerSize);
+	trdrop::tasks::post::PlotTask plotT(framerates, tears, config.colors, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, cv::VideoWriter::fourcc('X','2','6','4'), config.getBakedFPS(0), config.writerSize);
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize);
 
 	// CMDProgressTask
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
 	// PreTasks - order does not matter
 	scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::FPSPreTask>(fpsPreT));
-	//scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::TearPreTask>(tearPreT));
+	scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::TearPreTask>(tearPreT));
 
 	// IntermediateTasks - order does not matter
 	scheduler.addInterTask(std::make_shared<trdrop::tasks::inter::FPSInterTask>(fpsInterT));
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 		}
 
 		if (tearPreT.result.successful()) {
-			// tears = tearPreT.result.getSuccess();
+			tears = tearPreT.result.getSuccess();
 			DEBUGV("Main loop: Tears", tears);
 		}
 

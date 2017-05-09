@@ -147,7 +147,6 @@ namespace trdrop {
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks\n";
 #endif
-					// merging
 					merge(prev, merged);
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - merged frames\n";

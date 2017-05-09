@@ -129,7 +129,6 @@ namespace trdrop {
 							if (i == 0) lastPoints[vix] = currentPoint;
 							cv::line(res, lastPoints[vix], currentPoint, colors[vix], 2, CV_AA);
 							lastPoints[vix] = currentPoint;
-
 						});
 						pointDistance += pointDistanceIncrement;
 					});
@@ -143,8 +142,7 @@ namespace trdrop {
 
 					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](unsigned i, double tear) {
 						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned vix, std::deque<double> tearDeque) {
-							int tear = static_cast<int>(tearDeque[i]);
-							if (tear == 1) {
+							if (tearDeque[i] == 1) {
 								cv::Point basePoint(pointDistance + 6, frameSize.height - margin);
 								cv::Point topPoint(pointDistance + 6, frameSize.height - margin - tearHeight);
 								cv::line(res, basePoint, topPoint, colors[vix], 2, CV_AA);
@@ -160,7 +158,7 @@ namespace trdrop {
 				std::vector<double> & framerates;
 				std::vector<double> & tears;
 				std::vector<std::deque<double>> fpsContainer;
-				std::vector<std::deque<double>> tearContainer;
+				std::vector<std::deque<double>>    tearContainer;
 
 				std::vector<cv::Scalar> colors;
 				const cv::Scalar graphColor = cv::Scalar(255, 255, 255);
@@ -182,23 +180,3 @@ namespace trdrop {
 } // namespace trdrop
 
 #endif // !TDROP_TASKS_POST_PLOT_H
-
-//		int pointDistance = cornerDistance;
-//		int pointDistanceIncrement = width / plotWindow;
-//
-//		cv::Point lastPoint(cornerDistance + 6, frameSize.height - cornerDistance - 4);
-//		std::vector<cv::Point> lastPoints(fpsValues.size(), lastPoint);
-//
-//		for (int i = 0; i < fpsValues[0].size(); ++i) {
-//			for (int vix = 0; vix < fpsValues.size(); ++vix) {
-//				int currentFps = static_cast<int>(fpsValues[vix][i]);
-//				int y = (60 - currentFps*height / 60) + frameSize.height - 60 - cornerDistance - 4;
-//				cv::Point currentPoint(pointDistance + 6, y);
-//				cv::line(display, lastPoints[vix], currentPoint, plotColors[vix], 2, CV_AA);
-//				lastPoints[vix] = currentPoint;
-//			}
-//			pointDistance += pointDistanceIncrement;
-//		}
-//	}
-//
-//}
