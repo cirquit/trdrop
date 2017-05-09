@@ -136,16 +136,19 @@ namespace trdrop {
 
 				std::function<void(cv::Mat & res)> drawTears = [&](cv::Mat & res) {
 
+					cv::Scalar tearColor(200,0,0);
 					int pointDistance = margin;
 					int pointDistanceIncrement = width / plotWindow();
-					int tearHeight = height / 3;
+					int tearHeight = height / tearContainer.size(); // Fit all all videos into the graph
 
 					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](unsigned i, double tear) {
 						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned vix, std::deque<double> tearDeque) {
-							if (tearDeque[i] == 1) {
-								cv::Point basePoint(pointDistance + 6, frameSize.height - margin);
-								cv::Point topPoint(pointDistance + 6, frameSize.height - margin - tearHeight);
-								cv::line(res, basePoint, topPoint, colors[vix], 2, CV_AA);
+							if (tearDeque[i] != 0) {
+								cv::Point basePoint(pointDistance + 6, frameSize.height - margin - 4);
+								cv::Point topPoint(pointDistance + 6, frameSize.height - margin - tearHeight + vix * tearHeight);
+								cv::Point midPoint(pointDistance + 6, frameSize.height - margin - tearDeque[i] * tearHeight);
+								cv::line(res, basePoint, midPoint, tearColor, 2, CV_AA);
+								cv::line(res, midPoint, topPoint, colors[vix], 2, CV_AA);
 							}
 						});
 						pointDistance += pointDistanceIncrement;

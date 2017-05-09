@@ -62,7 +62,7 @@ namespace trdrop {
 					{
 						for (size_t j = 0; j < diffMat.cols; ++j)
 						{
-							badPixel[vix] += diffMat.at<uchar>(i,j) <= pixelTolerance ? 0 : 1;
+							badPixel[vix] += diffMat.at<uchar>(i,j) <= 5 ? 0 : 1;
 						}
 					}
 

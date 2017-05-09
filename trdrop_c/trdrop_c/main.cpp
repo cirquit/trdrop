@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize);
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, cv::VideoWriter::fourcc('X','2','6','4'), config.getBakedFPS(0), config.writerSize);
 
 	// CMDProgressTask
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
