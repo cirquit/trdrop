@@ -30,6 +30,9 @@
     <Filter Include="Header Files\tasks\inter">
       <UniqueIdentifier>{76b752da-1156-4448-95c8-f08d654938a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tasks\data">
+      <UniqueIdentifier>{9c71e655-c3bc-4076-9846-e1ca8d260268}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -90,6 +93,9 @@
     </ClInclude>
     <ClInclude Include="CSVFormatter.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="fpsdata.h">
+      <Filter>Header Files\tasks\data</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

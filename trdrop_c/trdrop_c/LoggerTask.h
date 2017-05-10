@@ -83,7 +83,7 @@ namespace trdrop {
 
 						std::string formatted(formatter.format(values.begin(), values.end()));
 #if _DEBUG
-						std::cout << "DEBUG: LoggerTask - logging: " << formatted << '\n';
+					//	std::cout << "DEBUG: LoggerTask - logging: " << formatted << '\n';
 #endif 
 						streamptr -> write(formatted.c_str(), formatted.size());
 						values.clear();

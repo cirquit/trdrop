@@ -85,6 +85,10 @@ namespace trdrop {
 					pixelDifference = yamlConfig[tag].as<int>();
 				});
 
+				fromTag("line-difference", yamlConfig, errors, [&](std::string tag) {
+					lineDifference = yamlConfig[tag].as<int>();
+				});
+
 				fromSequenceTag("fps-text-locations", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					textLocations.push_back(cv::Size(it -> second["x"].as<int>(), it -> second["y"].as<int>()));
 				});
@@ -104,6 +108,14 @@ namespace trdrop {
 					shadows = yamlConfig[tag].as<bool>();
 				});
 				
+				fromSequenceTag("fps-shadow-colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					int r = it->second["r"].as<int>();
+					int g = it->second["g"].as<int>();
+					int b = it->second["b"].as<int>();
+					shadowColors.push_back(cv::Scalar(b, g, r));
+				});
+
+
 				fromSequenceTag("fps-refresh-rate", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					refreshRate.push_back(it->second["rate"].as<int>());
 				});
@@ -219,6 +231,7 @@ namespace trdrop {
 			std::string outputFile;
 
 			int			pixelDifference;
+			int         lineDifference;
 
 			std::vector<cv::Point>   textLocations;
 			std::vector<std::string> fpsText;
@@ -226,6 +239,7 @@ namespace trdrop {
 			std::vector<int>	     refreshRate;
 			int				         fpsPrecision;
 			bool				     shadows;
+			std::vector<cv::Scalar>  shadowColors;
 
 			cv::Size viewerSize;
 			bool	 viewerActive;

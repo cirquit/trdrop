@@ -41,6 +41,7 @@
 #include "PlotTask.h"
 #include "ResizeTask.h"
 
+#include "fpsdata.h"
 
 int main(int argc, char **argv) {
 
@@ -59,31 +60,31 @@ int main(int argc, char **argv) {
 
 	// create container
 	trdrop::tasks::TaskScheduler scheduler(config.inputs);
-	
+
 	// FPSPreTask
 	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference);
 
-	// TearPreTask - TODO think about configurability
+	// TearPreTask
 	std::vector<double> tears(config.inputs.size());
-	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), 5);
+	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), config.pixelDifference, config.lineDifference);
 
 	// FPSIntermediateTask
-	std::vector<double> framerates(config.inputs.size());
+	trdrop::fps_data    fpsTaskData(config.inputs.size());
 	trdrop::tasks::inter::FPSInterTask fpsInterT(
-			framerates,
+			fpsTaskData,
 			config.textLocations,
 			config.refreshRate,
 			config.colors,
+			config.shadowColors,
 			config.fpsText,
 			config.fpsPrecision,
 			config.shadows)
 	;
-
 	// ResizeTaks
 	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
 
 	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(framerates, tears, config.colors, config.writerSize);
+	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tears, config.colors, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
@@ -100,7 +101,7 @@ int main(int argc, char **argv) {
 	std::vector<tostring> convertions;
 	trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter> loggerT(
 		convertions,
-		{ "Frameindex", "   " + fpsPreT.id }, // "      " + tearPreT.id
+		{ "Frameindex", "   " + fpsPreT.id, "        " + tearPreT.id },
 		config.inputNames,
 		config.logName
 	);
@@ -108,12 +109,11 @@ int main(int argc, char **argv) {
 		return trdrop::util::string_format("%10i", scheduler.getCurrentFrameIndex());
 	});
 	convertions.push_back([&](int ix){
-		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", framerates[ix]);
+		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", fpsTaskData.fps[ix]);
     });
-	/*convertions.push_back([&](int ix) {
-		std::string res = tears[ix] == -1 ? " false" : ("  true - " + std::to_string(tears[ix]));
-		return res;
-	});*/
+	convertions.push_back([&](int ix) {
+		return tears[ix] == 0 || fpsTaskData.duplicateFrame[ix] ? "       false" : std::to_string(static_cast<int>(tears[ix] * 100)) + "%" + "- true";
+	});
 
 
 	// PreTasks - order does not matter
@@ -140,8 +140,8 @@ int main(int argc, char **argv) {
 
 		// glue FPS source -> FPS consumer
 		if (fpsPreT.result.successful()) {
-			framerates = fpsPreT.result.getSuccess();
-			DEBUGV("Main loop: Framerates", framerates);
+			fpsTaskData = fpsPreT.result.getSuccess();
+			DEBUG("Main loop: FpsTaskData", fpsTaskData.to_string());
 		}
 
 		if (tearPreT.result.successful()) {

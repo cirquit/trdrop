@@ -33,11 +33,11 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				PlotTask(std::vector<double> & framerates, std::vector<double> & tears, std::vector<cv::Scalar> colors, cv::Size frameSize)
-					: framerates(framerates)
+				PlotTask(trdrop::fps_data & fpsTaskData, std::vector<double> & tears, std::vector<cv::Scalar> colors, cv::Size frameSize)
+					: fpsTaskData(fpsTaskData)
 					, tears(tears)
 					, colors(colors)
-					, fpsContainer(framerates.size())
+					, fpsContainer(fpsTaskData.videoCount)
 					, tearContainer(tears.size())
 					, frameSize(frameSize)
 					, height(frameSize.height / 4)
@@ -63,12 +63,13 @@ namespace trdrop {
 					
 					// remove oldest values
 					util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
-						dd.push_back(framerates[i]);
+						dd.push_back(fpsTaskData.fps[i]);
 						dd.pop_front();
 					});
 
 					util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
-						dd.push_back(tears[i]);
+						double tear = fpsTaskData.duplicateFrame[i] ? 0 : tears[i];
+						dd.push_back(tear);
 						dd.pop_front();
 					});
 
@@ -118,7 +119,7 @@ namespace trdrop {
 					int pointDistanceIncrement = width / plotWindow();
 
 					cv::Point lastPoint(margin + 6, frameSize.height - margin - 4);
-					std::vector<cv::Point> lastPoints(framerates.size(), lastPoint);
+					std::vector<cv::Point> lastPoints(fpsTaskData.videoCount, lastPoint);
 
 
 					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
@@ -136,7 +137,7 @@ namespace trdrop {
 
 				std::function<void(cv::Mat & res)> drawTears = [&](cv::Mat & res) {
 
-					cv::Scalar tearColor(200,0,0);
+					cv::Scalar tearColor(0,0,200);
 					int pointDistance = margin;
 					int pointDistanceIncrement = width / plotWindow();
 					int tearHeight = height / tearContainer.size(); // Fit all all videos into the graph
@@ -158,10 +159,10 @@ namespace trdrop {
 
 				// private member
 			private:
-				std::vector<double> & framerates;
+				trdrop::fps_data    & fpsTaskData;
 				std::vector<double> & tears;
 				std::vector<std::deque<double>> fpsContainer;
-				std::vector<std::deque<double>>    tearContainer;
+				std::vector<std::deque<double>> tearContainer;
 
 				std::vector<cv::Scalar> colors;
 				const cv::Scalar graphColor = cv::Scalar(255, 255, 255);

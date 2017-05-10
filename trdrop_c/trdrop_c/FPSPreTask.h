@@ -9,6 +9,7 @@
 
 #include "Tasks.h"
 #include "Either.h"
+#include "fpsdata.h"
 
 namespace trdrop {
 	namespace tasks {
@@ -23,8 +24,8 @@ namespace trdrop {
 
 				// types
 			private:
-				using EitherSD = Either<std::string, std::vector<double>>;
-				using RightD = Right<std::vector<double>>;
+				using EitherSD = Either<std::string, trdrop::fps_data>;
+				using RightD = Right<trdrop::fps_data>;
 				using LeftS = Left<std::string>;
 
 				// default member
@@ -40,8 +41,8 @@ namespace trdrop {
 			public:
 				FPSPreTask(std::string id, size_t videoCount, int pixelDifference)
 					: id(id)							// id used for the csv header
-					, fps(videoCount)					// allocate enough memory for all videos
 					, isDifferentFrame(videoCount)		// allocate enough memory for all videos
+					, fpsTaskData(videoCount)           // allocate enough memory for all videos
 					, pixelDifference(pixelDifference)  
 					, pretask(std::bind(&FPSPreTask::process
 						, this
@@ -71,20 +72,22 @@ namespace trdrop {
 
 					size_t localIndex = currentFrameIndex % windowSize;
 					isDifferentFrame[vix][localIndex] = equal ? 0.0 : 1.0;
-					fps[vix] = std::accumulate(isDifferentFrame[vix].begin(), isDifferentFrame[vix].end(), 0.0);
-					result = EitherSD(RightD(fps));
+
+					fpsTaskData.fps[vix] = std::accumulate(isDifferentFrame[vix].begin(), isDifferentFrame[vix].end(), 0.0);
+					fpsTaskData.duplicateFrame[vix] = equal;
+
+					result = EitherSD(RightD(fpsTaskData));
 				}
 
 				// public member
 			public:
-				EitherSD result;
+				EitherSD result = EitherSD(LeftS("FPSPreTask: result is not filled yet"));
 				const std::string id;
 
 				// private member
 			private:
 				std::vector<std::vector<double>>   isDifferentFrame;
-				std::vector<double> fps;
-				std::vector<int>    window;
+				trdrop::fps_data    fpsTaskData;
 				bool                equal = false;
 				const int           windowSize = 60;
 				int                 pixelDifference;

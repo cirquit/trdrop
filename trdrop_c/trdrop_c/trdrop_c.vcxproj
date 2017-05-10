@@ -167,6 +167,7 @@
     <ClInclude Include="CMDProgressTask.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CSVFormatter.h" />
+    <ClInclude Include="fpsdata.h" />
     <ClInclude Include="FPSInterTask.h" />
     <ClInclude Include="FPSPreTask.h" />
     <ClInclude Include="framealgorithm.h" />

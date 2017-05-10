@@ -3,6 +3,7 @@
 #define TRDROP_TASKS_PRE_TEAR_H
 
 #include <functional>
+#include <algorithm>
 #include <math.h>
 
 #include "Tasks.h"
@@ -21,8 +22,8 @@ namespace trdrop {
 
 				// types
 			private:
-				using EitherSVI = Either<std::string, std::vector<double>>;
-				using RightVI = Right<std::vector<double>>;
+				using EitherSVD = Either<std::string, std::vector<double>>;
+				using RightVD = Right<std::vector<double>>;
 				using LeftS = Left<std::string>;
 
 				// default member
@@ -36,11 +37,12 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				TearPreTask(std::string id, size_t videoCount, int pixelTolerance)
+				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, int lineTolerance)
 					: id(id)
 					, tears(videoCount)
 					, pixelTolerance(pixelTolerance)
 					, windowSize(windowSize)
+					, lineTolerance(lineTolerance)
 					, pretask(std::bind(&TearPreTask::process
 						, this
 						, std::placeholders::_1
@@ -56,34 +58,71 @@ namespace trdrop {
 				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
 					cv::Mat diffMat;
 					cv::absdiff(prev, cur, diffMat);
-					std::vector<int> badPixel = { 0, 0 };
 
-					for (size_t i = 0; i < diffMat.rows; ++i)
-					{
-						for (size_t j = 0; j < diffMat.cols; ++j)
-						{
-							badPixel[vix] += diffMat.at<uchar>(i,j) <= 5 ? 0 : 1;
-						}
-					}
-
+					// test purposes
 					static std::mutex mutex;
 					std::lock_guard<std::mutex> lock(mutex);
 
+					std::vector<std::vector<int>> blankLines;
+
+					blankLines.push_back(std::vector<int>(diffMat.rows, 0));
+					blankLines.push_back(std::vector<int>(diffMat.rows, 0));
+
+					//blankLines[0].insert(blankLines[0].end(), diffMat.rows, 0);
+					//blankLines[1].insert(blankLines[1].end(), diffMat.rows, 0);
+
+					for (size_t i = 0; i < diffMat.rows; ++i)
+					{
+						// starts with a blank pixel
+						if (diffMat.at<uchar>(i, 0) <= pixelTolerance)
+						{
+							size_t j = 0;
+							for (; j < diffMat.cols; ++j)
+							{
+								if (diffMat.at<uchar>(i, j) > pixelTolerance) break;
+							}
+							if (j == diffMat.cols) blankLines[vix][i] = 1;
+						}
+					}
+
+					int maxTear = maximumContOccurence(blankLines[vix]);
+					if (maxTear < lineTolerance) maxTear = 0;
+					
+
 					// count the bad pixels and if they consume more than 50% of the image -> tear (shown with a 1)
-					tears[vix] = static_cast<double>(badPixel[vix]) / static_cast<double>(diffMat.rows * diffMat.cols);
-					result = EitherSVI(RightVI(tears));
+					tears[vix] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
+					result = EitherSVD(RightVD(tears));
 				}
 
 				// public member
 			public:
-				EitherSVI result;
+				EitherSVD result;
 				const std::string id;
 
 				// private member
 			private:
 				int pixelTolerance;
+				int lineTolerance;
 				const int windowSize = 60; // not clean
 				std::vector<double> tears;
+
+				std::function<int(std::vector<int> &)> maximumContOccurence = [&](std::vector<int> & v)
+				{	
+					std::vector<int> maxOccurrences(v.size(), 0);
+					size_t m_ix = 0;
+					bool   cut = false;
+					for (size_t i = 0; i < v.size(); ++i) {
+						if (v[i] == 1) {
+							if (cut) ++m_ix; cut = false;
+							maxOccurrences[m_ix] += 1;
+						}
+						else {
+							cut = true;
+						}
+					}
+
+					return *std::max_element(maxOccurrences.begin(), maxOccurrences.end());
+				};
 
 			};
 		} // namespace pre

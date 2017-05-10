@@ -2,7 +2,7 @@
 #ifndef TRDROP_EITHER_H
 #define TRDROP_EITHER_H
 
-// TODO constexpr
+#include <memory>
 
 namespace trdrop {
 
@@ -85,10 +85,10 @@ namespace trdrop {
 
 	public:
 		constexpr Either(Left<Error> left)
-			: left(left.get()) {}
+			: left(std::make_shared<Error>(left.get())) {}
 
 		constexpr Either(Right<Success> right)
-			: right(right.get())
+			: right(std::make_shared<Success>(right.get()))
 			, success(true) {}
 
 		constexpr bool successful() const {
@@ -96,16 +96,17 @@ namespace trdrop {
 		}
 
 		constexpr Success getSuccess() {
-			return right;
+			return *right;
 		}
 
 		constexpr Error getError() {
-			return left;
+			return *left;
 		}
 
 	private:
-		Error left;
-		Success right;
+		// needed to have a deletable ptr so the Error and Success types don't have to be default constructable
+		std::shared_ptr<Error>   left;
+		std::shared_ptr<Success> right;
 		bool success = false;
 	};
 } // namespace trdrop
