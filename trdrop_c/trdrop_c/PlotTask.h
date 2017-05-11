@@ -171,12 +171,17 @@ namespace trdrop {
 				const int height; 
 				const int width;
 				
-				cv::Mat fps_sprite    = cv::imread("trdrop_sprites/fps_sprite.png", -1);
-				cv::Mat ten_sprite    = cv::imread("trdrop_sprites/10_sprite.png",  -1);
-				cv::Mat twenty_sprite = cv::imread("trdrop_sprites/20_sprite.png",  -1);
-				cv::Mat thirty_sprite = cv::imread("trdrop_sprites/30_sprite.png",  -1);
-				cv::Mat fourty_sprite = cv::imread("trdrop_sprites/40_sprite.png",  -1);
-				cv::Mat fifty_sprite  = cv::imread("trdrop_sprites/50_sprite.png",  -1);
+#if _DEBUGPATH
+				const std::string prep = "../../../images/";
+#else 
+				const std::string prep = ""; 
+#endif
+				cv::Mat fps_sprite    = cv::imread(prep + "trdrop_sprites/fps_sprite.png", -1);
+				cv::Mat ten_sprite    = cv::imread(prep + "trdrop_sprites/10_sprite.png",  -1);
+				cv::Mat twenty_sprite = cv::imread(prep + "trdrop_sprites/20_sprite.png",  -1);
+				cv::Mat thirty_sprite = cv::imread(prep + "trdrop_sprites/30_sprite.png",  -1);
+				cv::Mat fourty_sprite = cv::imread(prep + "trdrop_sprites/40_sprite.png",  -1);
+				cv::Mat fifty_sprite  = cv::imread(prep + "trdrop_sprites/50_sprite.png",  -1);
 				std::vector<cv::Mat> number_sprites = { ten_sprite, twenty_sprite, thirty_sprite, fourty_sprite, fifty_sprite };
 			};
 		}// namespace post

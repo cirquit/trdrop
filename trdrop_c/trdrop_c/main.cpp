@@ -1,6 +1,6 @@
 #define _DEBUG 1
 #define DEBUG(context, x) do { \
-	if (_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ": " << x << std::endl; } \
+	if (_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
 
 #define DEBUGV(context, vector) do { \
@@ -9,6 +9,8 @@
 		std::cerr << "DEBUG: " << context << " - " << #vector << ": \n"; \
 		for (auto & v : vector) { std::cerr << "         " << std::string(" ", sizeof context) << #vector << '[' << i++ << "]: " << v << '\n'; } \
 	} } while (0)
+
+#define _DEBUGPATH 1
 
 #include <iostream>
 #include <string>
@@ -45,8 +47,7 @@
 
 int main(int argc, char **argv) {
 
-	trdrop::config::Config config(-1, argc, argv);  // opencv gives a popup for the installed codecs with configuration options
-										            // it's currently not possible to configure them from code, because of the missing interface
+	trdrop::config::Config config(argc, argv);
 
 	if (!config.parsing.successful()) {
 		std::cerr << "trdrop_c terminating!\n"
@@ -91,7 +92,7 @@ int main(int argc, char **argv) {
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, cv::VideoWriter::fourcc('X','2','6','4'), config.getBakedFPS(0), config.writerSize);
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize);
 
 	// CMDProgressTask
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());

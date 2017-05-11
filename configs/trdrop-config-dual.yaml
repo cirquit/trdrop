@@ -1,18 +1,49 @@
 # Configuration file for trdrop
 
+# If the application terminates with the error "...abort()..."
+# then the formatting of the yaml-file is probably invalid.
+# Check if every "level" is aligned with 4 spaces per level
+# e.g:
+# test:
+#    x:
+#    y:
+
 
 ########################################
 # GENERAL Configuration
 
 # input files path
 input-files:
-  - Sample 2 1080p FPS Stable Skyrim XB1.avi
   - Sample 1 1080p FPS Drop Zelda Wii U.avi
-  
+  - Sample 1 1080p FPS Drop Zelda Wii U.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
-output-file: output-dual.avi
+output-file: output-single.avi
+
+# The codec which used to export the video
+# 
+# OpenCV is a little bit picky when it comes to codecs, especially if you're on Windows and want to modify the resulting video in After Effects
+# You need to specify a fourcc name of the codec (listed here http://www.fourcc.org/codecs.php), which always has four letters e.g X264
+#
+# If you specify the empty string "" as the codec, OpenCV **might** open a dialog after every start, where you can see all of your installed codecs
+# and can pick one. It's also possible that OpenCV just crashes and you have to supply it with a real codec.
+#
+# Things you should be aware of:
+#   * not every container (.avi) works with every codec
+#   * After Effects only accepts a special kind of .mp4 container, everything else is possibly not supported
+#   * if you specify a codec that you didn't install, everything crashes
+#   * even if you used the correct name of the codec and installed it, opencv might not find it and crash
+#   * this is mostly a trial and error method for each Windows installation
+#   * if the parsing of the fourcc string doesn't succeed, the fallback is the "hopefully-open-dialog" solution
+#
+# Codecs that work:
+#   * X264 + .avi
+#   * TODO
+#
+codec: "X264"
+# codec: ""   # <- popup
+
 
 # log file name (the name gets splitted on the dot and the corresponding filename is inserted e.g log-my-video-filename.csv)
 log-file:    log.csv
@@ -21,21 +52,29 @@ log-file:    log.csv
 # min: 0 - means that any changes in the color of two pixels means "different"
 # max: 765 - means that every possible change of color means "same"
 #
-# if the pixel difference is 0, then the computation is ~ 30x faster
+# if the pixel difference is 0, then the computation is ~ 30 times faster
 # but games like watchdogs will be falsly calculated because of the frame "afterglow"
 # a sane choice for this would be ~ 5
-pixel-difference: 0
+pixel-difference: 5
+
+# Line Difference Margin
+# min: 0 - every blank line will count as tear
+# max: <height of frame> - the whole frame should be blank to count as tear
+#
+# How many lines should be blank so the frame counts as tear
+line-difference: 50
+
 
 # defines the color of the text field and the plot color
 colors:
     first-video:
+        r: 64
+        g: 62
+        b: 55
+    second-video:
         r: 0
         g: 55
         b: 145
-    second-video:
-        r: 0
-        g: 154
-        b: 199
 
 ########################################
 # FPS CALCULATION Configuration
@@ -50,7 +89,7 @@ fps-text-locations:
     # x: 50, y: 50 for single video
     # x: 500, y: 50 for double video
     first-video:
-        x: 500
+        x: 50
         y: 50
     second-video:
         x: 500
@@ -59,15 +98,26 @@ fps-text-locations:
 # text which is placed before the number (currently always white)
 fps-text:
     first-video:
-        text: "PS4: "
+        text: "FPS: "
     second-video:
-        text: "Wii U: "
+        text: "FPS:"
 
 # fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
 fps-precision: 1
 
 # create a shadow behind the text for improved visibility
 fps-shadow: true
+
+# the color of the shadow
+fps-shadow-colors:
+    first-video:
+        r: 200
+        g: 250
+        b: 200
+    second-video:
+        r: 0
+        g: 0
+        b: 0
 
 # update fps-text every X frames
 # min-bound: 1
@@ -76,7 +126,7 @@ fps-refresh-rate:
     first-video:
         rate: 20
     second-video:
-        rate: 20
+        rate: 60
 
 
 ########################################
@@ -87,8 +137,8 @@ viewer-active: true
 
 # how big is the viewer window
 viewer-size:
-    viewer-width:  1920 #960
-    viewer-height: 1080 #540
+    viewer-width:  960 #1920 #960
+    viewer-height: 540 #1080 #540
 
 
 ########################################

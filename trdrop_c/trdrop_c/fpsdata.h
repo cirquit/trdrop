@@ -37,7 +37,6 @@ namespace trdrop {
 			std::for_each(fps.begin(), fps.end(), [&](double d) { result << std::to_string(d) << ' '; });
 			result << "Duplicate Frames: ";
 			std::for_each(duplicateFrame.begin(), duplicateFrame.end(), [&](bool b) { result << std::to_string(b) << ' '; });
-			result << '\n';
 			return result.str();
 		}
 

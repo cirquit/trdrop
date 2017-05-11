@@ -42,8 +42,7 @@ namespace trdrop {
 			
 			// parsed config
 			// not using the stream approach because of the custom error handling
-			Config(int codec, int argc, char** argv)
-				: codec(codec)
+			Config(int argc, char** argv)
 			{
 				std::string path = trdropYAMLConfig;
 				if (argc >= 2) {
@@ -56,13 +55,23 @@ namespace trdrop {
 				else {
 					std::cout << "trdrop: Using default config-path \"" << path << "\"\n";
 				}
-
+				std::cout << "got here anyways!\n";
 				YAML::Node yamlConfig = YAML::LoadFile(path);
 				std::vector<std::string> errors;
-				
+				std::cout << "got here!\n";
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
 					inputNames.push_back(it->as<std::string>());
+				});
+				std::cout << "got here too!\n";
+				fromTag("codec", yamlConfig, errors, [&](std::string tag) {
+					std::string cc = yamlConfig[tag].as<std::string>();
+					if (cc.size() < 4 || cc == "0000") {
+						codec = -1;
+						std::cout << "error - parsed: " << cc << '\n';
+					} else {
+						codec = cv::VideoWriter::fourcc(cc[0], cc[1], cc[2], cc[3]);
+					}
 				});
 
 				fromTag("output-file", yamlConfig, errors, [&](std::string tag) {
@@ -251,7 +260,11 @@ namespace trdrop {
 
 		// private member
 		private:
-			std::string trdropYAMLConfig = "trdrop-config.yaml";
+#if _DEBUGPATH
+			std::string trdropYAMLConfig = "../../../configs/trdrop-config.yaml";
+#else
+			std::string trdropYAMLConfig = "trdrop-config.yaml"; 
+#endif
 
 		};
 	} // namespace config

@@ -106,18 +106,15 @@ namespace trdrop {
 						});
 					}); 
 
-#if _DEBUG
-					std::cout << "DEBUG: TaskScheduler - launched " << preTasksFinished.size() << " pretasks\n";
-#endif				
 					// pretasks - waiting
 					std::for_each(preTasksFinished.begin(), preTasksFinished.end(), [](std::future<void> & future){
 						future.wait();
-					}); 
-					preTasksFinished.clear();
-					
+					}); 		
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all pretasks - size: " << preTasksFinished.size() << "\n";
 #endif
+					preTasksFinished.clear();
+
 					// intermediate tasks - parallel of different videos
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						
@@ -135,18 +132,17 @@ namespace trdrop {
 
 						}); 
 					});
-#if _DEBUG
-					std::cout << "DEBUG: TaskScheduler - launched " << interTasksFinished.size() << " intermediate tasks\n";
-#endif
+
 					// intermediate tasks - waiting
 					std::for_each(interTasksFinished.begin(), interTasksFinished.end(), [](std::future<void> & future) {
 						future.wait();
 					});
-					interTasksFinished.clear();
+
 
 #if _DEBUG
-					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks\n";
+					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks - size: " << interTasksFinished.size() << "\n";
 #endif
+					interTasksFinished.clear();
 					merge(prev, merged);
 #if _DEBUG
 					std::cout << "DEBUG: TaskScheduler - merged frames\n";
