@@ -83,10 +83,8 @@ namespace trdrop {
 
 				
 				fromSequenceTag("colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
-					int r = it->second["r"].as<int>();
-					int g = it->second["g"].as<int>();
-					int b = it->second["b"].as<int>();
-					colors.push_back(cv::Scalar(b, g, r));
+					std::string hex = it->second["hex"].as<std::string>();
+					colors.push_back(trdrop::util::hexToBGR(hex, cv::Scalar(0,0,0)));
 				});
 
 				fromTag("pixel-difference", yamlConfig, errors, [&](std::string tag) {
@@ -117,10 +115,8 @@ namespace trdrop {
 				});
 				
 				fromSequenceTag("fps-shadow-colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
-					int r = it->second["r"].as<int>();
-					int g = it->second["g"].as<int>();
-					int b = it->second["b"].as<int>();
-					shadowColors.push_back(cv::Scalar(b, g, r));
+					std::string hex = it->second["hex"].as<std::string>();
+					shadowColors.push_back(trdrop::util::hexToBGR(hex, cv::Scalar(230, 230, 230)));
 				});
 
 

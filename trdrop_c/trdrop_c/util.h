@@ -163,6 +163,24 @@ namespace trdrop {
 				}
 			}
 		}
+
+		// again, blatantly copied from https://stackoverflow.com/questions/18398468/c-stl-convert-string-with-rgb-color-to-3-int-values
+		cv::Scalar hexToBGR(std::string & hex, cv::Scalar & default)
+		{
+			if (hex.size() < 6) return default;
+			if (hex[0] == '#') hex = hex.erase(0, 1);
+
+			int r, g, b;
+
+			std::istringstream(hex.substr(0, 2)) >> std::hex >> r;
+			std::istringstream(hex.substr(2, 2)) >> std::hex >> g;
+			std::istringstream(hex.substr(4, 2)) >> std::hex >> b;
+
+			if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) return default;
+
+			return cv::Scalar(b, g, r);
+		}
+
 	} // namespace util
 } // namespace trdrop
 

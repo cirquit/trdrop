@@ -15,11 +15,11 @@
 # input files path
 input-files:
   - Sample 1 1080p FPS Drop Zelda Wii U.avi
-  - Sample 1 1080p FPS Drop Zelda Wii U.avi
+  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
-output-file: output-single.avi
+output-file: trdrop-output.avi
 
 # The codec which used to export the video
 # 
@@ -65,16 +65,22 @@ pixel-difference: 5
 line-difference: 50
 
 
-# defines the color of the text field and the plot color
+# defines the color of the text field and the plot color ("" are needed because # is a comment in yaml)
 colors:
     first-video:
-        r: 64
-        g: 62
-        b: 55
+        hex: "#b21a1a"
     second-video:
-        r: 0
-        g: 55
-        b: 145
+        hex: "#051afa"
+
+# create a shadow behind the text for improved visibility
+fps-shadow: true
+
+# the color of the shadow
+fps-shadow-colors:
+    first-video:
+        hex: "#fdf1cd"
+    second-video:
+        hex: "#f89e9d"
 
 ########################################
 # FPS CALCULATION Configuration
@@ -89,7 +95,7 @@ fps-text-locations:
     # x: 50, y: 50 for single video
     # x: 500, y: 50 for double video
     first-video:
-        x: 50
+        x: 500
         y: 50
     second-video:
         x: 500
@@ -98,26 +104,14 @@ fps-text-locations:
 # text which is placed before the number (currently always white)
 fps-text:
     first-video:
-        text: "FPS: "
+        text: "FPS:"
     second-video:
         text: "FPS:"
 
 # fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
 fps-precision: 1
 
-# create a shadow behind the text for improved visibility
-fps-shadow: true
 
-# the color of the shadow
-fps-shadow-colors:
-    first-video:
-        r: 200
-        g: 250
-        b: 200
-    second-video:
-        r: 0
-        g: 0
-        b: 0
 
 # update fps-text every X frames
 # min-bound: 1
@@ -126,7 +120,7 @@ fps-refresh-rate:
     first-video:
         rate: 20
     second-video:
-        rate: 60
+        rate: 20
 
 
 ########################################
