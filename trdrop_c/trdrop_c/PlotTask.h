@@ -87,18 +87,21 @@ namespace trdrop {
 					// graph starting points
 					int x = margin;
 					int y = frameSize.height - margin - height;
+
+					// extra space above 60fps in px
+					int overhead = 6;
 					
 					// graph background
-					cv::Mat roi = res(cv::Rect(x, y, width, height));
+					cv::Mat roi = res(cv::Rect(x, y - overhead, width, height+ overhead));
 					cv::Mat color(roi.size(), CV_8UC3, graphColor);
 					double alpha = 0.4;
 					cv::addWeighted(color, alpha, roi, 1.0 - alpha, 0.0, roi);
 					
 					// y-line
-					cv::line(res, cv::Point(x, y), cv::Point(x, y + height), graphColor, 3, 10);
+					cv::line(res, cv::Point(x, y - overhead), cv::Point(x, y + height), graphColor, 3, 10);
 
 					// y-line text with shadows
-					util::overlayImage(res, fps_sprite, res, cv::Point2i(x - 18, y - 28));
+					util::overlayImage(res, fps_sprite, res, cv::Point2i(x - 18, y - 28 - overhead));
 
 					// x-line
 					cv::line(res, cv::Point(x, y + height), cv::Point(x + width, y + height), graphColor, 3, 10);
