@@ -62,7 +62,6 @@ namespace trdrop {
 					// test purposes
 					static std::mutex mutex;
 					std::lock_guard<std::mutex> lock(mutex);
-
 					std::vector<std::vector<int>> blankLines;
 
 					blankLines.push_back(std::vector<int>(diffMat.rows, 0));
@@ -107,21 +106,20 @@ namespace trdrop {
 				std::vector<double> tears;
 
 				std::function<int(std::vector<int> &)> maximumContOccurence = [&](std::vector<int> & v)
-				{	
-					std::vector<int> maxOccurrences(v.size(), 0);
-					size_t m_ix = 0;
-					bool   cut = false;
-					for (size_t i = 0; i < v.size(); ++i) {
+				{
+					int max = 0;
+					int tempMax = 0;
+
+					for (int i = 0; i < v.size(); ++i) {
 						if (v[i] == 1) {
-							if (cut) ++m_ix; cut = false;
-							maxOccurrences[m_ix] += 1;
+							++tempMax;
+							if (max < tempMax) max = tempMax;
 						}
 						else {
-							cut = true;
+							tempMax = 0;
 						}
 					}
-
-					return *std::max_element(maxOccurrences.begin(), maxOccurrences.end());
+					return max;
 				};
 
 			};

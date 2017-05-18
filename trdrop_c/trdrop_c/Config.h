@@ -63,6 +63,9 @@ namespace trdrop {
 					inputNames.push_back(it->as<std::string>());
 				});
 
+				//inputs[0].set(CV_CAP_PROP_POS_FRAMES, 1171);
+				//inputs[1].set(CV_CAP_PROP_POS_FRAMES, 1171);
+
 				fromTag("codec", yamlConfig, errors, [&](std::string tag) {
 					std::string cc = yamlConfig[tag].as<std::string>();
 					if (cc.size() < 4 || cc == "0000") {
