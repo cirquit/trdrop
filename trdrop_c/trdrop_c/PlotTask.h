@@ -39,6 +39,7 @@ namespace trdrop {
 					, colors(colors)
 					, fpsContainer(fpsTaskData.videoCount)
 					, tearContainer(tears.size())
+					, timeContainer(tears.size())
 					, frameSize(frameSize)
 					, height(frameSize.height / 4)
 					, width(frameSize.width - 2 * margin)
@@ -108,7 +109,7 @@ namespace trdrop {
 					
 					// separation lines
 					for (int i = 1; i < 6; ++i) {
-						int lineY = (60 - 10 * i*height / 60) + frameSize.height - 60 - margin;
+						int lineY = (maxFps - 10 * i*height / maxFps) + frameSize.height - maxFps - margin;
 						cv::line(res, cv::Point(x, lineY-4), cv::Point(x + width, lineY-4), graphColor);
 						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(22, 23));
 						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - 28, lineY-9));
@@ -124,11 +125,10 @@ namespace trdrop {
 					cv::Point lastPoint(margin + 6, frameSize.height - margin - 4);
 					std::vector<cv::Point> lastPoints(fpsTaskData.videoCount, lastPoint);
 
-
 					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
 						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned vix, std::deque<double> fpsDeque) {
 							int currentFps = static_cast<int>(fpsDeque[i]);
-							int y = (60 - currentFps*height / 60) + frameSize.height - 60 - margin - 4;
+							int y = (maxFps - currentFps*height / maxFps) + frameSize.height - maxFps - margin - 4;
 							cv::Point currentPoint(pointDistance + 6, y);
 							if (i == 0) lastPoints[vix] = currentPoint;
 							cv::line(res, lastPoints[vix], currentPoint, colors[vix], 2, CV_AA);
@@ -159,7 +159,29 @@ namespace trdrop {
 						pointDistance += pointDistanceIncrement;
 					});
 				};
-					
+				/*
+				std::function<void(cv::Mat & res)> drawFrametimes = [&](cv::Mat & res) {
+
+					int pointDistance = margin + 6;
+					int pointDistanceIncrement = width / plotWindow();
+					int baseHeight = frameSize.height - margin - 4;
+
+					cv::Point lastPoint(pointDistance, baseHeight);
+					std::vector<cv::Point> lastPoints(fpsTaskData.videoCount, lastPoint);
+
+					util::enumerate(timeContainer[0].begin(), timeContainer[0].end(), 0, [&](unsigned i, double time) {
+						util::enumerate(timeContainer.begin(), timeContainer.end(), 0, [&](unsigned vix, std::deque<double> timeDeque) {
+							int currentTime = static_cast<int>(timeDeque[i]);
+							int y = (60 - currentTime*height / 60) + baseHeight - 60;
+							cv::Point currentPoint(pointDistance, y);
+							if (i == 0) lastPoints[vix] = currentPoint;
+							cv::line(res, lastPoints[vix], currentPoint, colors[vix], 2, CV_AA);
+							lastPoints[vix] = currentPoint;
+						});
+						pointDistance += pointDistanceIncrement;
+					});
+				};
+				*/
 
 				// private member
 			private:
@@ -167,6 +189,7 @@ namespace trdrop {
 				std::vector<double> & tears;
 				std::vector<std::deque<double>> fpsContainer;
 				std::vector<std::deque<double>> tearContainer;
+				std::vector<std::deque<double>> timeContainer;
 
 				std::vector<cv::Scalar> colors;
 				const cv::Scalar graphColor = cv::Scalar(255, 255, 255);
@@ -174,6 +197,7 @@ namespace trdrop {
 				const cv::Size frameSize;
 				const int height; 
 				const int width;
+				const int maxFps = 60;
 				
 #if _DEBUGPATH
 				const std::string prep = "../../../images/";
