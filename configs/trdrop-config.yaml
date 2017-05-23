@@ -23,7 +23,7 @@ output-file: trdrop-output.avi
 # if you trigger this option, trdrop will drop the raw frames as bmp into the starting directory. They should be importable
 # with every major video editing program
 # true / false
-output-as-bmps: true
+output-as-bmps: false
 
 # The codec which used to export the video
 # 
@@ -71,14 +71,14 @@ line-difference: 540
 # Tear color
 tear-color:
     first-video:
-        hex: "ff9999" # "#fdbc00"
+        hex: "#a0a0ff" # "#fdbc00"
 #    second-video:
 #        hex: "#22aa22"
 
 # defines the color of the text field and the plot color ("" are needed because # is a comment in yaml)
 colors:
     first-video:
-        hex: "#99ffff"
+        hex: "#5050ff"
 #    second-video:
 #        hex: "#051afa"
 
@@ -88,7 +88,7 @@ fps-shadow: true
 # the color of the shadow
 fps-shadow-colors:
     first-video:
-        hex: "#333333"
+        hex: "#a0a0ff"
 #    second-video:
 #        hex: "#f89e9d"
 
@@ -139,10 +139,10 @@ fps-refresh-rate:
 plot-background-color: "#000000"
 
 # Color of the x and y axes
-plot-axes-color: "#FF0000"
+plot-axes-color: "#dfdfff"
 
 # Color of the separation lines at 10, 20, 30, 40 and 50
-plot-lines-color: "#00FF00"
+plot-lines-color: "#dfdfff"
 
 # Plot background transparency (range: 0.0 - 1.0)
 # 0.0 ~ transparent

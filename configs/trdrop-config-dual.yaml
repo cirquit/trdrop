@@ -14,8 +14,8 @@
 
 # input files path
 input-files:
-  - zelda.avi
-  - zelda.avi
+  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
+  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
@@ -74,14 +74,14 @@ tear-color:
     first-video:
         hex: "#aa2222"
     second-video:
-        hex: "#22aa22"
+        hex: "#aa2222"
 
 # defines the color of the text field and the plot color ("" are needed because # is a comment in yaml)
 colors:
     first-video:
-        hex: "#8560b3"
+        hex: "#99ffff"
     second-video:
-        hex: "#051afa"
+        hex: "#e7c3e0"
 
 # create a shadow behind the text for improved visibility
 fps-shadow: true
@@ -89,9 +89,9 @@ fps-shadow: true
 # the color of the shadow
 fps-shadow-colors:
     first-video:
-        hex: "#fdf1cd"
+        hex: "#ff9999"
     second-video:
-        hex: "#f89e9d"
+        hex: "#585ab6"
 
 ########################################
 # FPS CALCULATION Configuration
@@ -140,10 +140,10 @@ fps-refresh-rate:
 plot-background-color: "#000000"
 
 # Color of the x and y axes
-plot-axes-color: "#FF0000"
+plot-axes-color: "#444444"
 
 # Color of the separation lines at 10, 20, 30, 40 and 50
-plot-lines-color: "#00FF00"
+plot-lines-color: "#444444"
 
 # Plot background transparency (range: 0.0 - 1.0)
 # 0.0 ~ transparent
