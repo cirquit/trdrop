@@ -6,7 +6,6 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-
 #include <opencv2\core\core.hpp>
 #include <opencv2/highgui/highgui.hpp>  // VideoWriter
 
@@ -31,13 +30,18 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				WriterTask(std::string filename, int codec, double bakedFps, cv::Size frameSize)
+				WriterTask(std::string filename, int codec, double bakedFps, cv::Size frameSize, bool outputAsBmps)
 					: output(filename, codec, bakedFps, frameSize)
+					, outputAsBmps(outputAsBmps)
+					, fileName(filename)
 					, posttask(std::bind(&WriterTask::process
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2))
 				{	
+					size_t dotIndex = filename.find_last_of('.');
+					fileName = dotIndex == -1 ? filename : filename.substr(0, dotIndex);
+
 #if _DEBUG
 					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
 #endif
@@ -46,13 +50,26 @@ namespace trdrop {
 				// interface methods
 			public:
 				void process(const cv::Mat & res, const size_t currentFrameIndex) {
-					output.write(res);
+					if (outputAsBmps) {
+						char frameName[255];
+						sprintf(frameName, "-%07zu.bmp", currentFrameIndex);
+						cv::imwrite(fileName + frameName, res);
+						cv::waitKey(100);
+					}	else {
+						output.write(res);
+					}
 				}
+
+				// private methods
+			private:
 
 				// private member
 			private:
 				cv::VideoWriter output;
 				const cv::Size frameSize;
+
+				std::string fileName;
+				bool outputAsBmps;
 			};
 		} // namespace post
 	} // namespace tasks

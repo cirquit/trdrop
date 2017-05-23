@@ -1,4 +1,4 @@
-#define _DEBUG 1
+#define _DEBUG 0
 #define DEBUG(context, x) do { \
 	if (_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
@@ -88,14 +88,14 @@ int main(int argc, char **argv) {
 	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
 
 	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.writerSize);
+	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotAlpha, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize);
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize, config.outputAsBmps);
 
 	// CMDProgressTask
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
@@ -116,7 +116,9 @@ int main(int argc, char **argv) {
 		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", fpsTaskData.fps[ix]);
     });
 	convertions.push_back([&](int ix) {
-		return tearTaskData.tears[ix] == 0 ? "       false" : "  " + std::to_string(static_cast<int>(tearTaskData.tears[ix] * 100)) + "%" + " - true";
+		return (fpsTaskData.duplicateFrame[ix] || (tearTaskData.tears[ix] == 0)) ?
+			"       false" :
+			"  " + std::to_string(static_cast<int>(tearTaskData.tears[ix] * 100)) + "%" + " - true";
 	});
 
 	// PreTasks - order does not matter

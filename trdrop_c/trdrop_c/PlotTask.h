@@ -34,10 +34,13 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				PlotTask(trdrop::fps_data & fpsTaskData, trdrop::tear_data & tearTaskData, std::vector<cv::Scalar> colors, cv::Size frameSize)
+				PlotTask(trdrop::fps_data & fpsTaskData, trdrop::tear_data & tearTaskData, std::vector<cv::Scalar> colors, std::vector<cv::Scalar> tearColors, cv::Scalar plotBackgroundColor, double plotAlpha, cv::Size frameSize)
 					: fpsTaskData(fpsTaskData)
 					, tearTaskData(tearTaskData)
 					, colors(colors)
+					, tearColors(tearColors)
+					, plotBackgroundColor(plotBackgroundColor)
+					, plotAlpha(plotAlpha)
 					, fpsContainer(fpsTaskData.videoCount)
 					, tearContainer(tearTaskData.tears.size())
 					, timeContainer(tearTaskData.tears.size())
@@ -95,10 +98,22 @@ namespace trdrop {
 					
 					// graph background
 					cv::Mat roi = res(cv::Rect(x, y - overhead, width, height+ overhead));
-					cv::Mat color(roi.size(), CV_8UC3, graphColor);
-					double alpha = 0.4;
-					cv::addWeighted(color, alpha, roi, 1.0 - alpha, 0.0, roi);
+					cv::Mat color(roi.size(), CV_8UC3, plotBackgroundColor);
+					cv::addWeighted(color, plotAlpha, roi, 1.0 - plotAlpha, 0.0, roi);
 					
+					// a little brighter than the background
+					cv::Scalar sepLineColor = cv::Scalar(plotBackgroundColor[0] + 40 % 255
+												     , plotBackgroundColor[1] + 40 % 255
+												     , plotBackgroundColor[2] + 40 % 255);
+
+					// separation lines
+					for (int i = 1; i < 6; ++i) {
+						int lineY = (maxFps - 10 * i*height / maxFps) + frameSize.height - maxFps - margin;
+						cv::line(res, cv::Point(x, lineY-4), cv::Point(x + width, lineY-4), sepLineColor);
+						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(22, 23));
+						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - 28, lineY-9));
+					}
+				
 					// y-line
 					cv::line(res, cv::Point(x, y - overhead), cv::Point(x, y + height), graphColor, 3, 10);
 
@@ -107,15 +122,7 @@ namespace trdrop {
 
 					// x-line
 					cv::line(res, cv::Point(x, y + height), cv::Point(x + width, y + height), graphColor, 3, 10);
-					
-					// separation lines
-					for (int i = 1; i < 6; ++i) {
-						int lineY = (maxFps - 10 * i*height / maxFps) + frameSize.height - maxFps - margin;
-						cv::line(res, cv::Point(x, lineY-4), cv::Point(x + width, lineY-4), graphColor);
-						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(22, 23));
-						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - 28, lineY-9));
-					}
-				
+
 				};
 
 				std::function<void(cv::Mat & res)> drawLines = [&](cv::Mat & res) {
@@ -140,8 +147,7 @@ namespace trdrop {
 				};
 
 				std::function<void(cv::Mat & res)> drawTears = [&](cv::Mat & res) {
-
-					cv::Scalar tearColor(0,0,200);
+					
 					int pointDistance = margin + 6;
 					int pointDistanceIncrement = width / plotWindow();
 					int tearHeight = height / tearContainer.size(); // Fit all all videos into the graph
@@ -153,7 +159,7 @@ namespace trdrop {
 								cv::Point basePoint(pointDistance, baseHeight - vix * tearHeight);
 								cv::Point topPoint(pointDistance, baseHeight - tearHeight - vix * tearHeight);
 								cv::Point midPoint(pointDistance, baseHeight - tearDeque[i] * tearHeight - vix * tearHeight);
-								cv::line(res, basePoint, midPoint, tearColor, 2, CV_AA);
+								cv::line(res, basePoint, midPoint, tearColors[vix], 2, CV_AA);
 								cv::line(res, midPoint, topPoint, colors[vix], 2, CV_AA);
 							}
 						});
@@ -163,13 +169,13 @@ namespace trdrop {
 
 				std::function<double(int)> getFps = [&](int vix) {
 					double fps = 0.0;
-					std::cout << "vix: " << vix << '\n';
-					trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
-						std::cout << "i: " << i << '\n';
-						if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
-							fps += 1.0;
-						}
-					});
+					if (fpsTaskData.fps_unprocessed.size() > 0) {
+						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+							if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
+								fps += 1.0;
+							}
+						});
+					}
 					return fps;
 				};
 
@@ -207,7 +213,10 @@ namespace trdrop {
 				std::vector<std::deque<double>> timeContainer;
 
 				std::vector<cv::Scalar> colors;
+				std::vector<cv::Scalar> tearColors;
 				const cv::Scalar graphColor = cv::Scalar(255, 255, 255);
+				cv::Scalar plotBackgroundColor;
+				double plotAlpha;
 				const int margin = 30; // px
 				const cv::Size frameSize;
 				const int height; 

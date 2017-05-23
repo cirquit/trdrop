@@ -57,15 +57,11 @@ namespace trdrop {
 				}
 				YAML::Node yamlConfig = YAML::LoadFile(path);
 				std::vector<std::string> errors;
-
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
 					inputNames.push_back(it->as<std::string>());
 				});
-
-				trdrop::util::setFrameIndex(inputs[0], 1171);
-				trdrop::util::setFrameIndex(inputs[1], 1171);
-
+				
 				fromTag("codec", yamlConfig, errors, [&](std::string tag) {
 					std::string cc = yamlConfig[tag].as<std::string>();
 					if (cc.size() < 4 || cc == "0000") {
@@ -76,26 +72,32 @@ namespace trdrop {
 					}
 				});
 
+
 				fromTag("output-file", yamlConfig, errors, [&](std::string tag) {
 					outputFile = yamlConfig[tag].as<std::string>();
+				});
+
+				fromTag("output-as-bmps", yamlConfig, errors, [&](std::string tag) {
+					outputAsBmps = yamlConfig[tag].as<bool>();
 				});
 
 				fromTag("log-file", yamlConfig, errors, [&](std::string tag) {
 					logName = yamlConfig[tag].as<std::string>();
 				});
 
-				
 				fromSequenceTag("colors", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					std::string hex = it->second["hex"].as<std::string>();
 					colors.push_back(trdrop::util::hexToBGR(hex, cv::Scalar(0,0,0)));
 				});
-
 				fromTag("pixel-difference", yamlConfig, errors, [&](std::string tag) {
 					pixelDifference = yamlConfig[tag].as<int>();
 				});
-
 				fromTag("line-difference", yamlConfig, errors, [&](std::string tag) {
 					lineDifference = yamlConfig[tag].as<int>();
+				});
+				fromSequenceTag("tear-color", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
+					std::string hex = it->second["hex"].as<std::string>();
+					tearColors.push_back(trdrop::util::hexToBGR(hex, cv::Scalar(220,0,0)));
 				});
 
 				fromSequenceTag("fps-text-locations", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
@@ -125,6 +127,19 @@ namespace trdrop {
 
 				fromSequenceTag("fps-refresh-rate", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					refreshRate.push_back(it->second["rate"].as<int>());
+				});
+
+				fromTag("plot-background-color", yamlConfig, errors, [&](std::string tag) {
+					std::string hex = yamlConfig[tag].as<std::string>();
+					plotBackgroundColor = (trdrop::util::hexToBGR(hex, cv::Scalar(230, 230, 230)));
+				});
+
+				fromTag("plot-background-alpha", yamlConfig, errors, [&](std::string tag) {
+					plotAlpha = yamlConfig[tag].as<double>();
+				});
+
+				fromTag("viewer-active", yamlConfig, errors, [&](std::string tag) {
+					viewerActive = yamlConfig[tag].as<bool>();
 				});
 
 				fromTag("viewer-active", yamlConfig, errors, [&](std::string tag) {
@@ -248,10 +263,15 @@ namespace trdrop {
 			bool				     shadows;
 			std::vector<cv::Scalar>  shadowColors;
 
+			std::vector<cv::Scalar>  tearColors;
+			cv::Scalar plotBackgroundColor;
+			double     plotAlpha;
+
 			cv::Size viewerSize;
 			bool	 viewerActive;
 
 			cv::Size writerSize;
+			bool outputAsBmps;
 
 			std::string								              logName;
 			trdrop::Either<std::vector<std::string>, std::string> parsing;
