@@ -1,10 +1,10 @@
-#define _DEBUG 0
+#define _TR_DEBUG 0
 #define DEBUG(context, x) do { \
-	if (_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
+	if (_TR_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
 
 #define DEBUGV(context, vector) do { \
-	if (_DEBUG) { \
+	if (_TR_DEBUG) { \
 		int i = 0; \
 		std::cerr << "DEBUG: " << context << " - " << #vector << ": \n"; \
 		for (auto & v : vector) { std::cerr << "         " << std::string(" ", sizeof context) << #vector << '[' << i++ << "]: " << v << '\n'; } \
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
 
 	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotAlpha, config.writerSize);
+	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotLinesColor, config.plotAxesColor, config.plotAlpha, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
 	if (config.viewerActive) scheduler.addPostTask(std::make_shared<trdrop::tasks::post::ViewerTask>(viewerT));
 	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::WriterTask>(writerT));
 
-#if !_DEBUG
+#if !_TR_DEBUG
 	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::CMDProgressTask>(cmdProgressT));
 #endif
 

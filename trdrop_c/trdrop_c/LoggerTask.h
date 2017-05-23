@@ -53,7 +53,7 @@ namespace trdrop {
 
 					std::for_each(fileNames.begin(), fileNames.end(), [&](std::string filename) {
 						streams.emplace_back(std::shared_ptr<std::ofstream>(new std::ofstream{ toLogFileName(filename) }));
-#if _DEBUG
+#if _TR_DEBUG
 						std::cout << "DEBUG: LoggerTask - created stream \"" << toLogFileName(filename) << "\"\n";
 #endif				
 						std::string formatted(formatter.format(ids.begin(), ids.end()));
@@ -66,7 +66,7 @@ namespace trdrop {
 				{
 					std::for_each(streams.begin(), streams.end(), [&](std::shared_ptr<std::ofstream> & streamptr) {
 						streamptr -> close();
-#if _DEBUG
+#if _TR_DEBUG
 						std::cout << "DEBUG: LoggerTask - deleted stream\n";
 #endif
 					});
@@ -82,7 +82,7 @@ namespace trdrop {
 						});
 
 						std::string formatted(formatter.format(values.begin(), values.end()));
-#if _DEBUG
+#if _TR_DEBUG
 					//	std::cout << "DEBUG: LoggerTask - logging: " << formatted << '\n';
 #endif 
 						streamptr -> write(formatted.c_str(), formatted.size());

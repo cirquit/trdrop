@@ -67,7 +67,7 @@ namespace trdrop {
 							} 
 						});
 						fpsTaskData.fps[vix] = tempFrameRates[vix];
-#if _DEBUG
+#if _TR_DEBUG
 						std::cout << "DEBUG - FPSInterTask - copied the framerates\n";
 #endif
 					}
@@ -77,7 +77,7 @@ namespace trdrop {
 
 					if (shadows) cv::putText(res, fpsText[vix] + text[vix], points[vix] + cv::Point(2, 2), CV_FONT_HERSHEY_SIMPLEX, 1, shadowColors[vix], 4, CV_AA);
 					cv::putText(res, fpsText[vix] + text[vix], points[vix], CV_FONT_HERSHEY_SIMPLEX, 1, colors[vix], 2, CV_AA);
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: FPSInterTask[" << vix << "] - drawing \"" << text[vix] << "\"\n";
 #endif
 				}

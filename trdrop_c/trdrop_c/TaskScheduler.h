@@ -73,7 +73,7 @@ namespace trdrop {
 			}
 
 			bool next() {
-#if _DEBUG
+#if _TR_DEBUG
 				std::cout << "\nDEBUG: TaskScheduler.next() - currentFrameIndex\n";
 #endif
 				if (currentFrameIndex == 0) {
@@ -95,7 +95,7 @@ namespace trdrop {
 				if (readSuccessful) {
 					// if this is the first frame, we load two frames
 					currentFrameIndex += currentFrameIndex == 0 ? 2 : 1;
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler.readSuccesful, currentFrameIndex: " << currentFrameIndex << '\n';
 #endif
 					
@@ -110,7 +110,7 @@ namespace trdrop {
 					std::for_each(preTasksFinished.begin(), preTasksFinished.end(), [](std::future<void> & future){
 						future.wait();
 					}); 		
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all pretasks - size: " << preTasksFinished.size() << "\n";
 #endif
 					preTasksFinished.clear();
@@ -138,17 +138,17 @@ namespace trdrop {
 					});
 
 
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all intermediate tasks - size: " << interTasksFinished.size() << "\n";
 #endif
 					interTasksFinished.clear();
 					merge(prev, merged);
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler - merged frames\n";
 #endif
 					// post tasks - sequential
 					std::for_each(postTasks.begin(), postTasks.end(), [&](std::shared_ptr<trdrop::tasks::posttask> f) { (*f)(merged, currentFrameIndex); });
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all posttasks\n";
 #endif
 				}

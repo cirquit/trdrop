@@ -14,8 +14,8 @@
 
 # input files path
 input-files:
-  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
-  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
+  - zelda.avi
+  - zelda.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
@@ -24,7 +24,7 @@ output-file: trdrop-dual-output.avi
 # if you trigger this option, trdrop will drop the raw frames as bmp into the starting directory. They should be importable
 # with every major video editing program
 # true / false
-output-as-bmps: true
+output-as-bmps: false
 
 # The codec which used to export the video
 # 
@@ -46,7 +46,7 @@ output-as-bmps: true
 #   * X264 + .avi
 #   * TODO
 #
-codec: "X264"
+codec: "DIVX"
 # codec: ""   # <- popup
 
 
@@ -138,6 +138,12 @@ fps-refresh-rate:
 
 # Background color
 plot-background-color: "#000000"
+
+# Color of the x and y axes
+plot-axes-color: "#FF0000"
+
+# Color of the separation lines at 10, 20, 30, 40 and 50
+plot-lines-color: "#00FF00"
 
 # Plot background transparency (range: 0.0 - 1.0)
 # 0.0 ~ transparent

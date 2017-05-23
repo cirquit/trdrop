@@ -76,12 +76,12 @@ namespace trdrop {
 					//blankLines[0].insert(blankLines[0].end(), diffMat.rows, 0);
 					//blankLines[1].insert(blankLines[1].end(), diffMat.rows, 0);
 
-					for (size_t i = 0; i < diffMat.rows; ++i)
+					for (int i = 0; i < diffMat.rows; ++i)
 					{
 						// starts with a blank pixel
 						if (diffMat.at<uchar>(i, 0) <= pixelTolerance)
 						{
-							size_t j = 0;
+							int j = 0;
 							for (; j < diffMat.cols; ++j)
 							{
 								if (diffMat.at<uchar>(i, j) > pixelTolerance) break;

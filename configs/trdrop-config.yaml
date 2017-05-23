@@ -138,6 +138,12 @@ fps-refresh-rate:
 # Background color
 plot-background-color: "#000000"
 
+# Color of the x and y axes
+plot-axes-color: "#FF0000"
+
+# Color of the separation lines at 10, 20, 30, 40 and 50
+plot-lines-color: "#00FF00"
+
 # Plot background transparency (range: 0.0 - 1.0)
 # 0.0 ~ transparent
 # 1.0 ~ non-transparent

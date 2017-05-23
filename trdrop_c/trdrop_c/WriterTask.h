@@ -42,7 +42,7 @@ namespace trdrop {
 					size_t dotIndex = filename.find_last_of('.');
 					fileName = dotIndex == -1 ? filename : filename.substr(0, dotIndex);
 
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "WriterTask - Output opened: " << (output.isOpened() ? "true" : "false") << '\n';
 #endif
 				}
@@ -52,7 +52,7 @@ namespace trdrop {
 				void process(const cv::Mat & res, const size_t currentFrameIndex) {
 					if (outputAsBmps) {
 						char frameName[255];
-						sprintf(frameName, "-%07zu.bmp", currentFrameIndex);
+						sprintf_s(frameName, "-%07zu.bmp", currentFrameIndex);
 						cv::imwrite(fileName + frameName, res);
 						cv::waitKey(100);
 					}	else {

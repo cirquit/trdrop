@@ -106,7 +106,7 @@ namespace trdrop {
 
 				fromSequenceTag("fps-text", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					fpsText.push_back(it->second["text"].as<std::string>());
-#if _DEBUG
+#if _TR_DEBUG
 					std::cout << "DEBUG: Config - fps-text - got \"" << fpsText.back() << "\"\n";
 #endif
 				});
@@ -134,6 +134,16 @@ namespace trdrop {
 					plotBackgroundColor = (trdrop::util::hexToBGR(hex, cv::Scalar(230, 230, 230)));
 				});
 
+				fromTag("plot-lines-color", yamlConfig, errors, [&](std::string tag) {
+					std::string hex = yamlConfig[tag].as<std::string>();
+					plotLinesColor = (trdrop::util::hexToBGR(hex, cv::Scalar(230, 230, 230)));
+				});
+
+				fromTag("plot-axes-color", yamlConfig, errors, [&](std::string tag) {
+					std::string hex = yamlConfig[tag].as<std::string>();
+					plotAxesColor = (trdrop::util::hexToBGR(hex, cv::Scalar(230, 230, 230)));
+				});
+
 				fromTag("plot-background-alpha", yamlConfig, errors, [&](std::string tag) {
 					plotAlpha = yamlConfig[tag].as<double>();
 				});
@@ -158,7 +168,7 @@ namespace trdrop {
 						});
 					});
 				}
-#if _DEBUG				
+#if _TR_DEBUG				
 				std::cout << "DEBUG: Config - viewer-size: " << viewerSize << '\n';
 #endif				
 				fromTag("writer-size", yamlConfig, errors, [&](std::string tag) {
@@ -179,7 +189,7 @@ namespace trdrop {
 					parsing = Either<std::vector<std::string>, std::string>(Left<std::vector<std::string>>(errors));
 				}
 
-#if _DEBUG
+#if _TR_DEBUG
 				std::cout << "DEBUG: Config.successful(): " << parsing.successful() << '\n';
 				util::enumerate(inputs.begin(), inputs.end(), 0, [&](size_t ix, cv::VideoCapture input) {
 					std::cout << "DEBUG: Config - FrameCounts: input[" << ix << "]: " << util::getFrameCount(input) << '\n';
@@ -265,6 +275,8 @@ namespace trdrop {
 
 			std::vector<cv::Scalar>  tearColors;
 			cv::Scalar plotBackgroundColor;
+			cv::Scalar plotLinesColor;
+			cv::Scalar plotAxesColor;
 			double     plotAlpha;
 
 			cv::Size viewerSize;
