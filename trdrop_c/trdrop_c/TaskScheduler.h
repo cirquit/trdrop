@@ -129,7 +129,6 @@ namespace trdrop {
 						
 						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
 							interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], currentFrameIndex, vix)));
-
 						}); 
 					});
 

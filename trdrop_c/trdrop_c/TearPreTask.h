@@ -9,6 +9,9 @@
 #include "Tasks.h"
 #include "Either.h"
 
+#include "teardata.h"
+
+
 namespace trdrop {
 	namespace tasks {
 		namespace pre {
@@ -22,8 +25,8 @@ namespace trdrop {
 
 				// types
 			private:
-				using EitherSVD = Either<std::string, std::vector<double>>;
-				using RightVD = Right<std::vector<double>>;
+				using EitherSVD = Either<std::string, trdrop::tear_data>;
+				using RightVD = Right<trdrop::tear_data>;
 				using LeftS = Left<std::string>;
 
 				// default member
@@ -39,9 +42,9 @@ namespace trdrop {
 			public:
 				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, int lineTolerance)
 					: id(id)
-					, tears(videoCount)
+					, tearTaskData(videoCount)
+					, tear_unprocessed(videoCount)
 					, pixelTolerance(pixelTolerance)
-					, windowSize(windowSize)
 					, lineTolerance(lineTolerance)
 					, pretask(std::bind(&TearPreTask::process
 						, this
@@ -50,7 +53,10 @@ namespace trdrop {
 						, std::placeholders::_3
 						, std::placeholders::_4))
 				{ 
-
+					// zero fps-values for every video
+					util::enumerate(tear_unprocessed.begin(), tear_unprocessed.end(), 0, [&](unsigned ix, std::vector<double> &v) {
+						v.insert(v.end(), windowSize, 0.0);
+					});
 				}
 
 				// interface methods
@@ -87,10 +93,13 @@ namespace trdrop {
 					int maxTear = maximumContOccurence(blankLines[vix]);
 					if (maxTear < lineTolerance) maxTear = 0;
 					
-
 					// count the bad pixels and if they consume more than 50% of the image -> tear (shown with a 1)
-					tears[vix] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
-					result = EitherSVD(RightVD(tears));
+					tearTaskData.tears[vix] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
+
+					size_t localIndex = currentFrameIndex % windowSize;
+					tear_unprocessed[vix][localIndex] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
+					tearTaskData.tear_unprocessed = tear_unprocessed;
+					result = EitherSVD(RightVD(tearTaskData));
 				}
 
 				// public member
@@ -103,7 +112,8 @@ namespace trdrop {
 				int pixelTolerance;
 				int lineTolerance;
 				const int windowSize = 60; // not clean
-				std::vector<double> tears;
+				trdrop::tear_data tearTaskData;
+				std::vector<std::vector<double>> tear_unprocessed;
 
 				std::function<int(std::vector<int> &)> maximumContOccurence = [&](std::vector<int> & v)
 				{

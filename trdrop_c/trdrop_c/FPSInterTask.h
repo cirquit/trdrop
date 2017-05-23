@@ -30,6 +30,7 @@ namespace trdrop {
 				// specialized member
 			public:
 				FPSInterTask(trdrop::fps_data & fpsTaskData
+						  ,  trdrop::tear_data & tearTaskData
 						  , std::vector<cv::Point> points
 					      , std::vector<int> refreshRate
 					      , std::vector<cv::Scalar> colors
@@ -37,6 +38,7 @@ namespace trdrop {
 						  , std::vector<std::string> fpsText
 						  , int precision = 2, bool shadows = true)
 					: fpsTaskData(fpsTaskData)
+					, tearTaskData(tearTaskData)
 					, points(points)
 					, precision(precision)
 					, shadows(shadows)
@@ -58,7 +60,13 @@ namespace trdrop {
 			public:
 				void process(cv::Mat & res, const size_t currentFrameIndex, const size_t vix) {
 					if (currentFrameIndex % refreshRate[vix] == 0) {
-						tempFrameRates.assign(fpsTaskData.fps.begin(), fpsTaskData.fps.end());
+						tempFrameRates[vix] = 0;
+						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+							if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
+								tempFrameRates[vix] += 1;
+							} 
+						});
+						fpsTaskData.fps[vix] = tempFrameRates[vix];
 #if _DEBUG
 						std::cout << "DEBUG - FPSInterTask - copied the framerates\n";
 #endif
@@ -77,6 +85,7 @@ namespace trdrop {
 				// private member
 			private:
 				trdrop::fps_data &       fpsTaskData;
+				trdrop::tear_data &      tearTaskData;
 				std::vector<double>      tempFrameRates;
 				std::vector<std::string> fpsText;
 				std::vector<cv::Point>   points;

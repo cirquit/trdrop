@@ -43,6 +43,7 @@ namespace trdrop {
 	public:
 		std::vector<bool>	duplicateFrame;
 		std::vector<double> fps;
+		std::vector<std::vector<double>> fps_unprocessed;
 		size_t              videoCount;
 
 	};

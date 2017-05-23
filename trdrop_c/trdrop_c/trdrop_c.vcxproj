@@ -178,6 +178,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Tasks.h" />
     <ClInclude Include="TaskScheduler.h" />
+    <ClInclude Include="teardata.h" />
     <ClInclude Include="TearPreTask.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="utilvideo.h" />

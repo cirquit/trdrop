@@ -10,7 +10,7 @@
 		for (auto & v : vector) { std::cerr << "         " << std::string(" ", sizeof context) << #vector << '[' << i++ << "]: " << v << '\n'; } \
 	} } while (0)
 
-#define _DEBUGPATH 1
+#define _DEBUGPATH 0
 
 #include <iostream>
 #include <string>
@@ -44,6 +44,8 @@
 #include "ResizeTask.h"
 
 #include "fpsdata.h"
+#include "teardata.h"
+
 
 int main(int argc, char **argv) {
 
@@ -63,16 +65,17 @@ int main(int argc, char **argv) {
 	trdrop::tasks::TaskScheduler scheduler(config.inputs);
 
 	// FPSPreTask
-	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference);
+	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference, config.refreshRate);
 
 	// TearPreTask
-	std::vector<double> tears(config.inputs.size());
+	trdrop::tear_data tearTaskData(config.inputs.size());
 	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), config.pixelDifference, config.lineDifference);
 
 	// FPSIntermediateTask
 	trdrop::fps_data    fpsTaskData(config.inputs.size());
 	trdrop::tasks::inter::FPSInterTask fpsInterT(
 			fpsTaskData,
+			tearTaskData,
 			config.textLocations,
 			config.refreshRate,
 			config.colors,
@@ -85,7 +88,7 @@ int main(int argc, char **argv) {
 	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
 
 	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tears, config.colors, config.writerSize);
+	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.writerSize);
 
 	// ViewerTask
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
@@ -113,9 +116,8 @@ int main(int argc, char **argv) {
 		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", fpsTaskData.fps[ix]);
     });
 	convertions.push_back([&](int ix) {
-		return tears[ix] == 0 || fpsTaskData.duplicateFrame[ix] ? "       false" : std::to_string(static_cast<int>(tears[ix] * 100)) + "%" + "- true";
+		return tearTaskData.tears[ix] == 0 ? "       false" : "  " + std::to_string(static_cast<int>(tearTaskData.tears[ix] * 100)) + "%" + " - true";
 	});
-
 
 	// PreTasks - order does not matter
 	scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::FPSPreTask>(fpsPreT));
@@ -146,9 +148,10 @@ int main(int argc, char **argv) {
 		}
 
 		if (tearPreT.result.successful()) {
-			tears = tearPreT.result.getSuccess();
-			DEBUGV("Main loop: Tears", tears);
+			tearTaskData = tearPreT.result.getSuccess();
+			DEBUGV("Main loop: Tears", tearTaskData.tears);
 		}
+
 
 	}
 	return EXIT_SUCCESS;

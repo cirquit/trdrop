@@ -97,5 +97,8 @@
     <ClInclude Include="fpsdata.h">
       <Filter>Header Files\tasks\data</Filter>
     </ClInclude>
+    <ClInclude Include="teardata.h">
+      <Filter>Header Files\tasks\data</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

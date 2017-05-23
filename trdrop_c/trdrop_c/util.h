@@ -34,6 +34,10 @@ namespace trdrop {
 			return input.get(CV_CAP_PROP_FRAME_COUNT);
 		}
 
+		void setFrameIndex(cv::VideoCapture & input, int frame) {
+			input.set(CV_CAP_PROP_POS_FRAMES, frame);
+		}
+
 		size_t getPixelCount(cv::VideoCapture & input) {
 			return static_cast<size_t>(getWidth(input) * getHeight(input));
 		}

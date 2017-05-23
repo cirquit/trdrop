@@ -13,6 +13,7 @@
 
 #include "Tasks.h"
 #include "util.h"
+#include "teardata.h"
 
 namespace trdrop {
 	namespace tasks {
@@ -33,13 +34,13 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				PlotTask(trdrop::fps_data & fpsTaskData, std::vector<double> & tears, std::vector<cv::Scalar> colors, cv::Size frameSize)
+				PlotTask(trdrop::fps_data & fpsTaskData, trdrop::tear_data & tearTaskData, std::vector<cv::Scalar> colors, cv::Size frameSize)
 					: fpsTaskData(fpsTaskData)
-					, tears(tears)
+					, tearTaskData(tearTaskData)
 					, colors(colors)
 					, fpsContainer(fpsTaskData.videoCount)
-					, tearContainer(tears.size())
-					, timeContainer(tears.size())
+					, tearContainer(tearTaskData.tears.size())
+					, timeContainer(tearTaskData.tears.size())
 					, frameSize(frameSize)
 					, height(frameSize.height / 4)
 					, width(frameSize.width - 2 * margin)
@@ -64,12 +65,12 @@ namespace trdrop {
 					
 					// remove oldest values
 					util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
-						dd.push_back(fpsTaskData.fps[i]);
+						dd.push_back(getFps(i));
 						dd.pop_front();
 					});
 
 					util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
-						double tear = fpsTaskData.duplicateFrame[i] ? 0 : tears[i];
+						double tear = fpsTaskData.duplicateFrame[i] ? 0 : tearTaskData.tears[i];
 						dd.push_back(tear);
 						dd.pop_front();
 					});
@@ -159,6 +160,20 @@ namespace trdrop {
 						pointDistance += pointDistanceIncrement;
 					});
 				};
+
+				std::function<double(int)> getFps = [&](int vix) {
+					double fps = 0.0;
+					std::cout << "vix: " << vix << '\n';
+					trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+						std::cout << "i: " << i << '\n';
+						if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
+							fps += 1.0;
+						}
+					});
+					return fps;
+				};
+
+
 				/*
 				std::function<void(cv::Mat & res)> drawFrametimes = [&](cv::Mat & res) {
 
@@ -186,7 +201,7 @@ namespace trdrop {
 				// private member
 			private:
 				trdrop::fps_data    & fpsTaskData;
-				std::vector<double> & tears;
+				trdrop::tear_data   & tearTaskData;
 				std::vector<std::deque<double>> fpsContainer;
 				std::vector<std::deque<double>> tearContainer;
 				std::vector<std::deque<double>> timeContainer;
