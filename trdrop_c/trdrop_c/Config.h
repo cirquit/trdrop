@@ -62,7 +62,7 @@ namespace trdrop {
 					inputNames.push_back(it->as<std::string>());
 				});
 				
-				trdrop::util::setFrameIndex(inputs[0], 1100);
+				// trdrop::util::setFrameIndex(inputs[0], 1100);
 
 				fromTag("codec", yamlConfig, errors, [&](std::string tag) {
 					std::string cc = yamlConfig[tag].as<std::string>();
