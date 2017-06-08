@@ -39,12 +39,13 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				FPSPreTask(std::string id, size_t videoCount, int pixelDifference, std::vector<int> refreshRate)
+				FPSPreTask(std::string id, size_t videoCount, int pixelDifference, std::vector<int> refreshRate, int windowSize)
 					: id(id)							// id used for the csv header
 					, isDifferentFrame(videoCount)		// allocate enough memory for all videos
 					, fpsTaskData(videoCount)           // allocate enough memory for all videos
 					, pixelDifference(pixelDifference)
 					, refreshRate(refreshRate)
+					, windowSize(windowSize)
 					, pretask(std::bind(&FPSPreTask::process
 						, this
 						, std::placeholders::_1
@@ -92,7 +93,7 @@ namespace trdrop {
 				std::vector<int>    refreshRate;
 				trdrop::fps_data    fpsTaskData;
 				bool                equal = false;
-				const int           windowSize = 60;
+				int		            windowSize;
 				int                 pixelDifference;
 			};
 		} // namespace pre

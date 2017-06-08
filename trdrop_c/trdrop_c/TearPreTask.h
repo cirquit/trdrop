@@ -40,12 +40,13 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, int lineTolerance)
+				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, int lineTolerance, int windowSize)
 					: id(id)
 					, tearTaskData(videoCount)
 					, tear_unprocessed(videoCount)
 					, pixelTolerance(pixelTolerance)
 					, lineTolerance(lineTolerance)
+					, windowSize(windowSize)
 					, pretask(std::bind(&TearPreTask::process
 						, this
 						, std::placeholders::_1
@@ -111,7 +112,7 @@ namespace trdrop {
 			private:
 				int pixelTolerance;
 				int lineTolerance;
-				const int windowSize = 60; // not clean
+				int windowSize;
 				trdrop::tear_data tearTaskData;
 				std::vector<std::vector<double>> tear_unprocessed;
 

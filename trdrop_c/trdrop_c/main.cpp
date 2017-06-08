@@ -64,11 +64,11 @@ int main(int argc, char **argv) {
 	trdrop::tasks::TaskScheduler scheduler(config.inputs, config.writerFrameSize);
 
 	// FPSPreTask
-	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference, config.refreshRate);
+	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference, config.refreshRate, config.getMinimumBakedFPS());
 
 	// TearPreTask
 	trdrop::tear_data tearTaskData(config.inputs.size());
-	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), config.pixelDifference, config.lineDifference);
+	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), config.pixelDifference, config.lineDifference, config.getMinimumBakedFPS());
 
 	// FPSTextTask - Post
 	trdrop::fps_data    fpsTaskData(config.inputs.size());
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 	if (config.viewerActive) viewerT.init();
 
 	// WriterTask - Post
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerFrameSize, config.outputAsBmps);
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getMinimumBakedFPS(), config.writerFrameSize, config.outputAsBmps);
 
 	// CMDProgressTask - Post
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());

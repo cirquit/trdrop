@@ -219,6 +219,11 @@ namespace trdrop {
 				return bakedFps;
 			}
 
+			int getMinimumBakedFPS() {
+				std::vector<double> & bakedFPS = getBakedFPS();
+				return std::ceil(*std::min_element(bakedFPS.begin(), bakedFPS.end()));
+			}
+
 			int getMinFrameIndex() {
 				return std::accumulate(inputs.begin(), inputs.end(), static_cast<int>(trdrop::util::getFrameCount(inputs[0])), [&](int acc, cv::VideoCapture input){
 					return std::min(acc, static_cast<int>(trdrop::util::getFrameCount(input)));
