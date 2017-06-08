@@ -61,6 +61,8 @@ namespace trdrop {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
 					inputNames.push_back(it->as<std::string>());
 				});
+
+
 				
 				// trdrop::util::setFrameIndex(inputs[0], 1100);
 
@@ -175,11 +177,11 @@ namespace trdrop {
 #endif				
 				fromTag("writer-size", yamlConfig, errors, [&](std::string tag) {
 					fromTag("writer-width", yamlConfig[tag], errors, [&](std::string tag_) {
-						writerSize.width = yamlConfig[tag][tag_].as<int>();
+						writerFrameSize.width = yamlConfig[tag][tag_].as<int>();
 					});
 
 					fromTag("writer-height", yamlConfig[tag], errors, [&](std::string tag_) {
-						writerSize.height = yamlConfig[tag][tag_].as<int>();
+						writerFrameSize.height = yamlConfig[tag][tag_].as<int>();
 					});
 				});
 
@@ -284,7 +286,7 @@ namespace trdrop {
 			cv::Size viewerSize;
 			bool	 viewerActive;
 
-			cv::Size writerSize;
+			cv::Size writerFrameSize;
 			bool outputAsBmps;
 
 			std::string								              logName;

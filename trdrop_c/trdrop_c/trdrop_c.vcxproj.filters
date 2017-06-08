@@ -70,9 +70,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FPSInterTask.h">
-      <Filter>Header Files\tasks\inter</Filter>
-    </ClInclude>
     <ClInclude Include="TearPreTask.h">
       <Filter>Header Files\tasks\pre</Filter>
     </ClInclude>
@@ -88,9 +85,6 @@
     <ClInclude Include="LoggerTask.h">
       <Filter>Header Files\tasks\inter</Filter>
     </ClInclude>
-    <ClInclude Include="ResizeTask.h">
-      <Filter>Header Files\tasks\post</Filter>
-    </ClInclude>
     <ClInclude Include="CSVFormatter.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -99,6 +93,9 @@
     </ClInclude>
     <ClInclude Include="teardata.h">
       <Filter>Header Files\tasks\data</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSTextTask.h">
+      <Filter>Header Files\tasks\inter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

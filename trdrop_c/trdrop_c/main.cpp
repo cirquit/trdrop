@@ -1,4 +1,4 @@
-#define _TR_DEBUG 0
+#define _TR_DEBUG 1
 #define DEBUG(context, x) do { \
 	if (_TR_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
@@ -35,7 +35,7 @@
 #include "TaskScheduler.h"
 #include "FPSPreTask.h"
 #include "TearPreTask.h"
-#include "FPSInterTask.h"
+#include "FPSTextTask.h"
 #include "ViewerTask.h"
 #include "WriterTask.h"
 #include "CMDProgressTask.h"
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	}
 
 	// create container
-	trdrop::tasks::TaskScheduler scheduler(config.inputs);
+	trdrop::tasks::TaskScheduler scheduler(config.inputs, config.writerFrameSize);
 
 	// FPSPreTask
 	trdrop::tasks::pre::FPSPreTask fpsPreT("FPS", config.inputs.size(), config.pixelDifference, config.refreshRate);
@@ -71,9 +71,9 @@ int main(int argc, char **argv) {
 	trdrop::tear_data tearTaskData(config.inputs.size());
 	trdrop::tasks::pre::TearPreTask tearPreT("Tear", config.inputs.size(), config.pixelDifference, config.lineDifference);
 
-	// FPSIntermediateTask
+	// FPSTextTask - Post
 	trdrop::fps_data    fpsTaskData(config.inputs.size());
-	trdrop::tasks::inter::FPSInterTask fpsInterT(
+	trdrop::tasks::post::FPSTextTask fpsTextT(
 			fpsTaskData,
 			tearTaskData,
 			config.textLocations,
@@ -81,26 +81,27 @@ int main(int argc, char **argv) {
 			config.colors,
 			config.shadowColors,
 			config.fpsText,
+			config.writerFrameSize,
 			config.fpsPrecision,
 			config.shadows)
 	;
-	// ResizeTaks
-	trdrop::tasks::post::ResizeTask resizeT(config.writerSize);
+	// ResizeTaks - Post
+	trdrop::tasks::post::ResizeTask resizeT(config.writerFrameSize);
 
-	// PlotTask
-	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotLinesColor, config.plotAxesColor, config.plotAlpha, config.writerSize);
+	// PlotTask - Post
+	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotLinesColor, config.plotAxesColor, config.plotAlpha, config.writerFrameSize);
 
-	// ViewerTask
+	// ViewerTask - Post
 	trdrop::tasks::post::ViewerTask viewerT(config.viewerSize);
 	if (config.viewerActive) viewerT.init();
 
-	// WriterTask
-	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerSize, config.outputAsBmps);
+	// WriterTask - Post
+	trdrop::tasks::post::WriterTask writerT(config.outputFile, config.codec, config.getBakedFPS(0), config.writerFrameSize, config.outputAsBmps);
 
-	// CMDProgressTask
+	// CMDProgressTask - Post
 	trdrop::tasks::post::CMDProgressTask cmdProgressT(config.getMinFrameIndex());
 
-	// LoggerTask
+	// LoggerTask - Intermediate
 	using tostring = trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter>::tostring;
 	std::vector<tostring> convertions;
 	trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter> loggerT(
@@ -126,11 +127,11 @@ int main(int argc, char **argv) {
 	scheduler.addPreTask(std::make_shared<trdrop::tasks::pre::TearPreTask>(tearPreT));
 
 	// IntermediateTasks - order does not matter
-	scheduler.addInterTask(std::make_shared<trdrop::tasks::inter::FPSInterTask>(fpsInterT));
+	
 	scheduler.addInterTask(std::make_shared<trdrop::tasks::inter::LoggerTask<trdrop::util::CSVFormatter>>(loggerT));
 
 	// PostTask - order matters
-	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::ResizeTask>(resizeT));
+	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::FPSTextTask>(fpsTextT));
 	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::PlotTask>(plotT));
 	if (config.viewerActive) scheduler.addPostTask(std::make_shared<trdrop::tasks::post::ViewerTask>(viewerT));
 	scheduler.addPostTask(std::make_shared<trdrop::tasks::post::WriterTask>(writerT));

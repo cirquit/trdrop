@@ -34,7 +34,7 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				PlotTask(trdrop::fps_data & fpsTaskData, trdrop::tear_data & tearTaskData, std::vector<cv::Scalar> colors, std::vector<cv::Scalar> tearColors, cv::Scalar plotBackgroundColor, cv::Scalar plotLinesColor, cv::Scalar plotAxesColor, double plotAlpha, cv::Size frameSize)
+				PlotTask(trdrop::fps_data & fpsTaskData, trdrop::tear_data & tearTaskData, std::vector<cv::Scalar> colors, std::vector<cv::Scalar> tearColors, cv::Scalar plotBackgroundColor, cv::Scalar plotLinesColor, cv::Scalar plotAxesColor, double plotAlpha, cv::Size writerFrameSize)
 					: fpsTaskData(fpsTaskData)
 					, tearTaskData(tearTaskData)
 					, colors(colors)
@@ -44,16 +44,18 @@ namespace trdrop {
 					, plotAxesColor(plotAxesColor)
 					, plotAlpha(plotAlpha)
 					, fpsContainer(fpsTaskData.videoCount)
-					, tearContainer(tearTaskData.tears.size())
-					, timeContainer(tearTaskData.tears.size())
-					, frameSize(frameSize)
-					, height(frameSize.height / 4)
-					, width(frameSize.width - 2 * margin)
+					, tearContainer(fpsTaskData.videoCount)
+					, timeContainer(fpsTaskData.videoCount)
+					, writerFrameSize(writerFrameSize)
 					, posttask(std::bind(&PlotTask::process
 						, this
 						, std::placeholders::_1
 						, std::placeholders::_2))
-				{
+				{	
+					margin = writerFrameSize.width / marginScalingRatio;
+					height = writerFrameSize.height / 4;
+					width = writerFrameSize.width - 2 * margin;
+
 					std::for_each(fpsContainer.begin(), fpsContainer.end(), [&](std::deque<double> & dd) {
 						dd.insert(dd.end(), plotWindow(), 0.0);
 					});
@@ -88,15 +90,16 @@ namespace trdrop {
 				// public member
 			public:
 
-				std::function<int()> plotWindow = [&]() { return (frameSize.width - 2 * margin) / 10;  };
+				std::function<int()> plotWindow = [&]() { return (writerFrameSize.width - 2 * margin) / 10;  };
+
 				std::function<void(cv::Mat & res)> drawGrid = [&](cv::Mat & res) {
 					
 					// graph starting points
 					int x = margin;
-					int y = frameSize.height - margin - height;
+					int y = writerFrameSize.height - margin - height;
 
-					// extra space above 60fps in px
-					int overhead = 6;
+					// extra space above 60fps line in px
+					int overhead = 6; // 20; // writerFrameSize.width / 320;
 					
 					// graph background
 					cv::Mat roi = res(cv::Rect(x, y - overhead, width, height+ overhead));
@@ -109,40 +112,72 @@ namespace trdrop {
 					//							     , plotBackgroundColor[2] + 40 % 255);
 
 
+					int spriteWScale = writerFrameSize.width / spriteWidthScaleRatio;
+					int spriteHScale = writerFrameSize.width / spriteHeightScaleRatio;
+
+					int spriteXOffset = writerFrameSize.width / spriteXScaleRatio;
+					int spriteYOffset = writerFrameSize.width / spriteYScaleRatio;
+
+					int sepLineThickness = writerFrameSize.width / separationLineThicknessRatio;
+					int lineYOffset = writerFrameSize.width / lineYOffsetRatio;
+
 					// separation lines
 					for (int i = 1; i < 6; ++i) {
-						int lineY = (maxFps - 10 * i*height / maxFps) + frameSize.height - maxFps - margin;
-						cv::line(res, cv::Point(x, lineY-4), cv::Point(x + width, lineY-4), plotLinesColor);
-						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(22, 23));
-						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - 28, lineY-9));
+						int lineY = (maxFps - 10 * i*height / maxFps) + writerFrameSize.height - maxFps - margin;
+						cv::line(res, cv::Point(x, lineY- lineYOffset), cv::Point(x + width, lineY- lineYOffset), plotLinesColor, sepLineThickness, CV_AA);
+						cv::resize(number_sprites[i-1], number_sprites[i-1], cv::Size(spriteWScale, spriteHScale));
+						util::overlayImage(res, number_sprites[i-1], res, cv::Point2i(x - spriteXOffset, lineY - spriteYOffset));
 					}
 				
+					int graphLineThickness = writerFrameSize.width / graphLineThicknessRatio;
+
 					// y-line
-					cv::line(res, cv::Point(x, y - overhead), cv::Point(x, y + height), plotAxesColor, 3, 10);
+					cv::line(res, cv::Point(x, y - overhead), cv::Point(x, y + height), plotAxesColor, graphLineThickness, CV_AA);
 
 					// y-line text with shadows
-					util::overlayImage(res, fps_sprite, res, cv::Point2i(x - 18, y - 28 - overhead));
+
+					int fpsSpriteWScale = writerFrameSize.width / fpsSpriteWidthScaleRatio;
+					int fpsSpriteHScale = writerFrameSize.width / fpsSpriteHeightScaleRatio;
+
+					int fpsSpriteXOffset = writerFrameSize.width / fpsSpriteXScaleRatio;
+					int fpsSpriteYOffset = writerFrameSize.width / fpsSpriteYScaleRatio;
+
+					cv::resize(fps_sprite, fps_sprite, cv::Size(fpsSpriteWScale, fpsSpriteHScale));
+					util::overlayImage(res, fps_sprite, res, cv::Point2i(x - fpsSpriteXOffset, y - fpsSpriteYOffset - overhead));
+
 
 					// x-line
-					cv::line(res, cv::Point(x, y + height), cv::Point(x + width, y + height), plotAxesColor, 3, 10);
+					cv::line(res, cv::Point(x, y + height), cv::Point(x + width, y + height), plotAxesColor, graphLineThickness, CV_AA);
 
 				};
 
 				std::function<void(cv::Mat & res)> drawLines = [&](cv::Mat & res) {
 
-					int pointDistance = margin;
+					int pointDistance = margin + writerFrameSize.width / pointDistanceRatio;
 					int pointDistanceIncrement = width / plotWindow();
 
-					cv::Point lastPoint(margin + 6, frameSize.height - margin - 4);
+					cv::Point lastPoint(margin, writerFrameSize.height - margin - 4);
 					std::vector<cv::Point> lastPoints(fpsTaskData.videoCount, lastPoint);
+
+					int lineThickness = writerFrameSize.width / lineThicknessRatio;
+					int lineYOffset	  = writerFrameSize.width / lineYOffsetRatio;
+					int lastLineXOffSet = writerFrameSize.width / lastLineXOffSetRatio;
 
 					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
 						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned vix, std::deque<double> fpsDeque) {
+
 							int currentFps = static_cast<int>(fpsDeque[i]);
-							int y = (maxFps - currentFps*height / maxFps) + frameSize.height - maxFps - margin - 4;
-							cv::Point currentPoint(pointDistance + 6, y);
-							if (i == 0) lastPoints[vix] = currentPoint;
-							cv::line(res, lastPoints[vix], currentPoint, colors[vix], 2, CV_AA);
+							int y = (maxFps - currentFps*height / maxFps) + writerFrameSize.height - maxFps - margin - lineYOffset;
+							cv::Point currentPoint(pointDistance, y);
+
+							// set the first point to the start of the grid
+							if (i == 0) lastPoints[vix] = currentPoint; 
+
+							// set the last point to the end of the grid
+							// custom offset...because we need to rewrite the whole orientation
+							if (i == fpsContainer[0].size() - 1) currentPoint.x = width + margin - lastLineXOffSet;
+
+							cv::line(res, lastPoints[vix], currentPoint, colors[vix], lineThickness, CV_AA);
 							lastPoints[vix] = currentPoint;
 						});
 						pointDistance += pointDistanceIncrement;
@@ -153,17 +188,19 @@ namespace trdrop {
 					
 					int pointDistance = margin + 6;
 					int pointDistanceIncrement = width / plotWindow();
-					int tearHeight = height / static_cast<int>(tearContainer.size()); // Fit all all videos into the graph
-					int baseHeight = frameSize.height - margin - 4;
+					int tearHeight = height / static_cast<int>(tearContainer.size()); // Fit all videos into the graph
+					int baseHeight = writerFrameSize.height - margin - 4;
 					
+					int lineThickness = writerFrameSize.width / lineThicknessRatio;
+
 					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](unsigned i, double tear) {
 						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned vix, std::deque<double> tearDeque) {
 							if (tearDeque[i] != 0) {
 								cv::Point basePoint(pointDistance, baseHeight - vix * tearHeight);
 								cv::Point topPoint(pointDistance, baseHeight - tearHeight - vix * tearHeight);
 								cv::Point midPoint(pointDistance, static_cast<int>(baseHeight - tearDeque[i] * tearHeight - vix * tearHeight));
-								cv::line(res, basePoint, midPoint, tearColors[vix], 2, CV_AA);
-								cv::line(res, midPoint, topPoint, colors[vix], 2, CV_AA);
+								cv::line(res, basePoint, midPoint, tearColors[vix], lineThickness, CV_AA);
+								cv::line(res, midPoint, topPoint, colors[vix], lineThickness, CV_AA);
 							}
 						});
 						pointDistance += pointDistanceIncrement;
@@ -188,7 +225,7 @@ namespace trdrop {
 
 					int pointDistance = margin + 6;
 					int pointDistanceIncrement = width / plotWindow();
-					int baseHeight = frameSize.height - margin - 4;
+					int baseHeight = writerFrameSize.height - margin - 4;
 
 					cv::Point lastPoint(pointDistance, baseHeight);
 					std::vector<cv::Point> lastPoints(fpsTaskData.videoCount, lastPoint);
@@ -221,12 +258,35 @@ namespace trdrop {
 				cv::Scalar plotBackgroundColor;
 				cv::Scalar plotLinesColor;
 				cv::Scalar plotAxesColor;
-				double plotAlpha;
-				const int margin = 30; // px
-				const cv::Size frameSize;
-				const int height; 
-				const int width;
-				const int maxFps = 60;
+
+				double		   plotAlpha;
+				int            margin;
+				int			   height; 
+				int			   width;
+				const cv::Size writerFrameSize;
+
+				const int	   maxFps = 60;
+
+
+				const int marginScalingRatio      = 64;   // 1920 / 30, because 30 was our initial px setting for 1080p 
+
+				const int spriteWidthScaleRatio   = 87;   // 1920 / 22, init px settings
+				const int spriteHeightScaleRatio  = 83;   // 1920 / 23, init px settings
+				const int spriteXScaleRatio	      = 69;   // 1920 / 28, init px settings
+				const int spriteYScaleRatio		  = 213;  // 1920 / 9,  init px settings
+
+				const int fpsSpriteWidthScaleRatio  = 51;  // 1920 / 37, init px settings
+				const int fpsSpriteHeightScaleRatio = 76;  // 1920 / 25, init px settings
+				const int fpsSpriteXScaleRatio		= 76;  // 1920 / 25, init px settings
+				const int fpsSpriteYScaleRatio	    = 76;  // 1920 / 25,  init px settings
+
+				const int lineThicknessRatio		   = 960;  // 1920 / 2, init px thickness
+				const int separationLineThicknessRatio = 1920; // 1920 / 1, init px thickness
+				const int graphLineThicknessRatio      = 384;  // 1920 / 5, init px thickness
+
+				const int pointDistanceRatio		   = 320;  // 1920 / 6, init px offset
+				const int lineYOffsetRatio			   = 480;  // 1920 / 4, init px offset
+				const int lastLineXOffSetRatio		   = 960;  // 1920 / 2, init px offset 
 				
 #if _DEBUGPATH
 				const std::string prep = "../../../images/";

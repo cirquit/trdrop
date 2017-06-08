@@ -31,8 +31,9 @@ namespace trdrop {
 
 			// specialized member
 		public:
-			TaskScheduler(std::vector<cv::VideoCapture> & inputs)
+			TaskScheduler(std::vector<cv::VideoCapture> & inputs, const cv::Size writerFrameSize)
 				: inputs(inputs)
+				, writerFrameSize(writerFrameSize)
 				, prev(inputs.size())
 				, cur(inputs.size())
 			{ }
@@ -49,33 +50,48 @@ namespace trdrop {
 				postTasks.push_back(taskptr);
 			}
 			
+			/* 
+			 * Resizes every video to the desired writerFrameSize and crops accordingly.
+			 * Currently supports up to 2 videos.
+			 */
 			void merge(std::vector<cv::Mat> & frames, cv::Mat & result) {
 
-				int x = frames[0].size().width / 4; // TODO only works for max 2 videos
-				int y = 0;
-				int width = frames[0].size().width / 2; // static_cast<int>(frames.size());
-				int height = frames[0].size().height;
+				std::vector<cv::Mat> resizedFrames;
 
-				cv::Rect box(x, y, width, height);
-				cv::Rect left(0, 0, width, height);
-				cv::Rect right(x*2, 0, width, height);
+				std::for_each(frames.begin(), frames.end(), [&](cv::Mat & a) {
+					cv::Mat resized(writerFrameSize, frames[0].depth());
+					cv::resize(a, resized, writerFrameSize);
+					resizedFrames.push_back(resized);
+				});
 
 				if (frames.size() == 1) {
-					result = cv::Mat(frames[0].size(), true);
-					frames[0].copyTo(result);
+					resizedFrames[0].copyTo(result);
 				} else if (frames.size() == 2) {
-					frames[0].copyTo(result);
-					cv::Mat cropped0 = frames[0](box);
-					cv::Mat cropped1 = frames[1](box);
+
+					int x = resizedFrames[0].size().width / 4;
+					int y = 0;
+					int width = resizedFrames[0].size().width / 2;
+					int height = resizedFrames[0].size().height;
+
+					cv::Rect box(x, y, width, height);
+					cv::Rect left(0, 0, width, height);
+					cv::Rect right(x * 2, 0, width, height);
+
+					resizedFrames[0].copyTo(result); // somehow needed, even if we already allocated 'result'
+					cv::Mat cropped0 = resizedFrames[0](box);
+					cv::Mat cropped1 = resizedFrames[1](box);
 					cropped0.copyTo(result(left));
 					cropped1.copyTo(result(right));
-				} 
+				} else {
+					std::cout << "\nError: merging for more than two videos is not defined...yet\n";
+				}
 			}
 
 			bool next() {
 #if _TR_DEBUG
 				std::cout << "\nDEBUG: TaskScheduler.next() - currentFrameIndex\n";
 #endif
+				// first read reads two frames
 				if (currentFrameIndex == 0) {
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
 						readSuccessful &= input.read(prev[vix]);
@@ -83,11 +99,11 @@ namespace trdrop {
 					});
 
 					if (readSuccessful) {
-						merged = cv::Mat(prev[0].size().height, prev[0].size().width, prev[0].depth());
+						merged = cv::Mat(writerFrameSize, prev[0].depth());
 					}
 				} else {
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
-						cur[vix].copyTo(prev[vix]);  // no need to swap pointers, cv::Mat uses smart pointers by itself
+						cur[vix].copyTo(prev[vix]);
 						readSuccessful &= input.read(cur[vix]);
 					});
 				}
@@ -115,18 +131,8 @@ namespace trdrop {
 #endif
 					preTasksFinished.clear();
 
-					// intermediate tasks - parallel of different videos
+					// intermediate tasks - parallel
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
-						
-						/*
-						std::function<void()> videoTask = [&]() {
-							std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
-								(*f)(prev[vix], currentFrameIndex, vix);
-							});
-						}; */
-						
-						// interTasksFinished.push_back(std::move(std::async(std::launch::async, videoTask)));
-						
 						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
 							interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], currentFrameIndex, vix)));
 						}); 
@@ -169,14 +175,15 @@ namespace trdrop {
 			std::vector<std::future<void>>		preTasksFinished;
 			
 			std::vector<std::shared_ptr<trdrop::tasks::intertask>> interTasks;
-			std::vector<std::future<void>>		  interTasksFinished;
+			std::vector<std::future<void>>		interTasksFinished;
 			
 			std::vector<std::shared_ptr<trdrop::tasks::posttask>> postTasks;
 			
 			std::vector<cv::Mat> cur;
 			std::vector<cv::Mat> prev;
 			cv::Mat				 merged;
-			size_t currentFrameIndex = 0;
+			const cv::Size       writerFrameSize;
+			size_t			     currentFrameIndex = 0;
 		};
 
 	} // namespace tasks

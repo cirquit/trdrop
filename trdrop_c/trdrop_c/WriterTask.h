@@ -30,8 +30,8 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				WriterTask(std::string filename, int codec, double bakedFps, cv::Size frameSize, bool outputAsBmps)
-					: output(filename, codec, bakedFps, frameSize)
+				WriterTask(std::string filename, int codec, double bakedFps, cv::Size writerFrameSize, bool outputAsBmps)
+					: output(filename, codec, bakedFps, writerFrameSize)
 					, outputAsBmps(outputAsBmps)
 					, fileName(filename)
 					, posttask(std::bind(&WriterTask::process
@@ -66,7 +66,6 @@ namespace trdrop {
 				// private member
 			private:
 				cv::VideoWriter output;
-				const cv::Size frameSize;
 
 				std::string fileName;
 				bool outputAsBmps;

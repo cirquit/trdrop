@@ -168,13 +168,12 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="CSVFormatter.h" />
     <ClInclude Include="fpsdata.h" />
-    <ClInclude Include="FPSInterTask.h" />
+    <ClInclude Include="FPSTextTask.h" />
     <ClInclude Include="FPSPreTask.h" />
     <ClInclude Include="framealgorithm.h" />
     <ClInclude Include="Either.h" />
     <ClInclude Include="LoggerTask.h" />
     <ClInclude Include="PlotTask.h" />
-    <ClInclude Include="ResizeTask.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Tasks.h" />
     <ClInclude Include="TaskScheduler.h" />
