@@ -41,7 +41,6 @@
 #include "CMDProgressTask.h"
 #include "LoggerTask.h"
 #include "PlotTask.h"
-#include "ResizeTask.h"
 
 #include "fpsdata.h"
 #include "teardata.h"
@@ -85,9 +84,7 @@ int main(int argc, char **argv) {
 			config.fpsPrecision,
 			config.shadows)
 	;
-	// ResizeTaks - Post
-	trdrop::tasks::post::ResizeTask resizeT(config.writerFrameSize);
-
+	
 	// PlotTask - Post
 	trdrop::tasks::post::PlotTask plotT(fpsTaskData, tearTaskData, config.colors, config.tearColors, config.plotBackgroundColor, config.plotLinesColor, config.plotAxesColor, config.plotAlpha, config.writerFrameSize);
 
