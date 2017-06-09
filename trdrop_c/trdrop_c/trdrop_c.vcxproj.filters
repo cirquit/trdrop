@@ -95,7 +95,7 @@
       <Filter>Header Files\tasks\data</Filter>
     </ClInclude>
     <ClInclude Include="FPSTextTask.h">
-      <Filter>Header Files\tasks\inter</Filter>
+      <Filter>Header Files\tasks\post</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

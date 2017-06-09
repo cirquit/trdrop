@@ -1,4 +1,4 @@
-#define _TR_DEBUG 1
+#define _TR_DEBUG 0
 #define DEBUG(context, x) do { \
 	if (_TR_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
@@ -107,13 +107,13 @@ int main(int argc, char **argv) {
 		config.inputNames,
 		config.logName
 	);
-	convertions.push_back([&](int ix){
+	convertions.push_back([&](size_t ix){
 		return trdrop::util::string_format("%10i", scheduler.getCurrentFrameIndex());
 	});
-	convertions.push_back([&](int ix){
+	convertions.push_back([&](size_t ix){
 		return trdrop::util::string_format("%6." + std::to_string(config.fpsPrecision) + "f", fpsTaskData.fps[ix]);
     });
-	convertions.push_back([&](int ix) {
+	convertions.push_back([&](size_t ix) {
 		return (fpsTaskData.duplicateFrame[ix] || (tearTaskData.tears[ix] == 0)) ?
 			"       false" :
 			"  " + std::to_string(static_cast<int>(tearTaskData.tears[ix] * 100)) + "%" + " - true";

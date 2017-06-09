@@ -47,6 +47,7 @@ namespace trdrop {
 					, pixelTolerance(pixelTolerance)
 					, lineTolerance(lineTolerance)
 					, windowSize(windowSize)
+					, videoCount(videoCount)
 					, pretask(std::bind(&TearPreTask::process
 						, this
 						, std::placeholders::_1
@@ -63,19 +64,11 @@ namespace trdrop {
 				// interface methods
 			public:
 				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
+					
 					cv::Mat diffMat;
 					cv::absdiff(prev, cur, diffMat);
-
-					// test purposes
-					static std::mutex mutex;
-					std::lock_guard<std::mutex> lock(mutex);
-					std::vector<std::vector<int>> blankLines;
-
-					blankLines.push_back(std::vector<int>(diffMat.rows, 0));
-					blankLines.push_back(std::vector<int>(diffMat.rows, 0));
-
-					//blankLines[0].insert(blankLines[0].end(), diffMat.rows, 0);
-					//blankLines[1].insert(blankLines[1].end(), diffMat.rows, 0);
+					
+					std::vector<std::vector<int>> blankLines(videoCount, std::vector<int>(diffMat.rows, 0));
 
 					for (int i = 0; i < diffMat.rows; ++i)
 					{
@@ -91,6 +84,9 @@ namespace trdrop {
 						}
 					}
 
+					static std::mutex mutex;
+					std::lock_guard<std::mutex> lock(mutex);
+
 					int maxTear = maximumContOccurence(blankLines[vix]);
 					if (maxTear < lineTolerance) maxTear = 0;
 					
@@ -101,6 +97,10 @@ namespace trdrop {
 					tear_unprocessed[vix][localIndex] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
 					tearTaskData.tear_unprocessed = tear_unprocessed;
 					result = EitherSVD(RightVD(tearTaskData));
+
+#if _TR_DEBUG
+					std::cout << "DEBUG: TearPreTask - finished for video " << vix << '\n';
+#endif
 				}
 
 				// public member
@@ -110,6 +110,7 @@ namespace trdrop {
 
 				// private member
 			private:
+				size_t videoCount;
 				int pixelTolerance;
 				int lineTolerance;
 				int windowSize;

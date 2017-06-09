@@ -23,7 +23,7 @@ namespace trdrop {
 
 			// types
 			public:
-				using tostring = std::function<std::string(int)>;
+				using tostring = std::function<std::string(size_t)>;
 
 				// default member
 			public:
@@ -48,10 +48,12 @@ namespace trdrop {
 					, intertask(std::bind(&LoggerTask::process
 						, this
 						, std::placeholders::_1
-						, std::placeholders::_2))
+						, std::placeholders::_2
+						, std::placeholders::_3))
 				{
 
 					std::for_each(fileNames.begin(), fileNames.end(), [&](std::string filename) {
+
 						streams.emplace_back(std::shared_ptr<std::ofstream>(new std::ofstream{ toLogFileName(filename) }));
 #if _TR_DEBUG
 						std::cout << "DEBUG: LoggerTask - created stream \"" << toLogFileName(filename) << "\"\n";
@@ -74,20 +76,22 @@ namespace trdrop {
 
 				// interface methods
 			public:
-				void process(cv::Mat & res, const size_t vix) {
-					util::enumerate(streams.begin(), streams.end(), 0, [&](unsigned ix, std::shared_ptr<std::ofstream> & streamptr) {
-						std::vector<std::string> values;
-						std::transform(conversions.begin(), conversions.end(), std::back_inserter(values), [&](tostring f) {
-							return f(ix);
-						});
+				void process(cv::Mat & res, const size_t currentFrameIndex, const size_t vix) {
 
-						std::string formatted(formatter.format(values.begin(), values.end()));
-#if _TR_DEBUG
-					//	std::cout << "DEBUG: LoggerTask - logging: " << formatted << '\n';
-#endif 
-						streamptr -> write(formatted.c_str(), formatted.size());
-						values.clear();
+					static std::mutex mutex;
+					std::lock_guard<std::mutex> lock(mutex);
+	
+					std::vector<std::string> values;
+					std::transform(conversions.begin(), conversions.end(), std::back_inserter(values), [&](tostring f) {
+							return f(vix);
 					});
+
+					std::string formatted(formatter.format(values.begin(), values.end()));
+#if _TR_DEBUG
+					std::cout << "DEBUG: LoggerTask - vix: " << vix << '\n';
+#endif
+					streams[vix] -> write(formatted.c_str(), formatted.size());
+					values.clear();
 				}
 
 				// private member
@@ -101,9 +105,11 @@ namespace trdrop {
  					std::string preLogName = dotIndex == -1 ? logName : logName.substr(0, dotIndex);
 					std::string extention = dotIndex == -1 ? "" : logName.substr(dotIndex, logName.size());
 
+					size_t slashIndex = filename.find_last_of('\\');
+					filename = slashIndex == -1 ? filename : filename.substr(slashIndex + 1);
+
 					return preLogName + "-" + filename + extention;
 				};
-
 
 				Formatter formatter;
 				std::vector<std::shared_ptr<std::ofstream>> streams;

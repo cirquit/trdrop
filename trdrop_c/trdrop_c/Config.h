@@ -44,26 +44,14 @@ namespace trdrop {
 			// not using the stream approach because of the custom error handling
 			Config(int argc, char** argv)
 			{
-				std::string path = trdropYAMLConfig;
-				if (argc >= 2) {
-					std::string maybePath(argv[1]);
-					if (doesFileExist(maybePath)) {
-						path = maybePath;
-						std::cout << "trdrop: Using config-path \"" << maybePath << "\"\n";
-					}
-				}
-				else {
-					std::cout << "trdrop: Using default config-path \"" << path << "\"\n";
-				}
-				YAML::Node yamlConfig = YAML::LoadFile(path);
+				YAML::Node yamlConfig = parseArgs(argc, argv);
+
 				std::vector<std::string> errors;
 				fromSequenceTag("input-files", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					inputs.push_back(cv::VideoCapture(it->as<std::string>()));
 					inputNames.push_back(it->as<std::string>());
 				});
 
-
-				
 				// trdrop::util::setFrameIndex(inputs[0], 1100);
 
 				fromTag("codec", yamlConfig, errors, [&](std::string tag) {
@@ -221,7 +209,7 @@ namespace trdrop {
 
 			int getMinimumBakedFPS() {
 				std::vector<double> & bakedFPS = getBakedFPS();
-				return std::ceil(*std::min_element(bakedFPS.begin(), bakedFPS.end()));
+				return static_cast<int>(std::ceil(*std::min_element(bakedFPS.begin(), bakedFPS.end())));
 			}
 
 			int getMinFrameIndex() {
@@ -258,9 +246,29 @@ namespace trdrop {
 				}
 				else {
 					error(errors, "tag \"" + tag + "\" could not be found in " + trdropYAMLConfig + ", please check the syntax of the tag\n");
+				}	
+			}
+
+			YAML::Node parseArgs(int argc, char** argv) {
+
+				// yaml encapsulated with single quotes and using double quotes for strings
+				if (argc >= 2 && (strcmp(argv[1], "--yaml") == 0)) {
+						std::cout << "trdrop: Using the config from the command line:\n";
+						std::cout << "    Got: " << argv[2] << '\n';
+						return YAML::Load(argv[2]);
 				}
 				
-				
+				// custom config path
+				if (argc >= 2 && doesFileExist(std::string(argv[1]))) {
+					std::string maybePath(argv[1]);
+					std::cout << "trdrop: Using config-path \"" << maybePath << "\"\n";
+					return YAML::LoadFile(maybePath);
+				}
+
+				// default config path
+				std::string defaultPath = trdropYAMLConfig;
+				std::cout << "trdrop: Using default config-path \"" << defaultPath << "\"\n";
+				return YAML::LoadFile(defaultPath);
 			}
 
 		// public member

@@ -82,7 +82,30 @@ namespace trdrop {
 					cv::Mat cropped1 = resizedFrames[1](box);
 					cropped0.copyTo(result(left));
 					cropped1.copyTo(result(right));
-				} else {
+				} else if (frames.size() == 3) {
+
+					int x = resizedFrames[0].size().width / 3;
+					int y = 0;
+					int width = resizedFrames[0].size().width / 3;
+					int height = resizedFrames[0].size().height;
+
+					cv::Rect box(x, y, width, height);
+
+					cv::Rect left(0, 0, width, height);
+					cv::Rect mid(x, 0, width, height);
+					cv::Rect right(x * 2, 0, width, height);
+
+
+					resizedFrames[0].copyTo(result); // somehow needed, even if we already allocated 'result'
+					cv::Mat cropped0 = resizedFrames[0](box);
+					cv::Mat cropped1 = resizedFrames[1](box);
+					cv::Mat cropped2 = resizedFrames[2](box);
+					cropped0.copyTo(result(left));
+					cropped1.copyTo(result(mid));
+					cropped2.copyTo(result(right));
+
+				}
+				else {
 					std::cout << "\nError: merging for more than two videos is not defined...yet\n";
 				}
 			}
@@ -117,7 +140,9 @@ namespace trdrop {
 					
 					// pretasks - parallel
 					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+						
 						std::for_each(preTasks.begin(), preTasks.end(), [&](std::shared_ptr<trdrop::tasks::pretask> f) {
+							// (*f)(prev[vix], cur[vix], currentFrameIndex, vix);
 							preTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], cur[vix], currentFrameIndex, vix)));
 						});
 					}); 
@@ -126,15 +151,19 @@ namespace trdrop {
 					std::for_each(preTasksFinished.begin(), preTasksFinished.end(), [](std::future<void> & future){
 						future.wait();
 					}); 		
+
+					
 #if _TR_DEBUG
 					std::cout << "DEBUG: TaskScheduler - finished all pretasks - size: " << preTasksFinished.size() << "\n";
 #endif
 					preTasksFinished.clear();
 
 					// intermediate tasks - parallel
-					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](const unsigned vix, cv::VideoCapture input) {
+	
 						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
-							interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[vix], currentFrameIndex, vix)));
+							(*f)(prev[vix], currentFrameIndex, vix); 
+							// interTasksFinished.push_back(std::move(std::async(std::launch::async, *f, prev[cvix], currentFrameIndex, cvix)));
 						}); 
 					});
 

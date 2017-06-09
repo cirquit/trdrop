@@ -62,6 +62,7 @@ namespace trdrop {
 				// interface methods
 			public:
 				void process(const cv::Mat & prev, const cv::Mat & cur, const size_t currentFrameIndex, const size_t vix) {
+					bool equal = false;
 
 					if (pixelDifference > 0){
 						equal = trdrop::algorithm::are_equal_with<int>(prev, cur, pixelDifference);
@@ -80,6 +81,11 @@ namespace trdrop {
 					fpsTaskData.fps_unprocessed = isDifferentFrame;
 
 					result = EitherSD(RightD(fpsTaskData));
+#if _TR_DEBUG
+					std::cout << "DEBUG: FPSPreTask - finished for video " << vix << '\n';
+#endif
+
+					
 				}
 
 				// public member
@@ -92,7 +98,6 @@ namespace trdrop {
 				std::vector<std::vector<double>>   isDifferentFrame;
 				std::vector<int>    refreshRate;
 				trdrop::fps_data    fpsTaskData;
-				bool                equal = false;
 				int		            windowSize;
 				int                 pixelDifference;
 			};
