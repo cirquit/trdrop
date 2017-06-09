@@ -22,5 +22,5 @@ Current releases are found [here](https://github.com/cirquit/trdrop/releases). (
 * support for comparison of different resolution videos
 * configurable output resolutions
 
-<img src="images/video-screenshot.jpg" alt="Teardrop logo" width="960" height="480">
+<img src="images/triple-screenshot.jpg" alt="Teardrop logo" width="960" height="480">
 
