@@ -15,15 +15,12 @@ Current releases are found [here](https://github.com/cirquit/trdrop/releases). (
 ## Features
 
 * fps feature extraction
-* support for up to two videos
+* support for up to three videos
 * csv logger
 * plot visualization
-* yaml-configuration
-  * text-x/y
-  * text-update
-  * text-color
-  * pixel difference
-  * viewer / writer resolution
+* configuration via a `yaml` file
+* support for comparison of different resolution videos
+* configurable output resolutions
 
 <img src="images/video-screenshot.jpg" alt="Teardrop logo" width="960" height="480">
 
