@@ -85,7 +85,7 @@ namespace trdrop {
 					pixelDifference = yamlConfig[tag].as<int>();
 				});
 				fromTag("line-difference", yamlConfig, errors, [&](std::string tag) {
-					lineDifference = yamlConfig[tag].as<int>();
+					lineDifference = yamlConfig[tag].as<double>();
 				});
 				fromSequenceTag("tear-color", yamlConfig, errors, [&](YAML::const_iterator it, std::string tag) {
 					std::string hex = it->second["hex"].as<std::string>();
@@ -280,7 +280,7 @@ namespace trdrop {
 			std::string outputFile;
 
 			int			pixelDifference;
-			int         lineDifference;
+			double      lineDifference;
 
 			std::vector<cv::Point>   textLocations;
 			std::vector<std::string> fpsText;

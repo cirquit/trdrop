@@ -40,7 +40,7 @@ namespace trdrop {
 
 				// specialized member
 			public:
-				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, int lineTolerance, int windowSize)
+				TearPreTask(std::string id, size_t videoCount, int pixelTolerance, double lineTolerance, int windowSize)
 					: id(id)
 					, tearTaskData(videoCount)
 					, tear_unprocessed(videoCount)
@@ -88,7 +88,8 @@ namespace trdrop {
 					std::lock_guard<std::mutex> lock(mutex);
 
 					int maxTear = maximumContOccurence(blankLines[vix]);
-					if (maxTear < lineTolerance) maxTear = 0;
+					int lineToleranceCount = lineTolerance * prev.size().height;
+					if (maxTear < lineToleranceCount) maxTear = 0;
 					
 					// count the bad pixels and if they consume more than 50% of the image -> tear (shown with a 1)
 					tearTaskData.tears[vix] = static_cast<double>(maxTear) / static_cast<double>(diffMat.rows);
@@ -112,7 +113,7 @@ namespace trdrop {
 			private:
 				size_t videoCount;
 				int pixelTolerance;
-				int lineTolerance;
+				double lineTolerance;
 				int windowSize;
 				trdrop::tear_data tearTaskData;
 				std::vector<std::vector<double>> tear_unprocessed;
