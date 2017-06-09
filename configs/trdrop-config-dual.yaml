@@ -14,8 +14,8 @@
 
 # input files path
 input-files:
-  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
-  - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
+  - 4K UHD Arkham Asylum PS4 Pro 01.avi
+  - 4K UHD Arkham Asylum PS4 Pro 01.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
@@ -44,6 +44,7 @@ output-as-bmps: false
 #
 # Codecs that work:
 #   * X264 + .avi
+#   * DIVX + .avi
 #   * TODO
 #
 codec: "DIVX"
@@ -63,11 +64,11 @@ log-file:    log.csv
 pixel-difference: 7
 
 # Line Difference Margin
-# min: 0 - every blank line will count as tear
-# max: <height of frame> - the whole frame should be blank to count as tear
+# min: 0%   - every blank line will count as tear
+# max: 100% - the whole frame should be blank to count as tear
 #
-# How many lines should be blank so the frame counts as tear
-line-difference: 540
+# How many % of the frame should be blank so it counts as tear
+line-difference: 0.6
 
 # Tear color
 tear-color:
@@ -106,10 +107,10 @@ fps-text-locations:
     # x: 50, y: 50 for single video
     # x: 500, y: 50 for double video
     first-video:
-        x: 500
+        x: 50
         y: 50
     second-video:
-        x: 500
+        x: 1010
         y: 50
 
 # text which is placed before the number (currently always white)

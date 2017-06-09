@@ -14,11 +14,13 @@
 
 # input files path
 input-files:
+  - Sample 1 1080p FPS Drop Zelda Wii U.avi
   - Sample 3 1080p Tearing Watch Dogs 2 PS4.avi
+  - 4K UHD Arkham Asylum PS4 Pro 01.avi
 
 # output file name (currently only name supported, not a path)
 # watch out for the extention, because opencv does not like some codecs with some containers (just use .avi)
-output-file: trdrop-output.avi
+output-file: trdrop-triple-output.avi
 
 # if you trigger this option, trdrop will drop the raw frames as bmp into the starting directory. They should be importable
 # with every major video editing program
@@ -46,7 +48,7 @@ output-as-bmps: false
 #   * DIVX + .avi
 #   * TODO
 #
-codec: "X264"
+codec: "DIVX"
 # codec: ""   # <- popup
 
 
@@ -72,13 +74,20 @@ line-difference: 0.6
 # Tear color
 tear-color:
     first-video:
-        hex: "#a0a0ff"
-
+        hex: "#aa2222"
+    second-video:
+        hex: "#aa2222"
+    third-video:
+        hex: "#aa2222"
 
 # defines the color of the text field and the plot color ("" are needed because # is a comment in yaml)
 colors:
     first-video:
-        hex: "#5050ff"
+        hex: "#99ffff"
+    second-video:
+        hex: "#e7c3e0"
+    third-video:
+        hex: "#733d58"
 
 # create a shadow behind the text for improved visibility
 fps-shadow: true
@@ -86,7 +95,11 @@ fps-shadow: true
 # the color of the shadow
 fps-shadow-colors:
     first-video:
-        hex: "#a0a0ff"
+        hex: "#ff9999"
+    second-video:
+        hex: "#585ab6"
+    third-video:
+        hex: "#333d58"
 
 ########################################
 # FPS CALCULATION Configuration
@@ -98,14 +111,26 @@ fps-shadow-colors:
 #    |                         |
 #  (max-y, 0) ---------- (max-x, max-y)
 fps-text-locations:
+    # x: 50, y: 50 for single video
+    # x: 500, y: 50 for double video
     first-video:
         x: 50
+        y: 50
+    second-video:
+        x: 690
+        y: 50
+    third-video:
+        x: 1330
         y: 50
 
 # text which is placed before the number (currently always white)
 fps-text:
     first-video:
         text: "PS4: "
+    second-video:
+        text: "Wii U: "
+    third-video:
+        text: "PC: "
 
 # fps text precision (e.g 2 ~ 0.00, 4 ~ 0.0000)
 fps-precision: 1
@@ -115,7 +140,11 @@ fps-precision: 1
 # max-bound: max-frames-count
 fps-refresh-rate:
     first-video:
-        rate: 2
+        rate: 20
+    second-video:
+        rate: 20
+    third-video:
+        rate: 20
 
 ########################################
 # Plot Configuration
@@ -124,15 +153,16 @@ fps-refresh-rate:
 plot-background-color: "#000000"
 
 # Color of the x and y axes
-plot-axes-color: "#dfdfff"
+plot-axes-color: "#444444"
 
 # Color of the separation lines at 10, 20, 30, 40 and 50
-plot-lines-color: "#dfdfff"
+plot-lines-color: "#444444"
 
 # Plot background transparency (range: 0.0 - 1.0)
 # 0.0 ~ transparent
 # 1.0 ~ non-transparent
 plot-background-alpha: 0.4
+
 
 ########################################
 # VIEWER Configuration
@@ -150,9 +180,6 @@ viewer-size:
 # WRITER Configuration
 
 # how big is the writer size
-#
-# min: (87,9)
-# max: tested up to (16000, 9000)
 writer-size:
-    writer-width:  1920 #3840
-    writer-height: 1080 #2160
+    writer-width:  1920
+    writer-height: 1080
