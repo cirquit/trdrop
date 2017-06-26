@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace trdropConfigCreator
 {
-    class VideoOptionsTabPage : System.Windows.Forms.TabPage
+    class VideoOptionsTabPage : MetroFramework.Controls.MetroTabPage
     {
         public VideoOptionsTabPage(string text) : base()
         {

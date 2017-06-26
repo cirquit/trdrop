@@ -12,7 +12,7 @@ using YamlDotNet;
 
 namespace trdropConfigCreator
 {
-    public partial class TrdropForm : Form
+    public partial class TrdropForm : MetroFramework.Forms.MetroForm
     {
 
         public TrdropForm()
@@ -55,7 +55,8 @@ namespace trdropConfigCreator
             if (e.TabPageIndex == this.videoTabControl.TabCount - 1)
                 e.Cancel = true;
         }
-
+        /*
+        //From https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-display-side-aligned-tabs-with-tabcontrol
         private void VideoSubTabControl_DrawItem(Object sender, System.Windows.Forms.DrawItemEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -69,25 +70,26 @@ namespace trdropConfigCreator
 
             if (e.State == DrawItemState.Selected)
             {
-
                 // Draw a different background color, and don't paint a focus rectangle.
                 _textBrush = new SolidBrush(Color.White);
-                g.FillRectangle(Brushes.Gray, e.Bounds);
+                g.FillRectangle(Brushes.SlateGray, e.Bounds);
             }
             else
             {
                 _textBrush = new System.Drawing.SolidBrush(e.ForeColor);
+                //g.FillRectangle(Brushes.SlateGray, e.Bounds);
                 e.DrawBackground();
             }
 
             // Use our own font.
-            Font _tabFont = new Font("Arial", (float)10.0, FontStyle.Bold, GraphicsUnit.Pixel);
+            Font _tabFont = new Font("Microsoft Sans Serif", (float)10.0, FontStyle.Bold, GraphicsUnit.Point);
 
             // Draw string. Center the text.
             StringFormat _stringFlags = new StringFormat();
             _stringFlags.Alignment = StringAlignment.Center;
             _stringFlags.LineAlignment = StringAlignment.Center;
-            g.DrawString(_tabPage.Text, _tabFont, _textBrush, _tabBounds, new StringFormat(_stringFlags));
+            //g.DrawString(_tabPage.Text, _tabFont, _textBrush, _tabBounds, new StringFormat(_stringFlags));
         }
+        */
     }
 }
