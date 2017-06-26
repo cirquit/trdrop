@@ -55,41 +55,71 @@ namespace trdropConfigCreator
             if (e.TabPageIndex == this.videoTabControl.TabCount - 1)
                 e.Cancel = true;
         }
-        /*
-        //From https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-display-side-aligned-tabs-with-tabcontrol
-        private void VideoSubTabControl_DrawItem(Object sender, System.Windows.Forms.DrawItemEventArgs e)
+
+        private void metroPanel1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            Brush _textBrush;
 
-            // Get the item from the collection.
-            TabPage _tabPage = this.videoSubTabControl.TabPages[e.Index];
-
-            // Get the real bounds for the tab rectangle.
-            Rectangle _tabBounds = videoSubTabControl.GetTabRect(e.Index);
-
-            if (e.State == DrawItemState.Selected)
-            {
-                // Draw a different background color, and don't paint a focus rectangle.
-                _textBrush = new SolidBrush(Color.White);
-                g.FillRectangle(Brushes.SlateGray, e.Bounds);
-            }
-            else
-            {
-                _textBrush = new System.Drawing.SolidBrush(e.ForeColor);
-                //g.FillRectangle(Brushes.SlateGray, e.Bounds);
-                e.DrawBackground();
-            }
-
-            // Use our own font.
-            Font _tabFont = new Font("Microsoft Sans Serif", (float)10.0, FontStyle.Bold, GraphicsUnit.Point);
-
-            // Draw string. Center the text.
-            StringFormat _stringFlags = new StringFormat();
-            _stringFlags.Alignment = StringAlignment.Center;
-            _stringFlags.LineAlignment = StringAlignment.Center;
-            //g.DrawString(_tabPage.Text, _tabFont, _textBrush, _tabBounds, new StringFormat(_stringFlags));
         }
-        */
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void metroTabPage3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void metroLabel17_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void metroTabPage4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void metroTabPage6_Click(object sender, EventArgs e)
+        {
+
+        }
+        /*
+//From https://docs.microsoft.com/en-us/dotnet/framework/winforms/controls/how-to-display-side-aligned-tabs-with-tabcontrol
+private void VideoSubTabControl_DrawItem(Object sender, System.Windows.Forms.DrawItemEventArgs e)
+{
+Graphics g = e.Graphics;
+Brush _textBrush;
+
+// Get the item from the collection.
+TabPage _tabPage = this.videoSubTabControl.TabPages[e.Index];
+
+// Get the real bounds for the tab rectangle.
+Rectangle _tabBounds = videoSubTabControl.GetTabRect(e.Index);
+
+if (e.State == DrawItemState.Selected)
+{
+// Draw a different background color, and don't paint a focus rectangle.
+_textBrush = new SolidBrush(Color.White);
+g.FillRectangle(Brushes.SlateGray, e.Bounds);
+}
+else
+{
+_textBrush = new System.Drawing.SolidBrush(e.ForeColor);
+//g.FillRectangle(Brushes.SlateGray, e.Bounds);
+e.DrawBackground();
+}
+
+// Use our own font.
+Font _tabFont = new Font("Microsoft Sans Serif", (float)10.0, FontStyle.Bold, GraphicsUnit.Point);
+
+// Draw string. Center the text.
+StringFormat _stringFlags = new StringFormat();
+_stringFlags.Alignment = StringAlignment.Center;
+_stringFlags.LineAlignment = StringAlignment.Center;
+//g.DrawString(_tabPage.Text, _tabFont, _textBrush, _tabBounds, new StringFormat(_stringFlags));
+}
+*/
     }
 }
