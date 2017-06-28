@@ -57,6 +57,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="HexBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="TrdropForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,7 +71,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="VideoOptionsTabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="VideoOptionsTabPageDesign.cs">
       <SubType>Component</SubType>
     </Compile>
     <EmbeddedResource Include="TrdropForm.resx">

@@ -69,34 +69,14 @@ namespace trdropConfigCreator
             }
         }
 
-        private void inputBrowseButton_Click(object sender, EventArgs e)
+        private void videoTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(browseDialog.ShowDialog() == DialogResult.OK)
-            {
-                inputFileTextBox.Text = browseDialog.FileName;
-            }
+
+
         }
 
-        private void pxToleranceTrackBar_ValueChanged(object sender, EventArgs e)
+        private void videoTabControl_Deselected(object sender, TabControlEventArgs e)
         {
-            pxToleranceTextBox.Text = pxToleranceTrackBar.Value.ToString();
-        }
-
-        private void lnToleranceTrackBar_ValueChanged(object sender, EventArgs e)
-        {
-            lnToleranceTextBox.Text = lnToleranceTrackBar.Value.ToString();
-        }
-
-        private void colorPanel_Click(object sender, EventArgs e)
-        {
-            ColorDialog cd = new ColorDialog();
-            Panel panel = (Panel)sender;
-
-            if(cd.ShowDialog() == DialogResult.OK)
-            {
-                panel.BackColor = cd.Color;
-                videoColorHexBox.Text = ColorTranslator.ToHtml(Color.FromArgb(cd.Color.ToArgb()));
-            }
 
         }
     }
