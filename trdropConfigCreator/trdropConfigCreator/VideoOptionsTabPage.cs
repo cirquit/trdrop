@@ -19,6 +19,7 @@ namespace trdropConfigCreator
         private void inputBrowseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog browseDialog = new OpenFileDialog();
+            browseDialog.Filter = "Video Files (*.avi)|*.avi";
             if (browseDialog.ShowDialog() == DialogResult.OK)
             {
                 inputFileTextBox.Text = browseDialog.FileName;
@@ -35,6 +36,27 @@ namespace trdropConfigCreator
             lnToleranceTextBox.Text = lnToleranceTrackBar.Value.ToString();
         }
 
+        private void pxToleranceTextBox_LostFocus(object sender, EventArgs e)
+        {
+            int.TryParse(pxToleranceTextBox.Text, out int num);
+            pxToleranceTrackBar.Value = num;
+        }
+
+        private void pxToleranceTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                //int.TryParse(pxToleranceTextBox.Text, out int num);
+                //pxToleranceTrackBar.Value = num;
+                this.Focus();
+            }
+        }
+
+        private void pxToleranceTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(e.KeyChar == 13) e.Handled = true;
+        }
+
         private void colorPanel_Click(object sender, EventArgs e)
         {
             ColorDialog cd = new ColorDialog();
@@ -48,10 +70,6 @@ namespace trdropConfigCreator
 
         }
 
-        private void trackBarTextBox_ValueChanged()
-        {
-
-        }
 
     }
 }

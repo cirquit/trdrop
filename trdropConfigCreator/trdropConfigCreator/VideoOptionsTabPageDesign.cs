@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace trdropConfigCreator
 {
@@ -408,6 +409,9 @@ namespace trdropConfigCreator
             this.pxToleranceTextBox.UseSelectable = true;
             this.pxToleranceTextBox.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.pxToleranceTextBox.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            this.pxToleranceTextBox.LostFocus += new EventHandler(pxToleranceTextBox_LostFocus);
+            this.pxToleranceTextBox.KeyPress += new KeyPressEventHandler(pxToleranceTextBox_KeyPress);
+            this.pxToleranceTextBox.KeyDown += new KeyEventHandler(pxToleranceTextBox_KeyDown);
             // 
             // pxToleranceMaxLabel
             // 
@@ -442,6 +446,7 @@ namespace trdropConfigCreator
             this.pxToleranceTrackBar.Text = "metroTrackBar1";
             this.pxToleranceTrackBar.Theme = MetroFramework.MetroThemeStyle.Dark;
             this.pxToleranceTrackBar.Value = 5;
+            this.pxToleranceTrackBar.ValueChanged += new EventHandler(pxToleranceTrackBar_ValueChanged);
             // 
             // pxToleranceLabel
             // 
@@ -710,6 +715,7 @@ namespace trdropConfigCreator
             "2",
             "3",
             "4"});
+            this.fpsPrecisionDropDown.SelectedIndex = 0;
             this.fpsPrecisionDropDown.Location = new System.Drawing.Point(641, 23);
             this.fpsPrecisionDropDown.Name = "fpsPrecisionDropDown";
             this.fpsPrecisionDropDown.Size = new System.Drawing.Size(70, 29);
@@ -1368,6 +1374,7 @@ namespace trdropConfigCreator
             this.outputExtensionDropDown.Items.AddRange(new object[] {
             ".avi",
             ".mp4"});
+            this.outputExtensionDropDown.SelectedIndex = 0;
             this.outputExtensionDropDown.Location = new System.Drawing.Point(458, 22);
             this.outputExtensionDropDown.Name = "outputExtensionDropDown";
             this.outputExtensionDropDown.Size = new System.Drawing.Size(70, 29);

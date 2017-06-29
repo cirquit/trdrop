@@ -31,7 +31,7 @@ namespace trdropConfigCreator
         private void InitializeComponent()
         {
             this.videoTabControl = new MetroFramework.Controls.MetroTabControl();
-            this.addVideoTab = new System.Windows.Forms.TabPage();
+            this.addVideoTab = new MetroFramework.Controls.MetroTabPage();
             this.plotSettingsTabControl = new MetroFramework.Controls.MetroTabControl();
             this.plotSettingsTabTage = new MetroFramework.Controls.MetroTabPage();
             this.plotBGAlphaTextBox = new MetroFramework.Controls.MetroTextBox();
@@ -75,6 +75,7 @@ namespace trdropConfigCreator
             this.videoOptionsTabPage1.VerticalScrollbarHighlightOnWheel = false;
             this.videoOptionsTabPage1.VerticalScrollbarSize = 10;
             this.videoOptionsTabPage1.Visible = false;
+            this.videoOptionsTabPage1.Click += new System.EventHandler(this.videoOptionsTabPage1_Click);
             // 
             // videoTabControl
             // 
@@ -102,13 +103,21 @@ namespace trdropConfigCreator
             // 
             // addVideoTab
             // 
-            this.addVideoTab.BackColor = System.Drawing.SystemColors.ControlText;
+            this.addVideoTab.BackColor = System.Drawing.Color.DimGray;
+            this.addVideoTab.HorizontalScrollbarBarColor = true;
+            this.addVideoTab.HorizontalScrollbarHighlightOnWheel = false;
+            this.addVideoTab.HorizontalScrollbarSize = 10;
             this.addVideoTab.Location = new System.Drawing.Point(4, 46);
             this.addVideoTab.Name = "addVideoTab";
             this.addVideoTab.Padding = new System.Windows.Forms.Padding(3);
             this.addVideoTab.Size = new System.Drawing.Size(810, 430);
+            this.addVideoTab.Style = MetroFramework.MetroColorStyle.Purple;
             this.addVideoTab.TabIndex = 1;
             this.addVideoTab.Text = "+";
+            this.addVideoTab.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.addVideoTab.VerticalScrollbarBarColor = true;
+            this.addVideoTab.VerticalScrollbarHighlightOnWheel = false;
+            this.addVideoTab.VerticalScrollbarSize = 10;
             // 
             // plotSettingsTabControl
             // 
@@ -462,7 +471,7 @@ namespace trdropConfigCreator
         }
 
         private MetroFramework.Controls.MetroTabControl videoTabControl;
-        private System.Windows.Forms.TabPage addVideoTab;
+        private MetroFramework.Controls.MetroTabPage addVideoTab;
         private MetroFramework.Controls.MetroTabControl plotSettingsTabControl;
         private MetroFramework.Controls.MetroTabPage plotSettingsTabTage;
         private MetroFramework.Controls.MetroLabel linesColorHexLabel;

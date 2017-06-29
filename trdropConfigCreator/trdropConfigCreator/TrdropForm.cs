@@ -71,11 +71,25 @@ namespace trdropConfigCreator
 
         private void videoTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
+            TabControl tabControl = (TabControl)sender;
+            int lastIndex = tabControl.TabCount - 1;
+
+            if(tabControl.SelectedIndex == lastIndex)
+            {
+                tabControl.SelectedIndex = 0;
+                tabControl.TabPages[0].Show();
+
+            }
 
 
         }
 
         private void videoTabControl_Deselected(object sender, TabControlEventArgs e)
+        {
+
+        }
+
+        private void videoOptionsTabPage1_Click(object sender, EventArgs e)
         {
 
         }
