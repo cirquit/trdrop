@@ -18,7 +18,7 @@ These instructions are written a little overly verbose for the sake of clarity. 
 * I will be using Visual Studio 2017, the [Community Edition](https://www.visualstudio.com/downloads/) is free to download.
   * The current version at the time of writing is 15.6.4.
   * You should only need "Desktop development with C++" installed to build Trdrop.
-    * You might also need to add "Windows 10 SDK (10.0.16299.0) for Desktop C++ [x86 and x64]" under "Individual Components"
+    * You might also need to add "Windows 10 SDK (10.0.16299.0) for Desktop C++ [x86 and x64]" under "Individual Components". If it's not there, you can download it [here](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
   * If for some reason you're running into issues and think you're missing something, [here's the full list of what I have installed](https://i.imgur.com/xhfAIJR.png). (Be forewarned: I use Visual Studio *a lot* so I have a ton of its components installed.)
 * Download and install [CMake](https://cmake.org/download/) (I am using 3.11.0 x64.)
 * Download and extract [OpenCV 3](https://github.com/opencv/opencv/releases/tag/3.4.1) (I'm using 3.4.1, you want the exe.)
