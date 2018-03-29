@@ -38,17 +38,13 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="yaml-cpp.props" />
-    <Import Project="yaml-cpp-Debug.props" />
-    <Import Project="OpenCV.props" />
-    <Import Project="OpenCV-Debug.props" />
+    <Import Project="trdrop-debug.props" />
+    <Import Project="trdrop.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="yaml-cpp.props" />
-    <Import Project="yaml-cpp-Release.props" />
-    <Import Project="OpenCV.props" />
-    <Import Project="OpenCV-Release.props" />
+    <Import Project="trdrop-release.props" />
+    <Import Project="trdrop.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
