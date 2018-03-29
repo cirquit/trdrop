@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <YAML_CPP_ROOT>$(SolutionDir)../../yaml-cpp/</YAML_CPP_ROOT>
+    <OPENCV3_ROOT>$(SolutionDir)../../opencv/build/</OPENCV3_ROOT>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IncludePath>$(YAML_CPP_ROOT)include/;$(IncludePath)</IncludePath>
+    <LibraryPath>$(YAML_CPP_ROOT)build/$(Configuration)/;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link />
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="YAML_CPP_ROOT">
+      <Value>$(YAML_CPP_ROOT)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OPENCV3_ROOT">
+      <Value>$(OPENCV3_ROOT)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

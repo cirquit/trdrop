@@ -15,7 +15,7 @@
     <ProjectGuid>{839714C5-948D-457F-B4A1-0AAD88D69A07}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>trdrop_c</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -38,20 +38,24 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="yaml-cpp.props" />
+    <Import Project="yaml-cpp-Debug.props" />
+    <Import Project="OpenCV.props" />
+    <Import Project="OpenCV-Debug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="yaml-cpp.props" />
+    <Import Project="yaml-cpp-Release.props" />
+    <Import Project="OpenCV.props" />
+    <Import Project="OpenCV-Release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(YAML_CPP_PATH)\include;$(OPEN_CV_PATH)\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(YAML_CPP_PATH)\build\Debug;$(OPEN_CV_PATH)\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(YAML_CPP_PATH)\include;$(OPEN_CV_PATH)\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(YAML_CPP_PATH)\build\Debug;$(OPEN_CV_PATH)\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -64,7 +68,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world320.lib;libyaml-cppmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -85,7 +88,6 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opencv_world320.lib;libyaml-cppmdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
