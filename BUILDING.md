@@ -1,4 +1,4 @@
-These instructions are written a little overly verbose for the sake of clarity. My fork diverges from the original in how it is built, these instructions will not work with it.
+These instructions are written a little overly verbose for the sake of clarity.
 
 # Build Environment Setup
 
