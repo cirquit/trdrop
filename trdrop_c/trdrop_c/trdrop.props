@@ -2,9 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <OPENCV_ROOT>$(SolutionDir)../../opencv/build/</OPENCV_ROOT>
+    <TRDROP_ROOT>$(SolutionDir)../</TRDROP_ROOT>
+    <OPENCV_ROOT>$(TRDROP_ROOT)../opencv/build/</OPENCV_ROOT>
     <OPENCV_VERSION>341</OPENCV_VERSION>
-    <YAML_CPP_ROOT>$(SolutionDir)../../yaml-cpp/</YAML_CPP_ROOT>
+    <YAML_CPP_ROOT>$(TRDROP_ROOT)../yaml-cpp/</YAML_CPP_ROOT>
   </PropertyGroup>
   <PropertyGroup>
     <IncludePath>$(YAML_CPP_ROOT)include/;$(OPENCV_ROOT)include/;$(IncludePath)</IncludePath>
@@ -16,6 +17,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <BuildMacro Include="TRDROP_ROOT">
+      <Value>$(TRDROP_ROOT)</Value>
+    </BuildMacro>
     <BuildMacro Include="OPENCV_ROOT">
       <Value>$(OPENCV_ROOT)</Value>
     </BuildMacro>

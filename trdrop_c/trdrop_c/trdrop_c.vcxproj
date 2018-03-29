@@ -117,4 +117,15 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ItemGroup>
+    <SpriteFiles Include="$(TRDROP_ROOT)images/trdrop_sprites/*.png" />
+    <ConfigFiles Include="$(TRDROP_ROOT)configs/*.yaml" />
+  </ItemGroup>
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="@(SpriteFiles)" DestinationFiles="@(SpriteFiles->'$(OutDir)trdrop_sprites/%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFiles="@(ConfigFiles->'$(OutDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TRDROP_ROOT)../openh264-1.7.0-win64.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OPENCV_ROOT)$(Platform)/vc15/bin/opencv_ffmpeg$(OPENCV_VERSION)_64.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OPENCV_ROOT)$(Platform)/vc15/bin/opencv_world$(OPENCV_VERSION)$(LIB_SUFFIX).dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
