@@ -54,7 +54,7 @@ namespace trdrop {
 						, std::placeholders::_4))
 				{
 					// zero fps-values for every video
-					util::enumerate(isDifferentFrame.begin(), isDifferentFrame.end(), 0, [&](unsigned ix, std::vector<double> &v) {
+					util::enumerate(isDifferentFrame.begin(), isDifferentFrame.end(), 0, [&](size_t ix, std::vector<double> &v) {
 						v.insert(v.end(), windowSize, 0.0);
 					});
 				}

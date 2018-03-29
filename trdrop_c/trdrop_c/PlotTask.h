@@ -71,12 +71,12 @@ namespace trdrop {
 					int plotWindow_ = plotWindow();
 					
 					// remove oldest values
-					util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
+					util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](size_t i, std::deque<double> & dd) {
 						dd.push_back(getFps(i));
 						dd.pop_front();
 					});
 
-					util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned i, std::deque<double> & dd) {
+					util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](size_t i, std::deque<double> & dd) {
 						double tear = fpsTaskData.duplicateFrame[i] ? 0 : tearTaskData.tears[i];
 						dd.push_back(tear);
 						dd.pop_front();
@@ -163,8 +163,8 @@ namespace trdrop {
 					int lineYOffset	  = writerFrameSize.width / lineYOffsetRatio;
 					int lastLineXOffSet = writerFrameSize.width / lastLineXOffSetRatio;
 
-					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](unsigned i, double fps) {
-						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](unsigned vix, std::deque<double> fpsDeque) {
+					util::enumerate(fpsContainer[0].begin(), fpsContainer[0].end(), 0, [&](size_t i, double fps) {
+						util::enumerate(fpsContainer.begin(), fpsContainer.end(), 0, [&](size_t vix, std::deque<double> fpsDeque) {
 
 							int currentFps = static_cast<int>(fpsDeque[i]);
 							int y = (maxFps - currentFps*height / maxFps) + writerFrameSize.height - maxFps - margin - lineYOffset;
@@ -193,12 +193,13 @@ namespace trdrop {
 					
 					int lineThickness = writerFrameSize.width / lineThicknessRatio;
 
-					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](unsigned i, double tear) {
-						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](unsigned vix, std::deque<double> tearDeque) {
+					util::enumerate(tearContainer[0].begin(), tearContainer[0].end(), 0, [&](size_t i, double tear) {
+						util::enumerate(tearContainer.begin(), tearContainer.end(), 0, [&](size_t vix, std::deque<double> tearDeque) {
 							if (tearDeque[i] != 0) {
-								cv::Point basePoint(pointDistance, baseHeight - vix * tearHeight);
-								cv::Point topPoint(pointDistance, baseHeight - tearHeight - vix * tearHeight);
-								cv::Point midPoint(pointDistance, static_cast<int>(baseHeight - tearDeque[i] * tearHeight - vix * tearHeight));
+                                unsigned vix_int = (unsigned)vix;
+								cv::Point basePoint(pointDistance, baseHeight - vix_int * tearHeight);
+								cv::Point topPoint(pointDistance, baseHeight - tearHeight - vix_int * tearHeight);
+								cv::Point midPoint(pointDistance, static_cast<int>(baseHeight - tearDeque[i] * tearHeight - vix_int * tearHeight));
 								cv::line(res, basePoint, midPoint, tearColors[vix], lineThickness, CV_AA);
 								cv::line(res, midPoint, topPoint, colors[vix], lineThickness, CV_AA);
 							}
@@ -207,10 +208,10 @@ namespace trdrop {
 					});
 				};
 
-				std::function<double(int)> getFps = [&](int vix) {
+				std::function<double(size_t)> getFps = [&](size_t vix) {
 					double fps = 0.0;
 					if (fpsTaskData.fps_unprocessed.size() > 0) {
-						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](size_t i, double d) {
 							if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
 								fps += 1.0;
 							}

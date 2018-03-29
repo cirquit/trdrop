@@ -56,7 +56,7 @@ namespace trdrop {
 						, std::placeholders::_4))
 				{ 
 					// zero fps-values for every video
-					util::enumerate(tear_unprocessed.begin(), tear_unprocessed.end(), 0, [&](unsigned ix, std::vector<double> &v) {
+					util::enumerate(tear_unprocessed.begin(), tear_unprocessed.end(), 0, [&](size_t ix, std::vector<double> &v) {
 						v.insert(v.end(), windowSize, 0.0);
 					});
 				}
@@ -88,7 +88,7 @@ namespace trdrop {
 					std::lock_guard<std::mutex> lock(mutex);
 
 					int maxTear = maximumContOccurence(blankLines[vix]);
-					int lineToleranceCount = lineTolerance * prev.size().height;
+					int lineToleranceCount = (int)(lineTolerance * prev.size().height);
 					if (maxTear < lineToleranceCount) maxTear = 0;
 					
 					// count the bad pixels and if they consume more than 50% of the image -> tear (shown with a 1)

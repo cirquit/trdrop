@@ -116,7 +116,7 @@ namespace trdrop {
 #endif
 				// first read reads two frames
 				if (currentFrameIndex == 0) {
-					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](size_t vix, cv::VideoCapture input) {
 						readSuccessful &= input.read(prev[vix]);
 						readSuccessful &= input.read(cur[vix]);
 					});
@@ -125,7 +125,7 @@ namespace trdrop {
 						merged = cv::Mat(writerFrameSize, prev[0].depth());
 					}
 				} else {
-					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](size_t vix, cv::VideoCapture input) {
 						cur[vix].copyTo(prev[vix]);
 						readSuccessful &= input.read(cur[vix]);
 					});
@@ -139,7 +139,7 @@ namespace trdrop {
 #endif
 					
 					// pretasks - parallel
-					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](unsigned vix, cv::VideoCapture input) {
+					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](size_t vix, cv::VideoCapture input) {
 						
 						std::for_each(preTasks.begin(), preTasks.end(), [&](std::shared_ptr<trdrop::tasks::pretask> f) {
 							// (*f)(prev[vix], cur[vix], currentFrameIndex, vix);
@@ -159,7 +159,7 @@ namespace trdrop {
 					preTasksFinished.clear();
 
 					// intermediate tasks - parallel
-					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](const unsigned vix, cv::VideoCapture input) {
+					trdrop::util::enumerate(inputs.begin(), inputs.end(), 0, [&](const size_t vix, cv::VideoCapture input) {
 	
 						std::for_each(interTasks.begin(), interTasks.end(), [&](std::shared_ptr<trdrop::tasks::intertask> f) {
 							(*f)(prev[vix], currentFrameIndex, vix); 
