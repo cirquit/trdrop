@@ -1,9 +1,9 @@
 #define _TR_DEBUG 0
-#define DEBUG(context, x) do { \
+#define TR_DEBUG(context, x) do { \
 	if (_TR_DEBUG) std::cerr << "DEBUG: " << context << " - " << #x << ":\n    " << x << std::endl; } \
  while (0)
 
-#define DEBUGV(context, vector) do { \
+#define TR_DEBUGV(context, vector) do { \
 	if (_TR_DEBUG) { \
 		int i = 0; \
 		std::cerr << "DEBUG: " << context << " - " << #vector << ": \n"; \
@@ -144,12 +144,12 @@ int main(int argc, char **argv) {
 		// glue FPS source -> FPS consumer
 		if (fpsPreT.result.successful()) {
 			fpsTaskData = fpsPreT.result.getSuccess();
-			DEBUG("Main loop: FpsTaskData", fpsTaskData.to_string());
+			TR_DEBUG("Main loop: FpsTaskData", fpsTaskData.to_string());
 		}
 
 		if (tearPreT.result.successful()) {
 			tearTaskData = tearPreT.result.getSuccess();
-			DEBUGV("Main loop: Tears", tearTaskData.tears);
+			TR_DEBUGV("Main loop: Tears", tearTaskData.tears);
 		}
 
 

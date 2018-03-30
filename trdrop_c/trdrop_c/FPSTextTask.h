@@ -76,7 +76,7 @@ namespace trdrop {
 					if (currentFrameIndex % refreshRate[vix] == 0) {
 						tempFrameRates[vix] = getFps(vix);
 						/*
-						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](size_t i, double d) {
 							if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
 								tempFrameRates[vix] += 1;
 							}
@@ -102,7 +102,7 @@ namespace trdrop {
 				std::function<double(int)> getFps = [&](int vix) {
 					double fps = 0.0;
 					if (fpsTaskData.fps_unprocessed.size() > 0) {
-						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](unsigned i, double d) {
+						trdrop::util::enumerate(fpsTaskData.fps_unprocessed[vix].begin(), fpsTaskData.fps_unprocessed[vix].end(), 0, [&](size_t i, double d) {
 							if (d == 1.0 && tearTaskData.tear_unprocessed[vix][i] == 0) {
 								fps += 1.0;
 							}

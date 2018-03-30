@@ -78,3 +78,6 @@ x86/
 
 # VS Cache
 .vs/
+
+# NuGet packages
+packages/
