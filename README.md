@@ -16,6 +16,14 @@ We don't take responsibility for any analysis errors or inaccuracies that might 
 
 To minimize errors, please make sure that you use **raw** videos from a capture card. This tool analyzes the **raw** pixel data and therefore any compressed encoding might falsify the output. If you notice some unexpected behaviour, please [make an issue](https://github.com/cirquit/trdrop/issues) with a short clip and a description of your testing setup (which capture card). This way we can try so keep a summary of supported devices.
 
+## Software limits
+
+You can use our software if:
+* your video is not encoded at all, also known as `.raw` format. Some vendors have own implementations of their `.raw` format and might not be comparable. In summary, you need to have a **non-compressed** video
+* your video does **not** exceed 60 frames per second, either in real-life or recording speed
+     * The **recording FPS** are read from the header information and not counted from the frame-time ([#21](https://github.com/cirquit/trdrop/issues/21)), which might be done in the future. If this information is corrupted, we can't do a proper analysis.
+     * The **real-life FPS** are a requirement because we don't have the best solution for the plotting library ([#21](https://github.com/cirquit/trdrop/issues/21)) and at the start of this project we wanted to cater to the people with high-end capture card users which record only console games in up to 4K. To my knowledge this is currenlty only possible at `60` fps
+
 ## Contributing
 
 If you want to contribute, please follow [this guide](BUILDING.md) which was kindly created by [PathogenDavid](https://github.com/PathogenDavid).
