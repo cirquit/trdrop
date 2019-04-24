@@ -3,6 +3,10 @@
 
 trdrop - a cross platform fps analyzer for raw video data 
 
+## Update 24.04.2019
+
+I'm currently working on a cross platform (Win/Linux) Qt based implementation. Currently testing some of the key functionalities in private repos. Stay tuned!
+
 ## Description
 
 This software is used for analyzing raw video data, calculating framedrops and visualizing tears.
