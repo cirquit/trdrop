@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/TrdropMenubar.qml</file>
+        <file>qml/TrdropContent.qml</file>
+        <file>qml/FileManagementWindow.qml</file>
+        <file>images/switch-arrows.png</file>
+        <file>qml/OptionsWindow.qml</file>
+        <file>qml/StartupBackground.qml</file>
+        <file>images/browse-icon.png</file>
+        <file>fonts/materialdesignicons-webfont.ttf</file>
+        <file>images/remove-icon.png</file>
+        <file>images/add-icon.png</file>
+        <file>qml/GeneralOptionsModel.qml</file>
+        <file>qml/FpsOptionsModel.qml</file>
+        <file>qml/Example.qml</file>
+    </qresource>
+</RCC>
