@@ -7,7 +7,7 @@ trdrop - a cross platform fps analyzer for raw video data
 
 Created the qt branch, currently building up the knowledge needed to use the Qt MVC model. Rebuilding the QML example to work from C++ to incorporate OpenCV.
 
-This is the current [progress video](2019-05-12-filechoose-dialog-progress.webm).
+This is the current [progress video](images/2019-05-12-filechoose-dialog-progress.webm).
 
 #### Update 24.04.2019
 
