@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 ListView {
     id: listView
     anchors.fill: parent
-    model: fileItemList.model
+    model: fileItemModel
 
     delegate: Item {
         implicitHeight: text.height
@@ -13,15 +13,15 @@ ListView {
         RowLayout {
             id: text
             Text {
-                text: "Name: " + edit.name
+                text: "Name: " + model.name
                 color: "#FFFFFF"
             }
             Text {
-                text: "Container: " + edit.container
+                text: "Container: " + model.container
                 color: "#FFFFFF"
             }
             Text {
-                text: "Position: " + edit.position
+                text: "Position: " + model.position
                 color: "#FFFFFF"
             }
             Text {
@@ -32,13 +32,26 @@ ListView {
                 text: "Click me!"
                 enabled: {
                     if (index === 0)      { return true; }
-                    else if (index === 1) { return fileItemList.get(0).fileSelected; }
-                    else if (index === 2) { return fileItemList.get(0).fileSelected
-                                                && fileItemList.get(1).fileSelected; }
+                    else if (index === 1) { return fileItemModel.isFileSelected(0); }
+                    else if (index === 2) { return fileItemModel.isFileSelected(0)
+                                                && fileItemModel.isFileSelected(1); }
+                    else return false;
                 }
                 onClicked: {
-                    edit.name = "Hello!"
-                    edit.fileSelected = true;
+//                    if (index === 0)      { console.log("index: 0 - " + fileItemModel.isFileSelected(0)); }
+//                    else if (index === 1) { console.log("index 1 - " + fileItemModel.isFileSelected(0)); }
+//                    else if (index === 2) { console.log("index 2 - " + fileItemModel.isFileSelected(0)
+//                                                + " " + fileItemModel.isFileSelected(1)); }
+                    model.name = "Hello!";
+                    model.fileSelected = true;
+                    fileItemModel.resetModel();
+                }
+            }
+            Button {
+                text: "Remove it!"
+                onClicked: {
+                    fileItemModel.remove(index);
+                    fileItemModel.appendDefaultFileItem();
                 }
             }
         }

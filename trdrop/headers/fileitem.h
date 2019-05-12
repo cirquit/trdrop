@@ -11,7 +11,7 @@ class FileItem
     Q_GADGET
     Q_PROPERTY(QString name         READ name         WRITE setName        ) // NOTIFY nameChanged)
     Q_PROPERTY(quint32 sizeMB       READ sizeMB       WRITE setSizeMB      ) // NOTIFY sizeMBChanged)
-    Q_PROPERTY(qint8   position     READ position     WRITE setPosition    ) // NOTIFY positionChanged)
+    Q_PROPERTY(quint8  position     READ position     WRITE setPosition    ) // NOTIFY positionChanged)
     Q_PROPERTY(QString container    READ container    WRITE setContainer   ) // NOTIFY containerChanged)
     Q_PROPERTY(bool    fileSelected READ fileSelected WRITE setFileSelected) // NOTIFY fileSelectionChanged)
 
