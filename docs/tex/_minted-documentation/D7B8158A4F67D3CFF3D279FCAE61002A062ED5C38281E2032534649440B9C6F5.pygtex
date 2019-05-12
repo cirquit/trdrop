@@ -1,5 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k}{if} \PYG{p}{(}\PYG{n}{fpsPreTask}\PYG{p}{.}\PYG{n}{result}\PYG{p}{.}\PYG{n}{successful}\PYG{p}{())} \PYG{p}{\PYGZob{}}
-    \PYG{n}{framerates} \PYG{o}{=} \PYG{n}{fpsPreT}\PYG{p}{.}\PYG{n}{result}\PYG{p}{.}\PYG{n}{getSuccess}\PYG{p}{();}
-\PYG{p}{\PYGZcb{}}
-\end{Verbatim}

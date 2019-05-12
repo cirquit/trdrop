@@ -50,34 +50,4 @@ local-images
 
 # C++ build
 
-trdrop_lib/build/*
-trdrop_c/build/*
-trdrop_v/build/*
-
-#docs
-trdrop_lib/apidocs/*
-
-# User specific files
-
-*.suo
-*.user
-*.useroscache
-*.sln.docstates
-*.userprefs
-
-# Visual Studio
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-
-# VS Cache
-.vs/
-
-# NuGet packages
-packages/
+build*
