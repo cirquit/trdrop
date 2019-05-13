@@ -32,7 +32,7 @@ Window {
                 // scroll vertically
                 drag.axis: Drag.YAxis
                 // holding functionality, only allowed if a file is loaded
-                onPressAndHold: held = true && edit.fileSelected
+                onPressAndHold: held = true && model.fileSelected
                 onReleased: held = false
                 // ms
                 pressAndHoldInterval: 10
@@ -76,12 +76,10 @@ Window {
                         visible: false
                         folder: shortcuts.movies
                         onAccepted: {
-                            fileItemList.openFile(index, fileDialog.fileUrl.toString())
-                            // edit.name = fileDialog.fileUrl.toString();
-                            edit.fileSelected = true;
-                            fileItemList.get(index).name = fileDialog.fileUrl.toString();
-                            // run stuff
-                            // update
+                            //fileItemList.openFile(index, fileDialog.fileUrl.toString())
+                            model.name = fileDialog.fileUrl.toString();
+                            model.fileSelected = true;
+                            fileItemModel.resetModel()
                         }
                     }
                     // file description, browse and remove buttons
@@ -90,47 +88,41 @@ Window {
                         Column {
                             id: fileInformation
                             // center the browse button if no file was loaded
-                            Layout.minimumWidth: edit.fileSelected ? fileManagementWindow.width * 0.78
+                            Layout.minimumWidth: model.fileSelected ? fileManagementWindow.width * 0.78
                                                                    : fileManagementWindow.width * 0.50 - browseButton.width * 0.5
                             padding: 7
                             Layout.fillWidth: true
 
-                            Label { font.pixelSize: 17; text:  edit.fileSelected ? "Filename:  " + edit.name : " " }
-                            Label { font.pixelSize: 17; text:  edit.fileSelected ? "Size: " + edit.sizeMB + " MB" : " " }
-                            Label { font.pixelSize: 17; text:  edit.fileSelected ? "Container: " + edit.container : " "  }
-                            Label { font.pixelSize: 17; text:  edit.fileSelected ? "Video Index: " + fileDragArea.DelegateModel.itemsIndex : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Filename:  "   + model.name : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Container: "   + model.container : " "  }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Video Index: " + fileDragArea.DelegateModel.itemsIndex : " " }
                         }
                         Button {
                             id: browseButton
                             // only allow additional files if the previous slots were filled
                             enabled: {
                                 if (index === 0) { return true; }
-                                else if (index === 1) { return fileItemList.get(0).fileSelected; }
-                                else if (index === 2) { return fileItemList.get(0).fileSelected
-                                                            && fileItemList.get(1).fileSelected; }
+                                else if (index === 1) { return fileItemModel.isFileSelected(0); }
+                                else if (index === 2) { return fileItemModel.isFileSelected(0)
+                                                            && fileItemModel.isFileSelected(1); }
+                                else return false;
                             }
                             hoverEnabled: true
                             Layout.fillHeight: true
                             flat: true
                             // change icon if no file was loaded yet
-                            icon.source: edit.fileSelected ? "qrc:/images/browse-icon.png" : "qrc:/images/add-icon.png"
+                            icon.source: model.fileSelected ? "qrc:/images/browse-icon.png"
+                                                            : "qrc:/images/add-icon.png"
                             ToolTip.text: "Browse"
                             ToolTip.delay: 500
                             ToolTip.visible: hovered
-                            onClicked: {
-                                fileDialog.open()
-                                //console.log(fileItemList.get(0).fileSelected)
-//                                console.log("fileItemList: " + fileItemList)
-//                                console.log("get: " + fileItemList.get(index))
-//                                console.log("fileItemList.model.data: " + fileItemList.model.data(0))
-//                                console.log("model.items: " + model.items(0))
-//                                console.log("model.data: " + model.data(0))
-                            }
+                            onClicked: fileDialog.open()
                         }
                         Button {
                             id: removeButton
                             // show this button if a file was loaded
-                            visible:  edit.fileSelected
+                            visible:  model.fileSelected
                             hoverEnabled: true
                             Layout.fillHeight: true
                             flat: true
@@ -139,8 +131,8 @@ Window {
                             ToolTip.delay: 500
                             ToolTip.visible: hovered
                             onClicked: {
-                                fileItemList.removeItem(index)
-                                fileItemList.addDefaultFileItem()
+                                fileItemModel.remove(index)
+                                fileItemModel.appendDefaultFileItem()
                             }
                         }
                     }
@@ -151,9 +143,7 @@ Window {
                     onEntered: {
                         var fromIndex = drag.source.DelegateModel.itemsIndex;
                         var toIndex   = fileDragArea.DelegateModel.itemsIndex;
-                        var fromItem  = fileItemList.model.data(fromIndex)
-                        var toItem    = fileItemList.model.data(toIndex)
-                        if (fromItem.fileSelected && toItem.fileSelected)
+                        if (fileItemModel.isFileSelected(fromIndex) && fileItemModel.isFileSelected(toIndex))
                         {
                             visualModel.items.move(fromIndex, toIndex)
                         }
@@ -168,8 +158,62 @@ Window {
             spacing: 4
             model: DelegateModel {
                 id: visualModel
-                model: fileItemList.model
+                model: fileItemModel
                 delegate: fileDragDelegate
+            }
+            // animate when something is added
+            add: Transition {
+                SequentialAnimation {
+                    // wait until remove has finished
+                    PauseAnimation {
+                        duration: 250
+                    }
+                    // blend in
+                    NumberAnimation {
+                        properties: "opacity"
+                        from: 0.0
+                        to: 1.0
+                        duration: 500
+                        easing.type: Easing.Linear
+                    }
+                }
+            }
+            // animate when some gets removed
+            remove: Transition {
+                // blend out
+                NumberAnimation {
+                    properties: "opacity";
+                    to: 0;
+                    duration: 250;
+                    easing.type: Easing.Linear
+                }
+            }
+            // animate when entry is moved if another entry is deleted
+            removeDisplaced: Transition {
+                SequentialAnimation {
+                    // wait until remove has finished
+                    PauseAnimation {
+                        duration: 250
+                    }
+                    NumberAnimation {
+                        properties: "y";
+                        duration: 500
+                        easing.type: Easing.Linear
+                    }
+                }
+            }
+            // animate when entry is moved by hand
+            displaced: Transition {
+                NumberAnimation {
+                    properties: "y"
+                    duration: 250
+                    easing: {
+                        type: Easing.InOutExpo
+                    }
+                }
+                from: "fromState"
+                to: "toState"
+
             }
         }
     }

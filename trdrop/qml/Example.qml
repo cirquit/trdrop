@@ -38,10 +38,6 @@ ListView {
                     else return false;
                 }
                 onClicked: {
-//                    if (index === 0)      { console.log("index: 0 - " + fileItemModel.isFileSelected(0)); }
-//                    else if (index === 1) { console.log("index 1 - " + fileItemModel.isFileSelected(0)); }
-//                    else if (index === 2) { console.log("index 2 - " + fileItemModel.isFileSelected(0)
-//                                                + " " + fileItemModel.isFileSelected(1)); }
                     model.name = "Hello!";
                     model.fileSelected = true;
                     fileItemModel.resetModel();

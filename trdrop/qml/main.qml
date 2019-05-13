@@ -23,9 +23,9 @@ ApplicationWindow
         visible: true
     }
 
-    Example {
-        visible: true
-    }
+//    Example {
+//        visible: true
+//    }
 
     // content
 //    TrdropContent {

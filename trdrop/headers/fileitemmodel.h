@@ -11,7 +11,7 @@ class FileItemModel : public QAbstractListModel
 
 //! constructors
 public:
-    //! TODO
+    //!
     FileItemModel(QObject * parent = nullptr)
         : QAbstractListModel(parent)
     {
@@ -20,7 +20,7 @@ public:
         appendDefaultFileItem();
         appendDefaultFileItem();
     }
-    //! TODO
+    //!
     enum FileItemRoles
     {
         NameRole         = Qt::UserRole
@@ -49,11 +49,10 @@ public:
         _file_item_list.removeAt(index);
         emit endRemoveRows();
     }
-    //! TODO
+    //!
     QVariant data(const QModelIndex & index,int role) const override
     {
         int row = index.row();
-        //qDebug() << row << " " << role << '\n';
         // if the index is out of bounds, return QVariant
         if(row < 0 || row >= _file_item_list.size()) { return QVariant(); }
         // otherwise get the item
@@ -75,7 +74,7 @@ public:
                 return QVariant();
         }
     }
-    //! TODO
+    //!
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         FileItem & file_item = _file_item_list[index.row()];
@@ -88,13 +87,12 @@ public:
         emit dataChanged(index, index);
         return true ;
     }
-    //! TODO
+    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
         endResetModel();
     }
-
     //! adds a default fileitem
     Q_INVOKABLE void appendDefaultFileItem()
     {
@@ -128,7 +126,6 @@ private:
     QList<FileItem> _file_item_list;
     //! TODO
     QHash<int, QByteArray> _role_names;
-
 };
 
 #endif // FILEITEMMODEL_H
