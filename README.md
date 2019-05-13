@@ -3,6 +3,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 14.05.2019
+
+Got the fileitemmodel working with c++ and qml. Added transition animations because they look good. Now focusing on the options dialog. Hopefully this will be faster as the model will be the same implementation as the fileitem one.
+
+![](images/2019-05-14-filechoose-dialog-progress.gif).
+
 #### Update 12.05.2019
 
 Created the qt branch, currently building up the knowledge needed to use the Qt MVC model. Rebuilding the QML example to work from C++ to incorporate OpenCV.
