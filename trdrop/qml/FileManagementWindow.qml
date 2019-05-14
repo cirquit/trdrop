@@ -15,7 +15,6 @@ Window {
     flags: Qt.SubWindow
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
-
     Pane {
         width: parent.width
         height: parent.height
@@ -44,7 +43,7 @@ Window {
                         verticalCenter: parent.verticalCenter
                     }
                     width: fileDragArea.width;
-                    height: fileInformation.implicitHeight + 4
+                    height: fileInformation.implicitHeight
                     border.width: 1
                     border.color: fileDragArea.held ? "#bface3"
                                                     : "#8066b0"
@@ -89,10 +88,9 @@ Window {
                             id: fileInformation
                             // center the browse button if no file was loaded
                             Layout.minimumWidth: model.fileSelected ? fileManagementWindow.width * 0.78
-                                                                   : fileManagementWindow.width * 0.50 - browseButton.width * 0.5
+                                                                    : fileManagementWindow.width * 0.50 - browseButton.width * 0.5
                             padding: 7
                             Layout.fillWidth: true
-
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Filename:  "   + model.name : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Container: "   + model.container : " "  }
@@ -102,7 +100,7 @@ Window {
                             id: browseButton
                             // only allow additional files if the previous slots were filled
                             enabled: {
-                                if (index === 0) { return true; }
+                                if      (index === 0) { return true; }
                                 else if (index === 1) { return fileItemModel.isFileSelected(0); }
                                 else if (index === 2) { return fileItemModel.isFileSelected(0)
                                                             && fileItemModel.isFileSelected(1); }
@@ -152,6 +150,7 @@ Window {
             }
         }
 
+        //
         ListView {
             id: fileView
             anchors { fill: parent; margins: 2 }
@@ -173,7 +172,7 @@ Window {
                         properties: "opacity"
                         from: 0.0
                         to: 1.0
-                        duration: 500
+                        duration: 1000
                         easing.type: Easing.Linear
                     }
                 }
@@ -213,7 +212,6 @@ Window {
                 }
                 from: "fromState"
                 to: "toState"
-
             }
         }
     }

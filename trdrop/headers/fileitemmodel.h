@@ -5,22 +5,24 @@
 #include <QDebug>
 #include "headers/fileitem.h"
 
+//!
 class FileItemModel : public QAbstractListModel
 {
     Q_OBJECT
-
 //! constructors
 public:
-    //!
-    FileItemModel(QObject * parent = nullptr)
+    //! initialize the model with #default_items and prepare the role names
+    FileItemModel(quint8 default_items
+                , QObject * parent = nullptr)
         : QAbstractListModel(parent)
     {
         _setup_role_names();
-        appendDefaultFileItem();
-        appendDefaultFileItem();
-        appendDefaultFileItem();
+        for (quint8 i = 0; i < default_items; ++i)
+        {
+            appendDefaultFileItem();
+        }
     }
-    //!
+    //! manage the access to FileItem member from QML
     enum FileItemRoles
     {
         NameRole         = Qt::UserRole
@@ -29,7 +31,6 @@ public:
       , ContainerRole    = Qt::UserRole + 3
       , FileSelectedRole = Qt::UserRole + 4
     };
-
 //! methods
 public:
     //! number of elements in the _file_item_list which correlate to the rows
@@ -40,16 +41,7 @@ public:
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
-    //! TODO
-    Q_INVOKABLE QVariant isFileSelected(int index) { return QVariant::fromValue(_file_item_list.at(index).fileSelected()); }
-    //! TODO
-    Q_INVOKABLE void remove(int index)
-    {
-        emit beginRemoveRows(QModelIndex(), index, index);
-        _file_item_list.removeAt(index);
-        emit endRemoveRows();
-    }
-    //!
+    //! QAbstractModel function which is called if a read in QML happens
     QVariant data(const QModelIndex & index,int role) const override
     {
         int row = index.row();
@@ -74,7 +66,7 @@ public:
                 return QVariant();
         }
     }
-    //!
+    //! QAbstractModel function which is called if an assignment in QML happens
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         FileItem & file_item = _file_item_list[index.row()];
@@ -84,7 +76,8 @@ public:
         else if (role == ContainerRole) file_item.setContainer(value.toString());
         else if (role == FileSelectedRole) file_item.setFileSelected(value.toBool());
         else return false;
-        emit dataChanged(index, index);
+        QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
+        emit dataChanged(index, toIndex);
         return true ;
     }
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
@@ -93,13 +86,24 @@ public:
         beginResetModel();
         endResetModel();
     }
-    //! adds a default fileitem
+    //! adds a default, not set fileitem
     Q_INVOKABLE void appendDefaultFileItem()
     {
         const FileItem file_item;
         _append_file_item(file_item);
     }
-
+    //! callable from QML to remove the item
+    Q_INVOKABLE void remove(int index)
+    {
+        emit beginRemoveRows(QModelIndex(), index, index);
+        _file_item_list.removeAt(index);
+        emit endRemoveRows();
+    }
+    //! checks if the fileSelected property of the item at the index is set, usable in QML
+    Q_INVOKABLE QVariant isFileSelected(int index)
+    {
+        return QVariant::fromValue(_file_item_list.at(index).fileSelected());
+    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -122,9 +126,9 @@ private:
     }
 //! member
 private:
-    //! TODO
+    //! container which stored the fileitems, in other words the "model"
     QList<FileItem> _file_item_list;
-    //! TODO
+    //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
 };
 
