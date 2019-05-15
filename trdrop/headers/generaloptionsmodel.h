@@ -90,7 +90,7 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //!
+    //! enables rendering of the images
     CheckBoxItem _enable_view;
 };
 

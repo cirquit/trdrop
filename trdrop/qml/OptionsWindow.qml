@@ -142,22 +142,70 @@ Window {
                     spacing: 4
                     model: DelegateModel {
                         id: fpsOptionsVisual
-                        model: FpsOptionsModel { id: fpsOptionsModel }
+                        model: fpsOptionsModel
                         delegate: fpsOptionsDelegate
                     }
                 }
                 Component {
                     id: fpsOptionsDelegate
-                    CheckBox {
-                        text: name
-                        checked: value
-                        action: Action {
-                            onTriggered: {
-                                fpsOptionsModel.setProperty(index, "value", !value)
-                                checked: value
+                    Frame {
+                        ColumnLayout {
+                            Switch {
+                                text: model.option01Name
+                                checked: model.option01Value
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                //ToolTip.text: model.option01Tooltip
+                                action: Action {
+                                    onTriggered: {
+                                        model.option01Value = !model.option01Value;
+                                        checked: model.option01Value
+                                    }
+                                }
+                            }
+                            Switch {
+                                text: model.option02Name
+                                checked: model.option02Value
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                //ToolTip.text: model.option02Tooltip
+                                action: Action {
+                                    onTriggered: {
+                                        model.option02Value = !model.option02Value;
+                                        checked: model.option02Value
+                                    }
+                                }
+                            }
+                            RowLayout {
+                                Label {
+                                    text: "Plotcolor"
+                                }
+                                Rectangle {
+                                    id: colorView
+                                    width: 50
+                                    height: 20
+                                    color: "#AFAFEF"
+                                    border.color: "#fffafa"
+                                    border.width: 1
+                                    radius: 2
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            colorDialog.open()
+                                        }
+                                    }
+                                    ColorDialog {
+                                        id: colorDialog
+                                        title: "Please choose a color"
+                                        onAccepted: {
+                                            colorView.color = colorDialog.color
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
+
                 }
             }
             Rectangle {

@@ -206,13 +206,13 @@ Window {
                 NumberAnimation {
                     properties: "y"
                     duration: 250
-                    easing: {
-                        type: Easing.InOutExpo
-                    }
+//                    easing: {
+//                        type: Easing.InOutExpo
+//                    }
                 }
                 from: "fromState"
                 to: "toState"
             }
         }
-
+    }
 }

@@ -3,6 +3,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 16.05.2019
+
+Started with the options menu. Colorpicking works!
+
+![](images/2019-05-16-options-menu-progress.gif)
+
 #### Update 14.05.2019
 
 Got the fileitemmodel working with c++ and qml. Added transition animations because they look good. Now focusing on the options dialog. Hopefully this will be faster as the model will be the same implementation as the fileitem one.
