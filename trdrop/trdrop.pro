@@ -30,5 +30,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     headers/fileitem.h \
-    headers/fileitemmodel.h
+    headers/fileitemmodel.h \
+    headers/checkboxitem.h \
+    headers/generaloptionsmodel.h
     # headers/fileitemlist.h \

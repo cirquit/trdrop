@@ -214,7 +214,5 @@ Window {
                 to: "toState"
             }
         }
-    }
-
 
 }

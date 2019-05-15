@@ -35,9 +35,9 @@ Window {
                     font.pointSize: 15
                     highlighted: generalOptions.visible
                     onClicked: {
-                        generalOptions.visible = true
-                        fpsOptions.visible = false
-                        tearOptions.visible = false
+                        generalOptions.visible   = true
+                        fpsOptions.visible       = false
+                        tearOptions.visible      = false
                         frametimeOptions.visible = false
                     }
                 }
@@ -50,9 +50,9 @@ Window {
                     font.pointSize: 15
                     highlighted: fpsOptions.visible
                     onClicked: {
-                        generalOptions.visible = false
-                        fpsOptions.visible = true
-                        tearOptions.visible = false
+                        generalOptions.visible   = false
+                        fpsOptions.visible       = true
+                        tearOptions.visible      = false
                         frametimeOptions.visible = false
                     }
                 }
@@ -65,9 +65,9 @@ Window {
                     font.pointSize: 15
                     highlighted: tearOptions.visible
                     onClicked: {
-                        generalOptions.visible = false
-                        fpsOptions.visible = false
-                        tearOptions.visible = true
+                        generalOptions.visible   = false
+                        fpsOptions.visible       = false
+                        tearOptions.visible      = true
                         frametimeOptions.visible = false
                     }
                 }
@@ -80,9 +80,9 @@ Window {
                     font.pointSize: 15
                     highlighted: frametimeOptions.visible
                     onClicked: {
-                        generalOptions.visible = false
-                        fpsOptions.visible = false
-                        tearOptions.visible = false
+                        generalOptions.visible   = false
+                        fpsOptions.visible       = false
+                        tearOptions.visible      = false
                         frametimeOptions.visible = true
                     }
                 }
@@ -104,22 +104,22 @@ Window {
                     spacing: 4
                     model: DelegateModel {
                         id: generalOptionsVisual
-                        model: GeneralOptionsModel { id: generalOptionsModel }
+                        model: generalOptionsModel
                         delegate: generalOptionsDelegate
                     }
                 }
                 Component {
                     id: generalOptionsDelegate
                     CheckBox {
-                        text: name
-                        checked: value
+                        text: model.enableViewName
+                        checked: model.enableViewValue
                         ToolTip.delay: 500
                         ToolTip.visible: hovered
-                        ToolTip.text: tooltip
+                        ToolTip.text: model.enableViewTooltip
                         action: Action {
                             onTriggered: {
-                                generalOptionsModel.setProperty(index, "value", !value)
-                                checked: value
+                                model.enableViewValue = !model.enableViewValue;
+                                checked: model.enableViewValue
                             }
                         }
                     }
