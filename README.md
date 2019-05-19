@@ -1,7 +1,12 @@
-# trdrop
-<img src="images/logos/trdrop_logo_text_wide.png" alt="Teardrop logo">
+<img src="images/logos/trdrop_new_2.png" alt="Teardrop logo">
 
 trdrop - a cross platform fps analyzer for raw video data
+
+#### Update 20.05.2019
+
+Added the Framerate options with a color picking / font picking / text editing functionality. Also added a reset settings button.
+
+[Webm this time, gif convertion failed](images/2019-05-20-fps-options-progress.webm)
 
 #### Update 16.05.2019
 

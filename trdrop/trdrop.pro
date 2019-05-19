@@ -36,5 +36,6 @@ HEADERS += \
     headers/fpsoptionsmodel.h \
     headers/colorpickitem.h \
     headers/valueitem.h \
-    headers/fpsoptions.h
+    headers/fpsoptions.h \
+    headers/textedititem.h
     # headers/fileitemlist.h \

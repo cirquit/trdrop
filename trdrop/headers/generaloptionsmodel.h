@@ -69,6 +69,12 @@ public:
         beginResetModel();
         endResetModel();
     }
+
+    Q_INVOKABLE void revertModelToDefault()
+    {
+        _init_checkboxes();
+        resetModel();
+    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

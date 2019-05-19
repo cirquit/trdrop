@@ -24,15 +24,16 @@ int main(int argc, char *argv[])
     FileItemModel file_item_model(default_file_items);
     engine.rootContext()->setContextProperty("fileItemModel", &file_item_model);
 
+    // prepare the FPS Options Model
+    qmlRegisterType<FPSOptionsModel>();
+    FPSOptionsModel fps_options_model;
+    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
+
     // prepare the OptionsModel
     qmlRegisterType<GeneralOptionsModel>();
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
 
-    //
-    qmlRegisterType<FPSOptionsModel>();
-    FPSOptionsModel fps_options_model;
-    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

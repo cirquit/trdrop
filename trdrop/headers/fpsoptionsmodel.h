@@ -27,6 +27,12 @@ public:
       , PixelDifferenceNameRole    = Qt::UserRole + 3
       , PixelDifferenceTooltipRole = Qt::UserRole + 4
       , PixelDifferenceValueRole   = Qt::UserRole + 5
+      , PixelDifferenceEnabledRole = Qt::UserRole + 6
+      , DisplayedTextNameRole      = Qt::UserRole + 7
+      , DisplayedTextTooltipRole   = Qt::UserRole + 8
+      , DisplayedTextValueRole     = Qt::UserRole + 9
+      , DisplayedTextFontRole      = Qt::UserRole + 10
+      , DisplayedTextEnabledRole   = Qt::UserRole + 11
     };
 //! methods
 public:
@@ -56,6 +62,18 @@ public:
                 return _file_options_list[row].pixel_difference.tooltip();
             case PixelDifferenceValueRole:
                 return _file_options_list[row].pixel_difference.value();
+            case PixelDifferenceEnabledRole:
+                return _file_options_list[row].pixel_difference.enabled();
+            case DisplayedTextNameRole:
+                 return _file_options_list[row].displayed_text.name();
+            case DisplayedTextTooltipRole:
+                 return _file_options_list[row].displayed_text.tooltip();
+            case DisplayedTextValueRole:
+                 return _file_options_list[row].displayed_text.value();
+            case DisplayedTextFontRole:
+                 return _file_options_list[row].displayed_text.font();
+            case DisplayedTextEnabledRole:
+                 return _file_options_list[row].displayed_text.enabled();
             default:
                 return QVariant();
         }
@@ -70,6 +88,12 @@ public:
         else if (role == PixelDifferenceNameRole)    _file_options_list[row].pixel_difference.setName(value.toString());
         else if (role == PixelDifferenceTooltipRole) _file_options_list[row].pixel_difference.setTooltip(value.toString());
         else if (role == PixelDifferenceValueRole)   _file_options_list[row].pixel_difference.setValue(value.toUInt());
+        else if (role == PixelDifferenceEnabledRole) _file_options_list[row].pixel_difference.setEnabled(value.toBool());
+        else if (role == DisplayedTextNameRole)      _file_options_list[row].displayed_text.setName(value.toString());
+        else if (role == DisplayedTextTooltipRole)   _file_options_list[row].displayed_text.setTooltip(value.toString());
+        else if (role == DisplayedTextValueRole)     _file_options_list[row].displayed_text.setValue(value.toString());
+        else if (role == DisplayedTextFontRole)      _file_options_list[row].displayed_text.setFont(value.value<QFont>());
+        else if (role == DisplayedTextEnabledRole)   _file_options_list[row].displayed_text.setEnabled(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -93,6 +117,15 @@ public:
         setData(q2, value, PixelDifferenceValueRole);
     }
 
+    //! TODO
+    Q_INVOKABLE void revertModelToDefault()
+    {
+        for (quint8 id = 0; id < 3; ++id) {
+            _file_options_list[id].revert_to_default();
+        }
+        resetModel();
+    }
+
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -101,9 +134,17 @@ private:
         _role_names[ColorPickNameRole]    = "colorName";
         _role_names[ColorPickTooltipRole] = "colorTooltip";
         _role_names[ColorPickValueRole]   = "color";
+
         _role_names[PixelDifferenceNameRole]    = "pixelDifferenceName";
         _role_names[PixelDifferenceTooltipRole] = "pixelDifferenceTooltip";
         _role_names[PixelDifferenceValueRole]   = "pixelDifference";
+        _role_names[PixelDifferenceEnabledRole] = "pixelDifferenceEnabled";
+
+        _role_names[DisplayedTextNameRole]      = "displayedTextName";
+        _role_names[DisplayedTextTooltipRole]   = "displayedTextTooltip";
+        _role_names[DisplayedTextValueRole]     = "displayedText";
+        _role_names[DisplayedTextFontRole]      = "displayedTextFont";
+        _role_names[DisplayedTextEnabledRole]   = "displayedTextEnabled";
     }
     //! TODO
     void _init_options()

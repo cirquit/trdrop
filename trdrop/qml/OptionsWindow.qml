@@ -18,8 +18,9 @@ Window {
     Material.accent: Material.DeepPurple
 
     Pane {
-        width: optionsWindow.width
+        width:  optionsWindow.width
         height: optionsWindow.height
+
         GridLayout {
             rows: 1
             columns: 2
@@ -98,7 +99,6 @@ Window {
                 border.color: "#bface3"
                 color: "#404040"
                 visible: true
-                // general options view
                 ListView {
                     id: generalOptionsView
                     anchors { fill: parent; margins: 20 }
@@ -111,16 +111,29 @@ Window {
                 }
                 Component {
                     id: generalOptionsDelegate
-                    CheckBox {
-                        text: model.enableViewName
-                        checked: model.enableViewValue
-                        ToolTip.delay: 500
-                        ToolTip.visible: hovered
-                        ToolTip.text: model.enableViewTooltip
-                        action: Action {
-                            onTriggered: {
-                                model.enableViewValue = !model.enableViewValue;
-                                checked: model.enableViewValue
+                    GridLayout {
+                        rows: 2
+                        columns: 1
+                        Switch {
+                            text: model.enableViewName
+                            checked: model.enableViewValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableViewTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableViewValue = !model.enableViewValue;
+                                    checked: model.enableViewValue
+                                }
+                            }
+                        }
+                        Button {
+                            text: "Revert to default settings"
+                            action: Action {
+                                onTriggered: {
+                                    fpsOptionsModel.revertModelToDefault();
+                                    generalOptionsModel.revertModelToDefault();
+                                }
                             }
                         }
                     }
@@ -152,8 +165,10 @@ Window {
                     Frame {
                         width: fpsOptions.width * 0.95
                         GridLayout {
-                            columns: 3
+                            columns: 4
+
                             Label {
+                                id: colorLabel
                                 text: model.colorName + ":"
                                 Layout.rightMargin: 5
                             }
@@ -161,12 +176,13 @@ Window {
                                 id: colorView
                                 height: 20
                                 color: model.color
-                                border.color: "#CCCCCC"
+                                border.color: "#8066b0"
                                 border.width: 1
                                 radius: 3
                                 Layout.leftMargin:  50
                                 Layout.rightMargin: 50
                                 Layout.fillWidth: true
+                                //ToolTip.text: model.colorTooltip
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: colorDialog.open()
@@ -182,19 +198,22 @@ Window {
                             }
                             Button {
                                 text:  "Replicate Color"
-                                ToolTip.text: "Replicate this color to tears and frametime of this video index"
-                                ToolTip.delay: 500
-                                width: 100
-                                ToolTip.visible: hovered
-//                                Layout.margins: 5
+                                //ToolTip.text: "Replicate this color to tears and frametime of this video index"
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
                                 action: Action {
                                     onTriggered:
                                         console.log("Copy: " + index)
                                 }
                             }
+                            Label { }
+
                             Label {
                                 text: model.pixelDifferenceName + ":"
                                 Layout.rightMargin: 5
+                                //ToolTip.text: model.pixelDifferenceTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
                             }
                             SpinBox {
                                 id: pixelDifferenceSpinBox
@@ -203,25 +222,84 @@ Window {
                                 stepSize: 1
                                 editable: true
                                 value: model.pixelDifference
-                                onValueChanged: {
-                                    if (model.pixelDifference !== value) model.pixelDifference = value;
-                                }
+                                onValueChanged: if (model.pixelDifference !== value) model.pixelDifference = value;
                             }
                             Button {
-                                text: "Apply to all"
-                                ToolTip.text: model.pixelDifferenceTooltip
-                                ToolTip.delay: 500
-                                ToolTip.visible: hovered
+                                text: "Apply to all videos"
                                 action: Action {
-                                    onTriggered: {
-                                        fpsOptionsModel.applyPixelDifference(model.pixelDifference)
-                                        fpsOptionsModel.resetModel()
+                                    onTriggered: fpsOptionsModel.applyPixelDifference(model.pixelDifference)
+                                }
+                            }
+                            Label { }
+
+                            Label {
+                                text: model.displayedTextName
+                                //ToolTip.text: model.displayedTextTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
+                            Rectangle {
+                                border {
+                                    color: "#8066b0"
+                                    width: 1
+                                }
+                                Layout.fillWidth: parent
+                                height: 30
+                                Layout.leftMargin: 20
+                                Layout.rightMargin: 20
+                                color: "transparent"
+//                                ToolTip.text: model.displayedTextTooltip
+//                                ToolTip.delay: 500
+//                                ToolTip.visible: hovered
+                                TextInput {
+                                    id: fpsText
+                                    anchors.fill: parent
+                                    leftPadding: 5
+                                    topPadding: 2
+                                    bottomPadding: 2
+                                    text: model.displayedText
+                                    color: enabled ? model.color
+                                                   : "#b0b0b0"
+                                    clip: true
+                                    font: model.displayedTextFont
+                                    onEditingFinished: {
+                                        model.displayedText = text;
                                     }
                                 }
                             }
+                            Button {
+                                id: fpsTextCustomize
+                                text: "Customize"
+                                onClicked: {
+                                    fontDialog.open()
+                                }
+                            }
+                            FontDialog {
+                                id: fontDialog
+                                title: "Please choose a font"
+                                font: Qt.font({ family: "Helvetica", pointSize: 15 })
+                                onAccepted: {
+                                    fpsText.font = fontDialog.font
+                                    model.displayedTextFont = fontDialog.font
+                                    console.log(model.displayedTextFont)
+                                }
+                            }
+                            Switch {
+                                id: fpsTextEnabled
+                                checked: true
+                                action: Action {
+                                    onTriggered: {
+                                        fpsText.enabled = !fpsText.enabled;
+                                        fpsTextCustomize.enabled = !fpsTextCustomize.enabled;
+                                        fpsTextEnabled.checked = fpsText.enabled
+                                    }
+                                }
+                                //ToolTip.text: "Disable text and framerate rendering"
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
                         }
                     }
-
                 }
             }
             Rectangle {

@@ -4,6 +4,7 @@
 #include "headers/checkboxitem.h"
 #include "headers/colorpickitem.h"
 #include "headers/valueitem.h"
+#include "headers/textedititem.h"
 
 class FPSOptions
 {
@@ -12,6 +13,14 @@ public:
     //! TODO
     FPSOptions(quint8 & video_id)
         : video_id(video_id)
+    {
+        _init_member();
+    }
+
+// methods
+public:
+    //! TODO
+    void revert_to_default()
     {
         _init_member();
     }
@@ -27,9 +36,16 @@ private:
 
         pixel_difference.setName("Pixel difference");
         pixel_difference.setTooltip("Pixel Difference Margin\n \
-                                      example 0    - RGB values have to be identical to not detect a new frame\n \
-                                      example: 5   - maximum summarized difference between each RGB channel can be 5");
+    example: 0  - RGB values have to be identical to not detect a new frame\n \
+    example: 5  - maximum summarized difference between each RGB channel can be 5");
         pixel_difference.setValue(0);
+        pixel_difference.setEnabled(true);
+
+        displayed_text.setName("Framerate text");
+        displayed_text.setTooltip("The text which will be shown in the left corner of each video with the framerate");
+        displayed_text.setValue("FPS:");
+        displayed_text.setEnabled(true);
+        displayed_text.setFont(QFont("Helvetica", 15));
     }
 
 // member
@@ -39,7 +55,9 @@ public:
     //! TODO
     ColorPickItem fps_plot_color;
     //! TODO
-    ValueItem pixel_difference;
+    ValueItem<quint32> pixel_difference;
+    //! TODO
+    TextEditItem displayed_text;
 };
 
 #endif // FPSOptions_H
