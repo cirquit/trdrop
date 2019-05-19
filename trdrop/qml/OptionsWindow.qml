@@ -3,6 +3,7 @@ import QtQml.Models 2.1
 import QtQuick.Window 2.12
 import QtQuick.Controls.Material 2.12
 import QtQuick.Controls 2.5
+import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 
@@ -149,57 +150,72 @@ Window {
                 Component {
                     id: fpsOptionsDelegate
                     Frame {
-                        ColumnLayout {
-                            Switch {
-                                text: model.option01Name
-                                checked: model.option01Value
-                                ToolTip.delay: 500
-                                ToolTip.visible: hovered
-                                //ToolTip.text: model.option01Tooltip
-                                action: Action {
-                                    onTriggered: {
-                                        model.option01Value = !model.option01Value;
-                                        checked: model.option01Value
+                        width: fpsOptions.width * 0.95
+                        GridLayout {
+                            columns: 3
+                            Label {
+                                text: model.colorName + ":"
+                                Layout.rightMargin: 5
+                            }
+                            Rectangle {
+                                id: colorView
+                                height: 20
+                                color: model.color
+                                border.color: "#CCCCCC"
+                                border.width: 1
+                                radius: 3
+                                Layout.leftMargin:  50
+                                Layout.rightMargin: 50
+                                Layout.fillWidth: true
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: colorDialog.open()
+                                }
+                                ColorDialog {
+                                    id: colorDialog
+                                    title: "Please choose a color"
+                                    onAccepted: {
+                                        colorView.color = colorDialog.color
+                                        model.color = colorDialog.color
                                     }
                                 }
                             }
-                            Switch {
-                                text: model.option02Name
-                                checked: model.option02Value
+                            Button {
+                                text:  "Replicate Color"
+                                ToolTip.text: "Replicate this color to tears and frametime of this video index"
                                 ToolTip.delay: 500
+                                width: 100
                                 ToolTip.visible: hovered
-                                //ToolTip.text: model.option02Tooltip
+//                                Layout.margins: 5
                                 action: Action {
-                                    onTriggered: {
-                                        model.option02Value = !model.option02Value;
-                                        checked: model.option02Value
-                                    }
+                                    onTriggered:
+                                        console.log("Copy: " + index)
                                 }
                             }
-                            RowLayout {
-                                Label {
-                                    text: "Plotcolor"
+                            Label {
+                                text: model.pixelDifferenceName + ":"
+                                Layout.rightMargin: 5
+                            }
+                            SpinBox {
+                                id: pixelDifferenceSpinBox
+                                from: 0
+                                to: 50
+                                stepSize: 1
+                                editable: true
+                                value: model.pixelDifference
+                                onValueChanged: {
+                                    if (model.pixelDifference !== value) model.pixelDifference = value;
                                 }
-                                Rectangle {
-                                    id: colorView
-                                    width: 50
-                                    height: 20
-                                    color: "#AFAFEF"
-                                    border.color: "#fffafa"
-                                    border.width: 1
-                                    radius: 2
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: {
-                                            colorDialog.open()
-                                        }
-                                    }
-                                    ColorDialog {
-                                        id: colorDialog
-                                        title: "Please choose a color"
-                                        onAccepted: {
-                                            colorView.color = colorDialog.color
-                                        }
+                            }
+                            Button {
+                                text: "Apply to all"
+                                ToolTip.text: model.pixelDifferenceTooltip
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                action: Action {
+                                    onTriggered: {
+                                        fpsOptionsModel.applyPixelDifference(model.pixelDifference)
+                                        fpsOptionsModel.resetModel()
                                     }
                                 }
                             }

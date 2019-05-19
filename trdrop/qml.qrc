@@ -11,6 +11,5 @@
         <file>fonts/materialdesignicons-webfont.ttf</file>
         <file>images/remove-icon.png</file>
         <file>images/add-icon.png</file>
-        <file>qml/FpsOptionsModel.qml</file>
     </qresource>
 </RCC>

@@ -34,5 +34,7 @@ HEADERS += \
     headers/checkboxitem.h \
     headers/generaloptionsmodel.h \
     headers/fpsoptionsmodel.h \
-    headers/fileoptions.h
+    headers/colorpickitem.h \
+    headers/valueitem.h \
+    headers/fpsoptions.h
     # headers/fileitemlist.h \
