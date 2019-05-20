@@ -8,6 +8,7 @@
 #include "headers/fileitemmodel.h"
 #include "headers/generaloptionsmodel.h"
 #include "headers/fpsoptionsmodel.h"
+#include "headers/tearoptionsmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +24,11 @@ int main(int argc, char *argv[])
     constexpr quint8 default_file_items = 3;
     FileItemModel file_item_model(default_file_items);
     engine.rootContext()->setContextProperty("fileItemModel", &file_item_model);
+
+    // prepare the FPS Options Model
+    qmlRegisterType<TearOptionsModel>();
+    TearOptionsModel tear_options_model;
+    engine.rootContext()->setContextProperty("tearOptionsModel", &tear_options_model);
 
     // prepare the FPS Options Model
     qmlRegisterType<FPSOptionsModel>();

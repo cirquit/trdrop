@@ -40,7 +40,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
-        return _file_options_list.size();
+        return _fps_options_list.size();
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
@@ -51,29 +51,29 @@ public:
         switch (role)
         {
             case ColorPickNameRole:
-                return _file_options_list[row].fps_plot_color.name();
+                return _fps_options_list[row].fps_plot_color.name();
             case ColorPickTooltipRole:
-                return _file_options_list[row].fps_plot_color.tooltip();
+                return _fps_options_list[row].fps_plot_color.tooltip();
             case ColorPickValueRole:
-                return _file_options_list[row].fps_plot_color.color();
+                return _fps_options_list[row].fps_plot_color.color();
             case PixelDifferenceNameRole:
-                return _file_options_list[row].pixel_difference.name();
+                return _fps_options_list[row].pixel_difference.name();
             case PixelDifferenceTooltipRole:
-                return _file_options_list[row].pixel_difference.tooltip();
+                return _fps_options_list[row].pixel_difference.tooltip();
             case PixelDifferenceValueRole:
-                return _file_options_list[row].pixel_difference.value();
+                return _fps_options_list[row].pixel_difference.value();
             case PixelDifferenceEnabledRole:
-                return _file_options_list[row].pixel_difference.enabled();
+                return _fps_options_list[row].pixel_difference.enabled();
             case DisplayedTextNameRole:
-                 return _file_options_list[row].displayed_text.name();
+                 return _fps_options_list[row].displayed_text.name();
             case DisplayedTextTooltipRole:
-                 return _file_options_list[row].displayed_text.tooltip();
+                 return _fps_options_list[row].displayed_text.tooltip();
             case DisplayedTextValueRole:
-                 return _file_options_list[row].displayed_text.value();
+                 return _fps_options_list[row].displayed_text.value();
             case DisplayedTextFontRole:
-                 return _file_options_list[row].displayed_text.font();
+                 return _fps_options_list[row].displayed_text.font();
             case DisplayedTextEnabledRole:
-                 return _file_options_list[row].displayed_text.enabled();
+                 return _fps_options_list[row].displayed_text.enabled();
             default:
                 return QVariant();
         }
@@ -82,18 +82,18 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         int row = index.row();
-        if      (role == ColorPickNameRole)          _file_options_list[row].fps_plot_color.setName(value.toString());
-        else if (role == ColorPickTooltipRole)       _file_options_list[row].fps_plot_color.setTooltip(value.toString());
-        else if (role == ColorPickValueRole)         _file_options_list[row].fps_plot_color.setColor(value.toString());
-        else if (role == PixelDifferenceNameRole)    _file_options_list[row].pixel_difference.setName(value.toString());
-        else if (role == PixelDifferenceTooltipRole) _file_options_list[row].pixel_difference.setTooltip(value.toString());
-        else if (role == PixelDifferenceValueRole)   _file_options_list[row].pixel_difference.setValue(value.toUInt());
-        else if (role == PixelDifferenceEnabledRole) _file_options_list[row].pixel_difference.setEnabled(value.toBool());
-        else if (role == DisplayedTextNameRole)      _file_options_list[row].displayed_text.setName(value.toString());
-        else if (role == DisplayedTextTooltipRole)   _file_options_list[row].displayed_text.setTooltip(value.toString());
-        else if (role == DisplayedTextValueRole)     _file_options_list[row].displayed_text.setValue(value.toString());
-        else if (role == DisplayedTextFontRole)      _file_options_list[row].displayed_text.setFont(value.value<QFont>());
-        else if (role == DisplayedTextEnabledRole)   _file_options_list[row].displayed_text.setEnabled(value.toBool());
+        if      (role == ColorPickNameRole)          _fps_options_list[row].fps_plot_color.setName(value.toString());
+        else if (role == ColorPickTooltipRole)       _fps_options_list[row].fps_plot_color.setTooltip(value.toString());
+        else if (role == ColorPickValueRole)         _fps_options_list[row].fps_plot_color.setColor(value.toString());
+        else if (role == PixelDifferenceNameRole)    _fps_options_list[row].pixel_difference.setName(value.toString());
+        else if (role == PixelDifferenceTooltipRole) _fps_options_list[row].pixel_difference.setTooltip(value.toString());
+        else if (role == PixelDifferenceValueRole)   _fps_options_list[row].pixel_difference.setValue(value.toUInt());
+        else if (role == PixelDifferenceEnabledRole) _fps_options_list[row].pixel_difference.setEnabled(value.toBool());
+        else if (role == DisplayedTextNameRole)      _fps_options_list[row].displayed_text.setName(value.toString());
+        else if (role == DisplayedTextTooltipRole)   _fps_options_list[row].displayed_text.setTooltip(value.toString());
+        else if (role == DisplayedTextValueRole)     _fps_options_list[row].displayed_text.setValue(value.toString());
+        else if (role == DisplayedTextFontRole)      _fps_options_list[row].displayed_text.setFont(value.value<QFont>());
+        else if (role == DisplayedTextEnabledRole)   _fps_options_list[row].displayed_text.setEnabled(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -121,7 +121,7 @@ public:
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
-            _file_options_list[id].revert_to_default();
+            _fps_options_list[id].revert_to_default();
         }
         resetModel();
     }
@@ -150,7 +150,7 @@ private:
     void _init_options()
     {
         for (quint8 id = 0; id < 3; ++id) {
-            _file_options_list.append(FPSOptions(id));
+            _fps_options_list.append(FPSOptions(id));
         }
     }
 
@@ -158,8 +158,8 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //!
-    QList<FPSOptions> _file_options_list;
+    //! TODO
+    QList<FPSOptions> _fps_options_list;
 };
 
 #endif // FPSOPTIONSMODEL_H

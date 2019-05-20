@@ -149,7 +149,6 @@ Window {
                 border.color: "#bface3"
                 color: "#404040"
                 visible: false
-                // general fps view
                 ListView {
                     id: fpsOptionsView
                     anchors { fill: parent; margins: 20 }
@@ -173,7 +172,7 @@ Window {
                                 Layout.rightMargin: 5
                             }
                             Rectangle {
-                                id: colorView
+                                id: fpsColorRectangle
                                 height: 20
                                 color: model.color
                                 border.color: "#8066b0"
@@ -185,14 +184,14 @@ Window {
                                 //ToolTip.text: model.colorTooltip
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: colorDialog.open()
+                                    onClicked: fpsColorDialog.open()
                                 }
                                 ColorDialog {
-                                    id: colorDialog
+                                    id: fpsColorDialog
                                     title: "Please choose a color"
                                     onAccepted: {
-                                        colorView.color = colorDialog.color
-                                        model.color = colorDialog.color
+                                        fpsColorRectangle.color = fpsColorDialog.color
+                                        model.color = fpsColorDialog.color
                                     }
                                 }
                             }
@@ -312,6 +311,65 @@ Window {
                 border.color: "#bface3"
                 color: "#404040"
                 visible: false
+                ListView {
+                    id: tearOptionsView
+                    anchors { fill: parent; margins: 20 }
+                    spacing: 4
+                    model: DelegateModel {
+                        id: tearOptionsVisual
+                        model: tearOptionsModel
+                        delegate: tearOptionsDelegate
+                    }
+                }
+                Component {
+                    id: tearOptionsDelegate
+                    Frame {
+                        width: fpsOptions.width * 0.95
+                        GridLayout {
+                            columns: 3
+                            Label {
+                                id: colorLabel
+                                text: model.colorName + ":"
+                                Layout.rightMargin: 5
+                            }
+                            Rectangle {
+                                id: tearColorRectangle
+                                height: 20
+                                color: "#FAFAFA"
+                                border.color: "#8066b0"
+                                border.width: 1
+                                radius: 3
+                                //Layout.leftMargin:  50
+                                //Layout.rightMargin: 50
+                                Layout.fillWidth: true
+                                //ToolTip.text: model.colorTooltip
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: tearColorDialog.open()
+                                }
+                                ColorDialog {
+                                    id: tearColorDialog
+                                    title: "Please choose a color"
+                                    onAccepted: {
+                                        tearColorView.color = tearColorDialog.color
+                                        model.color = tearColorDialog.color
+                                    }
+                                }
+                            }
+                            Button {
+                                text:  "Replicate Color"
+                                action: Action {
+                                    onTriggered:
+                                        console.log("Copy: " + index)
+                                }
+                            }
+
+                            Label {}
+                            Label { text: "Test" }
+                            Label {}
+                        }
+                    }
+                }
             }
             Rectangle {
                 id: frametimeOptions

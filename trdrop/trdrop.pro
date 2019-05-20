@@ -37,5 +37,7 @@ HEADERS += \
     headers/colorpickitem.h \
     headers/valueitem.h \
     headers/fpsoptions.h \
-    headers/textedititem.h
+    headers/textedititem.h \
+    headers/tearoptions.h \
+    headers/tearoptionsmodel.h
     # headers/fileitemlist.h \
