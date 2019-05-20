@@ -202,7 +202,7 @@ Window {
                                 //ToolTip.visible: hovered
                                 action: Action {
                                     onTriggered:
-                                        console.log("Copy: " + index)
+                                        tearOptionsModel.applyColor(model.color, index)
                                 }
                             }
                             Label { }
@@ -324,9 +324,23 @@ Window {
                 Component {
                     id: tearOptionsDelegate
                     Frame {
-                        width: fpsOptions.width * 0.95
+                        width: tearOptions.width * 0.95
                         GridLayout {
                             columns: 3
+
+                            Label {
+                                text: model.enableTearsName
+                            }
+                            Switch {
+                                Layout.columnSpan: 2
+                                checked: model.enableTears
+                                action: Action {
+                                    onTriggered: {
+                                        tearOptionsModel.setAllEnableTears(!model.enableTears)
+                                    }
+                                }
+                            }
+
                             Label {
                                 id: colorLabel
                                 text: model.colorName + ":"
@@ -335,14 +349,14 @@ Window {
                             Rectangle {
                                 id: tearColorRectangle
                                 height: 20
-                                color: "#FAFAFA"
+                                color: model.enableTears ? model.color : "#909090"
                                 border.color: "#8066b0"
                                 border.width: 1
                                 radius: 3
-                                //Layout.leftMargin:  50
-                                //Layout.rightMargin: 50
-                                Layout.fillWidth: true
-                                //ToolTip.text: model.colorTooltip
+                                Layout.leftMargin:  25
+                                Layout.rightMargin: 25
+                                ToolTip.text: model.colorTooltip
+                                width: 70
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: tearColorDialog.open()
@@ -351,22 +365,18 @@ Window {
                                     id: tearColorDialog
                                     title: "Please choose a color"
                                     onAccepted: {
-                                        tearColorView.color = tearColorDialog.color
                                         model.color = tearColorDialog.color
                                     }
                                 }
                             }
                             Button {
+                                enabled: model.enableTears
                                 text:  "Replicate Color"
                                 action: Action {
                                     onTriggered:
-                                        console.log("Copy: " + index)
+                                        fpsOptionsModel.applyColor(model.color, index)
                                 }
                             }
-
-                            Label {}
-                            Label { text: "Test" }
-                            Label {}
                         }
                     }
                 }

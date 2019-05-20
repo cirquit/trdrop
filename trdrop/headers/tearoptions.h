@@ -30,9 +30,13 @@ private:
     //! TODO
     void _init_member()
     {
-        tear_plot_color.setName("Tear plot color");
+        tear_plot_color.setName("Tear plot color:");
         tear_plot_color.setTooltip("Color of the tears in the framerate plot");
         tear_plot_color.setColor("#FAFAFA");
+
+        enable_tears.setName("Enable tears:");
+        enable_tears.setTooltip("Enables the rendering of tears in the framerate plot");
+        enable_tears.setValue(true);
     }
 
 // member
@@ -41,6 +45,8 @@ public:
     quint8       video_id;
     //! TODO
     ColorPickItem tear_plot_color;
+    //! TODO
+    ValueItem<bool> enable_tears;
     //! TODO
 //    ValueItem<quint32> pixel_difference;
 //    //! TODO

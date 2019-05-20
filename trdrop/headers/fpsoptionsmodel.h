@@ -21,18 +21,18 @@ public:
     //!
     enum FPSOptionsRoles
     {
-        ColorPickNameRole          = Qt::UserRole
-      , ColorPickTooltipRole       = Qt::UserRole + 1
-      , ColorPickValueRole         = Qt::UserRole + 2
-      , PixelDifferenceNameRole    = Qt::UserRole + 3
-      , PixelDifferenceTooltipRole = Qt::UserRole + 4
-      , PixelDifferenceValueRole   = Qt::UserRole + 5
-      , PixelDifferenceEnabledRole = Qt::UserRole + 6
-      , DisplayedTextNameRole      = Qt::UserRole + 7
-      , DisplayedTextTooltipRole   = Qt::UserRole + 8
-      , DisplayedTextValueRole     = Qt::UserRole + 9
-      , DisplayedTextFontRole      = Qt::UserRole + 10
-      , DisplayedTextEnabledRole   = Qt::UserRole + 11
+        ColorPickNameRole          = Qt::UserRole + 6
+      , ColorPickTooltipRole       = Qt::UserRole + 7
+      , ColorPickValueRole         = Qt::UserRole + 8
+      , PixelDifferenceNameRole    = Qt::UserRole + 9
+      , PixelDifferenceTooltipRole = Qt::UserRole + 10
+      , PixelDifferenceValueRole   = Qt::UserRole + 11
+      , PixelDifferenceEnabledRole = Qt::UserRole + 12
+      , DisplayedTextNameRole      = Qt::UserRole + 13
+      , DisplayedTextTooltipRole   = Qt::UserRole + 14
+      , DisplayedTextValueRole     = Qt::UserRole + 15
+      , DisplayedTextFontRole      = Qt::UserRole + 16
+      , DisplayedTextEnabledRole   = Qt::UserRole + 17
     };
 //! methods
 public:
@@ -115,6 +115,13 @@ public:
         setData(q0, value, PixelDifferenceValueRole);
         setData(q1, value, PixelDifferenceValueRole);
         setData(q2, value, PixelDifferenceValueRole);
+    }
+
+    //! apply the pixel difference to all indices
+    Q_INVOKABLE void applyColor(const QVariant & value, const int & row)
+    {
+        QModelIndex q = createIndex(row, 0);
+        setData(q, value, ColorPickValueRole);
     }
 
     //! TODO

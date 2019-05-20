@@ -26,19 +26,21 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("fileItemModel", &file_item_model);
 
     // prepare the FPS Options Model
+    qmlRegisterType<FPSOptionsModel>();
+    FPSOptionsModel fps_options_model;
+    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
+
+    // prepare the Tear Options Model
     qmlRegisterType<TearOptionsModel>();
     TearOptionsModel tear_options_model;
     engine.rootContext()->setContextProperty("tearOptionsModel", &tear_options_model);
 
-    // prepare the FPS Options Model
-    qmlRegisterType<FPSOptionsModel>();
-    FPSOptionsModel fps_options_model;
-    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
 
     // prepare the OptionsModel
     qmlRegisterType<GeneralOptionsModel>();
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
+
 
 
     // load application
