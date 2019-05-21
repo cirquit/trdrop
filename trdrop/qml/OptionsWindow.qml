@@ -112,7 +112,7 @@ Window {
                 Component {
                     id: generalOptionsDelegate
                     GridLayout {
-                        rows: 2
+                        rows: 5
                         columns: 1
                         Switch {
                             text: model.enableViewName
@@ -127,10 +127,64 @@ Window {
                                 }
                             }
                         }
+                        Switch {
+                            text: model.enableFramerateName
+                            checked: model.enableFramerateValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableFramerateTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableFramerateValue = !model.enableFramerateValue;
+                                    fpsTab.enabled = model.enableFramerateValue;
+                                    if (model.enableFramerateValue === false)
+                                    {
+                                        model.enableTearsValue = false;
+                                        tearTab.enabled = false;
+                                    }
+                                }
+                            }
+                        }
+                        Switch {
+                            text: model.enableTearsName
+                            checked: model.enableTearsValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableTearsTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableTearsValue = !model.enableTearsValue;
+                                    if (model.enableTearsValue) {
+                                        fpsTab.enabled = true;
+                                        tearTab.enabled = true;
+                                        model.enableFramerateValue = true;
+                                    } else {
+                                        tearTab.enabled = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        Switch {
+                            text: model.enableDeltaRenderingName
+                            checked: model.enableDeltaRenderingValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableDeltaRenderingTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableDeltaRenderingValue = !model.enableDeltaRenderingValue;
+                                }
+                            }
+                        }
+
+
                         Button {
                             text: "Revert to default settings"
                             action: Action {
                                 onTriggered: {
+                                    fpsTab.enabled = true;
+                                    tearTab.enabled = true;
                                     fpsOptionsModel.revertModelToDefault();
                                     generalOptionsModel.revertModelToDefault();
                                 }
@@ -196,6 +250,7 @@ Window {
                                 }
                             }
                             Button {
+                                Layout.columnSpan: 2
                                 text:  "Replicate Color"
                                 //ToolTip.text: "Replicate this color to tears and frametime of this video index"
                                 //ToolTip.delay: 500
@@ -205,7 +260,6 @@ Window {
                                         tearOptionsModel.applyColor(model.color, index)
                                 }
                             }
-                            Label { }
 
                             Label {
                                 text: model.pixelDifferenceName + ":"
@@ -224,12 +278,12 @@ Window {
                                 onValueChanged: if (model.pixelDifference !== value) model.pixelDifference = value;
                             }
                             Button {
+                                Layout.columnSpan: 2
                                 text: "Apply to all videos"
                                 action: Action {
                                     onTriggered: fpsOptionsModel.applyPixelDifference(model.pixelDifference)
                                 }
                             }
-                            Label { }
 
                             Label {
                                 text: model.displayedTextName
@@ -376,6 +430,19 @@ Window {
                                     onTriggered:
                                         fpsOptionsModel.applyColor(model.color, index)
                                 }
+                            }
+
+                            Label {
+                                text: "Tear percentage"
+                            }
+
+                            SpinBox {
+                                from: 0
+                                to: 100
+                                stepSize: 1
+                                editable: true
+                                value: 0
+                                onValueChanged: { }//if (model.pixelDifference !== value) model.pixelDifference = value;
                             }
                         }
                     }

@@ -21,12 +21,12 @@ public:
     //!
     enum FPSOptionsRoles
     {
-        ColorPickNameRole          = Qt::UserRole + 20
-      , ColorPickTooltipRole       = Qt::UserRole + 21
-      , ColorPickValueRole         = Qt::UserRole + 22
-      , EnableTearsNameRole        = Qt::UserRole + 23
-      , EnableTearsTooltipRole     = Qt::UserRole + 24
-      , EnableTearsValueRole       = Qt::UserRole + 25
+        ColorPickNameRole          = Qt::UserRole + 40
+      , ColorPickTooltipRole       = Qt::UserRole + 41
+      , ColorPickValueRole         = Qt::UserRole + 42
+      , EnableTearsNameRole        = Qt::UserRole + 43
+      , EnableTearsTooltipRole     = Qt::UserRole + 44
+      , EnableTearsValueRole       = Qt::UserRole + 45
     };
 //! methods
 public:

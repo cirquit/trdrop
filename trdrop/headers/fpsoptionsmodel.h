@@ -21,18 +21,18 @@ public:
     //!
     enum FPSOptionsRoles
     {
-        ColorPickNameRole          = Qt::UserRole + 6
-      , ColorPickTooltipRole       = Qt::UserRole + 7
-      , ColorPickValueRole         = Qt::UserRole + 8
-      , PixelDifferenceNameRole    = Qt::UserRole + 9
-      , PixelDifferenceTooltipRole = Qt::UserRole + 10
-      , PixelDifferenceValueRole   = Qt::UserRole + 11
-      , PixelDifferenceEnabledRole = Qt::UserRole + 12
-      , DisplayedTextNameRole      = Qt::UserRole + 13
-      , DisplayedTextTooltipRole   = Qt::UserRole + 14
-      , DisplayedTextValueRole     = Qt::UserRole + 15
-      , DisplayedTextFontRole      = Qt::UserRole + 16
-      , DisplayedTextEnabledRole   = Qt::UserRole + 17
+        ColorPickNameRole          = Qt::UserRole + 20
+      , ColorPickTooltipRole       = Qt::UserRole + 21
+      , ColorPickValueRole         = Qt::UserRole + 22
+      , PixelDifferenceNameRole    = Qt::UserRole + 23
+      , PixelDifferenceTooltipRole = Qt::UserRole + 24
+      , PixelDifferenceValueRole   = Qt::UserRole + 25
+      , PixelDifferenceEnabledRole = Qt::UserRole + 26
+      , DisplayedTextNameRole      = Qt::UserRole + 27
+      , DisplayedTextTooltipRole   = Qt::UserRole + 28
+      , DisplayedTextValueRole     = Qt::UserRole + 29
+      , DisplayedTextFontRole      = Qt::UserRole + 30
+      , DisplayedTextEnabledRole   = Qt::UserRole + 31
     };
 //! methods
 public:
