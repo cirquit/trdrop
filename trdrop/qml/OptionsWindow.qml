@@ -113,8 +113,9 @@ Window {
                     id: generalOptionsDelegate
                     GridLayout {
                         rows: 5
-                        columns: 1
+                        columns: 3
                         Switch {
+                            Layout.columnSpan: 3
                             text: model.enableViewName
                             checked: model.enableViewValue
                             ToolTip.delay: 500
@@ -137,6 +138,7 @@ Window {
                                 onTriggered: {
                                     model.enableFramerateValue = !model.enableFramerateValue;
                                     fpsTab.enabled = model.enableFramerateValue;
+                                    framerateRange.enabled = model.enableFramerateValue;
                                     if (model.enableFramerateValue === false)
                                     {
                                         model.enableTearsValue = false;
@@ -145,7 +147,23 @@ Window {
                                 }
                             }
                         }
+                        Label {
+                            Layout.leftMargin: 20
+                            text: model.framerateRangeName
+                        }
+                        SpinBox {
+                            id: framerateRange
+                            from: 30
+                            to: 180
+                            stepSize: 10
+                            editable: true
+                            value: model.framerateRangeValue
+                            onValueChanged: {
+                                if (model.framerateRangeValue !== value) model.framerateRangeValue = value;
+                            }
+                        }
                         Switch {
+                            Layout.columnSpan: 3
                             text: model.enableTearsName
                             checked: model.enableTearsValue
                             ToolTip.delay: 500
@@ -164,6 +182,7 @@ Window {
                                 }
                             }
                         }
+
                         Switch {
                             text: model.enableFrametimeName
                             checked: model.enableFrametimeValue
@@ -174,11 +193,28 @@ Window {
                                 onTriggered: {
                                     model.enableFrametimeValue = !model.enableFrametimeValue;
                                     frametimeTab.enabled = model.enableFrametimeValue
+                                    frametimeRange.enabled = model.enableFrametimeValue
                                 }
+                            }
+                        }
+                        Label {
+                            Layout.leftMargin: 20
+                            text: model.frametimeRangeName
+                        }
+                        SpinBox {
+                            id: frametimeRange
+                            from: 30
+                            to: 180
+                            stepSize: 10
+                            editable: true
+                            value: model.frametimeRangeValue
+                            onValueChanged: {
+                                if (model.frametimeRangeValue !== value) model.frametimeRangeValue = value;
                             }
                         }
 
                         Switch {
+                            Layout.columnSpan: 3
                             text: model.enableDeltaRenderingName
                             checked: model.enableDeltaRenderingValue
                             ToolTip.delay: 500
@@ -192,6 +228,7 @@ Window {
                         }
 
                         Button {
+                            Layout.columnSpan: 3
                             text: "Revert to default settings"
                             action: Action {
                                 onTriggered: {

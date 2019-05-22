@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include "headers/checkboxitem.h"
+#include "headers/valueitem.h"
 
 //!
 class GeneralOptionsModel : public QAbstractListModel
@@ -36,6 +37,12 @@ public:
       , EnableDeltaRenderingNameRole    = Qt::UserRole + 12
       , EnableDeltaRenderingTooltipRole = Qt::UserRole + 13
       , EnableDeltaRenderingValueRole   = Qt::UserRole + 14
+      , FramerateRangeNameRole          = Qt::UserRole + 15
+      , FramerateRangeTooltipRole       = Qt::UserRole + 16
+      , FramerateRangeValueRole         = Qt::UserRole + 17
+      , FrametimeRangeNameRole          = Qt::UserRole + 18
+      , FrametimeRangeTooltipRole       = Qt::UserRole + 19
+      , FrametimeRangeValueRole         = Qt::UserRole + 20
     };
 //! methods
 public:
@@ -83,6 +90,18 @@ public:
                 return _enable_delta_rendering.tooltip();
             case EnableDeltaRenderingValueRole:
                 return _enable_delta_rendering.value();
+            case FramerateRangeNameRole:
+                return _framerate_plot_range.name();
+            case FramerateRangeTooltipRole:
+                return _framerate_plot_range.tooltip();
+            case FramerateRangeValueRole:
+                return _framerate_plot_range.value();
+            case FrametimeRangeNameRole:
+                return _frametime_plot_range.name();
+            case FrametimeRangeTooltipRole:
+                return _frametime_plot_range.tooltip();
+            case FrametimeRangeValueRole:
+                return _frametime_plot_range.value();
             default:
                 return QVariant();
         }
@@ -96,6 +115,8 @@ public:
         else if (role == EnableTearsValueRole) _enable_tear_analysis.setValue(value.toBool());
         else if (role == EnableFrametimeValueRole) _enable_frametime_analysis.setValue(value.toBool());
         else if (role == EnableDeltaRenderingValueRole) _enable_delta_rendering.setValue(value.toBool());
+        else if (role == FramerateRangeValueRole) _framerate_plot_range.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == FrametimeRangeValueRole) _frametime_plot_range.setValue(static_cast<quint8>(value.toUInt()));
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -139,6 +160,12 @@ private:
         _role_names[EnableDeltaRenderingNameRole]    = "enableDeltaRenderingName";
         _role_names[EnableDeltaRenderingTooltipRole] = "enableDeltaRenderingTooltip";
         _role_names[EnableDeltaRenderingValueRole]   = "enableDeltaRenderingValue";
+        _role_names[FramerateRangeNameRole]          = "framerateRangeName";
+        _role_names[FramerateRangeTooltipRole]       = "framerateRangeTooltip";
+        _role_names[FramerateRangeValueRole]         = "framerateRangeValue";
+        _role_names[FrametimeRangeNameRole]          = "frametimeRangeName";
+        _role_names[FrametimeRangeTooltipRole]       = "frametimeRangeTooltip";
+        _role_names[FrametimeRangeValueRole]         = "frametimeRangeValue";
     }
     //!TODO
     void _init_checkboxes()
@@ -163,6 +190,14 @@ private:
         _enable_delta_rendering.setTooltip("Renders the difference between two consecutive frames (greyscale)");
         _enable_delta_rendering.setValue(false);
 
+        _framerate_plot_range.setName("Plot range:");
+        _framerate_plot_range.setTooltip("Length of the framerate plot in seconds (x-axis)");
+        _framerate_plot_range.setValue(60);
+
+        _frametime_plot_range.setName("Plot range:");
+        _frametime_plot_range.setTooltip("Length of the frametime plot in seconds (x-axis)");
+        _frametime_plot_range.setValue(30);
+
     }
 
 //! member
@@ -179,7 +214,12 @@ private:
     CheckBoxItem _enable_frametime_analysis;
     //! TODO
     CheckBoxItem _enable_delta_rendering;
-};
+    //! TODO
+    ValueItem<quint8> _framerate_plot_range;
+    //! TODO
+    ValueItem<quint8> _frametime_plot_range;
 
+
+};
 
 #endif // GENERALOPTIONSMODEL_H

@@ -21,12 +21,12 @@ public:
     //!
     enum FPSOptionsRoles
     {
-        ColorPickNameRole          = Qt::UserRole + 40
-      , ColorPickTooltipRole       = Qt::UserRole + 41
-      , ColorPickValueRole         = Qt::UserRole + 42
-      , PixelDifferenceNameRole    = Qt::UserRole + 43
-      , PixelDifferenceTooltipRole = Qt::UserRole + 44
-      , PixelDifferenceValueRole   = Qt::UserRole + 45
+        ColorPickNameRole          = Qt::UserRole + 50
+      , ColorPickTooltipRole       = Qt::UserRole + 51
+      , ColorPickValueRole         = Qt::UserRole + 52
+      , PixelDifferenceNameRole    = Qt::UserRole + 53
+      , PixelDifferenceTooltipRole = Qt::UserRole + 54
+      , PixelDifferenceValueRole   = Qt::UserRole + 55
     };
 //! methods
 public:
@@ -69,7 +69,7 @@ public:
         else if (role == ColorPickValueRole)     _tear_options_list[row].tear_plot_color.setColor(value.toString());
         else if (role == PixelDifferenceNameRole)    _tear_options_list[row].pixel_difference.setName(value.toString());
         else if (role == PixelDifferenceTooltipRole) _tear_options_list[row].pixel_difference.setTooltip(value.toString());
-        else if (role == PixelDifferenceValueRole)   _tear_options_list[row].pixel_difference.setValue(value.toUInt());
+        else if (role == PixelDifferenceValueRole)   _tear_options_list[row].pixel_difference.setValue(static_cast<quint8>(value.toUInt()));
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
