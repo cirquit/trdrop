@@ -158,6 +158,8 @@ Window {
                             stepSize: 10
                             editable: true
                             value: model.framerateRangeValue
+                            textFromValue: function(value, locale) { return value.toString() + 's'; }
+                            valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
                                 if (model.framerateRangeValue !== value) model.framerateRangeValue = value;
                             }
@@ -208,6 +210,8 @@ Window {
                             stepSize: 10
                             editable: true
                             value: model.frametimeRangeValue
+                            textFromValue: function(value, locale) { return value.toString() + 's'; }
+                            valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
                                 if (model.frametimeRangeValue !== value) model.frametimeRangeValue = value;
                             }
@@ -480,14 +484,8 @@ Window {
                                 stepSize: 1
                                 editable: true
                                 value: model.pixelDifference
-//                                textFromValue: function(value, locale) { return parseFloat(value) + "%"; }
-//                                valueFromText: function(value, locale) {
-//                                    if (value[value.length - 1] === '%') {
-//                                        var sliced = value.slice(0, oldStr.length - 1);
-//                                        console.log(sliced)
-//                                    }
-//                                    return value;
-//                                }
+                                textFromValue: function(value, locale) { return value.toString() + '%'; }
+                                valueFromText: function(value, locale) { return value.replace('%', ''); }
                                 onValueChanged: {
                                     if (model.pixelDifference !== value){ model.pixelDifference = value; }
                                 }
