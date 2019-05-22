@@ -41,7 +41,7 @@ private:
         pixel_difference.setValue(0);
         pixel_difference.setEnabled(true);
 
-        displayed_text.setName("Framerate text");
+        displayed_text.setName("Framerate text:");
         displayed_text.setTooltip("The text which will be shown in the left corner of each video with the framerate");
         displayed_text.setValue("FPS:");
         displayed_text.setEnabled(true);

@@ -164,6 +164,19 @@ Window {
                                 }
                             }
                         }
+                        Switch {
+                            text: model.enableFrametimeName
+                            checked: model.enableFrametimeValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableFrametimeTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableFrametimeValue = !model.enableFrametimeValue;
+                                    frametimeTab.enabled = model.enableFrametimeValue
+                                }
+                            }
+                        }
 
                         Switch {
                             text: model.enableDeltaRenderingName
@@ -178,13 +191,13 @@ Window {
                             }
                         }
 
-
                         Button {
                             text: "Revert to default settings"
                             action: Action {
                                 onTriggered: {
-                                    fpsTab.enabled = true;
+                                    fpsTab.enabled  = true;
                                     tearTab.enabled = true;
+                                    frametimeTab.enabled = true;
                                     fpsOptionsModel.revertModelToDefault();
                                     generalOptionsModel.revertModelToDefault();
                                 }
@@ -275,7 +288,9 @@ Window {
                                 stepSize: 1
                                 editable: true
                                 value: model.pixelDifference
-                                onValueChanged: if (model.pixelDifference !== value) model.pixelDifference = value;
+                                onValueChanged: {
+                                    if (model.pixelDifference !== value) model.pixelDifference = value;
+                                }
                             }
                             Button {
                                 Layout.columnSpan: 2
@@ -383,19 +398,6 @@ Window {
                             columns: 3
 
                             Label {
-                                text: model.enableTearsName
-                            }
-                            Switch {
-                                Layout.columnSpan: 2
-                                checked: model.enableTears
-                                action: Action {
-                                    onTriggered: {
-                                        tearOptionsModel.setAllEnableTears(!model.enableTears)
-                                    }
-                                }
-                            }
-
-                            Label {
                                 id: colorLabel
                                 text: model.colorName + ":"
                                 Layout.rightMargin: 5
@@ -403,14 +405,14 @@ Window {
                             Rectangle {
                                 id: tearColorRectangle
                                 height: 20
-                                color: model.enableTears ? model.color : "#909090"
+                                color: model.color
                                 border.color: "#8066b0"
                                 border.width: 1
                                 radius: 3
-                                Layout.leftMargin:  25
-                                Layout.rightMargin: 25
+                                Layout.leftMargin:  50
+                                Layout.rightMargin: 50
+                                Layout.fillWidth: true
                                 ToolTip.text: model.colorTooltip
-                                width: 70
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: tearColorDialog.open()
@@ -424,7 +426,6 @@ Window {
                                 }
                             }
                             Button {
-                                enabled: model.enableTears
                                 text:  "Replicate Color"
                                 action: Action {
                                     onTriggered:
@@ -433,16 +434,34 @@ Window {
                             }
 
                             Label {
-                                text: "Tear percentage"
+                                text: model.pixelDifferenceName
                             }
-
                             SpinBox {
+                                id: tearPercentage
                                 from: 0
                                 to: 100
                                 stepSize: 1
                                 editable: true
-                                value: 0
-                                onValueChanged: { }//if (model.pixelDifference !== value) model.pixelDifference = value;
+                                value: model.pixelDifference
+//                                textFromValue: function(value, locale) { return parseFloat(value) + "%"; }
+//                                valueFromText: function(value, locale) {
+//                                    if (value[value.length - 1] === '%') {
+//                                        var sliced = value.slice(0, oldStr.length - 1);
+//                                        console.log(sliced)
+//                                    }
+//                                    return value;
+//                                }
+                                onValueChanged: {
+                                    if (model.pixelDifference !== value){ model.pixelDifference = value; }
+                                }
+                            }
+                            Button {
+                                text: "Apply to all"
+                                action: Action {
+                                    onTriggered: {
+                                        tearOptionsModel.applyTearPercentage(model.pixelDifference)
+                                    }
+                                }
                             }
                         }
                     }

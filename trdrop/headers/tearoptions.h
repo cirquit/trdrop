@@ -34,9 +34,9 @@ private:
         tear_plot_color.setTooltip("Color of the tears in the framerate plot");
         tear_plot_color.setColor("#FAFAFA");
 
-        enable_tears.setName("Enable tears:");
-        enable_tears.setTooltip("Enables the rendering of tears in the framerate plot");
-        enable_tears.setValue(true);
+        pixel_difference.setName("Tear percentage:");
+        pixel_difference.setTooltip("How big can the teared frame be to be counted as a new frame for the framerate analysis");
+        pixel_difference.setValue(0);
     }
 
 // member
@@ -46,9 +46,7 @@ public:
     //! TODO
     ColorPickItem tear_plot_color;
     //! TODO
-    ValueItem<bool> enable_tears;
-    //! TODO
-//    ValueItem<quint32> pixel_difference;
+    ValueItem<quint8> pixel_difference;
 //    //! TODO
 //    TextEditItem displayed_text;
 };

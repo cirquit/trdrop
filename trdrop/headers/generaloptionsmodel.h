@@ -30,9 +30,12 @@ public:
       , EnableTearsNameRole             = Qt::UserRole + 6
       , EnableTearsTooltipRole          = Qt::UserRole + 7
       , EnableTearsValueRole            = Qt::UserRole + 8
-      , EnableDeltaRenderingNameRole    = Qt::UserRole + 9
-      , EnableDeltaRenderingTooltipRole = Qt::UserRole + 10
-      , EnableDeltaRenderingValueRole   = Qt::UserRole + 11
+      , EnableFrametimeNameRole         = Qt::UserRole + 9
+      , EnableFrametimeTooltipRole      = Qt::UserRole + 10
+      , EnableFrametimeValueRole        = Qt::UserRole + 11
+      , EnableDeltaRenderingNameRole    = Qt::UserRole + 12
+      , EnableDeltaRenderingTooltipRole = Qt::UserRole + 13
+      , EnableDeltaRenderingValueRole   = Qt::UserRole + 14
     };
 //! methods
 public:
@@ -68,6 +71,12 @@ public:
                 return _enable_tear_analysis.tooltip();
             case EnableTearsValueRole:
                 return _enable_tear_analysis.value();
+            case EnableFrametimeNameRole:
+                return _enable_frametime_analysis.name();
+            case EnableFrametimeTooltipRole:
+                return _enable_frametime_analysis.tooltip();
+            case EnableFrametimeValueRole:
+                return _enable_frametime_analysis.value();
             case EnableDeltaRenderingNameRole:
                 return _enable_delta_rendering.name();
             case EnableDeltaRenderingTooltipRole:
@@ -85,6 +94,7 @@ public:
         if (role == EnableViewValueRole) _enable_view.setValue(value.toBool());
         else if (role == EnableFramerateValueRole) _enable_fps_analysis.setValue(value.toBool());
         else if (role == EnableTearsValueRole) _enable_tear_analysis.setValue(value.toBool());
+        else if (role == EnableFrametimeValueRole) _enable_frametime_analysis.setValue(value.toBool());
         else if (role == EnableDeltaRenderingValueRole) _enable_delta_rendering.setValue(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
@@ -123,6 +133,9 @@ private:
         _role_names[EnableTearsNameRole]             = "enableTearsName";
         _role_names[EnableTearsTooltipRole]          = "enableTearsTooltip";
         _role_names[EnableTearsValueRole]            = "enableTearsValue";
+        _role_names[EnableFrametimeNameRole]         = "enableFrametimeName";
+        _role_names[EnableFrametimeTooltipRole]      = "enableFrametimeTooltip";
+        _role_names[EnableFrametimeValueRole]        = "enableFrametimeValue";
         _role_names[EnableDeltaRenderingNameRole]    = "enableDeltaRenderingName";
         _role_names[EnableDeltaRenderingTooltipRole] = "enableDeltaRenderingTooltip";
         _role_names[EnableDeltaRenderingValueRole]   = "enableDeltaRenderingValue";
@@ -142,6 +155,10 @@ private:
         _enable_tear_analysis.setTooltip("Renders the tears in the framerate plot");
         _enable_tear_analysis.setValue(true);
 
+        _enable_frametime_analysis.setName("Enable frametime analysis");
+        _enable_frametime_analysis.setTooltip("Renders the frametime plot");
+        _enable_frametime_analysis.setValue(true);
+
         _enable_delta_rendering.setName("Enable delta rendering");
         _enable_delta_rendering.setTooltip("Renders the difference between two consecutive frames (greyscale)");
         _enable_delta_rendering.setValue(false);
@@ -158,6 +175,8 @@ private:
     CheckBoxItem _enable_fps_analysis;
     //! TODO
     CheckBoxItem _enable_tear_analysis;
+    //! TODO
+    CheckBoxItem _enable_frametime_analysis;
     //! TODO
     CheckBoxItem _enable_delta_rendering;
 };
