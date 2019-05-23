@@ -147,6 +147,7 @@ Window {
                                 }
                             }
                         }
+
                         Label {
                             Layout.leftMargin: 20
                             text: model.framerateRangeName
@@ -158,6 +159,9 @@ Window {
                             stepSize: 10
                             editable: true
                             value: model.framerateRangeValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.framerateRangeTooltip
                             textFromValue: function(value, locale) { return value.toString() + 's'; }
                             valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
@@ -210,6 +214,9 @@ Window {
                             stepSize: 10
                             editable: true
                             value: model.frametimeRangeValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.frametimeRangeTooltip
                             textFromValue: function(value, locale) { return value.toString() + 's'; }
                             valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
@@ -278,6 +285,9 @@ Window {
                                 id: colorLabel
                                 text: model.colorName + ":"
                                 Layout.rightMargin: 5
+                                ToolTip.text: model.colorTooltip
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
                             }
                             Rectangle {
                                 id: fpsColorRectangle
@@ -289,7 +299,6 @@ Window {
                                 Layout.leftMargin:  50
                                 Layout.rightMargin: 50
                                 Layout.fillWidth: true
-                                //ToolTip.text: model.colorTooltip
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: fpsColorDialog.open()
@@ -329,6 +338,9 @@ Window {
                                 stepSize: 1
                                 editable: true
                                 value: model.pixelDifference
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                ToolTip.text: model.pixelDifferenceTooltip
                                 onValueChanged: {
                                     if (model.pixelDifference !== value) model.pixelDifference = value;
                                 }
@@ -343,9 +355,6 @@ Window {
 
                             Label {
                                 text: model.displayedTextName
-                                //ToolTip.text: model.displayedTextTooltip
-                                //ToolTip.delay: 500
-                                //ToolTip.visible: hovered
                             }
                             Rectangle {
                                 border {
@@ -357,9 +366,6 @@ Window {
                                 Layout.leftMargin: 20
                                 Layout.rightMargin: 20
                                 color: "transparent"
-//                                ToolTip.text: model.displayedTextTooltip
-//                                ToolTip.delay: 500
-//                                ToolTip.visible: hovered
                                 TextInput {
                                     id: fpsText
                                     anchors.fill: parent
