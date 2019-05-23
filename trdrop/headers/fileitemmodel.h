@@ -104,6 +104,16 @@ public:
     {
         return QVariant::fromValue(_file_item_list.at(index).fileSelected());
     }
+    //! TODO
+    Q_INVOKABLE QVariant filesSelectedCount()
+    {
+        quint8 file_selected_count = 0;
+        std::for_each(_file_item_list.begin(), _file_item_list.end(), [&](const FileItem & fi)
+        {
+            file_selected_count += fi.fileSelected() ? 1 : 0;
+        });
+        return QVariant::fromValue(file_selected_count);
+    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

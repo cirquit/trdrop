@@ -2,6 +2,14 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 23.05.2019
+
+Added more general options with a custom spinbox with text. Also tearoptions with a shared color option. Tooltips work on the general pane but not the others yet? Also got OpenCV running from a previous project on Linux, now porting it to Windows.
+
+![](images/2019-05-23-general-options-progress.gif)
+
+![](images/2019-05-23-tear-options-progress.gif)
+
 #### Update 20.05.2019
 
 Added the Framerate options with a color picking / font picking / text editing functionality. Also added a reset settings button.

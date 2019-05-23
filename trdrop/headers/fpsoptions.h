@@ -31,7 +31,7 @@ private:
     void _init_member()
     {
         fps_plot_color.setName("Framerate plot color");
-        fps_plot_color.setTooltip("Color of the framerate plot");
+        fps_plot_color.setTooltip("Color of the framerate graph of this video index in the framerate plot");
         fps_plot_color.setColor("#FAFAFA");
 
         pixel_difference.setName("Pixel difference");
