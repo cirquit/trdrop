@@ -13,8 +13,14 @@
 #include "headers/fpsoptionsmodel.h"
 #include "headers/tearoptionsmodel.h"
 
+#include "headers/capture.h"
+#include "headers/converter.h"
+#include "headers/imageviewer.h"
+#include "headers/customthread.h"
+
 int main(int argc, char *argv[])
 {
+    qRegisterMetaType<cv::Mat>("cv::Mat");
     // general application stuff
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
@@ -42,6 +48,25 @@ int main(int argc, char *argv[])
     qmlRegisterType<GeneralOptionsModel>();
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
+
+    //! TODO
+
+    ImageViewer view;
+    Capture capture;
+    Converter converter;
+    CustomThread captureThread;
+    CustomThread converterThread;
+    // Everything runs at the same priority as the gui, so it won't supply useless frames.
+    converter.setProcessAll(false);
+    captureThread.start();
+    converterThread.start();
+    capture.moveToThread(&captureThread);
+    converter.moveToThread(&converterThread);
+    QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
+    QObject::connect(&converter, &Converter::imageReady, &view, &ImageViewer::setImage);
+    view.show();
+    QObject::connect(&capture, &Capture::started, [](){ qDebug() << "Capture started."; });
+    QMetaObject::invokeMethod(&capture, "start");
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

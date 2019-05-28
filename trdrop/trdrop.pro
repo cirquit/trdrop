@@ -58,4 +58,9 @@ HEADERS += \
     headers/fpsoptions.h \
     headers/textedititem.h \
     headers/tearoptions.h \
-    headers/tearoptionsmodel.h
+    headers/tearoptionsmodel.h \
+    headers/trdropview.h \
+    headers/converter.h \
+    headers/imageviewer.h \
+    headers/customthread.h \
+    headers/capture.h

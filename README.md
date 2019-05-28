@@ -2,6 +2,10 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 28.05.2019
+
+Got OpenCV finally to show videos in a QWidget. Now it's up to do that in QML.
+
 #### Update 23.05.2019
 
 Added more general options with a custom spinbox with text. Also tearoptions with a shared color option. Tooltips work on the general pane but not the others yet? Also got OpenCV running from a previous project on Linux, now porting it to Windows.

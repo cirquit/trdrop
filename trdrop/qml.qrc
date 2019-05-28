@@ -11,5 +11,6 @@
         <file>fonts/materialdesignicons-webfont.ttf</file>
         <file>images/remove-icon.png</file>
         <file>images/add-icon.png</file>
+        <file>qml/OpenCVOutput.qml</file>
     </qresource>
 </RCC>

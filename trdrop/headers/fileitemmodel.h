@@ -117,7 +117,6 @@ public:
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
-    //! model.name, model.sizeMB, model.position, model.container, model.fileSelected
     void _setup_role_names()
     {
         _role_names[NameRole] = "name";
