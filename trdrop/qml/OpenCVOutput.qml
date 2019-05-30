@@ -8,9 +8,17 @@ QMLImageViewer {
     anchors.centerIn: parent
     Connections {
         target: converter
+        // see imageReady Q_SIGNAL in converter.h
         onImageReady: {
-            //console.log(image)
+            console.log("Got: On Image Ready Signal, triggering getNextFrame")
             imageviewer.setImage(image)
+        }
+    }
+    Connections {
+        target: imageviewer
+        onDoneRendering: {
+            console.log("Got: On Done Rendering Signal, triggering getNextFrame")
+            capture.getNextFrame()
         }
     }
 }

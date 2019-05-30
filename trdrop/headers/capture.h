@@ -18,42 +18,47 @@ public:
     //! TODO
     Capture(QObject *parent = nullptr)
         : QObject(parent)
-        //, _videocapture(new cv::VideoCapture("/media/asa/300GB-USB/Sample 1 1080p FPS Drop Zelda Wii U.avi"))
         , _videocapture(new cv::VideoCapture("/home/asa/Videos/billie-eilish-bad-guy.mp4"))
     { }
 
 //! methods
 public:
-    //! TODO
-    Q_SIGNAL void started();
-    //! TODO
-    Q_SLOT void start()
-    {
-       if (_videocapture->isOpened()) {
-          _timer.start(0, this);
-          emit started();
-       }
-    }
-    //! TODO
-    Q_SLOT void stop() { _timer.stop(); }
-    //! TODObillie-eilish-bad-guy.mp4
+//    //! TODO
+//    Q_SIGNAL void started();
+//    //! TODO
+//    Q_SLOT void start()
+//    {
+//       if (_videocapture->isOpened()) {
+//          _timer.start(0, this);
+//          emit started();
+//       }
+//    }
+//    //! TODO
+//    Q_SLOT void stop() { _timer.stop(); }
+//    //! TODO
 
     Q_SIGNAL void frameReady(const cv::Mat &);
     //! TODO
     cv::Mat frame() const { return _frame; }
-
+    //! TODO
+    Q_SLOT void getNextFrame()
+    {
+        _videocapture->read(_frame);
+        qDebug() << "Reading frame!";
+        emit frameReady(_frame);
+    }
 //! TODO
 private:
     //! TODO
-    void timerEvent(QTimerEvent * ev)
-    {
-       if (ev->timerId() != _timer.timerId()) return;
-       if (!_videocapture->read(_frame)) { // Blocks until a new frame is ready
-          _timer.stop();
-          return;
-       }
-       emit frameReady(_frame);
-    }
+//    void timerEvent(QTimerEvent * ev)
+//    {
+//       if (ev->timerId() != _timer.timerId()) return;
+//       if (!_videocapture->read(_frame)) { // Blocks until a new frame is ready
+//          _timer.stop();
+//          return;
+//       }
+//       emit frameReady(_frame);
+//    }
 
 // member
 public:

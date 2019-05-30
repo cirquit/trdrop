@@ -14,8 +14,11 @@ public:
     QMLImageViewer(QQuickItem *parent = nullptr)
         : QQuickPaintedItem(parent)
     { }
-
+    //! TODO
     QImage image() const { return _image; }
+    //! TODO
+    Q_SIGNAL void doneRendering();
+    //! TODO
     Q_SLOT void setImage(const QImage & other) {
         // if paintEvent has not finished updating, we discard the frame
         //if (!_finished_painting) qDebug() << "Viewer dropped frame!";
@@ -44,6 +47,7 @@ public:
     void paint(QPainter * painter)
     {
         painter->drawImage(0, 0, _image);
+        emit doneRendering();
     }
 
 private:

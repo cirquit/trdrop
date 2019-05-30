@@ -49,28 +49,21 @@ int main(int argc, char *argv[])
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
 
-    //! TODO
+    //! allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
 
     qmlRegisterType<QMLImageViewer>("Trdrop", 1, 0, "QMLImageViewer");
 
-    //ImageViewer view;
-    //QMLImageViewer view;
     Capture capture;
     Converter converter;
     CustomThread captureThread;
-    // Everything runs at the same priority as the gui, so it won't supply useless frames.
-    converter.setProcessAll(false);
     captureThread.start();
     capture.moveToThread(&captureThread);
-    //converter.moveToThread(&converterThread);
     QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
 
+    engine.rootContext()->setContextProperty("capture", &capture);
     engine.rootContext()->setContextProperty("converter", &converter);
-    //QObject::connect(&converter, &Converter::imageReady, &view, &QMLImageViewer::setImage);
-    //view.show();
-    // QObject::connect(&capture, &Capture::started, [](){ qDebug() << "Capture started."; });
-    // QMetaObject::invokeMethod(&capture, "start");
+    QMetaObject::invokeMethod(&capture, "getNextFrame");
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
