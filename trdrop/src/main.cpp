@@ -13,7 +13,7 @@
 #include "headers/fpsoptionsmodel.h"
 #include "headers/tearoptionsmodel.h"
 
-#include "headers/capture.h"
+// #include "headers/capture.h"
 #include "headers/converter.h"
 #include "headers/qml_imageviewer.h"
 #include "headers/customthread.h"
@@ -49,21 +49,21 @@ int main(int argc, char *argv[])
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
 
-    //! allow cv::Mat in signals
+    // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
-
+    //
     qmlRegisterType<QMLImageViewer>("Trdrop", 1, 0, "QMLImageViewer");
 
-    Capture capture;
-    Converter converter;
-    CustomThread captureThread;
-    captureThread.start();
-    capture.moveToThread(&captureThread);
-    QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
+//    Capture capture;
+//    Converter converter;
+//    CustomThread captureThread;
+//    captureThread.start();
+//    capture.moveToThread(&captureThread);
+//    QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
 
-    engine.rootContext()->setContextProperty("capture", &capture);
-    engine.rootContext()->setContextProperty("converter", &converter);
-    QMetaObject::invokeMethod(&capture, "getNextFrame");
+//    engine.rootContext()->setContextProperty("capture", &capture);
+//    engine.rootContext()->setContextProperty("converter", &converter);
+//    QMetaObject::invokeMethod(&capture, "getNextFrame");
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

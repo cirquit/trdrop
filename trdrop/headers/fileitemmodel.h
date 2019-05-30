@@ -122,6 +122,21 @@ public:
     {
         return QFileInfo(url).size() / (std::pow(2,10) * std::pow(2,10));
     }
+    //! TODO
+    Q_INVOKABLE QList<QVariant> getAllPaths() const
+    {
+        QList<QVariant> path_list;
+        path_list.reserve(_file_item_list.size());
+        for (int i = 0; i < _file_item_list.size(); ++i) {
+            if(_file_item_list[i].fileSelected())
+            {
+                const QString & filePath = _file_item_list[i].filePath();
+                path_list.push_back(filePath);
+            }
+        }
+        return path_list;
+    }
+
 //! c++ methods - snake_case
 public:
     //! returns a const fileitem list to get the file information for a cv::VideoCapture

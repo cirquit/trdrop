@@ -2,72 +2,87 @@
 #define CAPTURE_H
 
 #include <QObject>
-#include <QBasicTimer>
-#include <QTimerEvent>
 #include <QDebug>
+#include <vector>
 #include "opencv2/opencv.hpp"
 
 //! TODO
 class Capture : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(cv::Mat frame READ frame NOTIFY frameReady USER true)
+    //Q_PROPERTY(cv::Mat frame READ frame NOTIFY frameReady USER true)
+
+    //"/home/asa/Videos/billie-eilish-bad-guy.mp4"
 
 //! constructors
 public:
-    //! TODO
-    Capture(QObject *parent = nullptr)
+    //! reserves the memory for prealloc_video_count amount of videos
+    Capture(quint8 prealloc_video_count,
+            QObject *parent = nullptr)
         : QObject(parent)
-        , _videocapture(new cv::VideoCapture("/home/asa/Videos/billie-eilish-bad-guy.mp4"))
-    { }
+    {
+        _frame_list.reserve(prealloc_video_count);
+        _videocapture_list.reserve(prealloc_video_count);
+    }
 
 //! methods
 public:
-//    //! TODO
-//    Q_SIGNAL void started();
-//    //! TODO
-//    Q_SLOT void start()
-//    {
-//       if (_videocapture->isOpened()) {
-//          _timer.start(0, this);
-//          emit started();
-//       }
-//    }
-//    //! TODO
-//    Q_SLOT void stop() { _timer.stop(); }
-//    //! TODO
-
-    Q_SIGNAL void frameReady(const cv::Mat &);
-    //! TODO
-    cv::Mat frame() const { return _frame; }
-    //! TODO
-    Q_SLOT void getNextFrame()
+    //! signal to wait for on any successional converter
+    Q_SIGNAL void framesReady(const QList<cv::Mat> & _frame_list);
+    //! reallocates the framelist if need be, then reads one frame from each videocapture
+    //! and emits the framesReady signal
+    Q_SLOT void readNextFrames()
     {
-        _videocapture->read(_frame);
-        qDebug() << "Reading frame!";
-        emit frameReady(_frame);
+        bool not_enough_frames_allocated = _videocapture_list.size() > static_cast<size_t>(_frame_list.size());
+        if (not_enough_frames_allocated) _prepare_frame_list();
+
+        for (size_t i = 0; i < _videocapture_list.size(); ++i) _videocapture_list[i].read(_frame_list[i]);
+
+        emit framesReady(_frame_list);
     }
-//! TODO
+    //! try to open all paths with the cv::VideoCapture
+    //! TODO: check for errors
+    Q_INVOKABLE void openAllPaths(const QList<QVariant> & path_list)
+    {
+        _reset_state();
+        for(int i = 0; i < path_list.size(); ++i)
+        {
+            const QString path  = path_list[i].toString();
+            cv::VideoCapture vc(path.toStdString());
+            _videocapture_list.push_back(vc);
+        }
+    }
+
+//! methods
+private:
+    //! reset all state of the object
+    void _reset_state()
+    {
+        _frame_list.clear();
+        _videocapture_list.clear();
+        _current_frame_count = 0;
+    }
+    //! resets the frame_list member and reads the current frame from each videocapture
+    //! TODO: maybe set the videocaptures to 0'th frame
+    void _prepare_frame_list()
+    {
+        _frame_list.clear();
+        for (size_t i = 0; i < _videocapture_list.size(); ++i)
+        {
+            cv::Mat frame;
+            _videocapture_list[i].read(frame);
+            _frame_list.push_back(frame);
+        }
+    }
+
+//! member
 private:
     //! TODO
-//    void timerEvent(QTimerEvent * ev)
-//    {
-//       if (ev->timerId() != _timer.timerId()) return;
-//       if (!_videocapture->read(_frame)) { // Blocks until a new frame is ready
-//          _timer.stop();
-//          return;
-//       }
-//       emit frameReady(_frame);
-//    }
-
-// member
-public:
+    QList<cv::Mat> _frame_list;
     //! TODO
-    cv::Mat _frame;
+    std::vector<cv::VideoCapture> _videocapture_list;
     //! TODO
-    QBasicTimer _timer;
-    //! TODO
-    QScopedPointer<cv::VideoCapture> _videocapture;
+    quint64 _current_frame_count;
 };
 
 #endif // CAPTURE_H

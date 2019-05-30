@@ -83,7 +83,8 @@ Window {
                             model.qtFilePath = qtFilePath;
                             model.sizeMB = Utils.round(fileItemModel.getFileSize(realFilePath), 2)
                             model.fileSelected = true;
-                            fileItemModel.resetModel()
+                            console.log(fileItemModel.getAllPaths());
+                            fileItemModel.resetModel();
                         }
                     }
                     // file description, browse and remove buttons

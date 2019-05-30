@@ -2,6 +2,10 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 31.05.2019
+
+Working Video playback in QML from OpenCV, now giving the FileDialog the functionality behind the scenes. After this we will try some overlays
+
 #### Update 28.05.2019
 
 Got OpenCV finally to show videos in a QWidget. Now it's up to do that in QML.

@@ -123,7 +123,6 @@ public:
         QModelIndex q = createIndex(row, 0);
         setData(q, value, ColorPickValueRole);
     }
-
     //! TODO
     Q_INVOKABLE void revertModelToDefault()
     {
