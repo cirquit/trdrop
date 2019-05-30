@@ -3,6 +3,9 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
+#include <QFileInfo>
+#include <cmath>
+
 #include "headers/fileitem.h"
 
 //!
@@ -25,13 +28,13 @@ public:
     //! manage the access to FileItem member from QML
     enum FileItemRoles
     {
-        NameRole         = Qt::UserRole
+        FilePathRole     = Qt::UserRole
       , SizeMBRole       = Qt::UserRole + 1
       , PositionRole     = Qt::UserRole + 2
-      , ContainerRole    = Qt::UserRole + 3
+      , QtFilePathRole   = Qt::UserRole + 3
       , FileSelectedRole = Qt::UserRole + 4
     };
-//! methods
+//! qml methods - camelCase
 public:
     //! number of elements in the _file_item_list which correlate to the rows
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
@@ -52,14 +55,14 @@ public:
         // check which member is accessed and return accordingly
         switch (role)
         {
-            case NameRole:
-                return file_item.name();
+            case FilePathRole:
+                return file_item.filePath();
             case SizeMBRole:
                 return file_item.sizeMB();
             case PositionRole:
                 return file_item.position();
-            case ContainerRole:
-                return file_item.container();
+            case QtFilePathRole:
+                return file_item.qtFilePath();
             case FileSelectedRole:
                 return file_item.fileSelected();
             default:
@@ -70,10 +73,10 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         FileItem & file_item = _file_item_list[index.row()];
-        if (role == NameRole) file_item.setName(value.toString());
+        if (role == FilePathRole) file_item.setFilePath(value.toString());
         else if (role == SizeMBRole) file_item.setSizeMB(value.toUInt());
         else if (role == PositionRole) file_item.setPosition(static_cast<quint8>(value.toUInt()));
-        else if (role == ContainerRole) file_item.setContainer(value.toString());
+        else if (role == QtFilePathRole) file_item.setQtFilePath(value.toString());
         else if (role == FileSelectedRole) file_item.setFileSelected(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
@@ -114,15 +117,26 @@ public:
         });
         return QVariant::fromValue(file_selected_count);
     }
-//! methods
+    //! get the filesize in megabyte, QFileInfo.size() returns byte
+    Q_INVOKABLE QVariant getFileSize(const QString & url) const
+    {
+        return QFileInfo(url).size() / (std::pow(2,10) * std::pow(2,10));
+    }
+//! c++ methods - snake_case
+public:
+    //! returns a const fileitem list to get the file information for a cv::VideoCapture
+    const QList<FileItem> get_file_item_list() const {
+        return _file_item_list;
+    }
+//! c++ methods - snake_case
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[NameRole] = "name";
-        _role_names[SizeMBRole] = "sizeMB";
-        _role_names[PositionRole] = "position";
-        _role_names[ContainerRole] = "container";
+        _role_names[FilePathRole]     = "filePath";
+        _role_names[SizeMBRole]       = "sizeMB";
+        _role_names[PositionRole]     = "position";
+        _role_names[QtFilePathRole]   = "qtFilePath";
         _role_names[FileSelectedRole] = "fileSelected";
     }
     //! add file item object

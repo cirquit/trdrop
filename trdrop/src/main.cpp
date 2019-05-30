@@ -15,7 +15,6 @@
 
 #include "headers/capture.h"
 #include "headers/converter.h"
-#include "headers/imageviewer.h"
 #include "headers/qml_imageviewer.h"
 #include "headers/customthread.h"
 
@@ -28,8 +27,6 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQuickStyle::setStyle("Material");
     QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
-
-
 
     // prepare the FileItemModel
     qmlRegisterType<FileItemModel>();
@@ -62,11 +59,9 @@ int main(int argc, char *argv[])
     Capture capture;
     Converter converter;
     CustomThread captureThread;
-    CustomThread converterThread;
     // Everything runs at the same priority as the gui, so it won't supply useless frames.
     converter.setProcessAll(false);
     captureThread.start();
-    converterThread.start();
     capture.moveToThread(&captureThread);
     //converter.moveToThread(&converterThread);
     QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
@@ -75,7 +70,7 @@ int main(int argc, char *argv[])
     //QObject::connect(&converter, &Converter::imageReady, &view, &QMLImageViewer::setImage);
     //view.show();
     // QObject::connect(&capture, &Capture::started, [](){ qDebug() << "Capture started."; });
-    QMetaObject::invokeMethod(&capture, "start");
+    // QMetaObject::invokeMethod(&capture, "start");
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

@@ -19,21 +19,20 @@ ApplicationWindow
     //
     menuBar: TrdropMenubar { }
     // default content
-//    StartupBackground {
-//        visible: true
-//    }
+    StartupBackground {
+        visible: false
+    }
 
     OpenCVOutput {
         visible: true
     }
-
 //    Example {
 //        visible: true
 //    }
 
     // content
 //    TrdropContent {
-//        visible: false
+//        visible: true
 //    }
 
     // not needed yet

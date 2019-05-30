@@ -6,6 +6,8 @@ import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 
+import "../utils.js" as Utils
+
 Window {
     id: fileManagementWindow
     title: "Manage Files"
@@ -71,12 +73,15 @@ Window {
                     FileDialog {
                         id: fileDialog
                         title: "Please choose an uncompressed video"
-                        nameFilters: ["Video files (*.mp4 *.avi *.raw)"]
+                        nameFilters: ["Video files (*.mp4 *.avi *.raw)", "All files (*)"]
                         visible: false
                         folder: shortcuts.movies
                         onAccepted: {
-                            //fileItemList.openFile(index, fileDialog.fileUrl.toString())
-                            model.name = fileDialog.fileUrl.toString();
+                            var qtFilePath = fileDialog.fileUrl.toString();
+                            var realFilePath = Utils.urlToPath(fileDialog.fileUrl.toString())
+                            model.filePath = realFilePath;
+                            model.qtFilePath = qtFilePath;
+                            model.sizeMB = Utils.round(fileItemModel.getFileSize(realFilePath), 2)
                             model.fileSelected = true;
                             fileItemModel.resetModel()
                         }
@@ -89,11 +94,10 @@ Window {
                             // center the browse button if no file was loaded
                             Layout.minimumWidth: model.fileSelected ? fileManagementWindow.width * 0.78
                                                                     : fileManagementWindow.width * 0.50 - browseButton.width * 0.5
-                            padding: 7
+                            padding: 15
                             Layout.fillWidth: true
-                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Filename:  "   + model.name : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Filepath:  "   + model.filePath : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
-                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Container: "   + model.container : " "  }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Video Index: " + fileDragArea.DelegateModel.itemsIndex : " " }
                         }
                         Button {
@@ -206,9 +210,6 @@ Window {
                 NumberAnimation {
                     properties: "y"
                     duration: 250
-//                    easing: {
-//                        type: Easing.InOutExpo
-//                    }
                 }
                 from: "fromState"
                 to: "toState"

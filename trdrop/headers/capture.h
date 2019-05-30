@@ -1,5 +1,5 @@
-#ifndef CAPUTRE_H
-#define CAPUTRE_H
+#ifndef CAPTURE_H
+#define CAPTURE_H
 
 #include <QObject>
 #include <QBasicTimer>
@@ -18,6 +18,7 @@ public:
     //! TODO
     Capture(QObject *parent = nullptr)
         : QObject(parent)
+        //, _videocapture(new cv::VideoCapture("/media/asa/300GB-USB/Sample 1 1080p FPS Drop Zelda Wii U.avi"))
         , _videocapture(new cv::VideoCapture("/home/asa/Videos/billie-eilish-bad-guy.mp4"))
     { }
 
@@ -64,4 +65,4 @@ public:
     QScopedPointer<cv::VideoCapture> _videocapture;
 };
 
-#endif // CAPUTRE_H
+#endif // CAPTURE_H

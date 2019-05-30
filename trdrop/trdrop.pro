@@ -61,7 +61,6 @@ HEADERS += \
     headers/tearoptionsmodel.h \
     headers/trdropview.h \
     headers/converter.h \
-    headers/imageviewer.h \
     headers/customthread.h \
     headers/capture.h \
     headers/qml_imageviewer.h
