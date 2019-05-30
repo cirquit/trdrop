@@ -16,17 +16,20 @@
 #include "headers/capture.h"
 #include "headers/converter.h"
 #include "headers/imageviewer.h"
+#include "headers/qml_imageviewer.h"
 #include "headers/customthread.h"
 
 int main(int argc, char *argv[])
 {
-    qRegisterMetaType<cv::Mat>("cv::Mat");
+
     // general application stuff
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
     QQuickStyle::setStyle("Material");
     QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
+
+
 
     // prepare the FileItemModel
     qmlRegisterType<FileItemModel>();
@@ -50,8 +53,12 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
 
     //! TODO
+    qRegisterMetaType<cv::Mat>("cv::Mat");
 
-    ImageViewer view;
+    qmlRegisterType<QMLImageViewer>("Trdrop", 1, 0, "QMLImageViewer");
+
+    //ImageViewer view;
+    //QMLImageViewer view;
     Capture capture;
     Converter converter;
     CustomThread captureThread;
@@ -61,11 +68,13 @@ int main(int argc, char *argv[])
     captureThread.start();
     converterThread.start();
     capture.moveToThread(&captureThread);
-    converter.moveToThread(&converterThread);
+    //converter.moveToThread(&converterThread);
     QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
-    QObject::connect(&converter, &Converter::imageReady, &view, &ImageViewer::setImage);
-    view.show();
-    QObject::connect(&capture, &Capture::started, [](){ qDebug() << "Capture started."; });
+
+    engine.rootContext()->setContextProperty("converter", &converter);
+    //QObject::connect(&converter, &Converter::imageReady, &view, &QMLImageViewer::setImage);
+    //view.show();
+    // QObject::connect(&capture, &Capture::started, [](){ qDebug() << "Capture started."; });
     QMetaObject::invokeMethod(&capture, "start");
 
     // load application

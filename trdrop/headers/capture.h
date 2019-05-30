@@ -13,51 +13,55 @@ class Capture : public QObject {
     Q_OBJECT
     Q_PROPERTY(cv::Mat frame READ frame NOTIFY frameReady USER true)
 
-//! TODO
+//! constructors
 public:
     //! TODO
-    Capture(QObject *parent = {}) : QObject(parent) { }
+    Capture(QObject *parent = nullptr)
+        : QObject(parent)
+        , _videocapture(new cv::VideoCapture("/home/asa/Videos/billie-eilish-bad-guy.mp4"))
+    { }
+
+//! methods
+public:
     //! TODO
     Q_SIGNAL void started();
     //! TODO
     Q_SLOT void start()
     {
-       if (!m_videoCapture)
-          m_videoCapture.reset(new cv::VideoCapture("/home/asa/Videos/billie-eilish-bad-guy.mp4"));
-       if (m_videoCapture->isOpened()) {
-          m_timer.start(0, this);
+       if (_videocapture->isOpened()) {
+          _timer.start(0, this);
           emit started();
        }
     }
     //! TODO
-    Q_SLOT void stop() { m_timer.stop(); }
+    Q_SLOT void stop() { _timer.stop(); }
     //! TODObillie-eilish-bad-guy.mp4
 
     Q_SIGNAL void frameReady(const cv::Mat &);
     //! TODO
-    cv::Mat frame() const { return m_frame; }
+    cv::Mat frame() const { return _frame; }
 
 //! TODO
 private:
     //! TODO
     void timerEvent(QTimerEvent * ev)
     {
-       if (ev->timerId() != m_timer.timerId()) return;
-       if (!m_videoCapture->read(m_frame)) { // Blocks until a new frame is ready
-          m_timer.stop();
+       if (ev->timerId() != _timer.timerId()) return;
+       if (!_videocapture->read(_frame)) { // Blocks until a new frame is ready
+          _timer.stop();
           return;
        }
-       emit frameReady(m_frame);
+       emit frameReady(_frame);
     }
 
 // member
 public:
     //! TODO
-    cv::Mat m_frame;
+    cv::Mat _frame;
     //! TODO
-    QBasicTimer m_timer;
+    QBasicTimer _timer;
     //! TODO
-    QScopedPointer<cv::VideoCapture> m_videoCapture;
+    QScopedPointer<cv::VideoCapture> _videocapture;
 };
 
 #endif // CAPUTRE_H

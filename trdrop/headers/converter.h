@@ -20,7 +20,7 @@ public:
     //! TODO
     void queue(const cv::Mat &frame)
     {
-        if (!m_frame.empty()) qDebug() << "Converter dropped frame!";
+        //if (!m_frame.empty()) qDebug() << "Converter dropped frame!";
         m_frame = frame;
         if (! m_timer.isActive()) m_timer.start(0, this);
     }
@@ -62,7 +62,7 @@ public:
     //! TODO
     void setProcessAll(bool all) { m_processAll = all; }
     //! TODO
-    Q_SIGNAL void imageReady(const QImage &);
+    Q_SIGNAL void imageReady(const QImage & image);
     //! TODO
     QImage image() const { return m_image; }
     //! TODO

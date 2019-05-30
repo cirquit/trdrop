@@ -1,32 +1,24 @@
-#ifndef IMAGEVIEWER_H
-#define IMAGEVIEWER_H
+#ifndef QML_IMAGEVIEWER_H
+#define QML_IMAGEVIEWER_H
 
-#include <QObject>
-#include <QImage>
-#include <QDebug>
+#include <QtQuick/QQuickPaintedItem>
 #include <QPainter>
-#include <QWidget>
+#include <QColor>
 
-//! TODO
-class ImageViewer : public QWidget
+class QMLImageViewer : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QImage image READ image WRITE setImage USER true)
 
-//! constructors
 public:
-    //! TODO
-    ImageViewer(QWidget * parent = nullptr)
-        : QWidget(parent)
-        , _finished_painting(true)
+    QMLImageViewer(QQuickItem *parent = nullptr)
+        : QQuickPaintedItem(parent)
     { }
 
-//! methods
-public:
-    //! TODO
+    QImage image() const { return _image; }
     Q_SLOT void setImage(const QImage & other) {
         // if paintEvent has not finished updating, we discard the frame
-        if (!_finished_painting) qDebug() << "Viewer dropped frame!";
+        //if (!_finished_painting) qDebug() << "Viewer dropped frame!";
 
         bool same_resolution    = _image.size() == other.size();
         bool same_format        = _image.format() == other.format();
@@ -38,33 +30,27 @@ public:
         } // benchmark this copy compared to std::copy_n
         else { _image = other.copy(); }
         // now we should start painting if a paintEvent is triggered
-        _finished_painting = false;
+        //_finished_painting = false;
         // TODO rescale widget on source sizechange?
-        if (_image.size() != size()) { setFixedSize(_image.size()); }
+        if (other.size() != size()) {
+            setWidth(other.size().width());
+            setHeight(other.size().height());
+            setTextureSize(other.size());
+        }
         // TODO is this like a model update?
         update();
     }
     //! TODO
-    bool finished_painting() { return _finished_painting; }
-    //! TODO
-    QImage image() const { return _image; }
-    //! TODO
-    void paintEvent(QPaintEvent *)
+    void paint(QPainter * painter)
     {
-        QPainter painter(this);
-        if (!_image.isNull()) {
-            setAttribute(Qt::WA_OpaquePaintEvent);
-            painter.drawImage(0, 0, _image);
-            _finished_painting = true;
-        }
+        painter->drawImage(0, 0, _image);
     }
 
-//! TODO
-public:
-    //! TODO
-    bool _finished_painting;
+private:
+    QString _name;
+    QColor _color;
     //! TODO
     QImage _image;
 };
 
-#endif // IMAGEVIEWER_H
+#endif // QML_IMAGEVIEWER_H

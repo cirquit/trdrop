@@ -1,9 +1,16 @@
 import QtQuick 2.12
+import QtQuick.Controls 2.12
 import QtMultimedia 5.12
+import Trdrop 1.0
 
-Image {
+QMLImageViewer {
+    id: imageviewer
     anchors.centerIn: parent
-    source: "file:///home/asa/Pictures/indifferent-cat.jpg";
-
+    Connections {
+        target: converter
+        onImageReady: {
+            //console.log(image)
+            imageviewer.setImage(image)
+        }
+    }
 }
-

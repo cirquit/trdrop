@@ -63,4 +63,5 @@ HEADERS += \
     headers/converter.h \
     headers/imageviewer.h \
     headers/customthread.h \
-    headers/capture.h
+    headers/capture.h \
+    headers/qml_imageviewer.h
