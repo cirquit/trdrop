@@ -1,6 +1,12 @@
-<img src="images/logos/trdrop_new_2.png" alt="Teardrop logo">
+<img src="images/logos/trdrop_new_2.png" alt="Teardrop logo" height="200">
 
 trdrop - a cross platform fps analyzer for raw video data
+
+#### Update 02.05.2019
+
+Fused the FileDialog with the rendering for up to 3 videos in parallel. Currenlty still rendering only one video at a time. The Rendering Button is for debugging purposes, will be the export window in the future.
+
+![](images/2019-06-02-videos-loading-progress.gif)
 
 #### Update 31.05.2019
 

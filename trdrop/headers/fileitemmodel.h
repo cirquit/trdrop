@@ -95,12 +95,13 @@ public:
         const FileItem file_item;
         _append_file_item(file_item);
     }
-    //! callable from QML to remove the item
+    //! callable from QML to remove the item, emits new file paths
     Q_INVOKABLE void remove(int index)
     {
         emit beginRemoveRows(QModelIndex(), index, index);
         _file_item_list.removeAt(index);
         emit endRemoveRows();
+        emitFilePaths();
     }
     //! checks if the fileSelected property of the item at the index is set, usable in QML
     Q_INVOKABLE QVariant isFileSelected(int index)
@@ -123,7 +124,7 @@ public:
         return QFileInfo(url).size() / (std::pow(2,10) * std::pow(2,10));
     }
     //! TODO
-    Q_INVOKABLE QList<QVariant> getAllPaths() const
+    Q_INVOKABLE void emitFilePaths()
     {
         QList<QVariant> path_list;
         path_list.reserve(_file_item_list.size());
@@ -134,9 +135,10 @@ public:
                 path_list.push_back(filePath);
             }
         }
-        return path_list;
+        emit updateFileItemPaths(path_list);
     }
-
+    //! signal to wait from this model if any filepaths have changed
+    Q_SIGNAL void updateFileItemPaths(const QList<QVariant> & filePaths);
 //! c++ methods - snake_case
 public:
     //! returns a const fileitem list to get the file information for a cv::VideoCapture

@@ -8,7 +8,7 @@
 class QMLImageViewer : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(QImage image READ image WRITE setImage USER true)
+    //Q_PROPERTY(QImage image READ image WRITE setImage USER true)
 
 public:
     QMLImageViewer(QQuickItem *parent = nullptr)
@@ -19,9 +19,11 @@ public:
     //! TODO
     Q_SIGNAL void doneRendering();
     //! TODO
-    Q_SLOT void setImage(const QImage & other) {
+    Q_SLOT void setImages(const QList<QImage> & qml_image_list) {
+    //Q_SLOT void setImages(const QImage & other) {
         // if paintEvent has not finished updating, we discard the frame
         //if (!_finished_painting) qDebug() << "Viewer dropped frame!";
+        const QImage & other = qml_image_list[0];
 
         bool same_resolution    = _image.size() == other.size();
         bool same_format        = _image.format() == other.format();

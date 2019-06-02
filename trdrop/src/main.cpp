@@ -13,7 +13,7 @@
 #include "headers/fpsoptionsmodel.h"
 #include "headers/tearoptionsmodel.h"
 
-// #include "headers/capture.h"
+#include "headers/capture.h"
 #include "headers/converter.h"
 #include "headers/qml_imageviewer.h"
 #include "headers/customthread.h"
@@ -54,17 +54,16 @@ int main(int argc, char *argv[])
     //
     qmlRegisterType<QMLImageViewer>("Trdrop", 1, 0, "QMLImageViewer");
 
-//    Capture capture;
-//    Converter converter;
+    Capture capture(default_file_items);
+    Converter converter;
 //    CustomThread captureThread;
 //    captureThread.start();
 //    capture.moveToThread(&captureThread);
-//    QObject::connect(&capture, &Capture::frameReady, &converter, &Converter::processFrame);
+    QObject::connect(&capture, &Capture::framesReady, &converter, &Converter::processFrames);
 
-//    engine.rootContext()->setContextProperty("capture", &capture);
-//    engine.rootContext()->setContextProperty("converter", &converter);
+    engine.rootContext()->setContextProperty("capture", &capture);
+    engine.rootContext()->setContextProperty("converter", &converter);
 //    QMetaObject::invokeMethod(&capture, "getNextFrame");
-
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     return app.exec();

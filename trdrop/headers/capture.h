@@ -33,24 +33,34 @@ public:
     //! and emits the framesReady signal
     Q_SLOT void readNextFrames()
     {
+        if (_videocapture_list.empty()) return;
+
         bool not_enough_frames_allocated = _videocapture_list.size() > static_cast<size_t>(_frame_list.size());
         if (not_enough_frames_allocated) _prepare_frame_list();
 
-        for (size_t i = 0; i < _videocapture_list.size(); ++i) _videocapture_list[i].read(_frame_list[i]);
+        for (size_t i = 0; i < _videocapture_list.size(); ++i)
+        {
+            int _i = static_cast<int>(i); // std and qt container use either size_t and int as index, only to remove warning
+            _videocapture_list[i].read(_frame_list[_i]);
+        }
 
         emit framesReady(_frame_list);
     }
     //! try to open all paths with the cv::VideoCapture
     //! TODO: check for errors
-    Q_INVOKABLE void openAllPaths(const QList<QVariant> & path_list)
+    //! TODO: if the same paths are opened for the same index, do not reset everything
+    Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
         _reset_state();
+        qDebug() << "Opening " << path_list.size() << " cv::VideoCaputres";
         for(int i = 0; i < path_list.size(); ++i)
         {
             const QString path  = path_list[i].toString();
             cv::VideoCapture vc(path.toStdString());
             _videocapture_list.push_back(vc);
+            qDebug() << "    Received path: " << path_list[i].toString();
         }
+
     }
 
 //! methods
@@ -81,6 +91,8 @@ private:
     QList<cv::Mat> _frame_list;
     //! TODO
     std::vector<cv::VideoCapture> _videocapture_list;
+    //! TODO use this to path caching
+    // QList<QVariant> _path_list;
     //! TODO
     quint64 _current_frame_count;
 };

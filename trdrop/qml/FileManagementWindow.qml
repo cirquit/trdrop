@@ -83,7 +83,7 @@ Window {
                             model.qtFilePath = qtFilePath;
                             model.sizeMB = Utils.round(fileItemModel.getFileSize(realFilePath), 2)
                             model.fileSelected = true;
-                            console.log(fileItemModel.getAllPaths());
+                            fileItemModel.emitFilePaths();
                             fileItemModel.resetModel();
                         }
                     }
@@ -149,8 +149,11 @@ Window {
                         if (fileItemModel.isFileSelected(fromIndex) && fileItemModel.isFileSelected(toIndex))
                         {
                             visualModel.items.move(fromIndex, toIndex)
+                            fileItemModel.emitFilePaths();
                         }
                     }
+                    //onStateChanged: console.log(fileItemModel.getAllPaths());
+                    onExited: fileItemModel.emitFilePaths();
                 }
             }
         }
@@ -216,5 +219,10 @@ Window {
                 to: "toState"
             }
         }
+    }
+
+    Connections {
+        target: fileItemModel
+        onUpdateFileItemPaths: capture.openAllPaths(filePaths)
     }
 }
