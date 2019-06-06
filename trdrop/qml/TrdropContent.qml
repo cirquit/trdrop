@@ -1,17 +1,29 @@
-import QtQuick 2.9
-import QtQuick.Window 2.2
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtMultimedia 5.12
+import Trdrop 1.0
 
-Frame {
-    visible: false
-    // background: Rectangle { color: "#FF0000" }
-    // color: "#FF0000";
+QMLImageViewer {
+    id: imageviewer
+    anchors.centerIn: parent
+    //allowPainting: true
 
-//    Button
-//    {
-//        text: qsTr("Hello World")
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.verticalCenter: parent.verticalCenter
-//    }
+    Connections {
+        target: converter
+        // see imagesReady Q_SIGNAL in converter.h
+        onImagesReady: {
+            console.log("Converter: Sending imagelist to imageviewer")
+            imageviewer.setImages(qml_image_list)
+        }
+    }
+    Connections {
+        target: imageviewer
+        onDoneRendering: {
+            console.log("Imageviewer: Done rendering, calling getNextFrame to capture")
+//              wrapper.grabToImage(function(result) {
+//                                         result.saveToFile("blub.png");
+//                                     });
+            capture.readNextFrames()
+        }
+    }
 }

@@ -26,9 +26,16 @@ MenuBar
         MenuSeparator { }
         MenuItem
         {
-            //shortcut: "Ctrl+E"
-            text: qsTr("Export")
-            onTriggered: console.log("Export onTriggered");
+            //shortcut:
+            text: qsTr("Export       Ctrl+E")
+            action: Action {
+                shortcut: "Ctrl+E"
+                onTriggered: {
+                    var component = Qt.createComponent("ExportWindow.qml");
+                    var win = component.createObject(rootWindow);
+                    win.show();
+                }
+            }
         }
         MenuSeparator { }
         MenuItem

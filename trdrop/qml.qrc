@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>qml/main.qml</file>
         <file>qml/TrdropMenubar.qml</file>
-        <file>qml/TrdropContent.qml</file>
         <file>qml/FileManagementWindow.qml</file>
         <file>images/switch-arrows.png</file>
         <file>qml/OptionsWindow.qml</file>
@@ -13,5 +12,6 @@
         <file>images/add-icon.png</file>
         <file>qml/OpenCVOutput.qml</file>
         <file>utils.js</file>
+        <file>qml/ExportWindow.qml</file>
     </qresource>
 </RCC>

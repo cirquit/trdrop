@@ -22,6 +22,7 @@ ApplicationWindow
     StartupBackground {
         visible: false
     }
+
     Button {
         text: "Start rendering!"
         onClicked: capture.readNextFrames()
@@ -30,6 +31,9 @@ ApplicationWindow
     OpenCVOutput {
         visible: true
     }
+
+
+
 //    Example {
 //        visible: true
 //    }
