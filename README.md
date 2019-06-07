@@ -2,7 +2,13 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
-#### Update 02.05.2019
+#### Update 08.06.2019
+
+Started with the export dialog, got progress bar working, an export button and started with choosing the directory. Also working on the composing tool for multiple videos and automatic resizing, but as you can see in the gif some of the image channels are still wrongly displayed.
+
+![](images/2019-06-08-export-progress.gif)
+
+#### Update 02.06.2019
 
 Fused the FileDialog with the rendering for up to 3 videos in parallel. Currenlty still rendering only one video at a time. The Rendering Button is for debugging purposes, will be the export window in the future.
 

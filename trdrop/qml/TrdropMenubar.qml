@@ -31,6 +31,11 @@ MenuBar
             action: Action {
                 shortcut: "Ctrl+E"
                 onTriggered: {
+//                    if (fileItemModel.filesSelectedCount() === 0)
+//                    {
+//                        console.log("can't export stuff if no video is picked, TODO modal")
+//                        return
+//                    }
                     var component = Qt.createComponent("ExportWindow.qml");
                     var win = component.createObject(rootWindow);
                     win.show();

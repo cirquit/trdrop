@@ -223,6 +223,6 @@ Window {
 
     Connections {
         target: fileItemModel
-        onUpdateFileItemPaths: capture.openAllPaths(filePaths)
+        onUpdateFileItemPaths: videocapturelist.openAllPaths(filePaths)
     }
 }

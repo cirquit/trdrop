@@ -60,7 +60,9 @@ HEADERS += \
     headers/tearoptions.h \
     headers/tearoptionsmodel.h \
     headers/trdropview.h \
-    headers/converter.h \
     headers/customthread.h \
-    headers/capture.h \
-    headers/qml_imageviewer.h
+    headers/videocapturelist.h \
+    headers/videocapturelist_qml.h \
+    headers/imageconverter_qml.h \
+    headers/imageviewer_qml.h \
+    headers/imagecomposer_qml.h

@@ -23,12 +23,7 @@ ApplicationWindow
         visible: false
     }
 
-    Button {
-        text: "Start rendering!"
-        onClicked: capture.readNextFrames()
-    }
-
-    OpenCVOutput {
+    TrdropContent {
         visible: true
     }
 

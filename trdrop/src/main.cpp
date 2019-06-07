@@ -13,9 +13,10 @@
 #include "headers/fpsoptionsmodel.h"
 #include "headers/tearoptionsmodel.h"
 
-#include "headers/capture.h"
-#include "headers/converter.h"
-#include "headers/qml_imageviewer.h"
+#include "headers/videocapturelist_qml.h"
+#include "headers/imageconverter_qml.h"
+#include "headers/imagecomposer_qml.h"
+#include "headers/imageviewer_qml.h"
 #include "headers/customthread.h"
 
 int main(int argc, char *argv[])
@@ -51,19 +52,22 @@ int main(int argc, char *argv[])
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
-    //
-    qmlRegisterType<QMLImageViewer>("Trdrop", 1, 0, "QMLImageViewer");
+    // register the viewer as qml type
+    qmlRegisterType<ImageViewerQML>("Trdrop", 1, 0, "ImageViewerQML");
 
-    Capture capture(default_file_items);
-    Converter converter;
-//    CustomThread captureThread;
-//    captureThread.start();
-//    capture.moveToThread(&captureThread);
-    QObject::connect(&capture, &Capture::framesReady, &converter, &Converter::processFrames);
 
-    engine.rootContext()->setContextProperty("capture", &capture);
-    engine.rootContext()->setContextProperty("converter", &converter);
-//    QMetaObject::invokeMethod(&capture, "getNextFrame");
+    VideoCaptureListQML videocapturelist_qml(default_file_items);
+    engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
+    ImageConverterQML imageconverter_qml;
+    engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
+    ImageComposerQML imagecomposer_qml;
+    engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
+
+
+    // signals in c++
+    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
+    QObject::connect(&imageconverter_qml, &ImageConverterQML::imagesReady, &imagecomposer_qml, &ImageComposerQML::processImages);
+
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     return app.exec();
