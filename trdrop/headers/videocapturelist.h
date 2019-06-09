@@ -102,7 +102,6 @@ private:
         return static_cast<size_t>(frame_list.size()) != _videocapture_list.size();
     }
 
-
 // member
 public:
     // holds the frames that will be send via SIGNAL

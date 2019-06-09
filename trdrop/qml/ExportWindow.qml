@@ -60,11 +60,11 @@ Window {
                 Layout.fillWidth: true
                 model: ListModel {
                        id: cbItems
-                       ListElement { text: "1280 x 1080" }
+                       ListElement { key: "960x540"; value: [960, 540] }
+                       ListElement { key: "1920x1080"; value: [1920, 1080] }
+                       ListElement { key: "3840x2160"; value: [3840, 2160] }
                    }
-                onCurrentIndexChanged: {
-                    console.debug(cbItems.get(currentIndex).width + ", " + cbItems.get(currentIndex).height)
-                }
+                onAccepted: { console.log("hello"); }
             }
 
             ProgressBar {

@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
     // register the viewer as qml type
     qmlRegisterType<ImageViewerQML>("Trdrop", 1, 0, "ImageViewerQML");
 
-
     VideoCaptureListQML videocapturelist_qml(default_file_items);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     ImageConverterQML imageconverter_qml;
@@ -63,8 +62,7 @@ int main(int argc, char *argv[])
     ImageComposerQML imagecomposer_qml;
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
 
-
-    // signals in c++
+    // sigals in c++
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
     QObject::connect(&imageconverter_qml, &ImageConverterQML::imagesReady, &imagecomposer_qml, &ImageComposerQML::processImages);
 

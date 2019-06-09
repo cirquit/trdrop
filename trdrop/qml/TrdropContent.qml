@@ -6,6 +6,7 @@ import Trdrop 1.0
 ImageViewerQML {
     id: imageviewer
     anchors.centerIn: parent
+    //anchors.fill: parent
     //allowPainting: true
 
     Connections {

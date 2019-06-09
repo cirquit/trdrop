@@ -65,4 +65,6 @@ HEADERS += \
     headers/videocapturelist_qml.h \
     headers/imageconverter_qml.h \
     headers/imageviewer_qml.h \
-    headers/imagecomposer_qml.h
+    headers/imagecomposer_qml.h \
+    headers/resolutionsmodel.h \
+    headers/resolution.h

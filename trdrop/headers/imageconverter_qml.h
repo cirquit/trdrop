@@ -34,15 +34,15 @@ public:
         }
         emit imagesReady(_qml_image_list);
     }
-
+//! methods
 private:
     //! converts the cv::Mat to a QImage at the index in the _qml_image_list
     void _process_frame_to_image(const cv::Mat & frame, const int index)
     {
         // why does this have to be this type?
         Q_ASSERT(frame.type() == CV_8UC3);
-        int width  = static_cast<int>(frame.cols / 3.0);
-        int height = static_cast<int>(frame.rows / 3.0);
+        int width  = static_cast<int>(frame.cols);
+        int height = static_cast<int>(frame.rows);
         // resize if need be
         if (_qml_image_list.at(index).size() != QSize { width, height })
         {
@@ -77,7 +77,6 @@ private:
             _qml_image_list.clear();
             for (int i = 0; i <  frame_list_size; ++i)
             {
-                // TODO
                 _qml_image_list.push_back(_get_default_qimage());
             }
         }
@@ -87,7 +86,7 @@ private:
 
 //! member
 public:
-    //! TODO update _process_frame_to_image and everything else
+    //! list to be send by the signal
     QList<QImage> _qml_image_list;
 };
 
