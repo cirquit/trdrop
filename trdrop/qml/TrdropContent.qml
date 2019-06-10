@@ -14,6 +14,9 @@ ImageViewerQML {
         onImageReady: {
             imageviewer.setImage(composed_image)
         }
+        onResizeTriggered: {
+            imageviewer.resize(size)
+        }
     }
     Connections {
         target: imageviewer

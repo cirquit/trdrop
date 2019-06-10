@@ -5,7 +5,7 @@
 #include <QDebug>
 #include "headers/resolution.h"
 
-//!
+//! TODO
 class ResolutionsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -19,11 +19,10 @@ public:
         _setup_role_names();
     }
     //!
-    enum ExportOptionsModelRoles
+    enum ResolutionsModelRoles
     {
-        ResolutionPickNameRole          = Qt::UserRole + 60
-      , ResolutionPickWidthRole         = Qt::UserRole + 61
-      , ResolutionPickHeightRole        = Qt::UserRole + 62
+        ResolutionPickNameRole = Qt::UserRole + 60
+      , ResolutionPickSizeRole = Qt::UserRole + 61
     };
 //! methods
 public:
@@ -31,7 +30,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
-        return _fps_options_list.size();
+        return _resolutions_list.size();
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
@@ -39,14 +38,13 @@ public:
     QVariant data(const QModelIndex & index,int role) const override
     {
         Q_UNUSED(index);
+        int row = index.row();
         switch (role)
         {
             case ResolutionPickNameRole:
-                return _tear_options_list[row].tear_plot_color.name();
-            case ResolutionPickTooltipRole:
-                return _tear_options_list[row].tear_plot_color.tooltip();
-            case ResolutionPickValueRole:
-                return _tear_options_list[row].tear_plot_color.color();
+                return _resolutions_list[row].name();
+            case ResolutionPickSizeRole:
+                return _resolutions_list[row].size();
             default:
                 return QVariant();
         }
@@ -55,14 +53,12 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         int row = index.row();
-        if      (role == ResolutionPickNameRole)    _tear_options_list[row].tear_plot_color.setName(value.toString());
-        else if (role == ResolutionPickValueRole)   _tear_options_list[row].tear_plot_color.setColor(value.toString());
+        if (role == ResolutionPickSizeRole) _resolutions_list[row].setSize(value.toSize());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
         return true;
     }
-
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
     Q_INVOKABLE void resetModel()
     {
@@ -70,50 +66,33 @@ public:
         endResetModel();
     }
     //! TODO
-    Q_INVOKABLE void revertModelToDefault()
-    {
-        for (quint8 id = 0; id < 3; ++id) {
-            _tear_options_list[id].revert_to_default();
-        }
-        resetModel();
-    }
-    //! apply the color to the designated row
-    Q_INVOKABLE void applyColor(const QVariant & value, const int & row)
+    Q_INVOKABLE QVariant getSizeAt(const int & row)
     {
         QModelIndex q = createIndex(row, 0);
-        setData(q, value, ColorPickValueRole);
+        return data(q, ResolutionPickSizeRole);
     }
-
-    //! apply the pixel difference to all indices
-    Q_INVOKABLE void applyTearPercentage(const QVariant & value)
-    {
-        QModelIndex q0 = createIndex(0, 0);
-        QModelIndex q1 = createIndex(1, 0);
-        QModelIndex q2 = createIndex(2, 0);
-        setData(q0, value, PixelDifferenceValueRole);
-        setData(q1, value, PixelDifferenceValueRole);
-        setData(q2, value, PixelDifferenceValueRole);
-    }
-
-//! methods
+    //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[ColorPickNameRole]          = "colorName";
-        _role_names[ColorPickTooltipRole]       = "colorTooltip";
-        _role_names[ColorPickValueRole]         = "color";
-        _role_names[PixelDifferenceNameRole]    = "pixelDifferenceName";
-        _role_names[PixelDifferenceTooltipRole] = "pixelDifferenceTooltip";
-        _role_names[PixelDifferenceValueRole]   = "pixelDifference";
+        _role_names[ResolutionPickNameRole] = "resolutionName";
+        _role_names[ResolutionPickSizeRole] = "resolution";
    }
     //! TODO
     void _init_options()
     {
         _resolutions_list.push_back(Resolution(QSize(960, 540)));
+        _resolutions_list.push_back(Resolution(QSize(1280, 720)));
+        _resolutions_list.push_back(Resolution(QSize(1280, 1080)));
+        _resolutions_list.push_back(Resolution(QSize(1600, 900)));
         _resolutions_list.push_back(Resolution(QSize(1920, 1080)));
+        _resolutions_list.push_back(Resolution(QSize(2048, 1080)));
+        _resolutions_list.push_back(Resolution(QSize(2560, 1440)));
+        _resolutions_list.push_back(Resolution(QSize(3840, 1080)));
         _resolutions_list.push_back(Resolution(QSize(3840, 2160)));
-
+        _resolutions_list.push_back(Resolution(QSize(4096, 2160)));
+        _resolutions_list.push_back(Resolution(QSize(5120, 2160)));
     }
 
 //! member
@@ -122,9 +101,6 @@ private:
     QHash<int, QByteArray> _role_names;
     //! TODO
     QList<Resolution> _resolutions_list;
-    _
-
-
 };
 
 

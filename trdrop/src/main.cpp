@@ -12,6 +12,7 @@
 #include "headers/generaloptionsmodel.h"
 #include "headers/fpsoptionsmodel.h"
 #include "headers/tearoptionsmodel.h"
+#include "headers/resolutionsmodel.h"
 
 #include "headers/videocapturelist_qml.h"
 #include "headers/imageconverter_qml.h"
@@ -49,6 +50,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<GeneralOptionsModel>();
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
+
+    // prepare ResolutionsModel
+    qmlRegisterType<ResolutionsModel>();
+    ResolutionsModel resolutions_model;
+    engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");

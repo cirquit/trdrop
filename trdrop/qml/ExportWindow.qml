@@ -29,9 +29,32 @@ Window {
             Label {
                 text: "Export to directory:"
             }
-            Label {
-                id: exportDirectoryLabel
-                text: "                                                 "
+
+            Rectangle {
+                border {
+                    color: "#8066b0"
+                    width: 1
+                }
+                Layout.fillWidth: parent
+                height: 25
+                width: 300
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
+                color: "transparent"
+                TextInput {
+                    id: exportDirectoryLabel
+                    anchors.fill: parent
+                    leftPadding: 5
+                    topPadding: 2
+                    bottomPadding: 2
+                    text: fileItemModel.getDefaultMoviesDirectory()
+                    clip: true
+                    font.pointSize: 12
+                    color: "#FFFFFF"
+                    onEditingFinished: {
+                        exportDirectoryLabel.text = text;
+                    }
+               }
             }
             Button {
                 text: "Browse"
@@ -56,15 +79,15 @@ Window {
                 text: "Resolution:"
             }
             ComboBox {
-                Layout.columnSpan: 2
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
                 Layout.fillWidth: true
-                model: ListModel {
-                       id: cbItems
-                       ListElement { key: "960x540"; value: [960, 540] }
-                       ListElement { key: "1920x1080"; value: [1920, 1080] }
-                       ListElement { key: "3840x2160"; value: [3840, 2160] }
-                   }
-                onAccepted: { console.log("hello"); }
+                textRole: "resolutionName"
+                model: resolutionsModel
+                onActivated: {
+                    let size = resolutionsModel.getSizeAt(currentIndex);
+                    imagecomposer.resizeComposition(size);
+                }
             }
 
             ProgressBar {

@@ -18,4 +18,4 @@ function round(value, decimalPlaces) {
     return Math.round(value * factor) / factor;
 }
 
-;
+

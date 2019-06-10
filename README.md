@@ -2,6 +2,13 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 10.06.2019
+
+Resizing from export dialog works, even live. Default export location is movies on every platform (os-indepedent). Composing now works too, but not automatic centering if the ratio is different (16:9) -> (4:3) will produce black beams, may fix this later.
+
+![](images/2019-10-06-videos-composing-resizing.gif)
+
+
 #### Update 08.06.2019
 
 Started with the export dialog, got progress bar working, an export button and started with choosing the directory. Also working on the composing tool for multiple videos and automatic resizing, but as you can see in the gif some of the image channels are still wrongly displayed.

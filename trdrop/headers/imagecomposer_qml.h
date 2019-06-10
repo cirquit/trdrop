@@ -14,17 +14,18 @@ class ImageComposerQML : public QObject {
 
 //! constructors
 public:
-    //! default constructor
+    //! default constructor, the default size is dependent on the first row of the resolutionModel
     ImageComposerQML(QObject * parent = nullptr)
         : QObject(parent)
         , _size(QSize(960, 540))
-        //, _size(QSize(1280, 1080))
     { }
 
 //! methods
 public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & composed_image);
+    //! TODO
+    Q_SIGNAL void resizeTriggered(const QSize & size);
     //! side by side only right now
     Q_SLOT void processImages(const QList<QImage> & _qml_image_list)
     {
@@ -55,7 +56,7 @@ public:
         {
             const QImage scaled_image_01 = _qml_image_list[0].scaledToWidth(_size.width());
             const QImage scaled_image_02 = _qml_image_list[1].scaledToWidth(_size.width());
-            qDebug() << "scaled height: " << scaled_image_01.height();
+
             const int video_count = 2;
             const QImage centered_image_01 = _get_center_from_image(scaled_image_01, video_count);
             const QImage centered_image_02 = _get_center_from_image(scaled_image_02, video_count);
@@ -82,17 +83,15 @@ public:
     {
         _size = size;
         _qml_image = _qml_image.scaledToWidth(_size.width());
-        emit imageReady(_qml_image);
+        emit resizeTriggered(_size);
     }
-
+//! methods
 private:
-    //!
+    //! TODO
     QImage _get_center_from_image(const QImage & image, quint8 video_count)
     {
         const int single_video_width  = static_cast<int>(_size.width()  / static_cast<double>(video_count));
         const int single_video_height = _size.height();
-
-        qDebug() << "single_video_height: " << single_video_height;
 
         const int center_x = static_cast<int>(image.width()  / 2.0);
         const int start_x  = center_x - static_cast<int>(image.width() / (2 * static_cast<double>(video_count)));

@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QFileInfo>
+#include <QStandardPaths>
 #include <cmath>
 
 #include "headers/fileitem.h"
@@ -83,6 +84,13 @@ public:
         emit dataChanged(index, toIndex);
         return true ;
     }
+    //! TODO
+    Q_INVOKABLE QVariant getDefaultMoviesDirectory() const
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
+    }
+
+
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
     Q_INVOKABLE void resetModel()
     {
