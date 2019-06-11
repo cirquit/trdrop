@@ -19,7 +19,7 @@ public:
         _setup_role_names();
     }
     //!
-    enum FPSOptionsRoles
+    enum TearOptionsRoles
     {
         ColorPickNameRole          = Qt::UserRole + 50
       , ColorPickTooltipRole       = Qt::UserRole + 51
@@ -27,6 +27,7 @@ public:
       , PixelDifferenceNameRole    = Qt::UserRole + 53
       , PixelDifferenceTooltipRole = Qt::UserRole + 54
       , PixelDifferenceValueRole   = Qt::UserRole + 55
+      , TearOptionsEnabled         = Qt::UserRole + 56
     };
 //! methods
 public:
@@ -56,6 +57,8 @@ public:
                 return _tear_options_list[row].pixel_difference.tooltip();
             case PixelDifferenceValueRole:
                 return _tear_options_list[row].pixel_difference.value();
+            case TearOptionsEnabled:
+                return _tear_options_list[row].enabled;
             default:
                 return QVariant();
         }
@@ -70,6 +73,7 @@ public:
         else if (role == PixelDifferenceNameRole)    _tear_options_list[row].pixel_difference.setName(value.toString());
         else if (role == PixelDifferenceTooltipRole) _tear_options_list[row].pixel_difference.setTooltip(value.toString());
         else if (role == PixelDifferenceValueRole)   _tear_options_list[row].pixel_difference.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == TearOptionsEnabled)         _tear_options_list[row].enabled = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -96,7 +100,6 @@ public:
         QModelIndex q = createIndex(row, 0);
         setData(q, value, ColorPickValueRole);
     }
-
     //! apply the pixel difference to all indices
     Q_INVOKABLE void applyTearPercentage(const QVariant & value)
     {
@@ -107,7 +110,17 @@ public:
         setData(q1, value, PixelDifferenceValueRole);
         setData(q2, value, PixelDifferenceValueRole);
     }
-
+    //! TODO
+    Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
+    {
+        int video_count = filePaths.size();
+        for(int i = 0; i < _tear_options_list.size(); ++i)
+        {
+            const bool loaded_file = i < video_count;
+            QModelIndex q = createIndex(i, 0);
+            setData(q, loaded_file, TearOptionsEnabled);
+        }
+    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -119,6 +132,7 @@ private:
         _role_names[PixelDifferenceNameRole]    = "pixelDifferenceName";
         _role_names[PixelDifferenceTooltipRole] = "pixelDifferenceTooltip";
         _role_names[PixelDifferenceValueRole]   = "pixelDifference";
+        _role_names[TearOptionsEnabled]         = "tearOptionsEnabled";
    }
     //! TODO
     void _init_options()

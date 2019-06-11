@@ -90,7 +90,6 @@ public:
         return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
     }
 
-
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
     Q_INVOKABLE void resetModel()
     {

@@ -46,6 +46,8 @@ private:
         displayed_text.setValue("FPS:");
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Helvetica", 15));
+
+        enabled = false;
     }
 
 // member
@@ -58,6 +60,8 @@ public:
     ValueItem<quint32> pixel_difference;
     //! TODO
     TextEditItem displayed_text;
+    //! TODO
+    bool enabled;
 };
 
 #endif // FPSOptions_H

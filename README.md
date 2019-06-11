@@ -2,6 +2,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 11.06.2019
+
+Options are now enabled dependent on the amount of the videos that are selected. I also got some text overlay from the options rendered over the video, currently working on making it scale by size.
+
+![](images/2019-11-06-dependent-options.gif)
+
 #### Update 10.06.2019
 
 Resizing from export dialog works, even live. Default export location is movies on every platform (os-indepedent). Composing now works too, but not automatic centering if the ratio is different (16:9) -> (4:3) will produce black beams, may fix this later.

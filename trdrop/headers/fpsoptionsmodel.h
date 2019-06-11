@@ -33,6 +33,7 @@ public:
       , DisplayedTextValueRole     = Qt::UserRole + 39
       , DisplayedTextFontRole      = Qt::UserRole + 40
       , DisplayedTextEnabledRole   = Qt::UserRole + 41
+      , FPSOptionsEnabled          = Qt::UserRole + 42
     };
 //! methods
 public:
@@ -74,6 +75,8 @@ public:
                  return _fps_options_list[row].displayed_text.font();
             case DisplayedTextEnabledRole:
                  return _fps_options_list[row].displayed_text.enabled();
+            case FPSOptionsEnabled:
+                 return _fps_options_list[row].enabled;
             default:
                 return QVariant();
         }
@@ -94,12 +97,12 @@ public:
         else if (role == DisplayedTextValueRole)     _fps_options_list[row].displayed_text.setValue(value.toString());
         else if (role == DisplayedTextFontRole)      _fps_options_list[row].displayed_text.setFont(value.value<QFont>());
         else if (role == DisplayedTextEnabledRole)   _fps_options_list[row].displayed_text.setEnabled(value.toBool());
+        else if (role == FPSOptionsEnabled)          _fps_options_list[row].enabled = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
         return true;
     }
-
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
     Q_INVOKABLE void resetModel()
     {
@@ -116,7 +119,6 @@ public:
         setData(q1, value, PixelDifferenceValueRole);
         setData(q2, value, PixelDifferenceValueRole);
     }
-
     //! apply the pixel difference to all indices
     Q_INVOKABLE void applyColor(const QVariant & value, const int & row)
     {
@@ -131,7 +133,17 @@ public:
         }
         resetModel();
     }
-
+    //! TODO
+    Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
+    {
+        int video_count = filePaths.size();
+        for(int i = 0; i < _fps_options_list.size(); ++i)
+        {
+            const bool loaded_file = i < video_count;
+            QModelIndex q = createIndex(i, 0);
+            setData(q, loaded_file, FPSOptionsEnabled);
+        }
+    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -151,6 +163,8 @@ private:
         _role_names[DisplayedTextValueRole]     = "displayedText";
         _role_names[DisplayedTextFontRole]      = "displayedTextFont";
         _role_names[DisplayedTextEnabledRole]   = "displayedTextEnabled";
+
+        _role_names[FPSOptionsEnabled] = "fpsOptionsEnabled";
     }
     //! TODO
     void _init_options()

@@ -37,6 +37,8 @@ private:
         pixel_difference.setName("Tear percentage:");
         pixel_difference.setTooltip("How big can the teared frame be to be counted as a new frame for the framerate analysis");
         pixel_difference.setValue(0);
+
+        enabled = false;
     }
 
 // member
@@ -47,6 +49,8 @@ public:
     ColorPickItem tear_plot_color;
     //! TODO
     ValueItem<quint8> pixel_difference;
+    //! TODO
+    bool enabled;
 //    //! TODO
 //    TextEditItem displayed_text;
 };

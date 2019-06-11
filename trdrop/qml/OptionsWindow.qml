@@ -17,6 +17,14 @@ Window {
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
 
+    Connections {
+        target: fileItemModel
+        onUpdateFileItemPaths: {
+            fpsOptionsModel.updateEnabledRows(filePaths);
+            tearOptionsModel.updateEnabledRows(filePaths);
+        }
+    }
+
     Pane {
         width:  optionsWindow.width
         height: optionsWindow.height
@@ -292,7 +300,7 @@ Window {
                             Rectangle {
                                 id: fpsColorRectangle
                                 height: 20
-                                color: model.color
+                                color: model.fpsOptionsEnabled ? model.color : "#8b8b8b"
                                 border.color: "#8066b0"
                                 border.width: 1
                                 radius: 3
@@ -300,6 +308,7 @@ Window {
                                 Layout.rightMargin: 50
                                 Layout.fillWidth: true
                                 MouseArea {
+                                    enabled: model.fpsOptionsEnabled
                                     anchors.fill: parent
                                     onClicked: fpsColorDialog.open()
                                 }
@@ -318,6 +327,7 @@ Window {
                                 //ToolTip.text: "Replicate this color to tears and frametime of this video index"
                                 //ToolTip.delay: 500
                                 //ToolTip.visible: hovered
+                                enabled: model.fpsOptionsEnabled
                                 action: Action {
                                     onTriggered:
                                         tearOptionsModel.applyColor(model.color, index)
@@ -335,6 +345,7 @@ Window {
                                 id: pixelDifferenceSpinBox
                                 from: 0
                                 to: 50
+                                enabled: model.fpsOptionsEnabled
                                 stepSize: 1
                                 editable: true
                                 value: model.pixelDifference
@@ -348,6 +359,7 @@ Window {
                             Button {
                                 Layout.columnSpan: 2
                                 text: "Apply to all videos"
+                                enabled: model.fpsOptionsEnabled
                                 action: Action {
                                     onTriggered: fpsOptionsModel.applyPixelDifference(model.pixelDifference)
                                 }
@@ -372,9 +384,10 @@ Window {
                                     leftPadding: 5
                                     topPadding: 2
                                     bottomPadding: 2
+                                    enabled: model.fpsOptionsEnabled
                                     text: model.displayedText
-                                    color: enabled ? model.color
-                                                   : "#b0b0b0"
+                                    color: enabled && model.fpsOptionsEnabled ? model.color
+                                                                              : "#b0b0b0"
                                     clip: true
                                     font: model.displayedTextFont
                                     onEditingFinished: {
@@ -385,6 +398,7 @@ Window {
                             Button {
                                 id: fpsTextCustomize
                                 text: "Customize"
+                                enabled: model.fpsOptionsEnabled
                                 onClicked: {
                                     fontDialog.open()
                                 }
@@ -402,6 +416,7 @@ Window {
                             Switch {
                                 id: fpsTextEnabled
                                 checked: true
+                                enabled: model.fpsOptionsEnabled
                                 action: Action {
                                     onTriggered: {
                                         fpsText.enabled = !fpsText.enabled;
@@ -452,7 +467,7 @@ Window {
                             Rectangle {
                                 id: tearColorRectangle
                                 height: 20
-                                color: model.color
+                                color: model.tearOptionsEnabled ? model.color : "#8b8b8b"
                                 border.color: "#8066b0"
                                 border.width: 1
                                 radius: 3
@@ -462,6 +477,7 @@ Window {
                                 ToolTip.text: model.colorTooltip
                                 MouseArea {
                                     anchors.fill: parent
+                                    enabled: model.tearOptionsEnabled
                                     onClicked: tearColorDialog.open()
                                 }
                                 ColorDialog {
@@ -474,6 +490,7 @@ Window {
                             }
                             Button {
                                 text:  "Replicate Color"
+                                enabled: model.tearOptionsEnabled
                                 action: Action {
                                     onTriggered:
                                         fpsOptionsModel.applyColor(model.color, index)
@@ -489,6 +506,7 @@ Window {
                                 to: 100
                                 stepSize: 1
                                 editable: true
+                                enabled: model.tearOptionsEnabled
                                 value: model.pixelDifference
                                 textFromValue: function(value, locale) { return value.toString() + '%'; }
                                 valueFromText: function(value, locale) { return value.replace('%', ''); }
@@ -498,6 +516,7 @@ Window {
                             }
                             Button {
                                 text: "Apply to all"
+                                enabled: model.tearOptionsEnabled
                                 action: Action {
                                     onTriggered: {
                                         tearOptionsModel.applyTearPercentage(model.pixelDifference)

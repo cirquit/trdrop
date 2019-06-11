@@ -31,6 +31,13 @@ public:
         setHeight(size.height());
         setTextureSize(size);
     }
+    //! TODO
+    Q_SLOT void drawDefaultImage()
+    {
+        const QSize default_size(960, 540);
+        _qml_image = QImage(default_size, QImage::Format_RGB888);
+        _qml_image.fill(QColor(255, 255, 255));
+    }
     //! triggers a repainting of the pixmap when the image is copied
     Q_SLOT void setImage(const QImage & qml_image)
     {
