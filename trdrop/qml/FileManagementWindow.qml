@@ -223,6 +223,10 @@ Window {
 
     Connections {
         target: fileItemModel
-        onUpdateFileItemPaths: videocapturelist.openAllPaths(filePaths)
+        onUpdateFileItemPaths: {
+            videocapturelist.openAllPaths(filePaths)
+            fpsOptionsModel.updateEnabledRows(filePaths);
+            tearOptionsModel.updateEnabledRows(filePaths);
+        }
     }
 }

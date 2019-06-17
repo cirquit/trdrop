@@ -17,14 +17,6 @@ Window {
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
 
-    Connections {
-        target: fileItemModel
-        onUpdateFileItemPaths: {
-            fpsOptionsModel.updateEnabledRows(filePaths);
-            tearOptionsModel.updateEnabledRows(filePaths);
-        }
-    }
-
     Pane {
         width:  optionsWindow.width
         height: optionsWindow.height
