@@ -13,6 +13,5 @@
         <file>utils.js</file>
         <file>qml/ExportWindow.qml</file>
         <file>qml/TrdropContent.qml</file>
-        <file>qml/Example.qml</file>
     </qresource>
 </RCC>

@@ -2,6 +2,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 17.06.2019
+
+Finally got the Framerate Text working on resize and for multiple videos simultaneously.
+
+![](images/2019-17-06-fps-text-resize.gif)
+
 #### Update 11.06.2019
 
 Options are now enabled dependent on the amount of the videos that are selected. I also got some text overlay from the options rendered over the video, currently working on making it scale by size.

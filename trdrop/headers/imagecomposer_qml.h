@@ -11,13 +11,14 @@
 class ImageComposerQML : public QObject {
 
     Q_OBJECT
+    //Q_PROPERTY(QSize _size READ size)
 
 //! constructors
 public:
     //! default constructor, the default size is dependent on the first row of the resolutionModel
     ImageComposerQML(QObject * parent = nullptr)
         : QObject(parent)
-        , _size(QSize(960, 540))
+        , _size(QSize(960, 540)) //! TODO refactor to some global settings
     { }
 
 //! methods
@@ -85,7 +86,9 @@ public:
         _qml_image = _qml_image.scaledToWidth(_size.width());
         emit resizeTriggered(_size);
     }
-//! methods
+    //! TODO
+    //QVariant size(){ return _size; }
+    //! methods
 private:
     //! TODO
     QImage _get_center_from_image(const QImage & image, quint8 video_count)
@@ -102,9 +105,9 @@ private:
 
 //! member
 public:
-    //!
+    //! TODO
     QImage _qml_image;
-    //!
+    //! TODO
     QSize  _size;
 };
 

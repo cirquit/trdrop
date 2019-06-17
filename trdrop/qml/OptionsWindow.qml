@@ -422,6 +422,7 @@ Window {
                                         fpsText.enabled = !fpsText.enabled;
                                         fpsTextCustomize.enabled = !fpsTextCustomize.enabled;
                                         fpsTextEnabled.checked = fpsText.enabled
+                                        model.displayedTextEnabled = fpsText.enabled
                                     }
                                 }
                                 //ToolTip.text: "Disable text and framerate rendering"

@@ -16,7 +16,10 @@ public:
     ImageViewerQML(QQuickItem *parent = nullptr)
         : QQuickPaintedItem(parent)
         , _allow_painting(true)
-    { }
+    {
+        //! TODO refactor to some global settings
+        setImplicitSize(960, 540);
+    }
 
 //! methods
 public:

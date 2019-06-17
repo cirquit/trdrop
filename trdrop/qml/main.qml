@@ -22,15 +22,10 @@ ApplicationWindow
     StartupBackground {
         visible: false
     }
-
+    //
     TrdropContent {
         visible: true
     }
-
-//    Example {
-//        visible: true
-//    }
-
     // content
 //    TrdropContent {
 //        visible: true
