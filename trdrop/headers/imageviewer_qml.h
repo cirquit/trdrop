@@ -8,14 +8,14 @@
 class ImageViewerQML : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(bool _allow_painting READ allowPainting WRITE setAllowPainting NOTIFY allowPaintingChanged)
+    Q_PROPERTY(bool _emit_rendering_signal READ emitRenderingSignal WRITE setEmitRenderingSignal NOTIFY emitRenderingSignalChanged)
 
 //! constructors
 public:
     //! quick painted item, essentially a label with a drawable interface
     ImageViewerQML(QQuickItem *parent = nullptr)
         : QQuickPaintedItem(parent)
-        , _allow_painting(true)
+        , _emit_rendering_signal(false)
     {
         //! TODO refactor to some global settings
         setImplicitSize(960, 540);
@@ -24,7 +24,7 @@ public:
 //! methods
 public:
     //! QML changed signal for property
-    Q_SIGNAL void allowPaintingChanged();
+    Q_SIGNAL void emitRenderingSignalChanged();
     //! signal to wait for to use the rendered image
     Q_SIGNAL void doneRendering();
     //! resized the texture, width and height of this item
@@ -51,21 +51,21 @@ public:
     //! draws the image on the drawable space of the element and triggers a doneRendering signal when its finished
     void paint(QPainter * painter)
     {
-        if (_allow_painting)
+        painter->drawImage(0, 0, _qml_image);
+        if (_emit_rendering_signal)
         {
-            painter->drawImage(0, 0, _qml_image);
             emit doneRendering();
         }
     }
     //! QML getter
-    bool allowPainting(){ return _allow_painting; }
+    bool emitRenderingSignal(){ return _emit_rendering_signal; }
     //! QML setter
-    void setAllowPainting(bool other) { _allow_painting = other; }
+    void setEmitRenderingSignal(bool other) { _emit_rendering_signal = other; }
 
 //! member
 private:
-    //! if set, allows the execution of the paint() method
-    bool _allow_painting;
+    //! if set, allows after the execution of the paint() method to emit the doneRendering() signal
+    bool _emit_rendering_signal;
     //! image to be rendered in the pixmap
     QImage _qml_image;
 };

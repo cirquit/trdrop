@@ -87,6 +87,7 @@ Window {
                 onActivated: {
                     let size = resolutionsModel.getSizeAt(currentIndex);
                     imagecomposer.resizeComposition(size);
+                    videocapturelist.readNextFrames();
                 }
             }
 

@@ -20,7 +20,7 @@ ApplicationWindow
     menuBar: TrdropMenubar { }
     // default content
     StartupBackground {
-        visible: false
+        visible: true
     }
     //
     TrdropContent {

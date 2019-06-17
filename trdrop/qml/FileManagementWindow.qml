@@ -227,6 +227,7 @@ Window {
             videocapturelist.openAllPaths(filePaths)
             fpsOptionsModel.updateEnabledRows(filePaths);
             tearOptionsModel.updateEnabledRows(filePaths);
+            videocapturelist.readNextFrames();
         }
     }
 }
