@@ -66,4 +66,6 @@ HEADERS += \
     headers/imageviewer_qml.h \
     headers/imagecomposer_qml.h \
     headers/resolutionsmodel.h \
-    headers/resolution.h
+    headers/resolution.h \
+    headers/export_qml.h \
+    headers/exportcontroller_qml.h

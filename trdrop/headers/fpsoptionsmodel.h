@@ -37,7 +37,9 @@ public:
     };
 //! methods
 public:
-    //!
+    //! TODO
+    Q_SIGNAL void propagateFPSOptions(const QList<FPSOptions> fpsOptionsList);
+    //! TODO
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -101,6 +103,7 @@ public:
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
+        emit propagateFPSOptions(_fps_options_list);
         return true;
     }
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate

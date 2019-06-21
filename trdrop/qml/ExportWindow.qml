@@ -104,8 +104,15 @@ Window {
                 Layout.fillWidth: true
                 text: "Export"
                 onClicked: {
-                    // if running, stop and show Export again TODO
-                    videocapturelist.readNextFrames()
+                    if (exportController.isExporting())
+                    {
+                        exportButton.text = "Export";
+                        exportProgressBar.value = 0.0;
+                        exportController.invokeStopExporting();
+                    } else {
+                        exportController.invokeStartExporting();
+                        videocapturelist.readNextFrames();
+                    }
                 }
             }
 
@@ -118,6 +125,7 @@ Window {
                 onFinishedProcessing: {
                     exportButton.text = "Export";
                     exportProgressBar.value = 0.0;
+                    exportController.invokeStopExporting();
                 }
             }
 

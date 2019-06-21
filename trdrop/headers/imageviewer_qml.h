@@ -3,7 +3,11 @@
 
 #include <QtQuick/QQuickPaintedItem>
 #include <QPainter>
+#include <QScopedPointer>
+#include <QOpenGLFramebufferObject>
 #include <QColor>
+
+#include "fpsoptions.h"
 
 class ImageViewerQML : public QQuickPaintedItem
 {
@@ -52,15 +56,43 @@ public:
     void paint(QPainter * painter)
     {
         painter->drawImage(0, 0, _qml_image);
+        // TODO dirty
+        int video_count = 0;
+        for(int i = 0; i < _fps_option_list.size(); ++i)
+        {
+            if (_fps_option_list[i].enabled) ++video_count;
+        }
+
+        for(int i = 0; i < _fps_option_list.size(); ++i)
+        {
+            if (_fps_option_list[i].enabled)
+            {
+                painter->setPen(_fps_option_list[i].fps_plot_color.color());
+
+                int x_padding = static_cast<int>(size().width() / 28);
+                int x_step = static_cast<int>(size().width() / video_count);
+                int y_step = static_cast<int>(size().height() / 15);
+                int x = x_padding + x_step * i; // width
+                int y = y_step; // height
+                painter->setFont(_fps_option_list[i].displayed_text.font());
+                painter->drawText(x, y, _fps_option_list[i].displayed_text.value());
+            }
+        }
         if (_emit_rendering_signal)
         {
             emit doneRendering();
         }
     }
+    //! TODO
+    Q_SLOT void setFPSOptions(const QList<FPSOptions> fpsOptionsList)
+    {
+        _fps_option_list = fpsOptionsList;
+        update();
+    }
     //! QML getter
-    bool emitRenderingSignal(){ return _emit_rendering_signal; }
+    Q_SLOT bool emitRenderingSignal(){ return _emit_rendering_signal; }
     //! QML setter
-    void setEmitRenderingSignal(bool other) { _emit_rendering_signal = other; }
+    Q_SLOT void setEmitRenderingSignal(bool other) { _emit_rendering_signal = other; }
 
 //! member
 private:
@@ -68,6 +100,8 @@ private:
     bool _emit_rendering_signal;
     //! image to be rendered in the pixmap
     QImage _qml_image;
+    //! TODO
+    QList<FPSOptions> _fps_option_list;
 };
 
 #endif // IMAGEVIEWER_QML_H

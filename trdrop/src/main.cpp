@@ -18,6 +18,8 @@
 #include "headers/imageconverter_qml.h"
 #include "headers/imagecomposer_qml.h"
 #include "headers/imageviewer_qml.h"
+#include "headers/exportcontroller_qml.h"
+
 #include "headers/customthread.h"
 
 int main(int argc, char *argv[])
@@ -58,6 +60,8 @@ int main(int argc, char *argv[])
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
+    //
+    qRegisterMetaType<QList<FPSOptions>>("const QList<FPSOptions>");
     // register the viewer as qml type
     qmlRegisterType<ImageViewerQML>("Trdrop", 1, 0, "ImageViewerQML");
 
@@ -67,6 +71,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml;
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
+    ExportControllerQML exportcontroller_qml;
+    engine.rootContext()->setContextProperty("exportController", &exportcontroller_qml);
 
     // sigals in c++
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);

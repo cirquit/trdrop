@@ -9,8 +9,9 @@ ApplicationWindow
 {
     // startup as a fullscreen application
     id: rootWindow
-    width: Screen.width
-    height: Screen.height
+    //width:
+    minimumWidth: Screen.width
+    minimumHeight: Screen.height
     visible: true
 
     Material.theme: Material.Dark
