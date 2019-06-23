@@ -17,8 +17,14 @@
 #include "headers/qml_interface/videocapturelist_qml.h"
 #include "headers/qml_interface/imageconverter_qml.h"
 #include "headers/qml_interface/imagecomposer_qml.h"
-#include "headers/qml_interface/viewcomposer_qml.h"
-#include "headers/qml_interface/exportcontroller_qml.h"
+#include "headers/qml_interface/renderer_qml.h"
+#include "headers/qml_interface/viewer_qml.h"
+#include "headers/qml_interface/exporter_qml.h"
+
+#include <QThread>
+
+class CustomThread final : public QThread { public: ~CustomThread() { quit(); wait(); } };
+
 
 int main(int argc, char *argv[])
 {
@@ -57,10 +63,10 @@ int main(int argc, char *argv[])
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
-    //
+    // allow const QList<FPSOptions> in signals
     qRegisterMetaType<QList<FPSOptions>>("const QList<FPSOptions>");
     // register the viewer as qml type
-    qmlRegisterType<ViewerComposerQML>("Trdrop", 1, 0, "ImageViewerQML");
+    qmlRegisterType<ViewerQML>("Trdrop", 1, 0, "ViewerQML");
 
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
@@ -68,12 +74,41 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml;
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    ExportControllerQML exportcontroller_qml;
-    engine.rootContext()->setContextProperty("exportController", &exportcontroller_qml);
+    RendererQML renderer_qml;
+    engine.rootContext()->setContextProperty("renderer", &renderer_qml);
+    ExporterQML exporter_qml;
+    //CustomThread thread;
+    //thread.start();
+    //exporter_qml.moveToThread(&thread);
+    engine.rootContext()->setContextProperty("exporter", &exporter_qml);
 
-    // sigals in c++
+    // sigals in c++ (main processing pipeline)
+    // pass the QList<cv::Mat> to the converter
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
-    QObject::connect(&imageconverter_qml, &ImageConverterQML::imagesReady, &imagecomposer_qml, &ImageComposerQML::processImages);
+    // tearprocessing
+    // framerate processing
+    // frametime processing
+    // pass the QList<QImage> to the composer to mux them together
+    QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages);
+    // pass the QImage to the renderer to render the meta information onto the image
+    QObject::connect(&imagecomposer_qml,    &ImageComposerQML::imageReady,     &renderer_qml,         &RendererQML::processImage);
+    // pass the rendered QImage to the exporter
+    QObject::connect(&renderer_qml,         &RendererQML::imageReady,          &exporter_qml,         &ExporterQML::processImage);
+    // the exporter may trigger a request for new frames from VCL
+    QObject::connect(&exporter_qml,         &ExporterQML::requestNextImages,   &videocapturelist_qml, &VideoCaptureListQML::readNextFrames);
+
+    // if VCL finishes processing, finish exporting (may be needed if it's a video)
+    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::finishedProcessing, &exporter_qml, &ExporterQML::finishExporting);
+
+    // meta data pipeline
+    // link the fps options with the renderer
+    QObject::connect(&fps_options_model, &FPSOptionsModel::propagateFPSOptions, &renderer_qml, &RendererQML::setFPSOptions);
+    // TODO tear options
+    // TODO frametime options
+    // TODO tear values
+    // TODO fps values
+    // TODO frametime values
+    // TODO general option values
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

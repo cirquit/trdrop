@@ -34,7 +34,7 @@ public:
             if (!successful_frame_read)
             {
                 qDebug() << "VideoCaptureList.populate_next_frames(): terminated at index " << i << " at frame " << frame_count_list[i];
-                break;
+                return false;
             }
             frame_count_list[i] += 1;
         }
@@ -77,8 +77,19 @@ public:
         }
         _prepare_frame_lists();
     }
+    //! restarts the videocaptures and resets the accompanying frame lists
+    void restart_state()
+    {
+        for (size_t i = 0; i < _videocapture_list.size(); ++i)
+        {
+            _videocapture_list[i].set(cv::CAP_PROP_POS_FRAMES, 0);
+        }
+        _prepare_frame_lists();
+    }
+
 // methods
 private:
+
     //! reset all state of the object
     void _reset_state()
     {

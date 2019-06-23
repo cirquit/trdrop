@@ -61,16 +61,18 @@ HEADERS += \
     headers/cpp_interface/tearoptions.h \
     headers/cpp_interface/textedititem.h \
     headers/cpp_interface/videocapturelist.h \
-    headers/qml_interface/exportcontroller_qml.h \
     headers/qml_interface/framerateprocessing_qml.h \
     headers/qml_interface/frametimeprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
+    headers/qml_interface/renderer_qml.h \
     headers/qml_interface/tearprocessing_qml.h \
-    headers/qml_interface/viewcomposer_qml.h \
     headers/qml_interface/videocapturelist_qml.h \
     headers/qml_models/fileitemmodel.h \
     headers/qml_models/fpsoptionsmodel.h \
     headers/qml_models/generaloptionsmodel.h \
     headers/qml_models/resolutionsmodel.h \
-    headers/qml_models/tearoptionsmodel.h
+    headers/qml_models/tearoptionsmodel.h \
+    headers/qml_interface/viewer_qml.h \
+    headers/qml_interface/exporter_qml.h
+

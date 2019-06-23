@@ -2,6 +2,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 23.06.2019
+
+Not a very gif'able update, but I've rewritten the processing pipeline and grouped the headers by usage. A problem I've encountered was that I could not save images which were outside of the screen-resolution, which prompted me to rewrite some parts, but that is now also fixed.
+The only thing to test right now is the conversion between internal qt images to opencv to encode a new video. This should be only a matter of time, but then it's only about adding the missing features, which should not prove to be as difficult as the project structure until now.
+
+
 #### Update 17.06.2019
 
 Finally got the Framerate Text working on resize and for multiple videos simultaneously.

@@ -23,7 +23,7 @@ public:
 //! methods
 public:
     //! signal to wait for to render the full image
-    Q_SIGNAL void imageReady(const QImage & composed_image);
+    Q_SIGNAL void imageReady(QImage image);
     //! TODO
     Q_SIGNAL void resizeTriggered(const QSize & size);
     //! side by side only right now
@@ -101,7 +101,7 @@ private:
     }
 
 //! member
-public:
+private:
     //! TODO
     QImage _qml_image;
     //! TODO

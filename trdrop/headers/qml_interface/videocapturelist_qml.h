@@ -41,15 +41,17 @@ public:
         bool successful_reads = _videocapture_list.populate_next_frames();
         if (!successful_reads)
         {
+            restartVideos();
             emit finishedProcessing();
             return;
         }
+        qDebug() << "VideoCaptureListQML::readNextFrames()";
         emit framesReady(_videocapture_list.frame_list);
     }
     //! tries to open all videos
     Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
-        qDebug() << "Opening " << path_list.size() << " videos";
+        qDebug() << "Opening" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
     //! returns the progress of the video 0: start, 1: end of video
@@ -59,6 +61,11 @@ public:
         const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(_index);
         const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(_index);
         return static_cast<double>(current_frame_count) / static_cast<double>(max_frame_count);
+    }
+    //! restarts the videocaptures with the previously opened videos
+    Q_INVOKABLE void restartVideos()
+    {
+        _videocapture_list.restart_state();
     }
 
 //! member

@@ -87,7 +87,6 @@ Window {
                 onActivated: {
                     let size = resolutionsModel.getSizeAt(currentIndex);
                     imagecomposer.resizeComposition(size);
-                    videocapturelist.readNextFrames();
                 }
             }
 
@@ -104,14 +103,13 @@ Window {
                 Layout.fillWidth: true
                 text: "Export"
                 onClicked: {
-                    if (exportController.isExporting())
+                    if (exporter.isExporting())
                     {
                         exportButton.text = "Export";
                         exportProgressBar.value = 0.0;
-                        exportController.invokeStopExporting();
+                        exporter.stopExporting();
                     } else {
-                        exportController.invokeStartExporting();
-                        videocapturelist.readNextFrames();
+                        exporter.startExporting()
                     }
                 }
             }
@@ -125,7 +123,6 @@ Window {
                 onFinishedProcessing: {
                     exportButton.text = "Export";
                     exportProgressBar.value = 0.0;
-                    exportController.invokeStopExporting();
                 }
             }
 
