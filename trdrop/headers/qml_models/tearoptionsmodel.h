@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
-#include "headers/tearoptions.h"
+#include "headers/cpp_interface/tearoptions.h"
 
 //!
 class TearOptionsModel : public QAbstractListModel

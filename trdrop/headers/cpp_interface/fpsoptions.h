@@ -1,10 +1,10 @@
 #ifndef FPSOptions_H
 #define FPSOptions_H
 
-#include "headers/checkboxitem.h"
-#include "headers/colorpickitem.h"
-#include "headers/valueitem.h"
-#include "headers/textedititem.h"
+#include "headers/cpp_interface/checkboxitem.h"
+#include "headers/cpp_interface/colorpickitem.h"
+#include "headers/cpp_interface/valueitem.h"
+#include "headers/cpp_interface/textedititem.h"
 
 class FPSOptions
 {

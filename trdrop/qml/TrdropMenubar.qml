@@ -17,7 +17,7 @@ MenuBar
             action: Action {
                 shortcut: "Ctrl+F"
                 onTriggered: {
-                    var component = Qt.createComponent("FileManagementWindow.qml");
+                    var component = Qt.createComponent("FileWindow.qml");
                     var win = component.createObject(rootWindow);
                     win.show();
                 }

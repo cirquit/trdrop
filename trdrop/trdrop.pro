@@ -47,25 +47,30 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+
 HEADERS += \
-    headers/fileitem.h \
-    headers/fileitemmodel.h \
-    headers/checkboxitem.h \
-    headers/generaloptionsmodel.h \
-    headers/fpsoptionsmodel.h \
-    headers/colorpickitem.h \
-    headers/valueitem.h \
-    headers/fpsoptions.h \
-    headers/textedititem.h \
-    headers/tearoptions.h \
-    headers/tearoptionsmodel.h \
-    headers/customthread.h \
-    headers/videocapturelist.h \
-    headers/videocapturelist_qml.h \
-    headers/imageconverter_qml.h \
-    headers/imageviewer_qml.h \
-    headers/imagecomposer_qml.h \
-    headers/resolutionsmodel.h \
-    headers/resolution.h \
-    headers/export_qml.h \
-    headers/exportcontroller_qml.h
+    headers/cpp_interface/checkboxitem.h \
+    headers/cpp_interface/fileitem.h \
+    headers/cpp_interface/framerateprocessing.h \
+    headers/cpp_interface/resolution.h \
+    headers/cpp_interface/tearprocessing.h \
+    headers/cpp_interface/valueitem.h \
+    headers/cpp_interface/colorpickitem.h \
+    headers/cpp_interface/fpsoptions.h \
+    headers/cpp_interface/frametimeprocessing.h \
+    headers/cpp_interface/tearoptions.h \
+    headers/cpp_interface/textedititem.h \
+    headers/cpp_interface/videocapturelist.h \
+    headers/qml_interface/exportcontroller_qml.h \
+    headers/qml_interface/framerateprocessing_qml.h \
+    headers/qml_interface/frametimeprocessing_qml.h \
+    headers/qml_interface/imagecomposer_qml.h \
+    headers/qml_interface/imageconverter_qml.h \
+    headers/qml_interface/tearprocessing_qml.h \
+    headers/qml_interface/viewcomposer_qml.h \
+    headers/qml_interface/videocapturelist_qml.h \
+    headers/qml_models/fileitemmodel.h \
+    headers/qml_models/fpsoptionsmodel.h \
+    headers/qml_models/generaloptionsmodel.h \
+    headers/qml_models/resolutionsmodel.h \
+    headers/qml_models/tearoptionsmodel.h

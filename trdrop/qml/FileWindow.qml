@@ -124,7 +124,6 @@ Window {
                         }
                         Button {
                             id: removeButton
-                            // show this button if a file was loaded
                             visible:  model.fileSelected
                             hoverEnabled: true
                             Layout.fillHeight: true
@@ -152,13 +151,10 @@ Window {
                             fileItemModel.emitFilePaths();
                         }
                     }
-                    //onStateChanged: console.log(fileItemModel.getAllPaths());
                     onExited: fileItemModel.emitFilePaths();
                 }
             }
         }
-
-        //
         ListView {
             id: fileView
             anchors { fill: parent; margins: 2 }

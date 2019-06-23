@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
-#include "headers/resolution.h"
+#include "headers/cpp_interface/resolution.h"
 
 //! TODO
 class ResolutionsModel : public QAbstractListModel

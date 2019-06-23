@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
-#include "headers/fpsoptions.h"
+#include "headers/cpp_interface/fpsoptions.h"
 
 //!
 class FPSOptionsModel : public QAbstractListModel

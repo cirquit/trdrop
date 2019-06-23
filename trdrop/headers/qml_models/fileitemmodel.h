@@ -7,7 +7,7 @@
 #include <QStandardPaths>
 #include <cmath>
 
-#include "headers/fileitem.h"
+#include "headers/cpp_interface/fileitem.h"
 
 //!
 class FileItemModel : public QAbstractListModel

@@ -5,6 +5,7 @@
 #include <QList>
 #include "opencv2/opencv.hpp"
 
+//! TODO
 class VideoCaptureList
 {
 

@@ -3,8 +3,8 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
-#include "headers/checkboxitem.h"
-#include "headers/valueitem.h"
+#include "headers/cpp_interface/checkboxitem.h"
+#include "headers/cpp_interface/valueitem.h"
 
 //!
 class GeneralOptionsModel : public QAbstractListModel

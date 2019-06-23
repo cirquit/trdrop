@@ -7,9 +7,9 @@
 #include <QOpenGLFramebufferObject>
 #include <QColor>
 
-#include "fpsoptions.h"
+#include "headers/cpp_interface/fpsoptions.h"
 
-class ImageViewerQML : public QQuickPaintedItem
+class ViewerComposerQML : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(bool _emit_rendering_signal READ emitRenderingSignal WRITE setEmitRenderingSignal NOTIFY emitRenderingSignalChanged)
@@ -17,7 +17,7 @@ class ImageViewerQML : public QQuickPaintedItem
 //! constructors
 public:
     //! quick painted item, essentially a label with a drawable interface
-    ImageViewerQML(QQuickItem *parent = nullptr)
+    ViewerComposerQML(QQuickItem *parent = nullptr)
         : QQuickPaintedItem(parent)
         , _emit_rendering_signal(false)
     {

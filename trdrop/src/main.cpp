@@ -8,23 +8,20 @@
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
-#include "headers/fileitemmodel.h"
-#include "headers/generaloptionsmodel.h"
-#include "headers/fpsoptionsmodel.h"
-#include "headers/tearoptionsmodel.h"
-#include "headers/resolutionsmodel.h"
+#include "headers/qml_models/fileitemmodel.h"
+#include "headers/qml_models/generaloptionsmodel.h"
+#include "headers/qml_models/fpsoptionsmodel.h"
+#include "headers/qml_models/tearoptionsmodel.h"
+#include "headers/qml_models/resolutionsmodel.h"
 
-#include "headers/videocapturelist_qml.h"
-#include "headers/imageconverter_qml.h"
-#include "headers/imagecomposer_qml.h"
-#include "headers/imageviewer_qml.h"
-#include "headers/exportcontroller_qml.h"
-
-#include "headers/customthread.h"
+#include "headers/qml_interface/videocapturelist_qml.h"
+#include "headers/qml_interface/imageconverter_qml.h"
+#include "headers/qml_interface/imagecomposer_qml.h"
+#include "headers/qml_interface/viewcomposer_qml.h"
+#include "headers/qml_interface/exportcontroller_qml.h"
 
 int main(int argc, char *argv[])
 {
-
     // general application stuff
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
@@ -34,8 +31,8 @@ int main(int argc, char *argv[])
 
     // prepare the FileItemModel
     qmlRegisterType<FileItemModel>();
-    constexpr quint8 default_file_items = 3;
-    FileItemModel file_item_model(default_file_items);
+    constexpr quint8 default_file_items_count = 3;
+    FileItemModel file_item_model(default_file_items_count);
     engine.rootContext()->setContextProperty("fileItemModel", &file_item_model);
 
     // prepare the Tear Options Model
@@ -63,9 +60,9 @@ int main(int argc, char *argv[])
     //
     qRegisterMetaType<QList<FPSOptions>>("const QList<FPSOptions>");
     // register the viewer as qml type
-    qmlRegisterType<ImageViewerQML>("Trdrop", 1, 0, "ImageViewerQML");
+    qmlRegisterType<ViewerComposerQML>("Trdrop", 1, 0, "ImageViewerQML");
 
-    VideoCaptureListQML videocapturelist_qml(default_file_items);
+    VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     ImageConverterQML imageconverter_qml;
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
