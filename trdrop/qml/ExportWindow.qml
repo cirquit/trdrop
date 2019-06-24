@@ -22,11 +22,12 @@ Window {
         height: parent.height
         GridLayout {
             columns: 3
-            rows: 4
+            rows: 8
             Layout.margins: 10
             Layout.minimumHeight: 600
             Layout.minimumWidth: 600
             Label {
+                Layout.leftMargin: 53
                 text: "Export to directory:"
             }
 
@@ -75,7 +76,136 @@ Window {
                 }
             }
 
+            Switch {
+                id: exportAsImageSequenceSwitch
+//                Layout.columnSpan: 2
+                text: "Export as image sequence"
+                checked: true
+                action: Action {
+                    onTriggered: {
+                        //model.enableViewValue = !model.enableViewValue;
+                        //checked: model.enableViewValue
+                    }
+                }
+            }
+            Rectangle {
+                border {
+                    color: "#8066b0"
+                    width: 1
+                }
+                Layout.fillWidth: parent
+                height: 25
+                width: 300
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
+                color: "transparent"
+                TextInput {
+                    id: exportAsImageSequenceSwitchName
+                    anchors.fill: parent
+                    leftPadding: 5
+                    topPadding: 2
+                    bottomPadding: 2
+                    text: "exportsequence_"
+                    clip: true
+                    font.pointSize: 12
+                    color: "#FFFFFF"
+                    onEditingFinished: {
+                        //exportDirectoryLabel.text = text;
+                    }
+               }
+            }
+            ComboBox {
+                Layout.fillWidth: true
+                //textRole: "resolutionName"
+                model: [".jpg", ".png"]
+                onActivated: {
+                    //let size = resolutionsModel.getSizeAt(currentIndex);
+                    //imagecomposer.resizeComposition(size);
+                }
+            }
+
+
+            Switch {
+                id: exportAsVideoSwitch
+                text: "Export as video"
+                checked: true
+                action: Action {
+                    onTriggered: {
+                        //model.enableViewValue = !model.enableViewValue;
+                        //checked: model.enableViewValue
+                    }
+                }
+            }
+            Rectangle {
+                border {
+                    color: "#8066b0"
+                    width: 1
+                }
+                Layout.fillWidth: parent
+                height: 25
+                width: 300
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
+                color: "transparent"
+                TextInput {
+                    id: exportAsVideoName
+                    anchors.fill: parent
+                    leftPadding: 5
+                    topPadding: 2
+                    bottomPadding: 2
+                    text: "videox_vs_videoy"
+                    clip: true
+                    font.pointSize: 12
+                    color: "#FFFFFF"
+                    onEditingFinished: {
+                        //exportDirectoryLabel.text = text;
+                    }
+               }
+            }
+            ComboBox {
+                Layout.fillWidth: true
+                //textRole: "resolutionName"
+                model: [".avi", ".mp4"]
+                onActivated: {
+                    //let size = resolutionsModel.getSizeAt(currentIndex);
+                    //imagecomposer.resizeComposition(size);
+                }
+            }
+
+            Switch {
+                id: exportOverlay
+//                Layout.columnSpan: 2
+                text: "Export overlay only"
+                checked: true
+                action: Action {
+                    onTriggered: {
+                        //model.enableViewValue = !model.enableViewValue;
+                        //checked: model.enableViewValue
+                    }
+                }
+            }
             Label {
+                Layout.columnSpan: 2
+            }
+
+            Switch {
+                id: exportDelta
+//                Layout.columnSpan: 2
+                text: "Export image difference"
+                checked: true
+                action: Action {
+                    onTriggered: {
+                        //model.enableViewValue = !model.enableViewValue;
+                        //checked: model.enableViewValue
+                    }
+                }
+            }
+            Label {
+                Layout.columnSpan: 2
+            }
+
+            Label {
+                Layout.leftMargin: 53
                 text: "Resolution:"
             }
             ComboBox {
@@ -89,6 +219,12 @@ Window {
                     imagecomposer.resizeComposition(size);
                 }
             }
+            Label {
+
+            }
+
+
+
 
             ProgressBar {
                 id: exportProgressBar
