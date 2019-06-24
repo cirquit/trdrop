@@ -108,7 +108,7 @@ Window {
                     text: "exportsequence_"
                     clip: true
                     font.pointSize: 12
-                    color: "#FFFFFF"
+                    color: enabled ? "#FFFFFF" : "#b0b0b0";
                     onEditingFinished: {
                         //exportDirectoryLabel.text = text;
                     }
@@ -128,9 +128,13 @@ Window {
             Switch {
                 id: exportAsVideoSwitch
                 text: "Export as video"
-                checked: true
+                checked: false
                 action: Action {
                     onTriggered: {
+                        //console.log(exportAsVideoSwitch.checked)
+                        exportAsVideoSwitch.checked = !exportAsVideoSwitch.checked;
+                        exportAsVideoName.enabled = exportAsVideoSwitch.checked;
+                        exportAsVideoNameEnding.enabled = exportAsVideoSwitch.checked;
                         //model.enableViewValue = !model.enableViewValue;
                         //checked: model.enableViewValue
                     }
@@ -156,14 +160,17 @@ Window {
                     text: "videox_vs_videoy"
                     clip: true
                     font.pointSize: 12
-                    color: "#FFFFFF"
+                    color: enabled ? "#FFFFFF" : "#b0b0b0";
+                    enabled: false
                     onEditingFinished: {
                         //exportDirectoryLabel.text = text;
                     }
                }
             }
             ComboBox {
+                id: exportAsVideoNameEnding
                 Layout.fillWidth: true
+                enabled: false
                 //textRole: "resolutionName"
                 model: [".avi", ".mp4"]
                 onActivated: {
