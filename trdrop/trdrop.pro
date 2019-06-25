@@ -74,5 +74,9 @@ HEADERS += \
     headers/qml_models/resolutionsmodel.h \
     headers/qml_models/tearoptionsmodel.h \
     headers/qml_interface/viewer_qml.h \
-    headers/qml_interface/exporter_qml.h
+    headers/qml_interface/exporter_qml.h \
+    headers/qml_models/imageformatmodel.h \
+    headers/cpp_interface/imageformat.h \
+    headers/qml_models/videoformatmodel.h \
+    headers/cpp_interface/videoformat.h
 

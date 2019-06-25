@@ -13,6 +13,8 @@
 #include "headers/qml_models/fpsoptionsmodel.h"
 #include "headers/qml_models/tearoptionsmodel.h"
 #include "headers/qml_models/resolutionsmodel.h"
+#include "headers/qml_models/imageformatmodel.h"
+#include "headers/qml_models/videoformatmodel.h"
 
 #include "headers/qml_interface/videocapturelist_qml.h"
 #include "headers/qml_interface/imageconverter_qml.h"
@@ -20,11 +22,6 @@
 #include "headers/qml_interface/renderer_qml.h"
 #include "headers/qml_interface/viewer_qml.h"
 #include "headers/qml_interface/exporter_qml.h"
-
-#include <QThread>
-
-class CustomThread final : public QThread { public: ~CustomThread() { quit(); wait(); } };
-
 
 int main(int argc, char *argv[])
 {
@@ -61,6 +58,17 @@ int main(int argc, char *argv[])
     ResolutionsModel resolutions_model;
     engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
 
+    // prepare ImagFormatModel (Exporter)
+    qmlRegisterType<ImageFormatModel>();
+    ImageFormatModel imageformat_model;
+    engine.rootContext()->setContextProperty("imageFormatModel", &imageformat_model);
+
+    // prepare VideoFormatModel
+    qmlRegisterType<VideoFormatModel>();
+    VideoFormatModel videoformat_model;
+    engine.rootContext()->setContextProperty("videoFormatModel", &videoformat_model);
+
+
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
     // allow const QList<FPSOptions> in signals
@@ -77,9 +85,6 @@ int main(int argc, char *argv[])
     RendererQML renderer_qml;
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml;
-    //CustomThread thread;
-    //thread.start();
-    //exporter_qml.moveToThread(&thread);
     engine.rootContext()->setContextProperty("exporter", &exporter_qml);
 
     // sigals in c++ (main processing pipeline)

@@ -116,10 +116,11 @@ Window {
             }
             ComboBox {
                 Layout.fillWidth: true
-                //textRole: "resolutionName"
-                model: [".jpg", ".png"]
+                textRole: "imageFormatName"
+                model: imageFormatModel
                 onActivated: {
-                    //let size = resolutionsModel.getSizeAt(currentIndex);
+                    let format = imageFormatModel.getValueAt(currentIndex);
+                    console.log(format)
                     //imagecomposer.resizeComposition(size);
                 }
             }
@@ -161,7 +162,7 @@ Window {
                     clip: true
                     font.pointSize: 12
                     color: enabled ? "#FFFFFF" : "#b0b0b0";
-                    enabled: false
+                    enabled: true
                     onEditingFinished: {
                         //exportDirectoryLabel.text = text;
                     }
@@ -170,10 +171,12 @@ Window {
             ComboBox {
                 id: exportAsVideoNameEnding
                 Layout.fillWidth: true
-                enabled: false
-                //textRole: "resolutionName"
-                model: [".avi", ".mp4"]
+                enabled: true
+                textRole: "videoFormatName"
+                model: videoFormatModel
                 onActivated: {
+                    let format = videoFormatModel.getValueAt(currentIndex);
+                    console.log(format)
                     //let size = resolutionsModel.getSizeAt(currentIndex);
                     //imagecomposer.resizeComposition(size);
                 }
