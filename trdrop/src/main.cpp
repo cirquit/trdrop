@@ -15,6 +15,7 @@
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/imageformatmodel.h"
 #include "headers/qml_models/videoformatmodel.h"
+#include "headers/qml_models/exportoptionsmodel.h"
 
 #include "headers/qml_interface/videocapturelist_qml.h"
 #include "headers/qml_interface/imageconverter_qml.h"
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
     GeneralOptionsModel general_options_model;
     engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
 
-    // prepare ResolutionsModel
+    // prepare ResolutionsModel (Exporter)
     qmlRegisterType<ResolutionsModel>();
     ResolutionsModel resolutions_model;
     engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
@@ -63,10 +64,15 @@ int main(int argc, char *argv[])
     ImageFormatModel imageformat_model;
     engine.rootContext()->setContextProperty("imageFormatModel", &imageformat_model);
 
-    // prepare VideoFormatModel
+    // prepare VideoFormatModel (Exporter)
     qmlRegisterType<VideoFormatModel>();
     VideoFormatModel videoformat_model;
     engine.rootContext()->setContextProperty("videoFormatModel", &videoformat_model);
+
+    // prepare ExportOptionsModel (Exporter)
+    qmlRegisterType<ExportOptionsModel>();
+    ExportOptionsModel export_options_model;
+    engine.rootContext()->setContextProperty("exportOptionsModel", &export_options_model);
 
 
     // allow cv::Mat in signals

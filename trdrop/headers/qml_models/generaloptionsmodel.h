@@ -16,7 +16,7 @@ public:
     GeneralOptionsModel(QObject * parent = nullptr)
         : QAbstractListModel(parent)
     {
-        _init_checkboxes();
+        _init_options();
         _setup_role_names();
     }
     //! manage the access to FileItem member from QML
@@ -131,7 +131,7 @@ public:
     //! TODO
     Q_INVOKABLE void revertModelToDefault()
     {
-        _init_checkboxes();
+        _init_options();
         resetModel();
     }
     //! TODO
@@ -168,7 +168,7 @@ private:
         _role_names[FrametimeRangeValueRole]         = "frametimeRangeValue";
     }
     //!TODO
-    void _init_checkboxes()
+    void _init_options()
     {
         _enable_view.setName("Enable View");
         _enable_view.setTooltip("Renders the exported frame in the main window (Disabling may improve export speed)");

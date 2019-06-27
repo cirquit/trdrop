@@ -78,5 +78,6 @@ HEADERS += \
     headers/qml_models/imageformatmodel.h \
     headers/cpp_interface/imageformat.h \
     headers/qml_models/videoformatmodel.h \
-    headers/cpp_interface/videoformat.h
+    headers/cpp_interface/videoformat.h \
+    headers/qml_models/exportoptionsmodel.h
 
