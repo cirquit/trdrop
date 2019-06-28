@@ -39,7 +39,7 @@ Window {
                 rows: 7
 
                 Label {
-                    //Layout.leftMargin: 53
+                    Layout.leftMargin: 54
                     text: model.exportDirectoryName
                 }
                 Rectangle {
@@ -144,13 +144,6 @@ Window {
                     action: Action {
                         onTriggered: {
                             model.videoPrefixEnabled = !checked;
-                            //console.log("video: " + model.videoPrefixEnabled)
-                            //console.log(exportAsVideoSwitch.checked)
-//                            exportAsVideoSwitch.checked = !exportAsVideoSwitch.checked;
-//                            exportAsVideoName.enabled = exportAsVideoSwitch.checked;
-//                            exportAsVideoNameEnding.enabled = exportAsVideoSwitch.checked;
-                            //model.enableViewValue = !model.enableViewValue;
-                            //checked: model.enableViewValue
                         }
                     }
                 }
@@ -184,15 +177,90 @@ Window {
                 ComboBox {
                     id: exportAsVideoNameEnding
                     Layout.fillWidth: true
-                    // TODO enabled: model.exportAsVideoValue
                     textRole: "videoFormatName"
-                    enabled: false
                     model: videoFormatModel
                     onActivated: {
                         let format = videoFormatModel.getValueAt(currentIndex);
                         //console.log(format)
                         //let size = resolutionsModel.getSizeAt(currentIndex);
                         //imagecomposer.resizeComposition(size);
+                    }
+                }
+
+
+                Switch {
+                    id: exportAsOverlaySwitch
+                    text: model.exportAsOverlayName
+                    checked: model.exportAsOverlayValue
+                    action: Action {
+                        onTriggered: {
+                            model.exportAsOverlayValue = !model.exportAsOverlayValue;
+                            checked: model.exportAsOverlayValue
+                        }
+                    }
+                }
+                Label {
+                    Layout.columnSpan: 2
+                }
+
+
+                Label {
+                    Layout.leftMargin: 54
+                    text: "Resolution:"
+                }
+                ComboBox {
+                    Layout.leftMargin: 20
+                    Layout.rightMargin: 20
+                    Layout.fillWidth: true
+                    textRole: "resolutionName"
+                    model: resolutionsModel
+                    onActivated: {
+                        let size = resolutionsModel.getSizeAt(currentIndex);
+                        imagecomposer.resizeComposition(size);
+                    }
+                }
+                Label { }
+
+                ProgressBar {
+                    id: exportProgressBar
+                    Layout.columnSpan: 3
+                    Layout.fillWidth: true
+                    value: 0.0
+                }
+                Button {
+                    id: exportButton
+                    Layout.columnSpan: 3
+                    Layout.fillWidth: true
+                    enabled: false
+                    text: "Export"
+                    onClicked: {
+                        if (exporter.isExporting())
+                        {
+                            exportButton.text = "Export";
+                            exportProgressBar.value = 0.0;
+                            exporter.stopExporting();
+                        } else {
+                            exporter.startExporting()
+                        }
+                    }
+                }
+
+                Connections {
+                    target: fileItemModel
+                    onUpdateFileItemPaths: {
+                        exportButton.enabled = filePaths.length > 0;
+                    }
+                }
+
+                Connections {
+                    target: videocapturelist
+                    onFramesReady: {
+                        exportProgressBar.value = videocapturelist.getVideoProgress(0);
+                        exportButton.text       = Utils.round(videocapturelist.getVideoProgress(0) * 100, 1) + "%";
+                    }
+                    onFinishedProcessing: {
+                        exportButton.text = "Export";
+                        exportProgressBar.value = 0.0;
                     }
                 }
 
@@ -204,79 +272,10 @@ Window {
 
 
 
-//            Switch {
-//                id: exportOverlay
-////                Layout.columnSpan: 2
-//                text: "Export overlay only"
-//                checked: true
-//                action: Action {
-//                    onTriggered: {
-//                        //model.enableViewValue = !model.enableViewValue;
-//                        //checked: model.enableViewValue
-//                    }
-//                }
-//            }
-//            Label {
-//                Layout.columnSpan: 2
-//            }
-
-//            Label {
-//                Layout.leftMargin: 53
-//                text: "Resolution:"
-//            }
-//            ComboBox {
-//                Layout.leftMargin: 20
-//                Layout.rightMargin: 20
-//                Layout.fillWidth: true
-//                textRole: "resolutionName"
-//                model: resolutionsModel
-//                onActivated: {
-//                    let size = resolutionsModel.getSizeAt(currentIndex);
-//                    imagecomposer.resizeComposition(size);
-//                }
-//            }
-//            Label {
-
-//            }
 
 
 
 
-//            ProgressBar {
-//                id: exportProgressBar
-//                Layout.columnSpan: 3
-//                Layout.fillWidth: true
-//                value: 0.0
-//            }
-
-//            Button {
-//                id: exportButton
-//                Layout.columnSpan: 3
-//                Layout.fillWidth: true
-//                text: "Export"
-//                onClicked: {
-//                    if (exporter.isExporting())
-//                    {
-//                        exportButton.text = "Export";
-//                        exportProgressBar.value = 0.0;
-//                        exporter.stopExporting();
-//                    } else {
-//                        exporter.startExporting()
-//                    }
-//                }
-//            }
-
-//            Connections {
-//                target: videocapturelist
-//                onFramesReady: {
-//                    exportProgressBar.value = videocapturelist.getVideoProgress(0);
-//                    exportButton.text       = Utils.round(videocapturelist.getVideoProgress(0) * 100, 1) + "%";
-//                }
-//                onFinishedProcessing: {
-//                    exportButton.text = "Export";
-//                    exportProgressBar.value = 0.0;
-//                }
-//            }
 
 //        }
 //    }

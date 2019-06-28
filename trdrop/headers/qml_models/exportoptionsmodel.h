@@ -25,21 +25,21 @@ public:
     enum ExportOptionsRoles
     {
         ExportDirectoryNameRole        = Qt::UserRole + 100
-      , ExportDirectoryValueRole       //= Qt::UserRole + 101
-      , ImagesequencePrefixNameRole    //= Qt::UserRole + 102
-      , ImagesequencePrefixTooltipRole //= Qt::UserRole + 103
-      , ImagesequencePrefixEnabledRole //= Qt::UserRole + 104
-      , ImagesequencePrefixValueRole   //= Qt::UserRole + 105
-      , VideoPrefixNameRole            //= Qt::UserRole + 106
-      , VideoPrefixTooltipRole         //= Qt::UserRole + 107
-      , VideoPrefixEnabledRole         //= Qt::UserRole + 108
-      , VideoPrefixValueRole           //= Qt::UserRole + 109
-      , ExportAsOverlayNameRole        //= Qt::UserRole + 110
-      , ExportAsOverlayTooltipRole     //= Qt::UserRole + 111
-      , ExportAsOverlayValueRole       //= Qt::UserRole + 112
-      , ExportCSVNameRole              //= Qt::UserRole + 113
-      , ExportCSVTooltipRole           //= Qt::UserRole + 114
-      , ExportCSVValueRole             //= Qt::UserRole + 115
+      , ExportDirectoryValueRole       = Qt::UserRole + 101
+      , ImagesequencePrefixNameRole    = Qt::UserRole + 102
+      , ImagesequencePrefixTooltipRole = Qt::UserRole + 103
+      , ImagesequencePrefixEnabledRole = Qt::UserRole + 104
+      , ImagesequencePrefixValueRole   = Qt::UserRole + 105
+      , VideoPrefixNameRole            = Qt::UserRole + 106
+      , VideoPrefixTooltipRole         = Qt::UserRole + 107
+      , VideoPrefixEnabledRole         = Qt::UserRole + 108
+      , VideoPrefixValueRole           = Qt::UserRole + 109
+      , ExportAsOverlayNameRole        = Qt::UserRole + 110
+      , ExportAsOverlayTooltipRole     = Qt::UserRole + 111
+      , ExportAsOverlayValueRole       = Qt::UserRole + 112
+      , ExportCSVNameRole              = Qt::UserRole + 113
+      , ExportCSVTooltipRole           = Qt::UserRole + 114
+      , ExportCSVValueRole             = Qt::UserRole + 115
     };
 //! methods
 public:
