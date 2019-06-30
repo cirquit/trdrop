@@ -40,6 +40,7 @@ public:
       , ExportCSVNameRole              = Qt::UserRole + 113
       , ExportCSVTooltipRole           = Qt::UserRole + 114
       , ExportCSVValueRole             = Qt::UserRole + 115
+      , EnabledExportButtonRole        = Qt::UserRole + 116
     };
 //! methods
 public:
@@ -89,6 +90,8 @@ public:
                 return _export_csv.tooltip();
             case ExportCSVValueRole:
                 return _export_csv.value();
+            case EnabledExportButtonRole:
+                return _enabled_export_button;
             default:
                 return QVariant();
         }
@@ -114,6 +117,7 @@ public:
         else if (role == ImagesequencePrefixEnabledRole) _imagesequence_prefix.setEnabled(value.toBool());
         else if (role == VideoPrefixValueRole)           _videoname_prefix.setValue(value.toString());
         else if (role == VideoPrefixEnabledRole)         _videoname_prefix.setEnabled(value.toBool());
+        else if (role == EnabledExportButtonRole)        _enabled_export_button = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -137,11 +141,17 @@ public:
         return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
     }
     //! TODO
-    QString getImagesequencePrefix(){ return _imagesequence_prefix.value(); }
+    Q_INVOKABLE void setEnabledExportButton(bool other)
+    {
+        QModelIndex q = createIndex(0, 0);
+        setData(q, other, EnabledExportButtonRole);
+    }
     //! TODO
-    QString getExportDirectory(){ return _export_directory.value(); }
+    QString get_imagesequence_prefix(){ return _imagesequence_prefix.value(); }
     //! TODO
-    bool exportAsImageSequence(){ return _imagesequence_prefix.enabled(); }
+    QString get_export_directory(){ return _export_directory.value(); }
+    //! TODO
+    bool export_as_imagesequence(){ return _imagesequence_prefix.enabled(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -163,6 +173,7 @@ private:
         _role_names[ExportCSVNameRole]              = "exportCSVName";
         _role_names[ExportCSVTooltipRole]           = "exportCSVTooltip";
         _role_names[ExportCSVValueRole]             = "exportCSVValue";
+        _role_names[EnabledExportButtonRole]        = "exportButtonEnabled";
     }
     //!TODO
     void _init_options()
@@ -193,6 +204,8 @@ private:
         _videoname_prefix.setEnabled(false);
         _videoname_prefix.setFont(QFont("Helvetica", 15));
 
+        _enabled_export_button = false;
+
     }
 
 //! member
@@ -209,6 +222,8 @@ private:
     TextEditItem _imagesequence_prefix;
     //! TODO
     TextEditItem _videoname_prefix;
+    //! TODO
+    bool _enabled_export_button;
 };
 
 #endif // EXPORTOPTIONSMODEL_H

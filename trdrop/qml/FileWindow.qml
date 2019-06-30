@@ -223,6 +223,7 @@ Window {
             videocapturelist.openAllPaths(filePaths)
             fpsOptionsModel.updateEnabledRows(filePaths);
             tearOptionsModel.updateEnabledRows(filePaths);
+            exportOptionsModel.setEnabledExportButton(filePaths.length > 0);
             videocapturelist.readNextFrames();
         }
     }

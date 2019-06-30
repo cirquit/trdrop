@@ -234,7 +234,7 @@ Window {
                     id: exportButton
                     Layout.columnSpan: 3
                     Layout.fillWidth: true
-                    enabled: false
+                    enabled: model.exportButtonEnabled
                     text: "Export"
                     onClicked: {
                         if (exporter.isExporting())
@@ -249,12 +249,6 @@ Window {
                     }
                 }
 
-                Connections {
-                    target: fileItemModel
-                    onUpdateFileItemPaths: {
-                        exportButton.enabled = filePaths.length > 0;
-                    }
-                }
                 Connections {
                     target: videocapturelist
                     onFramesReady: {

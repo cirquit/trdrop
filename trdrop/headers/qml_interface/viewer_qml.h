@@ -42,7 +42,7 @@ public:
     Q_SLOT void setImage(const QImage & qml_image)
     {
         resize(qml_image.size());
-        qDebug() << "ViewerQML::setImage - " << qml_image;
+        //qDebug() << "ViewerQML::setImage - " << qml_image;
         _qml_image = qml_image.copy();
         update();
     }

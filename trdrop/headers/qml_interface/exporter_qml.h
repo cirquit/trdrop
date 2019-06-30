@@ -37,11 +37,10 @@ public:
     //! TODO
     Q_SLOT void processImage(const QImage & image)
     {
-        // _qml_image = image.copy();
-        qDebug() << "ExporterQML::processImage()";
+        //qDebug() << "ExporterQML::processImage()";
         if (isExporting())
         {
-            if (_export_options_model->exportAsImageSequence())
+            if (_export_options_model->export_as_imagesequence())
             {
                 QString filepath = _create_image_file_path();
                 image.save(filepath);
@@ -80,9 +79,9 @@ private:
     //! TODO
     QString _create_image_file_path() const
     {
-        QString directory_path = _export_options_model->getExportDirectory();
-        QString imagesequence_prefix = _export_options_model->getImagesequencePrefix();
-        QString image_postfix = _imageformat_model->getActiveValue().name();
+        QString directory_path = _export_options_model->get_export_directory();
+        QString imagesequence_prefix = _export_options_model->get_imagesequence_prefix();
+        QString image_postfix = _imageformat_model->get_active_value().name();
         return QDir(directory_path).filePath(imagesequence_prefix + _get_frame_count() + image_postfix);
     }
     //! TODO make _prefix_zeros dependent on the amount of frames

@@ -45,7 +45,7 @@ public:
             emit finishedProcessing();
             return;
         }
-        qDebug() << "VideoCaptureListQML::readNextFrames()";
+        //qDebug() << "VideoCaptureListQML::readNextFrames()";
         emit framesReady(_videocapture_list.frame_list);
     }
     //! tries to open all videos

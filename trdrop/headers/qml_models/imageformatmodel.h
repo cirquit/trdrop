@@ -65,7 +65,7 @@ public:
         }
     }
     //! TODO
-    ImageFormat getActiveValue()
+    ImageFormat get_active_value()
     {
         for (int i = 0; i < _imageformat_list.size(); ++i) {
             if (_imageformat_list[i].enabled())

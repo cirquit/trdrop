@@ -1,6 +1,8 @@
 #ifndef FPSOptions_H
 #define FPSOptions_H
 
+#include <QPainter>
+
 #include "headers/cpp_interface/checkboxitem.h"
 #include "headers/cpp_interface/colorpickitem.h"
 #include "headers/cpp_interface/valueitem.h"
@@ -23,6 +25,13 @@ public:
     void revert_to_default()
     {
         _init_member();
+    }
+    //! TODO
+    void paint_fps_text(QPainter * painter, int x, int y)
+    {
+        painter->setPen(fps_plot_color.color());
+        painter->setFont(displayed_text.font());
+        painter->drawText(x, y, displayed_text.value());
     }
 
 // methods
