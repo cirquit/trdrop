@@ -56,10 +56,25 @@ public:
         endResetModel();
     }
     //! TODO
-    Q_INVOKABLE QVariant getValueAt(const int & row)
+    Q_INVOKABLE void setActiveValueAt(const int & row)
     {
-        QModelIndex q = createIndex(row, 0);
-        return data(q, ImageFormatValueRole);
+        for (int i = 0; i < _imageformat_list.size(); ++i)
+        {
+            bool enabled = i == row;
+            _imageformat_list[i].setEnabled(enabled);
+        }
+    }
+    //! TODO
+    ImageFormat getActiveValue()
+    {
+        for (int i = 0; i < _imageformat_list.size(); ++i) {
+            if (_imageformat_list[i].enabled())
+            {
+                return _imageformat_list[i];
+            }
+        }
+        qDebug() << "ImageFormatModel::getActiveValue() - no imageformat selected, this should never happen. Returning first element";
+        return _imageformat_list[0];
     }
 
     //! methods
@@ -67,14 +82,14 @@ private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[ImageFormatNameRole] = "imageFormatName";
+        _role_names[ImageFormatNameRole]  = "imageFormatName";
         _role_names[ImageFormatValueRole] = "imageFormatValue";
    }
     //! TODO
     void _init_options()
     {
-        _imageformat_list.push_back(ImageFormat(ImageFormatType::JPEG));
-        _imageformat_list.push_back(ImageFormat(ImageFormatType::PNG));
+        _imageformat_list.push_back(ImageFormat(ImageFormatType::JPEG, true));
+        _imageformat_list.push_back(ImageFormat(ImageFormatType::PNG, false));
     }
 
 //! member

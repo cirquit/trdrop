@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDir>
 #include "headers/qml_models/exportoptionsmodel.h"
+#include "headers/qml_models/imageformatmodel.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -17,12 +18,14 @@ class ExporterQML : public QObject {
 public:
     //! default constructor, the default size is dependent on the first row of the resolutionModel
     ExporterQML(std::shared_ptr<ExportOptionsModel> export_options_model
+              , std::shared_ptr<ImageFormatModel>   imageformat_model
               , QObject * parent = nullptr)
         : QObject(parent)
         , _is_exporting(false)
         , _frame_count(0)
         , _prefix_zeros(10)
-        , _export_options_models(export_options_model)
+        , _export_options_model(export_options_model)
+        , _imageformat_model(imageformat_model)
     { }
 
 //! methods
@@ -38,8 +41,11 @@ public:
         qDebug() << "ExporterQML::processImage()";
         if (isExporting())
         {
-            QString filepath = _create_image_file_path();
-            image.save(filepath);
+            if (_export_options_model->exportAsImageSequence())
+            {
+                QString filepath = _create_image_file_path();
+                image.save(filepath);
+            }
             _frame_count += 1;
         }
         emit imageReady(image);
@@ -74,9 +80,10 @@ private:
     //! TODO
     QString _create_image_file_path() const
     {
-        QString directory_path = _export_options_models->getExportDirectory();
-        QString imagesequence_prefix = _export_options_models->getImagesequencePrefix();
-        return QDir(directory_path).filePath(imagesequence_prefix + _get_frame_count() + ".jpg");
+        QString directory_path = _export_options_model->getExportDirectory();
+        QString imagesequence_prefix = _export_options_model->getImagesequencePrefix();
+        QString image_postfix = _imageformat_model->getActiveValue().name();
+        return QDir(directory_path).filePath(imagesequence_prefix + _get_frame_count() + image_postfix);
     }
     //! TODO make _prefix_zeros dependent on the amount of frames
     //! This looks wrong on so many levels, maybe use printf or something
@@ -101,7 +108,9 @@ public:
     //! TODO
     const quint8 _prefix_zeros;
     //! this is shared because it is only dependent on how to save sources
-    std::shared_ptr<ExportOptionsModel> _export_options_models;
+    std::shared_ptr<ExportOptionsModel> _export_options_model;
+    //! this is shared because it is only dependent on how to save sources
+    std::shared_ptr<ImageFormatModel> _imageformat_model;
 
 
 };

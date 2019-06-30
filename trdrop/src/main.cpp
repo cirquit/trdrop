@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<ImageFormatModel>();
     ImageFormatModel imageformat_model;
     engine.rootContext()->setContextProperty("imageFormatModel", &imageformat_model);
+    std::shared_ptr<ImageFormatModel> shared_imageformat_model(&imageformat_model);
 
     // prepare VideoFormatModel (Exporter)
     qmlRegisterType<VideoFormatModel>();
@@ -90,7 +91,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
     RendererQML renderer_qml;
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
-    ExporterQML exporter_qml(shared_export_options_model);
+    ExporterQML exporter_qml(shared_export_options_model
+                           , shared_imageformat_model);
     engine.rootContext()->setContextProperty("exporter", &exporter_qml);
 
     // sigals in c++ (main processing pipeline)

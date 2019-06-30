@@ -140,6 +140,8 @@ public:
     QString getImagesequencePrefix(){ return _imagesequence_prefix.value(); }
     //! TODO
     QString getExportDirectory(){ return _export_directory.value(); }
+    //! TODO
+    bool exportAsImageSequence(){ return _imagesequence_prefix.enabled(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -182,13 +184,13 @@ private:
         _imagesequence_prefix.setName("Export as imagesequence");
         _imagesequence_prefix.setTooltip("Export the analysis as imagesequence");
         _imagesequence_prefix.setValue("exportsequence_");
-        _imagesequence_prefix.setEnabled(false);
+        _imagesequence_prefix.setEnabled(true);
         _imagesequence_prefix.setFont(QFont("Helvetica", 15));
 
         _videoname_prefix.setName("Export as video");
         _videoname_prefix.setValue("videoanalysis_");
         _videoname_prefix.setTooltip("Export the graph only");
-        _videoname_prefix.setEnabled(true);
+        _videoname_prefix.setEnabled(false);
         _videoname_prefix.setFont(QFont("Helvetica", 15));
 
     }

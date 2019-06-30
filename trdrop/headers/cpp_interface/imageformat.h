@@ -17,8 +17,10 @@ class ImageFormat
 // constructors
 public:
     //! TODO
-    ImageFormat(const ImageFormatType imageformat_type)
+    ImageFormat(const ImageFormatType imageformat_type
+              , bool enabled)
         : _imageformat_type(imageformat_type)
+        , _enabled(enabled)
     { }
 // methods
 public:
@@ -36,10 +38,16 @@ public:
                 return ".jpg";
         }
     }
+    //! TODO
+    bool enabled(){ return _enabled; } const
+    //! TODO
+    void setEnabled(bool other){ _enabled = other; }
+
 // member
 private:
     //! TODO
     ImageFormatType _imageformat_type;
+    bool _enabled;
 };
 
 #endif // IMAGEFORMAT_H

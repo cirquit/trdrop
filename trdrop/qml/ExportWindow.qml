@@ -131,7 +131,9 @@ Window {
                     model: imageFormatModel
                     //enabled: model.imagesequencePrefixEnabled
                     onActivated: {
-                        let format = imageFormatModel.getValueAt(currentIndex);
+                        //let format = imageFormatModel.getValueAt(currentIndex);
+                        imageFormatModel.setActiveValueAt(currentIndex);
+
                         //imagecomposer.resizeComposition(size);
                     }
                 }
@@ -178,6 +180,7 @@ Window {
                     id: exportAsVideoNameEnding
                     Layout.fillWidth: true
                     textRole: "videoFormatName"
+                    enabled: false
                     model: videoFormatModel
                     onActivated: {
                         let format = videoFormatModel.getValueAt(currentIndex);
