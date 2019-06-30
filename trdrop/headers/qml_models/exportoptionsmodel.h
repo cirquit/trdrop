@@ -136,7 +136,10 @@ public:
     {
         return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
     }
-
+    //! TODO
+    QString getImagesequencePrefix(){ return _imagesequence_prefix.value(); }
+    //! TODO
+    QString getExportDirectory(){ return _export_directory.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

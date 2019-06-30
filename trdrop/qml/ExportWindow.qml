@@ -241,6 +241,7 @@ Window {
                             exporter.stopExporting();
                         } else {
                             exporter.startExporting()
+
                         }
                     }
                 }
@@ -251,7 +252,6 @@ Window {
                         exportButton.enabled = filePaths.length > 0;
                     }
                 }
-
                 Connections {
                     target: videocapturelist
                     onFramesReady: {

@@ -5,7 +5,13 @@
 #include <QPainter>
 #include <QColor>
 
+
+// TODO only for shared pointer
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+
 #include "headers/cpp_interface/fpsoptions.h"
+#include "headers/qml_models/exportoptionsmodel.h"
 
 class RendererQML : public QObject
 {
@@ -96,7 +102,7 @@ private:
 private:
     //! cached image to draw onto
     QImage _qml_image;
-    //! TODO
+    //! this is copied and transferred via signals as it has to trigger a redraw
     QList<FPSOptions> _fps_option_list;
 };
 

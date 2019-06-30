@@ -61,6 +61,7 @@ public:
         QModelIndex q = createIndex(row, 0);
         return data(q, ImageFormatValueRole);
     }
+
     //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

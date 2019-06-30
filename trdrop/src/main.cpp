@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<ExportOptionsModel>();
     ExportOptionsModel export_options_model;
     engine.rootContext()->setContextProperty("exportOptionsModel", &export_options_model);
-
+    std::shared_ptr<ExportOptionsModel> shared_export_options_model(&export_options_model);
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
     RendererQML renderer_qml;
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
-    ExporterQML exporter_qml;
+    ExporterQML exporter_qml(shared_export_options_model);
     engine.rootContext()->setContextProperty("exporter", &exporter_qml);
 
     // sigals in c++ (main processing pipeline)
