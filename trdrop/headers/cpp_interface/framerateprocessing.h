@@ -6,6 +6,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <memory>
+#include "headers/cpp_interface/fpsoptions.h"
 
 //! TODO
 class FramerateProcessing
@@ -26,7 +28,8 @@ public:
 //! methods
 public:
     //! TODO
-    void check_for_difference(const QList<cv::Mat> & cv_frame_list)
+    void check_for_difference(const QList<cv::Mat> & cv_frame_list
+                            , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list)
     {
         if (!_received_first_frames)
         {
@@ -35,20 +38,32 @@ public:
             _cache_framelist(cv_frame_list);
         } else
         {
+            // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
+            // refactored this from the loop to allow omp
+            bool all_cached_frames_filled = true;
             for (int i = 0; i < cv_frame_list.size(); ++i)
             {
-                // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
-                if (_cached_frames[i].empty()) break;
-
-                // check if the previous frame and current frame are equal
-                bool are_equal = _are_equal_with(_cached_frames[i]
-                                                 , cv_frame_list[i]
-                                                 , 0);
-                // if the frame is equal, don't increment the whole frame count -> 0
-                quint8 diff_frame = are_equal ? 0 : 1;
-                // explicit convertion for linter
-                size_t _i = static_cast<size_t>(i);
-                _frame_diff_lists[_i][_shared_frame_diff_count] = diff_frame;
+                all_cached_frames_filled = all_cached_frames_filled && !_cached_frames[i].empty();
+            }
+            // TODO test this for performance
+            if (all_cached_frames_filled) {
+                #pragma omp parallel for
+                for (int i = 0; i < cv_frame_list.size(); ++i)
+                {
+                    // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
+                    //if (_cached_frames[i].empty()) break;
+                    // get the pixel difference from the settings
+                    int current_pixel_difference = static_cast<int>((*shared_fps_options_list)[i].pixel_difference.value());
+                    // check if the previous frame and current frame are equal
+                    bool are_equal = _are_equal_with(_cached_frames[i]
+                                                     , cv_frame_list[i]
+                                                     , current_pixel_difference);
+                    // if the frame is equal, don't increment the whole frame count -> 0
+                    quint8 diff_frame = are_equal ? 0 : 1;
+                    // explicit convertion for linter
+                    size_t _i = static_cast<size_t>(i);
+                    _frame_diff_lists[_i][_shared_frame_diff_count] = diff_frame;
+                }
             }
             // frame count is incremented in between frames (difference only)
             _shared_frame_diff_count += 1;

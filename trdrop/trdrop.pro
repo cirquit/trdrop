@@ -31,6 +31,11 @@ unix: LIBS += -L/usr/local/lib \
         -lopencv_videoio \
         -lopencv_video
 
+# openmp support to allow parallelism
+LIBS += -fopenmp
+QMAKE_CXXFLAGS += -fopenmp
+
+
 SOURCES += \
         src/main.cpp
 

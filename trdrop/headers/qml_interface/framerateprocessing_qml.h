@@ -7,6 +7,7 @@
 #include "opencv2/opencv.hpp"
 #include "headers/cpp_interface/framerateprocessing.h"
 #include "headers/cpp_interface/frameratemodel.h"
+#include "headers/cpp_interface/fpsoptions.h"
 
 //! converts the images from cv::Mat to QImage
 class FramerateProcessingQML : public QObject {
@@ -16,9 +17,11 @@ class FramerateProcessingQML : public QObject {
 //! constructors
 public:
     //! default constructor
-    FramerateProcessingQML(std::shared_ptr<FramerateModel> shared_framerate_model,
-                           QObject * parent = nullptr)
+    FramerateProcessingQML(std::shared_ptr<FramerateModel> shared_framerate_model
+                         , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+                         , QObject * parent = nullptr)
         : QObject(parent)
+        , _shared_fps_options_list(shared_fps_options_list)
         , _shared_framerate_model(shared_framerate_model)
     { }
 
@@ -30,7 +33,7 @@ public:
     Q_SLOT void processFrames(const QList<cv::Mat> & cv_image_list)
     {
         //
-        _framerate_processing.check_for_difference(cv_image_list);
+        _framerate_processing.check_for_difference(cv_image_list, _shared_fps_options_list);
         //
         //
         const QList<double> framerate_list = _framerate_processing.get_framerates();
@@ -44,6 +47,8 @@ public:
     }
 
 private:
+
+    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! TODO

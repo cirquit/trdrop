@@ -16,9 +16,11 @@ class FPSOptionsModel : public QAbstractListModel
 public:
     //! TODO
     FPSOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
+                  , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
                   , QObject * parent = nullptr)
         : QAbstractListModel(parent)
         , _shared_framerate_model(shared_framerate_model)
+        , _shared_fps_options_list(shared_fps_options_list)
         , _max_video_count(3)
     {
         _init_options();
@@ -49,7 +51,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
-        return _fps_options_list.size();
+        return _shared_fps_options_list->size();
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
@@ -60,31 +62,31 @@ public:
         switch (role)
         {
             case ColorPickNameRole:
-                return _fps_options_list[row].fps_plot_color.name();
+                return (*_shared_fps_options_list)[row].fps_plot_color.name();
             case ColorPickTooltipRole:
-                return _fps_options_list[row].fps_plot_color.tooltip();
+                return (*_shared_fps_options_list)[row].fps_plot_color.tooltip();
             case ColorPickValueRole:
-                return _fps_options_list[row].fps_plot_color.color();
+                return (*_shared_fps_options_list)[row].fps_plot_color.color();
             case PixelDifferenceNameRole:
-                return _fps_options_list[row].pixel_difference.name();
+                return (*_shared_fps_options_list)[row].pixel_difference.name();
             case PixelDifferenceTooltipRole:
-                return _fps_options_list[row].pixel_difference.tooltip();
+                return (*_shared_fps_options_list)[row].pixel_difference.tooltip();
             case PixelDifferenceValueRole:
-                return _fps_options_list[row].pixel_difference.value();
+                return (*_shared_fps_options_list)[row].pixel_difference.value();
             case PixelDifferenceEnabledRole:
-                return _fps_options_list[row].pixel_difference.enabled();
+                return (*_shared_fps_options_list)[row].pixel_difference.enabled();
             case DisplayedTextNameRole:
-                 return _fps_options_list[row].displayed_text.name();
+                 return (*_shared_fps_options_list)[row].displayed_text.name();
             case DisplayedTextTooltipRole:
-                 return _fps_options_list[row].displayed_text.tooltip();
+                 return (*_shared_fps_options_list)[row].displayed_text.tooltip();
             case DisplayedTextValueRole:
-                 return _fps_options_list[row].displayed_text.value();
+                 return (*_shared_fps_options_list)[row].displayed_text.value();
             case DisplayedTextFontRole:
-                 return _fps_options_list[row].displayed_text.font();
+                 return (*_shared_fps_options_list)[row].displayed_text.font();
             case DisplayedTextEnabledRole:
-                 return _fps_options_list[row].displayed_text.enabled();
+                 return (*_shared_fps_options_list)[row].displayed_text.enabled();
             case FPSOptionsEnabled:
-                 return _fps_options_list[row].enabled;
+                 return (*_shared_fps_options_list)[row].enabled;
             default:
                 return QVariant();
         }
@@ -93,23 +95,22 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         int row = index.row();
-        if      (role == ColorPickNameRole)          _fps_options_list[row].fps_plot_color.setName(value.toString());
-        else if (role == ColorPickTooltipRole)       _fps_options_list[row].fps_plot_color.setTooltip(value.toString());
-        else if (role == ColorPickValueRole)         _fps_options_list[row].fps_plot_color.setColor(value.toString());
-        else if (role == PixelDifferenceNameRole)    _fps_options_list[row].pixel_difference.setName(value.toString());
-        else if (role == PixelDifferenceTooltipRole) _fps_options_list[row].pixel_difference.setTooltip(value.toString());
-        else if (role == PixelDifferenceValueRole)   _fps_options_list[row].pixel_difference.setValue(value.toUInt());
-        else if (role == PixelDifferenceEnabledRole) _fps_options_list[row].pixel_difference.setEnabled(value.toBool());
-        else if (role == DisplayedTextNameRole)      _fps_options_list[row].displayed_text.setName(value.toString());
-        else if (role == DisplayedTextTooltipRole)   _fps_options_list[row].displayed_text.setTooltip(value.toString());
-        else if (role == DisplayedTextValueRole)     _fps_options_list[row].displayed_text.setValue(value.toString());
-        else if (role == DisplayedTextFontRole)      _fps_options_list[row].displayed_text.setFont(value.value<QFont>());
-        else if (role == DisplayedTextEnabledRole)   _fps_options_list[row].displayed_text.setEnabled(value.toBool());
-        else if (role == FPSOptionsEnabled)          _fps_options_list[row].enabled = value.toBool();
+        if      (role == ColorPickNameRole)          (*_shared_fps_options_list)[row].fps_plot_color.setName(value.toString());
+        else if (role == ColorPickTooltipRole)       (*_shared_fps_options_list)[row].fps_plot_color.setTooltip(value.toString());
+        else if (role == ColorPickValueRole)         (*_shared_fps_options_list)[row].fps_plot_color.setColor(value.toString());
+        else if (role == PixelDifferenceNameRole)    (*_shared_fps_options_list)[row].pixel_difference.setName(value.toString());
+        else if (role == PixelDifferenceTooltipRole) (*_shared_fps_options_list)[row].pixel_difference.setTooltip(value.toString());
+        else if (role == PixelDifferenceValueRole)   (*_shared_fps_options_list)[row].pixel_difference.setValue(value.toUInt());
+        else if (role == PixelDifferenceEnabledRole) (*_shared_fps_options_list)[row].pixel_difference.setEnabled(value.toBool());
+        else if (role == DisplayedTextNameRole)      (*_shared_fps_options_list)[row].displayed_text.setName(value.toString());
+        else if (role == DisplayedTextTooltipRole)   (*_shared_fps_options_list)[row].displayed_text.setTooltip(value.toString());
+        else if (role == DisplayedTextValueRole)     (*_shared_fps_options_list)[row].displayed_text.setValue(value.toString());
+        else if (role == DisplayedTextFontRole)      (*_shared_fps_options_list)[row].displayed_text.setFont(value.value<QFont>());
+        else if (role == DisplayedTextEnabledRole)   (*_shared_fps_options_list)[row].displayed_text.setEnabled(value.toBool());
+        else if (role == FPSOptionsEnabled)          (*_shared_fps_options_list)[row].enabled = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
-        emit propagateFPSOptions(_fps_options_list);
         return true;
     }
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
@@ -138,7 +139,7 @@ public:
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
-            _fps_options_list[id].revert_to_default();
+            (*_shared_fps_options_list)[id].revert_to_default();
         }
         resetModel();
     }
@@ -146,7 +147,7 @@ public:
     Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
     {
         int video_count = filePaths.size();
-        for(int i = 0; i < _fps_options_list.size(); ++i)
+        for(int i = 0; i < _shared_fps_options_list->size(); ++i)
         {
             const bool loaded_file = i < video_count;
             QModelIndex q = createIndex(i, 0);
@@ -179,7 +180,7 @@ private:
     void _init_options()
     {
         for (quint8 id = 0; id < _max_video_count; ++id) {
-            _fps_options_list.append(FPSOptions(id, _shared_framerate_model));
+            _shared_fps_options_list->append(FPSOptions(id, _shared_framerate_model));
         }
     }
 
@@ -188,11 +189,11 @@ private:
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! TODO
+    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    //! TODO
     quint8 _max_video_count;
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
-    QList<FPSOptions> _fps_options_list;
 };
 
 #endif // FPSOPTIONSMODEL_H

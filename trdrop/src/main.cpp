@@ -39,7 +39,9 @@ int main(int argc, char *argv[])
     // c++ models
     FramerateModel framerate_model;
     std::shared_ptr<FramerateModel> shared_framerate_model(&framerate_model);
-
+    //
+    QList<FPSOptions> fps_option_list;
+    std::shared_ptr<QList<FPSOptions>> shared_fps_options_list(&fps_option_list);
 
     // qml models
     // prepare the FileItemModel
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
 
     // prepare the FPS Options Model
     qmlRegisterType<FPSOptionsModel>();
-    FPSOptionsModel fps_options_model(shared_framerate_model);
+    FPSOptionsModel fps_options_model(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
 
     // prepare the OptionsModel
@@ -94,13 +96,13 @@ int main(int argc, char *argv[])
 
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
-    FramerateProcessingQML framerate_processing_qml(shared_framerate_model);
+    FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     ImageConverterQML imageconverter_qml;
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml;
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    RendererQML renderer_qml;
+    RendererQML renderer_qml(shared_fps_options_list);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);
@@ -126,7 +128,7 @@ int main(int argc, char *argv[])
 
     // meta data pipeline
     // link the fps options with the renderer
-    QObject::connect(&fps_options_model, &FPSOptionsModel::propagateFPSOptions, &renderer_qml, &RendererQML::setFPSOptions);
+    QObject::connect(&fps_options_model, &FPSOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
     // TODO tear options
     // TODO frametime options
     // TODO tear values

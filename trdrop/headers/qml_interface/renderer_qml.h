@@ -20,8 +20,10 @@ class RendererQML : public QObject
 //! constructors
 public:
     //! quick painted item, essentially a label with a drawable interface
-    RendererQML(QQuickItem *parent = nullptr)
+    RendererQML(std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+              , QQuickItem *parent = nullptr)
         : QObject(parent)
+        , _shared_fps_options_list(shared_fps_options_list)
     { }
 
 //! methods
@@ -47,9 +49,8 @@ public:
         emit imageReady(qml_image);
     }
     //! TODO
-    Q_SLOT void setFPSOptions(const QList<FPSOptions> fpsOptionsList)
+    Q_SLOT void redraw()
     {
-        _fps_option_list = fpsOptionsList;
         processImage(_qml_image);
     }
 
@@ -61,16 +62,16 @@ private:
         int image_width  = _qml_image.size().width();
         int image_height = _qml_image.size().height();
 
-        for(int i = 0; i < _fps_option_list.size(); ++i)
+        for(int i = 0; i < _shared_fps_options_list->size(); ++i)
         {
-            if (_fps_option_list[i].enabled)
+            if ((*_shared_fps_options_list)[i].enabled)
             {
                 int x_padding = static_cast<int>(image_width / 28);
                 int x_step = static_cast<int>(image_width / video_count);
                 int y_step = static_cast<int>(image_height / 15);
                 int x = x_padding + x_step * i; // width
                 int y = y_step; // height
-                _fps_option_list[i].paint_fps_text(&painter, x, y);
+                (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y);
             }
         }
     }
@@ -88,9 +89,9 @@ private:
     int _get_video_count()
     {
         int video_count = 0;
-        for(int i = 0; i < _fps_option_list.size(); ++i)
+        for(int i = 0; i < _shared_fps_options_list->size(); ++i)
         {
-            if (_fps_option_list[i].enabled) ++video_count;
+            if ((*_shared_fps_options_list)[i].enabled) ++video_count;
         }
         return video_count;
     }
@@ -99,8 +100,8 @@ private:
 private:
     //! cached image to draw onto
     QImage _qml_image;
-    //! this is copied and transferred via signals as it has to trigger a redraw
-    QList<FPSOptions> _fps_option_list;
+    //! TODO
+    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
 };
 
 #endif // IMAGEVIEWER_QML_H
