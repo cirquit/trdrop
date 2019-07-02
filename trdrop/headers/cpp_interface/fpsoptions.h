@@ -2,19 +2,23 @@
 #define FPSOptions_H
 
 #include <QPainter>
+#include <memory>
 
 #include "headers/cpp_interface/checkboxitem.h"
 #include "headers/cpp_interface/colorpickitem.h"
 #include "headers/cpp_interface/valueitem.h"
 #include "headers/cpp_interface/textedititem.h"
+#include "headers/cpp_interface/frameratemodel.h"
 
 class FPSOptions
 {
 // constructors
 public:
     //! TODO
-    FPSOptions(quint8 & video_id)
+    FPSOptions(const quint8 video_id
+             , std::shared_ptr<FramerateModel> shared_framerate_model)
         : video_id(video_id)
+        , _shared_framerate_model(shared_framerate_model)
     {
         _init_member();
     }
@@ -31,7 +35,7 @@ public:
     {
         painter->setPen(fps_plot_color.color());
         painter->setFont(displayed_text.font());
-        painter->drawText(x, y, displayed_text.value());
+        painter->drawText(x, y, _get_full_text());
     }
 
 // methods
@@ -58,6 +62,12 @@ private:
 
         enabled = false;
     }
+    //! TODO
+    QString _get_full_text() const
+    {
+        double framerate = _shared_framerate_model->get_framerate_at(video_id);
+        return displayed_text.value() + " " + QString::number(framerate);
+    }
 
 // member
 public:
@@ -71,6 +81,9 @@ public:
     TextEditItem displayed_text;
     //! TODO
     bool enabled;
+    //! TODO
+    std::shared_ptr<FramerateModel> _shared_framerate_model;
+
 };
 
 #endif // FPSOptions_H

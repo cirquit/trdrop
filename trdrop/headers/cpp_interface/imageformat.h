@@ -39,7 +39,7 @@ public:
         }
     }
     //! TODO
-    bool enabled(){ return _enabled; } const
+    bool enabled() const { return _enabled; }
     //! TODO
     void setEnabled(bool other){ _enabled = other; }
 

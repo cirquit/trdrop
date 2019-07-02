@@ -51,7 +51,7 @@ public:
     //! tries to open all videos
     Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
-        qDebug() << "Opening" << path_list.size() << "videos";
+        qDebug() << "Trying to open" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
     //! returns the progress of the video 0: start, 1: end of video
@@ -70,6 +70,7 @@ public:
 
 //! member
 private:
+    //! TODO
     VideoCaptureList _videocapture_list;
 };
 

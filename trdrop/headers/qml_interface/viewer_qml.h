@@ -41,9 +41,10 @@ public:
     //! triggers a repainting of the pixmap when the image is copied
     Q_SLOT void setImage(const QImage & qml_image)
     {
-        resize(qml_image.size());
+        //resize(qml_image.size());
         //qDebug() << "ViewerQML::setImage - " << qml_image;
         _qml_image = qml_image.copy();
+        _qml_image = _qml_image.scaledToWidth(size().width());
         update();
     }
     //! draws the image on the drawable space of the element

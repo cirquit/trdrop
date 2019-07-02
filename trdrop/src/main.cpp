@@ -20,9 +20,12 @@
 #include "headers/qml_interface/videocapturelist_qml.h"
 #include "headers/qml_interface/imageconverter_qml.h"
 #include "headers/qml_interface/imagecomposer_qml.h"
+#include "headers/qml_interface/framerateprocessing_qml.h"
 #include "headers/qml_interface/renderer_qml.h"
 #include "headers/qml_interface/viewer_qml.h"
 #include "headers/qml_interface/exporter_qml.h"
+
+#include "headers/cpp_interface/frameratemodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +36,12 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle("Material");
     QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
 
+    // c++ models
+    FramerateModel framerate_model;
+    std::shared_ptr<FramerateModel> shared_framerate_model(&framerate_model);
+
+
+    // qml models
     // prepare the FileItemModel
     qmlRegisterType<FileItemModel>();
     constexpr quint8 default_file_items_count = 3;
@@ -46,7 +55,7 @@ int main(int argc, char *argv[])
 
     // prepare the FPS Options Model
     qmlRegisterType<FPSOptionsModel>();
-    FPSOptionsModel fps_options_model;
+    FPSOptionsModel fps_options_model(shared_framerate_model);
     engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
 
     // prepare the OptionsModel
@@ -85,6 +94,8 @@ int main(int argc, char *argv[])
 
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
+    FramerateProcessingQML framerate_processing_qml(shared_framerate_model);
+    engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     ImageConverterQML imageconverter_qml;
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml;
@@ -97,9 +108,9 @@ int main(int argc, char *argv[])
 
     // sigals in c++ (main processing pipeline)
     // pass the QList<cv::Mat> to the converter
-    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
+    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &framerate_processing_qml, &FramerateProcessingQML::processFrames);
     // tearprocessing
-    // framerate processing
+    QObject::connect(&framerate_processing_qml, &FramerateProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
     // frametime processing
     // pass the QList<QImage> to the composer to mux them together
     QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages);

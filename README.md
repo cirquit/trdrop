@@ -2,6 +2,18 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 02.07.2019
+
+First framerate analysis is working for multiple videos! I'm currently exporting images only and probably not implement the video encoding because it has some licensing problems which I simply ignored (h264). Importing in your favourite post-processing software is also probably easier with a imagesequence.
+
+![](images/2019-07-02-setup-first-fps-analysis.gif)
+
+If you install `ffmpeg` you can simply use this command to create [the following video](videos/2019-07-02-first-fps-analysis.mp4).
+
+```bash
+> ffmpeg -framerate 30 -i exportsequence_%10d.jpg  -c:v libx264 -pix_fmt yuv420p analysis.mp4
+```
+
 #### Update 25.06.2019
 
 Found a QImage to OpenCV convertion, but determined that its not necessarily needed yet, as I can also save QImages directly to the hard drive. Finalized the gui of the export settings, now I have to make it functional.

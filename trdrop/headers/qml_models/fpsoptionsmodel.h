@@ -3,7 +3,10 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
+#include <memory>
+
 #include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/frameratemodel.h"
 
 //!
 class FPSOptionsModel : public QAbstractListModel
@@ -11,9 +14,12 @@ class FPSOptionsModel : public QAbstractListModel
     Q_OBJECT
 //! constructors
 public:
-    //!
-    FPSOptionsModel(QObject * parent = nullptr)
+    //! TODO
+    FPSOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
+                  , QObject * parent = nullptr)
         : QAbstractListModel(parent)
+        , _shared_framerate_model(shared_framerate_model)
+        , _max_video_count(3)
     {
         _init_options();
         _setup_role_names();
@@ -172,13 +178,17 @@ private:
     //! TODO
     void _init_options()
     {
-        for (quint8 id = 0; id < 3; ++id) {
-            _fps_options_list.append(FPSOptions(id));
+        for (quint8 id = 0; id < _max_video_count; ++id) {
+            _fps_options_list.append(FPSOptions(id, _shared_framerate_model));
         }
     }
 
 //! member
 private:
+    //! TODO
+    std::shared_ptr<FramerateModel> _shared_framerate_model;
+    //! TODO
+    quint8 _max_video_count;
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
     //! TODO

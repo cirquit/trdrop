@@ -27,30 +27,4 @@ Item {
         id: viewer
         anchors.centerIn: parent
     }
-
-//    Connections {
-//        target: imageviewer
-//        onDoneRendering: {
-//            videocapturelist.readNextFrames()
-//        }
-//    }
-
-//    Connections {
-//        target: fpsOptionsModel
-//        onPropagateFPSOptions: {
-//            imageviewer.setFPSOptions(fpsOptionsList);
-//        }
-//    }
-
-//    Connections {
-//        target: exportController
-//        onStartExporting: {
-//            imageviewer.setEmitRenderingSignal(true);
-//        }
-//        onStopExporting: {
-//            imageviewer.setEmitRenderingSignal(false);
-//        }
-//    }
-
-
 }
