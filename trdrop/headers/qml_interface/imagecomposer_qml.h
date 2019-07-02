@@ -83,7 +83,8 @@ public:
     {
         _size = size;
         _qml_image = _qml_image.scaledToWidth(_size.width());
-        emit resizeTriggered(_size);
+        emit imageReady(_qml_image);
+        //emit resizeTriggered(_size);
     }
 //! methods
 private:
