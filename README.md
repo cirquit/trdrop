@@ -2,6 +2,13 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 04.07.2019
+
+Resetting state (fps, loaded frames currently) if the opened files are modified. Now using the shortest video to stop the export and using it to show the progress. Now I will try run this on Windows, I only need to manage to install opencv with qt correctly. Hopefully this will be finished until the end of the week.
+
+![](images/2019-07-04-resetting-state.gif)
+
+
 #### Update 02.07.2019
 
 First framerate analysis is working for multiple videos! I'm currently exporting images only and probably not implement the video encoding because it has some licensing problems which I simply ignored (h264). Importing in your favourite post-processing software is also probably easier with a imagesequence.

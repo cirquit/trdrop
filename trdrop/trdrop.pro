@@ -68,6 +68,7 @@ HEADERS += \
     headers/cpp_interface/videocapturelist.h \
     headers/cpp_interface/imageformat.h \
     headers/cpp_interface/videoformat.h \
+    headers/cpp_interface/frameratemodel.h \
     headers/qml_interface/framerateprocessing_qml.h \
     headers/qml_interface/frametimeprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
@@ -84,8 +85,7 @@ HEADERS += \
     headers/qml_models/tearoptionsmodel.h \
     headers/qml_models/imageformatmodel.h \
     headers/qml_models/videoformatmodel.h \
-    headers/qml_models/exportoptionsmodel.h \
-    headers/cpp_interface/frameratemodel.h
+    headers/qml_models/exportoptionsmodel.h
 
 
 
