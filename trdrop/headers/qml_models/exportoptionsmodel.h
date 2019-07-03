@@ -41,6 +41,9 @@ public:
       , ExportCSVTooltipRole           = Qt::UserRole + 114
       , ExportCSVValueRole             = Qt::UserRole + 115
       , EnabledExportButtonRole        = Qt::UserRole + 116
+      , EnableLivePreviewNameRole      = Qt::UserRole + 117
+      , EnableLivePreviewTooltipRole   = Qt::UserRole + 118
+      , EnableLivePreviewValueRole     = Qt::UserRole + 119
     };
 //! methods
 public:
@@ -90,6 +93,12 @@ public:
                 return _export_csv.tooltip();
             case ExportCSVValueRole:
                 return _export_csv.value();
+            case EnableLivePreviewNameRole:
+                return _enable_live_preview.name();
+            case EnableLivePreviewTooltipRole:
+                return _enable_live_preview.tooltip();
+            case EnableLivePreviewValueRole:
+                return _enable_live_preview.value();
             case EnabledExportButtonRole:
                 return _enabled_export_button;
             default:
@@ -117,6 +126,7 @@ public:
         else if (role == ImagesequencePrefixEnabledRole) _imagesequence_prefix.setEnabled(value.toBool());
         else if (role == VideoPrefixValueRole)           _videoname_prefix.setValue(value.toString());
         else if (role == VideoPrefixEnabledRole)         _videoname_prefix.setEnabled(value.toBool());
+        else if (role == EnableLivePreviewValueRole)     _enable_live_preview.setValue(value.toBool());
         else if (role == EnabledExportButtonRole)        _enabled_export_button = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
@@ -147,6 +157,8 @@ public:
         setData(q, other, EnabledExportButtonRole);
     }
     //! TODO
+    Q_INVOKABLE QVariant enabledLivePreview(){ return _enable_live_preview.value(); }
+    //! TODO
     QString get_imagesequence_prefix(){ return _imagesequence_prefix.value(); }
     //! TODO
     QString get_export_directory(){ return _export_directory.value(); }
@@ -174,6 +186,10 @@ private:
         _role_names[ExportCSVTooltipRole]           = "exportCSVTooltip";
         _role_names[ExportCSVValueRole]             = "exportCSVValue";
         _role_names[EnabledExportButtonRole]        = "exportButtonEnabled";
+        _role_names[EnableLivePreviewNameRole]      = "enableLivePreviewName";
+        _role_names[EnableLivePreviewTooltipRole]   = "enableLivePreviewTooltip";
+        _role_names[EnableLivePreviewValueRole]     = "enableLivePreviewValue";
+
     }
     //!TODO
     void _init_options()
@@ -187,6 +203,10 @@ private:
         _export_as_overlay.setName("Export as overlay");
         _export_as_overlay.setTooltip("Export the graph only");
         _export_as_overlay.setValue(false);
+
+        _enable_live_preview.setName("Enable live preview");
+        _enable_live_preview.setTooltip("Show the rendered frames");
+        _enable_live_preview.setValue(true);
 
         _export_csv.setName("Export csv");
         _export_csv.setTooltip("Export framerate as csv file");
@@ -216,6 +236,8 @@ private:
     TextEditItem _export_directory;
     //! TODO
     CheckBoxItem _export_as_overlay;
+    //! TODO
+    CheckBoxItem _enable_live_preview;
     //! TODO
     CheckBoxItem _export_csv;
     //! TODO

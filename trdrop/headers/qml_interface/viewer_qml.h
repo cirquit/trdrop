@@ -38,19 +38,27 @@ public:
         _qml_image = QImage(default_size, QImage::Format_RGB888);
         _qml_image.fill(QColor(255, 255, 255));
     }
-    //! triggers a repainting of the pixmap when the image is copied
-    Q_SLOT void setImage(const QImage & qml_image)
+    //! triggers a repainting of the pixmap when the image is copied and drawn
+    Q_SLOT void setImage(const QImage & qml_image, QVariant draw_image)
     {
         //resize(qml_image.size());
         //qDebug() << "ViewerQML::setImage - " << qml_image;
-        _qml_image = qml_image.copy();
-        _qml_image = _qml_image.scaledToWidth(size().width());
+        _draw_image = draw_image.toBool();
+        if (draw_image.toBool())
+        {
+            _qml_image = qml_image.copy();
+            _qml_image = _qml_image.scaledToWidth(size().width());
+        }
         update();
     }
-    //! draws the image on the drawable space of the element
+    //! draws the image on the drawable space of the element and request new frames
+    //! this is inside this method because I'm not sure if the drawing is async
     void paint(QPainter * painter)
     {
-        painter->drawImage(0, 0, _qml_image);
+        if (_draw_image)
+        {
+            painter->drawImage(0, 0, _qml_image);
+        }
         emit requestNextImages();
     }
 
@@ -58,6 +66,8 @@ public:
 private:
     //! image to be rendered
     QImage _qml_image;
+    //! TODO
+    bool _draw_image;
 };
 
 

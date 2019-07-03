@@ -86,6 +86,11 @@ public:
         }
         _prepare_frame_lists();
     }
+    //! TODO
+    size_t get_open_videos_count() const
+    {
+        return _videocapture_list.size();
+    }
 
 // methods
 private:

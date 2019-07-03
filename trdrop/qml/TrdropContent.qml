@@ -9,9 +9,12 @@ Item {
     anchors.centerIn: parent
     anchors.fill: parent
 
+    // slightly convoluted, this should be reworked
+    // the viewer can't take the exportOptionsModel as shared_ptr as its called from QML
+    // and not from c++
     Connections {
         target: exporter
-        onImageReady: { viewer.setImage(image) }
+        onImageReady: { viewer.setImage(image, exportOptionsModel.enabledLivePreview()) }
     }
 
     Connections {

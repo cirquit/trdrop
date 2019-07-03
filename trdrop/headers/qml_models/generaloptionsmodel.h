@@ -22,27 +22,24 @@ public:
     //! manage the access to FileItem member from QML
     enum GeneralOptionsRoles
     {
-        EnableViewNameRole              = Qt::UserRole
-      , EnableViewTooltipRole           = Qt::UserRole + 1
-      , EnableViewValueRole             = Qt::UserRole + 2
-      , EnableFramerateNameRole         = Qt::UserRole + 3
-      , EnableFramerateTooltipRole      = Qt::UserRole + 4
-      , EnableFramerateValueRole        = Qt::UserRole + 5
-      , EnableTearsNameRole             = Qt::UserRole + 6
-      , EnableTearsTooltipRole          = Qt::UserRole + 7
-      , EnableTearsValueRole            = Qt::UserRole + 8
-      , EnableFrametimeNameRole         = Qt::UserRole + 9
-      , EnableFrametimeTooltipRole      = Qt::UserRole + 10
-      , EnableFrametimeValueRole        = Qt::UserRole + 11
-      , EnableDeltaRenderingNameRole    = Qt::UserRole + 12
-      , EnableDeltaRenderingTooltipRole = Qt::UserRole + 13
-      , EnableDeltaRenderingValueRole   = Qt::UserRole + 14
-      , FramerateRangeNameRole          = Qt::UserRole + 15
-      , FramerateRangeTooltipRole       = Qt::UserRole + 16
-      , FramerateRangeValueRole         = Qt::UserRole + 17
-      , FrametimeRangeNameRole          = Qt::UserRole + 18
-      , FrametimeRangeTooltipRole       = Qt::UserRole + 19
-      , FrametimeRangeValueRole         = Qt::UserRole + 20
+        EnableFramerateNameRole         = Qt::UserRole
+      , EnableFramerateTooltipRole      = Qt::UserRole + 1
+      , EnableFramerateValueRole        = Qt::UserRole + 2
+      , EnableTearsNameRole             = Qt::UserRole + 3
+      , EnableTearsTooltipRole          = Qt::UserRole + 4
+      , EnableTearsValueRole            = Qt::UserRole + 5
+      , EnableFrametimeNameRole         = Qt::UserRole + 6
+      , EnableFrametimeTooltipRole      = Qt::UserRole + 7
+      , EnableFrametimeValueRole        = Qt::UserRole + 8
+      , EnableDeltaRenderingNameRole    = Qt::UserRole + 9
+      , EnableDeltaRenderingTooltipRole = Qt::UserRole + 10
+      , EnableDeltaRenderingValueRole   = Qt::UserRole + 11
+      , FramerateRangeNameRole          = Qt::UserRole + 12
+      , FramerateRangeTooltipRole       = Qt::UserRole + 13
+      , FramerateRangeValueRole         = Qt::UserRole + 14
+      , FrametimeRangeNameRole          = Qt::UserRole + 15
+      , FrametimeRangeTooltipRole       = Qt::UserRole + 16
+      , FrametimeRangeValueRole         = Qt::UserRole + 17
     };
 //! methods
 public:
@@ -60,12 +57,6 @@ public:
         Q_UNUSED(index)
         switch (role)
         {
-            case EnableViewNameRole:
-                return _enable_view.name();
-            case EnableViewTooltipRole:
-                return _enable_view.tooltip();
-            case EnableViewValueRole:
-                return _enable_view.value();
             case EnableFramerateNameRole:
                 return _enable_fps_analysis.name();
             case EnableFramerateTooltipRole:
@@ -110,8 +101,7 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         Q_UNUSED(index)
-        if (role == EnableViewValueRole) _enable_view.setValue(value.toBool());
-        else if (role == EnableFramerateValueRole) _enable_fps_analysis.setValue(value.toBool());
+        if (role == EnableFramerateValueRole) _enable_fps_analysis.setValue(value.toBool());
         else if (role == EnableTearsValueRole) _enable_tear_analysis.setValue(value.toBool());
         else if (role == EnableFrametimeValueRole) _enable_frametime_analysis.setValue(value.toBool());
         else if (role == EnableDeltaRenderingValueRole) _enable_delta_rendering.setValue(value.toBool());
@@ -145,9 +135,6 @@ private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[EnableViewNameRole]              = "enableViewName";
-        _role_names[EnableViewTooltipRole]           = "enableViewTooltip";
-        _role_names[EnableViewValueRole]             = "enableViewValue";
         _role_names[EnableFramerateNameRole]         = "enableFramerateName";
         _role_names[EnableFramerateTooltipRole]      = "enableFramerateTooltip";
         _role_names[EnableFramerateValueRole]        = "enableFramerateValue";
@@ -170,10 +157,6 @@ private:
     //!TODO
     void _init_options()
     {
-        _enable_view.setName("Enable View");
-        _enable_view.setTooltip("Renders the exported frame in the main window (Disabling may improve export speed)");
-        _enable_view.setValue(true);
-
         _enable_fps_analysis.setName("Enable framerate analysis");
         _enable_fps_analysis.setTooltip("Renders the framerate plot and framerate text");
         _enable_fps_analysis.setValue(true);
@@ -204,8 +187,6 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! enables rendering of the images
-    CheckBoxItem _enable_view;
     //! TODO
     CheckBoxItem _enable_fps_analysis;
     //! TODO

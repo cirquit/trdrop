@@ -112,22 +112,8 @@ Window {
                 Component {
                     id: generalOptionsDelegate
                     GridLayout {
-                        rows: 5
+                        rows: 4
                         columns: 3
-                        Switch {
-                            Layout.columnSpan: 3
-                            text: model.enableViewName
-                            checked: model.enableViewValue
-                            ToolTip.delay: 500
-                            ToolTip.visible: hovered
-                            ToolTip.text: model.enableViewTooltip
-                            action: Action {
-                                onTriggered: {
-                                    model.enableViewValue = !model.enableViewValue;
-                                    checked: model.enableViewValue
-                                }
-                            }
-                        }
                         Switch {
                             text: model.enableFramerateName
                             checked: model.enableFramerateValue

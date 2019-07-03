@@ -192,6 +192,22 @@ Window {
 
 
                 Switch {
+                    id: enableLivePreviewSwitch
+                    text: model.enableLivePreviewName
+                    checked: model.enableLivePreviewValue
+                    action: Action {
+                        onTriggered: {
+                            model.enableLivePreviewValue = !model.enableLivePreviewValue;
+                            checked: model.enableLivePreviewValue
+                        }
+                    }
+                }
+                Label {
+                    Layout.columnSpan: 2
+                }
+
+
+                Switch {
                     id: exportAsOverlaySwitch
                     text: model.exportAsOverlayName
                     checked: model.exportAsOverlayValue
@@ -251,8 +267,9 @@ Window {
                 Connections {
                     target: videocapturelist
                     onFramesReady: {
-                        exportProgressBar.value = videocapturelist.getVideoProgress(0);
-                        exportButton.text       = Utils.round(videocapturelist.getVideoProgress(0) * 100, 1) + "%";
+                        console.log("Got here!")
+                        exportProgressBar.value = videocapturelist.getShortestVideoProgress();
+                        exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "%";
                     }
                     onFinishedProcessing: {
                         exportButton.text = "Export";

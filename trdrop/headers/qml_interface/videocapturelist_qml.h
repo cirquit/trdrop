@@ -54,18 +54,43 @@ public:
         qDebug() << "Trying to open" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
+    //! returns the shortest progress of the video 0: start, 1: end of video, because we terminate the export
+    //! if one of the videos is done
+    Q_INVOKABLE QVariant getShortestVideoProgress() const
+    {
+        int video_count = static_cast<int>(_videocapture_list.get_open_videos_count());
+        double shortest_progress = 0.0;
+        for(int i = 0; i < video_count; ++i)
+        {
+            double current_progress = _get_video_progress(i);
+            if (current_progress > shortest_progress)
+            {
+                shortest_progress = current_progress;
+            }
+        }
+        return shortest_progress;
+    }
+
     //! returns the progress of the video 0: start, 1: end of video
     Q_INVOKABLE QVariant getVideoProgress(const QVariant index) const
     {
         const int _index = index.toInt();
-        const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(_index);
-        const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(_index);
-        return static_cast<double>(current_frame_count) / static_cast<double>(max_frame_count);
+        return _get_video_progress(_index);
+
     }
     //! restarts the videocaptures with the previously opened videos
     Q_INVOKABLE void restartVideos()
     {
         _videocapture_list.restart_state();
+    }
+
+private:
+    //! TODO
+    double _get_video_progress(const int index) const
+    {
+        const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(index);
+        const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(index);
+        return static_cast<double>(current_frame_count) / static_cast<double>(max_frame_count);
     }
 
 //! member
