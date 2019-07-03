@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
     // tearprocessing
     QObject::connect(&framerate_processing_qml, &FramerateProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
     // frametime processing
+    // delta rendering
     // pass the QList<QImage> to the composer to mux them together
     QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages);
     // pass the QImage to the renderer to render the meta information onto the image
