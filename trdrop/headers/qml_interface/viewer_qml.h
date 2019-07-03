@@ -47,7 +47,7 @@ public:
         if (draw_image.toBool())
         {
             _qml_image = qml_image.copy();
-            _qml_image = _qml_image.scaledToWidth(size().width());
+            _qml_image = _qml_image.scaledToWidth(static_cast<int>(size().width()));
         }
         update();
     }

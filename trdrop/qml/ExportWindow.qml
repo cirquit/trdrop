@@ -267,7 +267,6 @@ Window {
                 Connections {
                     target: videocapturelist
                     onFramesReady: {
-                        console.log("Got here!")
                         exportProgressBar.value = videocapturelist.getShortestVideoProgress();
                         exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "%";
                     }

@@ -46,6 +46,12 @@ public:
         emit framesReady(cv_image_list);
     }
 
+    Q_INVOKABLE void resetState()
+    {
+        _shared_framerate_model->reset_model();
+        _framerate_processing.reset_state();
+    }
+
 private:
 
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
