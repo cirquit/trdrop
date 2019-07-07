@@ -31,6 +31,25 @@ unix: LIBS += -L/usr/local/lib \
         -lopencv_videoio \
         -lopencv_video
 
+windows: INCLUDEPATH += c:\opencv-4.1.0\build\install\include
+windows: LIBS += -LC:\\opencv-4.1.0\build\install\x86\mingw\lib \
+        -lopencv_calib3d410 \
+        -lopencv_core410 \
+        -lopencv_dnn410 \
+        -lopencv_features2d410 \
+        -lopencv_flann410 \
+        -lopencv_gapi410 \
+        -lopencv_highgui410 \
+        -lopencv_imgcodecs410 \
+        -lopencv_imgproc410 \
+        -lopencv_ml410 \
+        -lopencv_objdetect410 \
+        -lopencv_photo410 \
+        -lopencv_stitching410 \
+        -lopencv_videoio410 \
+        -lopencv_video410
+
+
 # openmp support to allow parallelism
 LIBS += -fopenmp
 QMAKE_CXXFLAGS += -fopenmp

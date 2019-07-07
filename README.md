@@ -4,7 +4,7 @@ trdrop - a cross platform fps analyzer for raw video data
 
 #### Update 08.07.2019
 
-Got the Windows build running! Currently restricted by the 32-bit build, hopefully this won't become a problem in the future. I also created an overview of the current progress.
+Got the Windows build running! Currently restricted by the 32-bit build, hopefully this won't become a problem in the future. I also created an overview of the current progress. Screenshots will follow when I adapted the window sizes.
 
 To build on Windows, you need to follow this very much unfinished [DEVELOPMENT.md](DEVELOPMENT.md) guide.
 
