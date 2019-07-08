@@ -2,6 +2,14 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 08.07.2019
+
+Got the Windows build running! Currently restricted by the 32-bit build, hopefully this won't become a problem in the future. I also created an overview of the current progress.
+
+To build on Windows, you need to follow this very much unfinished [DEVELOPMENT.md](DEVELOPMENT.md) guide.
+
+![](images/trdrop-pipeline.png)
+
 #### Update 04.07.2019
 
 Resetting state (fps, loaded frames currently) if the opened files are modified. Now using the shortest video to stop the export and using it to show the progress. Now I will try run this on Windows, I only need to manage to install opencv with qt correctly. Hopefully this will be finished until the end of the week.

@@ -61,22 +61,33 @@ Install from [https://opencv.org/opencv-4-1-0.html](https://opencv.org/opencv-4-
 
 Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows](https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows).
 
-Don't forget the PATH variable, otherwise you will get a problem while generating the Makefile in CMake.
+The only difference is that I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build` instead a new one at `C:\opencv-build`.
+
+How PATH looks for me:
+
+```
+1) C:\Qt\Tools\mingw730_32\bin
+2) C:\Qt\5.12.2\mingw73_32\bin
+3) C:\opencv-4.1.0\build\install\x86\mingw\bin
+```
+
+> 1) is needed for CMake to get the correct compiler (gcc / g++)
+
+> 2) is needed for the qt libraries on runtime (Qt5Gui.dll)
+
+> 3) is possibly needed for some opencv specific stuff (TODO test this)
 
 Pick the following flags configuration (deviating from the default configuration):
 
 * [ ] Build_JAVA
 * [ ] Build_opencv_java_bindings_generator
 * [ ] Build_opencv_python_bindings_generator
-* [X] Build_opencv_world
 * [Release] CMAKE_BUILD_TYPE
 * [X] WITH_OPENGL
 * [X] WITH_QT
-* Check if the gstreamer libraries got found -> should look like this
+* [ ] WITH_OPENCL_D3D11_NV
 
 
-#### Problems
+#### Current shortcomings
 
-> CMake Error at modules/videoio/cmake/detect_ffmpeg.cmake:16 (include):
-  include could not find load file:
-
+* Can run the executable from QtCreator, need to manually locate it inside the build directory
