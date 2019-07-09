@@ -5,7 +5,9 @@
 #include <QPainter>
 #include <QImage>
 #include <QDebug>
+#include <memory>
 #include "opencv2/opencv.hpp"
+#include "headers/qml_models/resolutionsmodel.h"
 
 //! composes the QList<QImage> into a single QImage
 class ImageComposerQML : public QObject {
@@ -15,20 +17,21 @@ class ImageComposerQML : public QObject {
 //! constructors
 public:
     //! default constructor, the default size is dependent on the first row of the resolutionModel
-    ImageComposerQML(QObject * parent = nullptr)
+    ImageComposerQML(std::shared_ptr<ResolutionsModel> shared_resolution_model
+                   , QObject * parent = nullptr)
         : QObject(parent)
-        , _size(QSize(960, 540)) //! TODO refactor to some global settings
+        , _shared_resolution_model(shared_resolution_model)
     { }
 
 //! methods
 public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(QImage image);
-    //! TODO
-    Q_SIGNAL void resizeTriggered(const QSize & size);
     //! side by side only right now
     Q_SLOT void processImages(const QList<QImage> & _qml_image_list)
     {
+        QSize _size = _shared_resolution_model->get_active_value().size();
+
         if (_qml_image_list.size() == 3)
         {
             const QImage scaled_image_01 = _qml_image_list[0].scaledToWidth(_size.width());
@@ -79,18 +82,18 @@ public:
         emit imageReady(_qml_image);
     }
     //! TODO
-    Q_SLOT void resizeComposition(const QSize & size)
+    Q_SLOT void updateComposition()
     {
-        _size = size;
-        _qml_image = _qml_image.scaledToWidth(_size.width());
+        QSize size = _shared_resolution_model->get_active_value().size();
+        _qml_image = _qml_image.scaledToWidth(size.width());
         emit imageReady(_qml_image);
-        //emit resizeTriggered(_size);
     }
 //! methods
 private:
     //! TODO
     QImage _get_center_from_image(const QImage & image, quint8 video_count)
     {
+        QSize _size = _shared_resolution_model->get_active_value().size();
         const int single_video_width  = static_cast<int>(_size.width()  / static_cast<double>(video_count));
         const int single_video_height = _size.height();
 
@@ -106,7 +109,7 @@ private:
     //! TODO
     QImage _qml_image;
     //! TODO
-    QSize  _size;
+    std::shared_ptr<ResolutionsModel> _shared_resolution_model;
 };
 
 

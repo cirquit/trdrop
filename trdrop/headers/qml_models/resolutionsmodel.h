@@ -71,6 +71,30 @@ public:
         QModelIndex q = createIndex(row, 0);
         return data(q, ResolutionPickSizeRole);
     }
+
+    //! TODO
+    Q_INVOKABLE void setActiveValueAt(const int & row)
+    {
+        for (int i = 0; i < _resolutions_list.size(); ++i)
+        {
+            bool enabled = i == row;
+            _resolutions_list[i].setEnabled(enabled);
+        }
+    }
+    //! TODO
+    Resolution get_active_value()
+    {
+        for (int i = 0; i < _resolutions_list.size(); ++i) {
+            if (_resolutions_list[i].enabled())
+            {
+                return _resolutions_list[i];
+            }
+        }
+        qDebug() << "ResolutionModel::getActiveValue() - no resolution selected, this should never happen. Returning first element";
+        return _resolutions_list[0];
+    }
+
+
     //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -82,17 +106,17 @@ private:
     //! TODO
     void _init_options()
     {
-        _resolutions_list.push_back(Resolution(QSize(960, 540)));
-        _resolutions_list.push_back(Resolution(QSize(1280, 720)));
-        _resolutions_list.push_back(Resolution(QSize(1280, 1080)));
-        _resolutions_list.push_back(Resolution(QSize(1600, 900)));
-        _resolutions_list.push_back(Resolution(QSize(1920, 1080)));
-        _resolutions_list.push_back(Resolution(QSize(2048, 1080)));
-        _resolutions_list.push_back(Resolution(QSize(2560, 1440)));
-        _resolutions_list.push_back(Resolution(QSize(3840, 1080)));
-        _resolutions_list.push_back(Resolution(QSize(3840, 2160)));
-        _resolutions_list.push_back(Resolution(QSize(4096, 2160)));
-        _resolutions_list.push_back(Resolution(QSize(5120, 2160)));
+        _resolutions_list.push_back(Resolution(QSize(960, 540),    true));
+        _resolutions_list.push_back(Resolution(QSize(1280, 720),  false));
+        _resolutions_list.push_back(Resolution(QSize(1280, 1080), false));
+        _resolutions_list.push_back(Resolution(QSize(1600, 900),  false));
+        _resolutions_list.push_back(Resolution(QSize(1920, 1080), false));
+        _resolutions_list.push_back(Resolution(QSize(2048, 1080), false));
+        _resolutions_list.push_back(Resolution(QSize(2560, 1440), false));
+        _resolutions_list.push_back(Resolution(QSize(3840, 1080), false));
+        _resolutions_list.push_back(Resolution(QSize(3840, 2160), false));
+        _resolutions_list.push_back(Resolution(QSize(4096, 2160), false));
+        _resolutions_list.push_back(Resolution(QSize(5120, 2160), false));
     }
 
 //! member

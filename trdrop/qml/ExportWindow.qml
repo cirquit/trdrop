@@ -234,8 +234,8 @@ Window {
                     textRole: "resolutionName"
                     model: resolutionsModel
                     onActivated: {
-                        let size = resolutionsModel.getSizeAt(currentIndex);
-                        imagecomposer.resizeComposition(size);
+                        resolutionsModel.setActiveValueAt(currentIndex);
+                        imagecomposer.updateComposition();
                     }
                 }
                 Label { }
