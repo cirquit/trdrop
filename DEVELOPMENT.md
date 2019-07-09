@@ -15,17 +15,13 @@ Short writeup of Windows / Linux (Ubuntu) cross platform development information
 
 ## Setup an initial repository for Qt
 
-Setup a `.gitignore` file
-
-```bash
-> cat .gitignore
-qt-opencv.pro.user*
-qt-opencv.pro.user
-```
-
 ## Install Qt
 
-Install the Qt Creator from ... Install the packages mingw32 (**32bit** and **64bit**) both in Tools and Qt 5.12.2 subdirectory
+* Install [QtCreator](https://www.qt.io/download#)
+    - I use the version `5.12.2`, but I hope that any `5.*.*` version works
+    - **Windows:** Check to install the correct compiler, I use `mingw_730`, the 32-bit version
+    - **Windows:** Install everything in the default installation directory -> `C:\Qt`
+    - **Linux:** Check to install the correct compiler, I use `g++ 7.4.0`
 
 ## Install CMake (Linux)
 
@@ -34,20 +30,6 @@ Execute in the command line `sudo apt-get install cmake`
 ## Install CMake (Windows)
 
 Use the `.msi` installer from [https://cmake.org/download/](https://cmake.org/download/). Pick the option to add CMake to the `PATH`.
-
-## Install GStreamer (Linux)
-
-## Install GStreamer (Windows)
-
-Install the 64 bit mingw `.msi` from [https://gstreamer.freedesktop.org/data/pkg/windows/1.15.2/](https://gstreamer.freedesktop.org/data/pkg/windows/1.15.2/), e.g `gstreamer-1.0-mingw-x86_64-1.15.2.msi` **and** the according `devel` package, e.g `gstreamer-1.0-devel-mingw-x86_64-1.15.2.msi`.
-
-Use the `Typical` install option. This installs the binary, library and headers to `C:\gstreamer`
-
-## Install FFmpeg (Linux)
-
-## Install FFmpeg (Windows)
-
-Download the installer from [here](https://ffmpeg.zeranoe.com/builds/). Pick the Version `4.1.1`, Windows 64-bit, static **and** dev, extract both in the same directory at `C:\ffmpeg`
 
 ## Install OpenCV (Linux)
 
@@ -63,7 +45,7 @@ Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_
 
 The only difference is that I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build` instead a new one at `C:\opencv-build`.
 
-How PATH looks for me:
+My PATH environment variable for comparisson:
 
 ```
 1) C:\Qt\Tools\mingw730_32\bin
@@ -87,7 +69,8 @@ Pick the following flags configuration (deviating from the default configuration
 * [X] WITH_QT
 * [ ] WITH_OPENCL_D3D11_NV
 
+You may have to set the CMake settings multiple times, e.g. after the `WITH_QT` flag you have to set additional variables.
 
 #### Current shortcomings
 
-* Can run the executable from QtCreator, need to manually locate it inside the build directory
+* Can't run the executable from QtCreator, need to manually locate it inside the build directory
