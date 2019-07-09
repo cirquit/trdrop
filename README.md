@@ -2,6 +2,15 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 09.07.2019
+
+Added a version of delta rendering via [cv::absdiff](https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga6fef31bc8c4071cbc114a758a2b79c14).
+
+In this gif you can see the tears. But this way of visualization is not the way we calculate the frame difference so this will be changed in the future, as this clip should have ~ 30FPS. But the general functionality is there so it's possible to change it anytime.
+
+![](images/2019-07-09-tear-delta-rendering.gif)
+
+
 #### Update 08.07.2019
 
 Got the Windows build running! Currently restricted by the 32-bit build, hopefully this won't become a problem in the future. I also created an overview of the current progress. Screenshots will follow when I adapted the window sizes.
@@ -33,7 +42,7 @@ If you install `ffmpeg` you can simply use this command to create [the following
 
 Found a QImage to OpenCV convertion, but determined that its not necessarily needed yet, as I can also save QImages directly to the hard drive. Finalized the gui of the export settings, now I have to make it functional.
 
-![](images/2019-25-06-export-settings.gif)
+![](images/2019-06-25-export-settings.gif)
 
 #### Update 23.06.2019
 
@@ -45,19 +54,19 @@ The only thing to test right now is the conversion between internal qt images to
 
 Finally got the Framerate Text working on resize and for multiple videos simultaneously.
 
-![](images/2019-17-06-fps-text-resize.gif)
+![](images/2019-06-17-fps-text-resize.gif)
 
 #### Update 11.06.2019
 
 Options are now enabled dependent on the amount of the videos that are selected. I also got some text overlay from the options rendered over the video, currently working on making it scale by size.
 
-![](images/2019-11-06-dependent-options.gif)
+![](images/2019-06-11-dependent-options.gif)
 
 #### Update 10.06.2019
 
 Resizing from export dialog works, even live. Default export location is movies on every platform (os-indepedent). Composing now works too, but not automatic centering if the ratio is different (16:9) -> (4:3) will produce black beams, may fix this later.
 
-![](images/2019-10-06-videos-composing-resizing.gif)
+![](images/2019-06-10-videos-composing-resizing.gif)
 
 
 #### Update 08.06.2019
