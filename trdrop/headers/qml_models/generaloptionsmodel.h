@@ -128,8 +128,8 @@ public:
     Q_INVOKABLE QVariant enabledFramerateAnalysis() { return _enable_fps_analysis.value(); }
     //! TODO
     Q_INVOKABLE QVariant enabledTearAnalysis()      { return _enable_tear_analysis.value(); }
-
-
+    //! TODO
+    bool get_enable_delta_rendering() { return _enable_delta_rendering.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

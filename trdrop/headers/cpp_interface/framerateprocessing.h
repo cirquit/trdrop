@@ -117,6 +117,7 @@ private:
         _shared_frame_diff_count = 0;
     }
     //! TODO rethink this
+    //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
     bool _are_equal_with(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference) const {
         cv::Mat black_white_frame_a;
         cv::Mat black_white_frame_b;

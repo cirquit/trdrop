@@ -28,6 +28,7 @@ public:
     Q_SLOT void processFrames(const QList<cv::Mat> & cv_image_list)
     {
         _prepare_image_list(cv_image_list.size());
+
         for (int i = 0; i < cv_image_list.size(); ++i)
         {
             _process_frame_to_image(cv_image_list.at(i), i);
@@ -39,7 +40,6 @@ private:
     //! converts the cv::Mat to a QImage at the index in the _qml_image_list
     void _process_frame_to_image(const cv::Mat & frame, const int index)
     {
-        // why does this have to be this type?
         Q_ASSERT(frame.type() == CV_8UC3);
         int width  = static_cast<int>(frame.cols);
         int height = static_cast<int>(frame.rows);

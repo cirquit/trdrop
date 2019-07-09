@@ -88,6 +88,7 @@ HEADERS += \
     headers/cpp_interface/imageformat.h \
     headers/cpp_interface/videoformat.h \
     headers/cpp_interface/frameratemodel.h \
+    headers/cpp_interface/deltaprocessing.h \
     headers/qml_interface/framerateprocessing_qml.h \
     headers/qml_interface/frametimeprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
@@ -97,6 +98,7 @@ HEADERS += \
     headers/qml_interface/videocapturelist_qml.h \
     headers/qml_interface/viewer_qml.h \
     headers/qml_interface/exporter_qml.h \
+    headers/qml_interface/deltaprocessing_qml.h \
     headers/qml_models/fileitemmodel.h \
     headers/qml_models/fpsoptionsmodel.h \
     headers/qml_models/generaloptionsmodel.h \
