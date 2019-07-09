@@ -18,6 +18,7 @@ public:
     FPSOptions(const quint8 video_id
              , std::shared_ptr<FramerateModel> shared_framerate_model)
         : video_id(video_id)
+        , enabled(false) // initialized by default to false, because revert_to_default button in options should not reset this
         , _shared_framerate_model(shared_framerate_model)
     {
         _init_member();
@@ -60,7 +61,7 @@ private:
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Helvetica", 15));
 
-        enabled = false;
+        // enabled = false;
     }
     //! TODO
     QString _get_full_text() const
