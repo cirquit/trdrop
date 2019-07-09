@@ -226,6 +226,10 @@ Window {
             tearOptionsModel.updateEnabledRows(filePaths);
             exportOptionsModel.setEnabledExportButton(filePaths.length > 0);
             videocapturelist.readNextFrames();
+            if (filePaths.length === 0)
+            {
+                exporter.stopExporting();
+            }
         }
     }
 }
