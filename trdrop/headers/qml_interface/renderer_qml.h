@@ -64,7 +64,9 @@ private:
 
         for(int i = 0; i < _shared_fps_options_list->size(); ++i)
         {
-            if ((*_shared_fps_options_list)[i].enabled)
+            const bool options_enabled = (*_shared_fps_options_list)[i].enabled;
+            const bool text_enabled    = (*_shared_fps_options_list)[i].displayed_text.enabled();
+            if (options_enabled && text_enabled)
             {
                 int x_padding = static_cast<int>(image_width / 28);
                 int x_step = static_cast<int>(image_width / video_count);
