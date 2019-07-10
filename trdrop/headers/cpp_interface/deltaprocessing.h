@@ -93,36 +93,45 @@ private:
         // first frames can't be compared
         _received_first_frames = false;
     }
-    //! TODO
+    //! make this chooseable?
     cv::Mat _get_difference(const cv::Mat & first_frame, const cv::Mat & second_frame) const
     {
         cv::Mat difference;
-        cv::absdiff(first_frame, second_frame, difference);
+        //cv::absdiff(first_frame, second_frame, difference);
+        _are_equal_with_draw(first_frame, second_frame, 8, difference);
         return difference;
     }
 
     //! TODO rethink this
     //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
-//    bool _are_equal_with(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference) const {
-//        cv::Mat black_white_frame_a;
-//        cv::Mat black_white_frame_b;
-//        cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
-//        cv::cvtColor(frame_b, black_white_frame_b, cv::COLOR_BGRA2GRAY);
+    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference, cv::Mat & output) const {
+        cv::Mat black_white_frame_a;
+        cv::Mat black_white_frame_b;
+        cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
+        cv::cvtColor(frame_b, black_white_frame_b, cv::COLOR_BGRA2GRAY);
 
-//        //qDebug() << black_white_frame_a.at<uchar>(0, 0) << "," << black_white_frame_b.at<uchar>(0, 0);
-//        for (int i = 0; i < black_white_frame_a.rows; i += 1) {
-//            for (int j = 0; j < black_white_frame_a.cols; j += 1) {
-//                int ac(std::max(black_white_frame_a.at<uchar>(i, j)
-//                              , black_white_frame_b.at<uchar>(i, j)));
-//                int bc(std::min(black_white_frame_a.at<uchar>(i, j)
-//                              , black_white_frame_b.at<uchar>(i, j)));
-//                if (ac - bc > pixelDifference) {
-//                    return false;
-//                }
-//            }
-//        }
-//        return true;
-//    }
+        output = frame_a.clone();
+
+        for (int i = 0; i < black_white_frame_a.rows; i += 1) {
+            for (int j = 0; j < black_white_frame_a.cols; j += 1) {
+                int ac(std::max(black_white_frame_a.at<uchar>(i, j)
+                              , black_white_frame_b.at<uchar>(i, j)));
+                int bc(std::min(black_white_frame_a.at<uchar>(i, j)
+                              , black_white_frame_b.at<uchar>(i, j)));
+                if (ac - bc > pixelDifference) {
+                    // on difference, set to white
+                    output.at<cv::Vec3b>(i,j)[0] = 255;
+                    output.at<cv::Vec3b>(i,j)[1] = 255;
+                    output.at<cv::Vec3b>(i,j)[2] = 255;
+                } else {
+                    // on "same" pixel, set to black
+                    output.at<cv::Vec3b>(i,j)[0] = 0;
+                    output.at<cv::Vec3b>(i,j)[1] = 0;
+                    output.at<cv::Vec3b>(i,j)[2] = 0;
+                }
+            }
+        }
+    }
 
     //! TODO
     void _cache_framelist(const QList<cv::Mat> _other)
