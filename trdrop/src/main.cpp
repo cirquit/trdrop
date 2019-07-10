@@ -38,11 +38,9 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
 
     // c++ models
-    FramerateModel framerate_model;
-    std::shared_ptr<FramerateModel> shared_framerate_model(&framerate_model);
+    std::shared_ptr<FramerateModel> shared_framerate_model(new FramerateModel());
     //
-    QList<FPSOptions> fps_option_list;
-    std::shared_ptr<QList<FPSOptions>> shared_fps_options_list(&fps_option_list);
+    std::shared_ptr<QList<FPSOptions>> shared_fps_options_list(new QList<FPSOptions>());
 
     // qml models
     // prepare the FileItemModel
@@ -70,8 +68,8 @@ int main(int argc, char *argv[])
     // prepare ResolutionsModel (Exporter)
     qmlRegisterType<ResolutionsModel>();
     ResolutionsModel resolutions_model;
-    engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
     std::shared_ptr<ResolutionsModel> shared_resolution_model(&resolutions_model);
+    engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
 
     // prepare ImagFormatModel (Exporter)
     qmlRegisterType<ImageFormatModel>();
