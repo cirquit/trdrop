@@ -221,7 +221,9 @@ Window {
         target: fileItemModel
         onUpdateFileItemPaths: {
             framerateprocessing.resetState();
-            videocapturelist.openAllPaths(filePaths)
+            deltaprocessing.resetState();
+            videocapturelist.openAllPaths(filePaths);
+            //console.log(videocapturelist.getMaximumCapturedFramerate())
             fpsOptionsModel.updateEnabledRows(filePaths);
             tearOptionsModel.updateEnabledRows(filePaths);
             exportOptionsModel.setEnabledExportButton(filePaths.length > 0);

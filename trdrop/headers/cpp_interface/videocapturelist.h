@@ -91,6 +91,22 @@ public:
     {
         return _videocapture_list.size();
     }
+    //! get the maxmimum captured framerate as we need to know this for the framerate counting
+    double get_maximum_captured_framerate(const double default_value) const
+    {
+        double highest_framerate = default_value;
+        for (size_t i = 0; i < _videocapture_list.size(); ++i)
+        {
+            const double framerate = get_captured_framerate(static_cast<int>(i));
+            if (highest_framerate < framerate) { highest_framerate = framerate; }
+        }
+        return highest_framerate;
+    }
+    //! returns the raw framerate of the clip with which it was recorded
+    double get_captured_framerate(const int index) const
+    {
+        return get_videocapture_by_index(index).get(cv::CAP_PROP_FPS);
+    }
 
 // methods
 private:

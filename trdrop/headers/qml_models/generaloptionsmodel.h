@@ -173,11 +173,11 @@ private:
         _enable_delta_rendering.setTooltip("Renders the difference between two consecutive frames (greyscale)");
         _enable_delta_rendering.setValue(false);
 
-        _framerate_plot_range.setName("Plot range:");
+        _framerate_plot_range.setName("Analysis range:");
         _framerate_plot_range.setTooltip("Length of the framerate plot in seconds (x-axis)");
         _framerate_plot_range.setValue(60);
 
-        _frametime_plot_range.setName("Plot range:");
+        _frametime_plot_range.setName("Analysis range:");
         _frametime_plot_range.setTooltip("Length of the frametime plot in seconds (x-axis)");
         _frametime_plot_range.setValue(30);
 

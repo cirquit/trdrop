@@ -83,6 +83,11 @@ public:
     {
         _videocapture_list.restart_state();
     }
+    //! TODO
+    Q_INVOKABLE QVariant getMaximumCapturedFramerate()
+    {
+        return _get_maximum_captured_framerate();
+    }
 
 private:
     //! TODO
@@ -91,6 +96,12 @@ private:
         const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(index);
         const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(index);
         return static_cast<double>(current_frame_count) / static_cast<double>(max_frame_count);
+    }
+    //! TODO rewrite this with optional
+    double _get_maximum_captured_framerate() const
+    {
+        const double default_framerate = 0;
+        return _videocapture_list.get_maximum_captured_framerate(default_framerate);
     }
 
 //! member
