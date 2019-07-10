@@ -13,7 +13,7 @@ Window {
     title: "Manage Files"
     visible: true
     width: 800
-    height: 400
+    height: 350
     flags: Qt.SubWindow
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
@@ -97,7 +97,7 @@ Window {
                                                                     : fileManagementWindow.width * 0.50 - browseButton.width * 0.5
                             padding: 15
                             Layout.fillWidth: true
-                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Filepath:  "   + model.filePath : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Filepath:  "   + Utils.cutFilePath(model.filePath, 60) : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Video Index: " + fileDragArea.DelegateModel.itemsIndex : " " }
                         }

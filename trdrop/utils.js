@@ -18,4 +18,18 @@ function round(value, decimalPlaces) {
     return Math.round(value * factor) / factor;
 }
 
+// cuts the string to targetLength size, starting from the end
+function dropToSize(urlString, targetLength){
+    let stringLength = urlString.length;
+    return urlString.substring(stringLength - targetLength, stringLength);
+}
 
+// cuts the url to the target length and prepends "..." if it exceeds the targetLength
+function cutFilePath(urlString, targetLength){
+   if (urlString.length > targetLength){
+       return "..." + dropToSize(urlString, targetLength)
+   }
+   else {
+       return urlString;
+   }
+}
