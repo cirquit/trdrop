@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
 
     // c++ models
     std::shared_ptr<FramerateModel> shared_framerate_model(new FramerateModel());
-    //
     std::shared_ptr<QList<FPSOptions>> shared_fps_options_list(new QList<FPSOptions>());
 
     // qml models
@@ -61,21 +60,19 @@ int main(int argc, char *argv[])
 
     // prepare the OptionsModel
     qmlRegisterType<GeneralOptionsModel>();
-    GeneralOptionsModel general_options_model;
-    engine.rootContext()->setContextProperty("generalOptionsModel", &general_options_model);
-    std::shared_ptr<GeneralOptionsModel> shared_general_options_model(&general_options_model);
+    std::shared_ptr<GeneralOptionsModel> shared_general_options_model(new GeneralOptionsModel());
+    engine.rootContext()->setContextProperty("generalOptionsModel", &(*shared_general_options_model));
 
     // prepare ResolutionsModel (Exporter)
     qmlRegisterType<ResolutionsModel>();
-    ResolutionsModel resolutions_model;
-    std::shared_ptr<ResolutionsModel> shared_resolution_model(&resolutions_model);
-    engine.rootContext()->setContextProperty("resolutionsModel", &resolutions_model);
+    //ResolutionsModel resolutions_model;
+    std::shared_ptr<ResolutionsModel> shared_resolution_model(new ResolutionsModel());
+    engine.rootContext()->setContextProperty("resolutionsModel", &(*shared_resolution_model));
 
     // prepare ImagFormatModel (Exporter)
     qmlRegisterType<ImageFormatModel>();
-    ImageFormatModel imageformat_model;
-    engine.rootContext()->setContextProperty("imageFormatModel", &imageformat_model);
-    std::shared_ptr<ImageFormatModel> shared_imageformat_model(&imageformat_model);
+    std::shared_ptr<ImageFormatModel> shared_imageformat_model(new ImageFormatModel());
+    engine.rootContext()->setContextProperty("imageFormatModel", &(*shared_imageformat_model));
 
     // prepare VideoFormatModel (Exporter)
     qmlRegisterType<VideoFormatModel>();
@@ -84,9 +81,9 @@ int main(int argc, char *argv[])
 
     // prepare ExportOptionsModel (Exporter)
     qmlRegisterType<ExportOptionsModel>();
-    ExportOptionsModel export_options_model;
-    engine.rootContext()->setContextProperty("exportOptionsModel", &export_options_model);
-    std::shared_ptr<ExportOptionsModel> shared_export_options_model(&export_options_model);
+    //ExportOptionsModel export_options_model;
+    std::shared_ptr<ExportOptionsModel> shared_export_options_model(new ExportOptionsModel());
+    engine.rootContext()->setContextProperty("exportOptionsModel", &(*shared_export_options_model));
 
     // allow cv::Mat in signals
     qRegisterMetaType<cv::Mat>("cv::Mat");
