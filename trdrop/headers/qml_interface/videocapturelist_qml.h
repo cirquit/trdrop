@@ -51,7 +51,7 @@ public:
     //! tries to open all videos
     Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
-        qDebug() << "Trying to open" << path_list.size() << "videos";
+        qDebug() << "VideoCaptureListQML::openAllPaths(): Trying to open" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
     //! returns the shortest progress of the video 0: start, 1: end of video, because we terminate the export

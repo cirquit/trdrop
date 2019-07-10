@@ -33,7 +33,7 @@ public:
             // if we have an insuccessful read, we terminate
             if (!successful_frame_read)
             {
-                qDebug() << "VideoCaptureList.populate_next_frames(): terminated at index " << i << " at frame " << frame_count_list[i];
+                qDebug() << "VideoCaptureList::populate_next_frames(): terminated at index " << i << " at frame " << frame_count_list[i];
                 return false;
             }
             frame_count_list[i] += 1;

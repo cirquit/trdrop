@@ -33,7 +33,6 @@ public:
     {
         if (!_received_first_frames)
         {
-            qDebug() << "check_for_difference():received_frames = false";
             _received_first_frames = true;
             _cache_framelist(cv_frame_list);
         } else

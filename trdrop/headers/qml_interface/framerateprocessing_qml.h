@@ -35,13 +35,10 @@ public:
         //
         _framerate_processing.check_for_difference(cv_image_list, _shared_fps_options_list);
         //
-        //
         const QList<double> framerate_list = _framerate_processing.get_framerates();
 
-        //qDebug() << "FPS:";
         for (int i = 0; i < framerate_list.size(); ++i) {
             _shared_framerate_model->set_framerate_at(i, framerate_list[i]);
-          //  qDebug() << "    " << framerate_list[i];
         }
         emit framesReady(cv_image_list);
     }
