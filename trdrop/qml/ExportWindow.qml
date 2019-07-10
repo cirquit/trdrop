@@ -14,7 +14,7 @@ Window {
     visible: true
     width: 740
     height: 390
-    flags: Qt.SubWindow
+    flags: Qt.SubWindow || Qt.WindowSystemMenuHint
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {
