@@ -322,7 +322,7 @@ Window {
                             SpinBox {
                                 id: pixelDifferenceSpinBox
                                 from: 0
-                                to: 50
+                                to: 255
                                 enabled: model.fpsOptionsEnabled
                                 stepSize: 1
                                 editable: true

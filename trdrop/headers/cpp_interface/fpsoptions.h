@@ -49,9 +49,9 @@ private:
         fps_plot_color.setColor("#FAFAFA");
 
         pixel_difference.setName("Pixel difference");
-        pixel_difference.setTooltip("Pixel Difference Margin\n \
-    example: 0  - RGB values have to be identical to not detect a new frame\n \
-    example: 5  - maximum summarized difference between each RGB channel can be 5");
+        pixel_difference.setTooltip("Pixel Difference Margin (0 - 255)\n \
+    Currently every frame is converted to greyscale and compared on a pixel basis. Greater is more \"forgiving\"\n\
+    Example: \"5\" - The difference in color may be up to 5 to NOT trigger a new frame");
         pixel_difference.setValue(0);
         pixel_difference.setEnabled(true);
 
