@@ -119,9 +119,9 @@ public:
     Q_INVOKABLE QVariant filesSelectedCount()
     {
         quint8 file_selected_count = 0;
-        std::for_each(_file_item_list.begin(), _file_item_list.end(), [&](const FileItem & fi)
+        std::for_each(_file_item_list.begin(), _file_item_list.end(), [&](const FileItem & fileitem)
         {
-            file_selected_count += fi.fileSelected() ? 1 : 0;
+            file_selected_count += fileitem.fileSelected() ? 1 : 0;
         });
         return QVariant::fromValue(file_selected_count);
     }
@@ -144,6 +144,13 @@ public:
         }
         emit updateFileItemPaths(path_list);
     }
+    //! USED ONLY WITH the visual model index update in FileWindow,
+    //! therefore not triggering resetModel
+    Q_INVOKABLE void swapItemsAt(int indexA, int indexB)
+    {
+        _file_item_list.swap(indexA, indexB);
+    }
+
     //! signal to wait from this model if any filepaths have changed
     Q_SIGNAL void updateFileItemPaths(const QList<QVariant> & filePaths);
 //! c++ methods - snake_case

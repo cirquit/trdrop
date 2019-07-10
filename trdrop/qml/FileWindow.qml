@@ -148,6 +148,7 @@ Window {
                         if (fileItemModel.isFileSelected(fromIndex) && fileItemModel.isFileSelected(toIndex))
                         {
                             visualModel.items.move(fromIndex, toIndex)
+                            fileItemModel.swapItemsAt(fromIndex, toIndex);
                             fileItemModel.emitFilePaths();
                         }
                     }
