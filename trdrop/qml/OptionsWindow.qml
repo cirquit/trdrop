@@ -12,7 +12,7 @@ Window {
     title: "Options"
     visible: true
     width: 800
-    height: 800
+    height: 700
     flags: Qt.SubWindow
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple

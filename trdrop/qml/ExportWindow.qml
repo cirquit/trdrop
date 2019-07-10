@@ -12,8 +12,8 @@ Window {
     id: exportWindow
     title: "Export"
     visible: true
-    width: 800
-    height: 600
+    width: 740
+    height: 390
     flags: Qt.SubWindow
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
