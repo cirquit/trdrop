@@ -7,6 +7,8 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 
+import "../utils.js" as Utils
+
 Window {
     id: optionsWindow
     title: "Options"
@@ -151,7 +153,7 @@ Window {
                             textFromValue: function(value, locale) { return value.toString() + 's'; }
                             valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
-                                if (model.framerateRangeValue !== value) model.framerateRangeValue = value;
+                                if (model.framerateRangeValue !== value) model.framerateRangeValue = Utils.round(value, 0);
                             }
                         }
                         Switch {
@@ -206,7 +208,7 @@ Window {
                             textFromValue: function(value, locale) { return value.toString() + 's'; }
                             valueFromText: function(value, locale) { return value.replace('s', ''); }
                             onValueChanged: {
-                                if (model.frametimeRangeValue !== value) model.frametimeRangeValue = value;
+                                if (model.frametimeRangeValue !== value) model.frametimeRangeValue = Utils.round(value, 0);;
                             }
                         }
 
