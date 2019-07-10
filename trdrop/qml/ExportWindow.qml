@@ -273,6 +273,8 @@ Window {
                     onFinishedProcessing: {
                         exportButton.text = "Export";
                         exportProgressBar.value = 0.0;
+                        framerateprocessing.resetState();
+                        deltaprocessing.resetState();
                     }
                 }
 
