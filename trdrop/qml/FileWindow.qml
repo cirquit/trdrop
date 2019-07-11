@@ -83,7 +83,7 @@ Window {
                             model.qtFilePath = qtFilePath;
                             model.sizeMB = Utils.round(fileItemModel.getFileSize(realFilePath), 2)
                             model.fileSelected = true;
-                            fileItemModel.emitFilePaths();
+                            fileItemModel.emitFilePaths(getVisualFileItemPaths());
                             fileItemModel.resetModel();
                         }
                     }
@@ -99,7 +99,7 @@ Window {
                             Layout.fillWidth: true
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Filepath:  "   + Utils.cutFilePath(model.filePath, 60) : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
-                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Video Index: " + fileDragArea.DelegateModel.itemsIndex : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Recorded Framerate: "  + model.recordedFramerate + " FPS" : " " }
                         }
                         Button {
                             id: browseButton
@@ -135,6 +135,7 @@ Window {
                             onClicked: {
                                 fileItemModel.remove(index)
                                 fileItemModel.appendDefaultFileItem()
+                                fileItemModel.emitFilePaths(getVisualFileItemPaths());
                             }
                         }
                     }
@@ -147,12 +148,10 @@ Window {
                         var toIndex   = fileDragArea.DelegateModel.itemsIndex;
                         if (fileItemModel.isFileSelected(fromIndex) && fileItemModel.isFileSelected(toIndex))
                         {
-                            visualModel.items.move(fromIndex, toIndex)
-                            fileItemModel.swapItemsAt(fromIndex, toIndex);
-                            fileItemModel.emitFilePaths();
+                            visualModel.items.move(fromIndex, toIndex);
                         }
                     }
-                    onExited: fileItemModel.emitFilePaths();
+                    onExited: fileItemModel.emitFilePaths(getVisualFileItemPaths());
                 }
             }
         }
@@ -224,7 +223,9 @@ Window {
             framerateprocessing.resetState();
             deltaprocessing.resetState();
             videocapturelist.openAllPaths(filePaths);
-            //console.log(videocapturelist.getMaximumCapturedFramerate())
+            fileItemModel.setRecordedFramerates(getVisualFileItemPaths()
+                                               ,videocapturelist.getRecordedFramerates());
+            fpsOptionsModel.setRecordedFramerates(videocapturelist.getRecordedFramerates());
             fpsOptionsModel.updateEnabledRows(filePaths);
             tearOptionsModel.updateEnabledRows(filePaths);
             exportOptionsModel.setEnabledExportButton(filePaths.length > 0);
@@ -235,4 +236,30 @@ Window {
             }
         }
     }
+
+    //! We need to use the visual file items as the visualModel does not propate the shuffling to the underlying fileitemmodel
+    function getVisualFileItemPaths()
+    {
+        var filepath_00 = visualModel.items.get(0).model.filePath;
+        var filepath_01 = visualModel.items.get(1).model.filePath;
+        var filepath_02 = visualModel.items.get(2).model.filePath;
+
+        var filepath_list = [];
+
+        if (filepath_00.length !== 0)
+        {
+            filepath_list.push(filepath_00);
+        }
+        if (filepath_01.length !== 0)
+        {
+            filepath_list.push(filepath_01);
+        }
+        if (filepath_02.length !== 0)
+        {
+            filepath_list.push(filepath_02);
+        }
+
+        return filepath_list;
+    }
+
 }

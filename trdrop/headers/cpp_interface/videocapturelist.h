@@ -91,19 +91,19 @@ public:
     {
         return _videocapture_list.size();
     }
-    //! get the maxmimum captured framerate as we need to know this for the framerate counting
-    double get_maximum_captured_framerate(const double default_value) const
+    //! get the captured framerate as we need to know this for the framerate counting
+    QList<double> get_recorded_framerates() const
     {
-        double highest_framerate = default_value;
+        QList<double> recorded_framerates;
         for (size_t i = 0; i < _videocapture_list.size(); ++i)
         {
-            const double framerate = get_captured_framerate(static_cast<int>(i));
-            if (highest_framerate < framerate) { highest_framerate = framerate; }
+            const double framerate = get_recorded_framerate(static_cast<int>(i));
+            recorded_framerates.push_back(framerate);
         }
-        return highest_framerate;
+        return recorded_framerates;
     }
     //! returns the raw framerate of the clip with which it was recorded
-    double get_captured_framerate(const int index) const
+    double get_recorded_framerate(const int index) const
     {
         return get_videocapture_by_index(index).get(cv::CAP_PROP_FPS);
     }

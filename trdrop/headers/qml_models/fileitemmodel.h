@@ -29,11 +29,12 @@ public:
     //! manage the access to FileItem member from QML
     enum FileItemRoles
     {
-        FilePathRole     = Qt::UserRole
-      , SizeMBRole       = Qt::UserRole + 1
-      , PositionRole     = Qt::UserRole + 2
-      , QtFilePathRole   = Qt::UserRole + 3
-      , FileSelectedRole = Qt::UserRole + 4
+        FilePathRole          = Qt::UserRole
+      , SizeMBRole            = Qt::UserRole + 1
+      , RecordedFramerateRole = Qt::UserRole + 2
+      , QtFilePathRole        = Qt::UserRole + 3
+      , FileSelectedRole      = Qt::UserRole + 4
+      , PositionRole          = Qt::UserRole + 5
     };
 //! qml methods - camelCase
 public:
@@ -66,6 +67,8 @@ public:
                 return file_item.qtFilePath();
             case FileSelectedRole:
                 return file_item.fileSelected();
+            case RecordedFramerateRole:
+                return file_item.recordedFramerate();
             default:
                 return QVariant();
         }
@@ -79,6 +82,7 @@ public:
         else if (role == PositionRole) file_item.setPosition(static_cast<quint8>(value.toUInt()));
         else if (role == QtFilePathRole) file_item.setQtFilePath(value.toString());
         else if (role == FileSelectedRole) file_item.setFileSelected(value.toBool());
+        else if (role == RecordedFramerateRole) file_item.setRecordedFramerate(value.toDouble());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -102,13 +106,12 @@ public:
         const FileItem file_item;
         _append_file_item(file_item);
     }
-    //! callable from QML to remove the item, emits new file paths
+    //! callable from QML to remove the item
     Q_INVOKABLE void remove(int index)
     {
         emit beginRemoveRows(QModelIndex(), index, index);
         _file_item_list.removeAt(index);
         emit endRemoveRows();
-        emitFilePaths();
     }
     //! checks if the fileSelected property of the item at the index is set, usable in QML
     Q_INVOKABLE QVariant isFileSelected(int index)
@@ -131,24 +134,29 @@ public:
         return QFileInfo(url).size() / (std::pow(2,10) * std::pow(2,10));
     }
     //! TODO
-    Q_INVOKABLE void emitFilePaths()
+    Q_INVOKABLE void emitFilePaths(const QList<QVariant> visual_file_path_list)
     {
-        QList<QVariant> path_list;
-        path_list.reserve(_file_item_list.size());
-        for (int i = 0; i < _file_item_list.size(); ++i) {
-            if(_file_item_list[i].fileSelected())
+        emit updateFileItemPaths(visual_file_path_list);
+    }
+    //! TODO
+    Q_INVOKABLE void setRecordedFramerates(const QList<QVariant> visual_file_path_list
+                                         , const QList<double> recorded_framerates)
+    {
+        for (int i = 0; i < visual_file_path_list.size(); ++i)
+        {
+            const int visual_index = i;
+            const QString visual_file_path   = visual_file_path_list[visual_index].toString();
+            const double  recorded_framerate = recorded_framerates[visual_index];
+            for(int j = 0; j < _file_item_list.size(); ++j)
             {
-                const QString & filePath = _file_item_list[i].filePath();
-                path_list.push_back(filePath);
+                const QString model_file_path = _file_item_list[j].filePath();
+                if (visual_file_path == model_file_path)
+                {
+                    QModelIndex q = createIndex(j, 0);
+                    setData(q, recorded_framerate, RecordedFramerateRole);
+                }
             }
         }
-        emit updateFileItemPaths(path_list);
-    }
-    //! USED ONLY WITH the visual model index update in FileWindow,
-    //! therefore not triggering resetModel
-    Q_INVOKABLE void swapItemsAt(int indexA, int indexB)
-    {
-        _file_item_list.swap(indexA, indexB);
     }
 
     //! signal to wait from this model if any filepaths have changed
@@ -164,11 +172,12 @@ private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[FilePathRole]     = "filePath";
-        _role_names[SizeMBRole]       = "sizeMB";
-        _role_names[PositionRole]     = "position";
-        _role_names[QtFilePathRole]   = "qtFilePath";
-        _role_names[FileSelectedRole] = "fileSelected";
+        _role_names[FilePathRole]          = "filePath";
+        _role_names[SizeMBRole]            = "sizeMB";
+        _role_names[PositionRole]          = "position";
+        _role_names[QtFilePathRole]        = "qtFilePath";
+        _role_names[FileSelectedRole]      = "fileSelected";
+        _role_names[RecordedFramerateRole] = "recordedFramerate";
     }
     //! add file item object
     void _append_file_item(const FileItem file_item)

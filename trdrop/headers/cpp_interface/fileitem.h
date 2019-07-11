@@ -19,6 +19,7 @@ public:
         , _position(0)
         , _qt_file_path("")
         , _file_selected(false)
+        , _recorded_framerate(0.0)
     { }
 
     FileItem(const FileItem & other) = default;
@@ -31,14 +32,15 @@ public:
     void setPosition(const quint8 & _other){ _position = _other; }
     void setQtFilePath(const QString & _other){ _qt_file_path = _other; }
     void setFileSelected(const bool & _other){ _file_selected = _other; }
-
+    void setRecordedFramerate(const double & _other){ _recorded_framerate = _other; }
 //! getter methods
 public:
-    QString filePath()     const { return _file_path; }
-    quint32 sizeMB()       const { return _size_mb; }
-    quint8  position()     const { return _position; }
-    QString qtFilePath()   const { return _qt_file_path; }
-    bool    fileSelected() const { return _file_selected; }
+    QString filePath()          const { return _file_path; }
+    quint32 sizeMB()            const { return _size_mb; }
+    quint8  position()          const { return _position; }
+    QString qtFilePath()        const { return _qt_file_path; }
+    bool    fileSelected()      const { return _file_selected; }
+    double  recordedFramerate() const { return _recorded_framerate; }
 
 //! member
 private:
@@ -47,6 +49,7 @@ private:
     quint8  _position;      // position in the file management list
     QString _qt_file_path;  // qt file path (with file:// as prefix)
     bool    _file_selected; // is a file currently selected for this item
+    double  _recorded_framerate; // with how many frames per second was this file recorded
 };
 
 #endif // FILEITEM_H

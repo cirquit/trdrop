@@ -61,6 +61,10 @@ private:
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Helvetica", 15));
 
+        recorded_framerate.setName("Recorded framerate:");
+        recorded_framerate.setTooltip("This is the raw encoded framerate of the clip without frameranalysis");
+        recorded_framerate.setValue(0.0);
+
         // enabled = false;
     }
     //! TODO
@@ -84,6 +88,8 @@ public:
     bool enabled;
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
+    //! the actual recording framerate (e.g most of the time this will be ~60)
+    ValueItem<double> recorded_framerate;
 
 };
 
