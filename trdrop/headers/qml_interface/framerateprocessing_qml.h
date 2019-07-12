@@ -9,7 +9,7 @@
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/cpp_interface/fpsoptions.h"
 
-//! converts the images from cv::Mat to QImage
+//! TODO
 class FramerateProcessingQML : public QObject {
 
     Q_OBJECT
@@ -42,12 +42,18 @@ public:
         }
         emit framesReady(cv_image_list);
     }
-
-    Q_INVOKABLE void resetState()
+    //! TODO
+    Q_INVOKABLE void resetState(const QList<quint8> recorded_framerate_list)
     {
         _shared_framerate_model->reset_model();
-        _framerate_processing.reset_state();
+        _framerate_processing.reset_state(recorded_framerate_list);
     }
+
+    //! TODO
+//    Q_INVOKABLE void setRecordedFramerateList(QList<double> recorded_framerate_list)
+//    {
+//        _framerate_processing.set_recorded_framerates(recorded_framerate_list);
+//    }
 
 private:
 

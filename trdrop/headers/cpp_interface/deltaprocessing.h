@@ -59,7 +59,8 @@ public:
                 #pragma omp parallel for
                 for (int i = 0; i < cv_frame_list.size(); ++i)
                 {
-                    difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i]).clone();
+                    const quint32 pixel_difference = (*shared_fps_options_list)[i].pixel_difference.value();
+                    difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i], pixel_difference).clone();
                 }
             } else {
                 // we could try to calculate the difference for each frame which we have a difference for
@@ -94,31 +95,30 @@ private:
         _received_first_frames = false;
     }
     //! make this chooseable?
-    cv::Mat _get_difference(const cv::Mat & first_frame, const cv::Mat & second_frame) const
+    cv::Mat _get_difference(const cv::Mat & first_frame, const cv::Mat & second_frame, const quint32 pixel_difference) const
     {
         cv::Mat difference;
         //cv::absdiff(first_frame, second_frame, difference);
-        _are_equal_with_draw(first_frame, second_frame, 8, difference);
+        _are_equal_with_draw(first_frame, second_frame, static_cast<int>(pixel_difference), difference);
         return difference;
     }
 
     //! TODO rethink this
     //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
-    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference, cv::Mat & output) const {
+    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixel_difference, cv::Mat & output) const {
         cv::Mat black_white_frame_a;
         cv::Mat black_white_frame_b;
         cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
         cv::cvtColor(frame_b, black_white_frame_b, cv::COLOR_BGRA2GRAY);
 
         output = frame_a.clone();
-
         for (int i = 0; i < black_white_frame_a.rows; i += 1) {
             for (int j = 0; j < black_white_frame_a.cols; j += 1) {
                 int ac(std::max(black_white_frame_a.at<uchar>(i, j)
                               , black_white_frame_b.at<uchar>(i, j)));
                 int bc(std::min(black_white_frame_a.at<uchar>(i, j)
                               , black_white_frame_b.at<uchar>(i, j)));
-                if (ac - bc > pixelDifference) {
+                if (ac - bc > pixel_difference) {
                     // on difference, set to white
                     output.at<cv::Vec3b>(i,j)[0] = 255;
                     output.at<cv::Vec3b>(i,j)[1] = 255;

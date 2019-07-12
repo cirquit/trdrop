@@ -89,6 +89,9 @@ int main(int argc, char *argv[])
     qRegisterMetaType<cv::Mat>("cv::Mat");
     // allow const QList<FPSOptions> in signals
     qRegisterMetaType<QList<FPSOptions>>("const QList<FPSOptions>");
+    // allow const QList<quint8> in signals
+    qRegisterMetaType<QList<quint8>>("const QList<quint8>");
+
     // register the viewer as qml type
     qmlRegisterType<ViewerQML>("Trdrop", 1, 0, "ViewerQML");
 

@@ -8,6 +8,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <memory>
 #include "headers/cpp_interface/fpsoptions.h"
+#include "headers/qml_models/generaloptionsmodel.h"
 
 //! TODO
 class FramerateProcessing
@@ -17,12 +18,11 @@ class FramerateProcessing
 public:
     //! TODO
     FramerateProcessing()
-        : _shared_frame_diff_count(0)
-        , _received_first_frames(false)
+        : _received_first_frames(false)
         , _max_video_count(3)
-        , _cached_framedifferences_count(60)
     {
-        _init_member();
+        QList<quint8> _default_recorded_framerates = { 0, 0, 0 };
+        _init_member(_default_recorded_framerates);
     }
 
 //! methods
@@ -55,24 +55,24 @@ public:
                     int current_pixel_difference = static_cast<int>((*shared_fps_options_list)[i].pixel_difference.value());
                     // check if the previous frame and current frame are equal
                     bool are_equal = _are_equal_with(_cached_frames[i]
-                                                     , cv_frame_list[i]
-                                                     , current_pixel_difference);
+                                                   , cv_frame_list[i]
+                                                   , current_pixel_difference);
                     // if the frame is equal, don't increment the whole frame count -> 0
-                    quint8 diff_frame = are_equal ? 0 : 1;
+                    const quint8 diff_frame = are_equal ? 0 : 1;
                     // explicit convertion for linter
-                    size_t _i = static_cast<size_t>(i);
-                    _frame_diff_lists[_i][_shared_frame_diff_count] = diff_frame;
+                    const size_t _i           = static_cast<size_t>(i);
+                    const size_t _frame_count = _current_framecount_list[_i];
+                    // set the diff_frame for the video (_i) for the current count (_frame_count)
+                    _frame_diff_lists[_i][_frame_count] = diff_frame;
                 }
             }
-            // frame count is incremented in between frames (difference only)
-            _shared_frame_diff_count += 1;
-            // reset every X frames
-            _shared_frame_diff_count %= _cached_framedifferences_count;
+            // increments the framecounter for each video and loops automatically
+            _increment_current_framecount();
         }
         // save the current frame list
         _cache_framelist(cv_frame_list);
     }
-    //! TODO
+    //! calculates the current framerate for each video
     const QList<double> get_framerates()
     {
         QList<double> framerates;
@@ -82,19 +82,19 @@ public:
         }
         return framerates;
     }
-    //! TODO
-    void reset_state()
+    //! resets the state of the object, but to ensure that the class is in a well defined state and nobody misuses it
+    //! we need to know the recorded framerates (with no videos loaded this list will be empty)
+    void reset_state(const QList<quint8> recorded_framerate_list)
     {
         _frame_diff_lists.clear();
+        _current_framecount_list.clear();
         _cached_frames.clear();
-        _init_member();
+        _init_member(recorded_framerate_list);
     }
 
 //! methods
 private:
-    //! TODO adapt this to any amount of recorded framerates (currenlty this is set by _cached_framedifferences_count)
-    //! I have to make a counting window for the rec_framerate, then average the windows for each video independently
-    //! then it should be possible to compare videos with an initial 30Hz and 60Hz recording
+    //! sums up the vector with (0's and 1's) to get the resulting framerate
     double _calculate_framerate(size_t video_index)
     {
         double framecount = std::accumulate(_frame_diff_lists[video_index].begin()
@@ -102,20 +102,25 @@ private:
                                           , 0.0);
         return framecount;
     }
-    //! TODO
-    void _init_member()
+    //! the inner lists of _frame_diff_lists are initialized to be the size of the framerate of each recorded video
+    //! as we can not recognize a higher framerate than the one it was recorded with
+    void _init_member(const QList<quint8> recorded_framerate_list)
     {
-        // prepare buffer for each video
         for (int i = 0; i < _max_video_count; ++i)
         {
-            _frame_diff_lists.push_back(std::vector<quint8>(_cached_framedifferences_count, 0));
+            quint8 recorded_framerate = 0;
+            const bool has_recorded_framerate = i < recorded_framerate_list.size();
+            if (has_recorded_framerate)
+            {
+                recorded_framerate = recorded_framerate_list[i];
+            }
+            _frame_diff_lists.push_back(std::vector<quint8>(recorded_framerate, 0));
             _cached_frames.push_back(cv::Mat());
+            _current_framecount_list.push_back(0);
         }
-        // first frames can't be compared
+        // without a seconds frame frames can't be compared
         _received_first_frames = false;
-        _shared_frame_diff_count = 0;
     }
-    //! TODO rethink this
     //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
     bool _are_equal_with(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference) const {
         cv::Mat black_white_frame_a;
@@ -148,7 +153,7 @@ private:
         }
         return true;
     }
-    //! TODO
+    //! copies the framelist as cv::Mat is a smart pointer and need to be copied manually
     void _cache_framelist(const QList<cv::Mat> _other)
     {
         for (int i = 0; i < _other.size(); ++i)
@@ -156,21 +161,30 @@ private:
             _cached_frames[i] = _other[i].clone();
         }
     }
-
+    //! increases the framecount for each video and cuts it by the recorded_framerate (see _init_member())
+    //! mod 0 is invalid, so we have to catch that
+    void _increment_current_framecount()
+    {
+        for (size_t i = 0; i < _current_framecount_list.size(); ++i)
+        {
+            quint8 recorded_framerate = static_cast<quint8>(_frame_diff_lists[i].size());
+            _current_framecount_list[i] += 1;
+            if (recorded_framerate != 0) _current_framecount_list[i] %= recorded_framerate;
+        }
+    }
 //! member
 private:
+
+    //! holds the current framecount of each video (used to access the inner lists of _frame_diff_lists)
+    std::vector<size_t> _current_framecount_list;
     //! TODO
-    quint64        _shared_frame_diff_count;
+    bool                 _received_first_frames;
     //! TODO
-    bool           _received_first_frames;
-    //! TODO
-    QList<cv::Mat> _cached_frames;
-    //! TODO
+    QList<cv::Mat>       _cached_frames;
+    //! the list which has a list for each video consisting of 0's or 1's, counting the differing frames
     std::vector<std::vector<quint8>> _frame_diff_lists;
     //! TODO
-    const quint8  _max_video_count;
-    //! TODO
-    const quint16 _cached_framedifferences_count;
+    const quint8         _max_video_count;
 };
 
 #endif // FRAMERATEPROCESSING_H

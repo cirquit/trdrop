@@ -51,7 +51,7 @@ public:
     //! tries to open all videos
     Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
-        qDebug() << "VideoCaptureListQML::openAllPaths(): Trying to open" << path_list.size() << "videos";
+        //qDebug() << "VideoCaptureListQML::openAllPaths(): Trying to open" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
     //! returns the shortest progress of the video 0: start, 1: end of video, because we terminate the export
@@ -70,13 +70,11 @@ public:
         }
         return shortest_progress;
     }
-
     //! returns the progress of the video 0: start, 1: end of video
     Q_INVOKABLE QVariant getVideoProgress(const QVariant index) const
     {
         const int _index = index.toInt();
         return _get_video_progress(_index);
-
     }
     //! restarts the videocaptures with the previously opened videos
     Q_INVOKABLE void restartVideos()
@@ -84,9 +82,20 @@ public:
         _videocapture_list.restart_state();
     }
     //! TODO
-    Q_INVOKABLE QList<double> getRecordedFramerates()
+    Q_INVOKABLE QList<double> getRecordedFramerates() const
     {
         return _get_recorded_framerates();
+    }
+    //! TODO
+    Q_INVOKABLE QList<quint8> getUnsignedRecordedFramerates() const
+    {
+        QList<double> recorded_framerates = _get_recorded_framerates();
+        QList<quint8> unsigned_recorded_framerates;
+        for (int i = 0; i < recorded_framerates.size(); ++i)
+        {
+            unsigned_recorded_framerates.push_back(static_cast<quint8>(recorded_framerates[i]));
+        }
+        return unsigned_recorded_framerates;
     }
 
 private:

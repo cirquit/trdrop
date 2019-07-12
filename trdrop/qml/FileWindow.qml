@@ -220,9 +220,9 @@ Window {
     Connections {
         target: fileItemModel
         onUpdateFileItemPaths: {
-            framerateprocessing.resetState();
-            deltaprocessing.resetState();
             videocapturelist.openAllPaths(filePaths);
+            framerateprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
+            deltaprocessing.resetState();
             fileItemModel.setRecordedFramerates(getVisualFileItemPaths()
                                                ,videocapturelist.getRecordedFramerates());
             fpsOptionsModel.setRecordedFramerates(videocapturelist.getRecordedFramerates());
