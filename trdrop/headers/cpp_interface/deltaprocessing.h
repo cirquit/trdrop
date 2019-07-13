@@ -132,7 +132,6 @@ private:
             }
         }
     }
-
     //! TODO
     void _cache_framelist(const QList<cv::Mat> _other)
     {

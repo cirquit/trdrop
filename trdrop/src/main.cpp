@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQuickStyle::setStyle("Material");
     QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
+    // TODO add the other fonts?
 
     // c++ models
     std::shared_ptr<FramerateModel> shared_framerate_model(new FramerateModel());

@@ -70,7 +70,7 @@ private:
             {
                 int x_padding = static_cast<int>(image_width / 28);
                 int x_step = static_cast<int>(image_width / video_count);
-                int y_step = static_cast<int>(image_height / 15);
+                int y_step = static_cast<int>(image_height / 12);
                 int x = x_padding + x_step * i; // width
                 int y = y_step; // height
                 (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y);

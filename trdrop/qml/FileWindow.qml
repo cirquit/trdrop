@@ -99,7 +99,7 @@ Window {
                             Layout.fillWidth: true
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Filepath:  "   + Utils.cutFilePath(model.filePath, 60) : " " }
                             Label { font.pixelSize: 17; text:  model.fileSelected ? "Size: "        + model.sizeMB + " MB" : " " }
-                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Recorded Framerate: "  + model.recordedFramerate + " FPS" : " " }
+                            Label { font.pixelSize: 17; text:  model.fileSelected ? "Recorded Framerate: "  + Utils.round(model.recordedFramerate, 2) + " FPS" : " " }
                         }
                         Button {
                             id: browseButton

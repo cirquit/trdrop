@@ -34,6 +34,13 @@ public:
     //! TODO
     void paint_fps_text(QPainter * painter, int x, int y)
     {
+        int x_offset = 1;
+        int y_offset = 1;
+
+        painter->setPen(QColor(41, 41, 41));
+        painter->setFont(displayed_text.font());
+        painter->drawText(x + x_offset, y + y_offset, _get_full_text());
+
         painter->setPen(fps_plot_color.color());
         painter->setFont(displayed_text.font());
         painter->drawText(x, y, _get_full_text());
@@ -59,7 +66,7 @@ private:
         displayed_text.setTooltip("The text which will be shown in the left corner of each video with the framerate");
         displayed_text.setValue("FPS:");
         displayed_text.setEnabled(true);
-        displayed_text.setFont(QFont("Helvetica", 15));
+        displayed_text.setFont(QFont("Fjalla One", 18));
 
         recorded_framerate.setName("Recorded framerate:");
         recorded_framerate.setTooltip("This is the raw encoded framerate of the clip without frameranalysis");

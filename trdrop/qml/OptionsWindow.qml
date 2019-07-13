@@ -386,11 +386,10 @@ Window {
                             FontDialog {
                                 id: fontDialog
                                 title: "Please choose a font"
-                                font: Qt.font({ family: "Helvetica", pointSize: 15 })
+                                font: Qt.font({ family: "Fjalla One", pointSize: 18 })
                                 onAccepted: {
                                     fpsText.font = fontDialog.font
                                     model.displayedTextFont = fontDialog.font
-                                    console.log(model.displayedTextFont)
                                 }
                             }
                             Switch {
