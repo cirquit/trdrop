@@ -82,6 +82,17 @@ public:
         }
         return framerates;
     }
+    //! calculates the current frametimes for each video for the last frames
+    const QList<double> get_frametimes()
+    {
+        QList<double> frametimes;
+        for (size_t i = 0; i < _frame_diff_lists.size(); ++i)
+        {
+            frametimes.push_back(_calculate_frametime(i));
+        }
+        return frametimes;
+    }
+
     //! resets the state of the object, but to ensure that the class is in a well defined state and nobody misuses it
     //! we need to know the recorded framerates (with no videos loaded this list will be empty)
     void reset_state(const QList<quint8> recorded_framerate_list)
@@ -101,6 +112,35 @@ private:
                                           , _frame_diff_lists[video_index].end()
                                           , 0.0);
         return framecount;
+    }
+    //! frametime for the last visible frame in milliseconds
+    double _calculate_frametime(size_t video_index)
+    {
+        size_t recorded_framerate      = _frame_diff_lists[video_index].size();
+        size_t current_framerate_count = _current_framecount_list[video_index];
+        // if the recorded framerate is zero, there is no video loaded for that index
+        // TODO refactor this
+        if (recorded_framerate == 0) return 0;
+        // if no frames were analyzed, we can't analyze the frametime
+        if (_calculate_framerate(video_index) == 0.0) return 0;
+        // if the current frame is a duplicate, we have to wait until we got a new frame to estimate the time of the previous frame
+        if (_frame_diff_lists[video_index][current_framerate_count] == 0) return 0;
+        // we always look at the previous frame first
+        current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);
+        // counter of how long the frame is show per 1 / recorded_framerate in seconds
+        double frame_time_counter = 0.0;
+        // start looping backwards for the frame_diff_list until we reach for a new frame
+        bool iterating_over_same_frame = true;
+        while (iterating_over_same_frame)
+        {
+            quint8 diff = _frame_diff_lists[video_index][current_framerate_count];
+            frame_time_counter += 1.0;
+            // loop backwards manually (TODO refactor with stl)
+            current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);
+            if (diff == 1) iterating_over_same_frame = false;
+        }
+        double frametime_in_s = frame_time_counter / static_cast<double>(recorded_framerate);
+        return frametime_in_s * 1000;
     }
     //! the inner lists of _frame_diff_lists are initialized to be the size of the framerate of each recorded video
     //! as we can not recognize a higher framerate than the one it was recorded with
@@ -172,19 +212,25 @@ private:
             if (recorded_framerate != 0) _current_framecount_list[i] %= recorded_framerate;
         }
     }
+    //! TODO refactor this?
+    size_t _decrement_modulo(size_t value, size_t max_value)
+    {
+        if (value == 0) return max_value;
+        else return --value;
+    }
 //! member
 private:
 
     //! holds the current framecount of each video (used to access the inner lists of _frame_diff_lists)
-    std::vector<size_t> _current_framecount_list;
+    std::vector<size_t>              _current_framecount_list;
     //! TODO
-    bool                 _received_first_frames;
+    bool                             _received_first_frames;
     //! TODO
-    QList<cv::Mat>       _cached_frames;
+    QList<cv::Mat>                   _cached_frames;
     //! the list which has a list for each video consisting of 0's or 1's, counting the differing frames
     std::vector<std::vector<quint8>> _frame_diff_lists;
     //! TODO
-    const quint8         _max_video_count;
+    const quint8                     _max_video_count;
 };
 
 #endif // FRAMERATEPROCESSING_H

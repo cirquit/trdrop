@@ -115,9 +115,9 @@ int main(int argc, char *argv[])
     // sigals in c++ (main processing pipeline)
     // pass the QList<cv::Mat> to the converter
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &framerate_processing_qml, &FramerateProcessingQML::processFrames);
-    // tearprocessing
+    // framerate processing
     QObject::connect(&framerate_processing_qml, &FramerateProcessingQML::framesReady, &delta_processing_qml, &DeltaProcessingQML::processFrames);
-    // frametime processing
+    // delta processing
     QObject::connect(&delta_processing_qml, &DeltaProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
     // pass the QList<QImage> to the composer to mux them together
     QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages);

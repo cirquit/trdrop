@@ -81,7 +81,6 @@ HEADERS += \
     headers/cpp_interface/valueitem.h \
     headers/cpp_interface/colorpickitem.h \
     headers/cpp_interface/fpsoptions.h \
-    headers/cpp_interface/frametimeprocessing.h \
     headers/cpp_interface/tearoptions.h \
     headers/cpp_interface/textedititem.h \
     headers/cpp_interface/videocapturelist.h \
@@ -90,7 +89,6 @@ HEADERS += \
     headers/cpp_interface/frameratemodel.h \
     headers/cpp_interface/deltaprocessing.h \
     headers/qml_interface/framerateprocessing_qml.h \
-    headers/qml_interface/frametimeprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
     headers/qml_interface/renderer_qml.h \
