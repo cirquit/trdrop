@@ -2,6 +2,29 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 13.07.2019
+
+Had multiple updates throughout the week:
+
+* Framerate Text
+    - added shadow
+    - added two new fonts (see gif)
+* Framerate Analysis
+    - works with any recorded framerate (this was capped in the previous versions to 60 fps)
+    - now extracting the recorded framerate of the clip and showing it in the File Window
+* File Window
+    - fixed some bugs, now moving the files also changes their order in the renderer
+* Deltaprocessing
+    - Added the corresponding algorithm to show how we currently calculate frames
+        + this also shows tears very nicely
+* Other
+    - fixed some memory issues
+    - added closing buttons for each window (only visible in Windows)
+
+Next steps are implementing the frametime and tear calculation. Then we can at last get to the plotting implementation.
+
+![](images/2019-07-13-full-showcase-delta-renderering.gif)
+
 #### Update 09.07.2019
 
 Added a version of delta rendering via [cv::absdiff](https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga6fef31bc8c4071cbc114a758a2b79c14).
