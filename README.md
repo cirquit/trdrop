@@ -2,6 +2,14 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 14.07.2019
+
+Added frametime calculation (just a first prototype, need a plot for validation) and tear detection (similar to the one in the currently released trdrop).
+
+Restrictions of the tear algorithm is that we only detect tears in subsequent frames as we use an algorithm that works on the difference between the frames.
+
+Next up is the plotting!
+
 #### Update 13.07.2019
 
 Had multiple updates throughout the week:

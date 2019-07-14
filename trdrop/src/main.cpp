@@ -21,6 +21,7 @@
 #include "headers/qml_interface/imageconverter_qml.h"
 #include "headers/qml_interface/imagecomposer_qml.h"
 #include "headers/qml_interface/framerateprocessing_qml.h"
+#include "headers/qml_interface/tearprocessing_qml.h"
 #include "headers/qml_interface/deltaprocessing_qml.h"
 #include "headers/qml_interface/renderer_qml.h"
 #include "headers/qml_interface/viewer_qml.h"
@@ -98,6 +99,8 @@ int main(int argc, char *argv[])
 
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
+    TearProcessingQML tear_processing_qml(shared_framerate_model, shared_fps_options_list);
+    engine.rootContext()->setContextProperty("tearprocessing", &tear_processing_qml);
     FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     DeltaProcessingQML delta_processing_qml(shared_fps_options_list, shared_general_options_model);
@@ -114,7 +117,9 @@ int main(int argc, char *argv[])
 
     // sigals in c++ (main processing pipeline)
     // pass the QList<cv::Mat> to the converter
-    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &framerate_processing_qml, &FramerateProcessingQML::processFrames);
+    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &tear_processing_qml, &TearProcessingQML::processFrames);
+    // tear processing
+    QObject::connect(&tear_processing_qml, &TearProcessingQML::framesReady, &framerate_processing_qml, &FramerateProcessingQML::processFrames);
     // framerate processing
     QObject::connect(&framerate_processing_qml, &FramerateProcessingQML::framesReady, &delta_processing_qml, &DeltaProcessingQML::processFrames);
     // delta processing

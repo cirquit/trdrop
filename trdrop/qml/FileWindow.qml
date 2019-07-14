@@ -223,6 +223,7 @@ Window {
             videocapturelist.openAllPaths(filePaths);
             framerateprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
             deltaprocessing.resetState();
+            tearprocessing.resetState();
             fileItemModel.setRecordedFramerates(getVisualFileItemPaths()
                                                ,videocapturelist.getRecordedFramerates());
             fpsOptionsModel.setRecordedFramerates(videocapturelist.getRecordedFramerates());

@@ -275,6 +275,7 @@ Window {
                         exportProgressBar.value = 0.0;
                         framerateprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
                         deltaprocessing.resetState();
+                        tearprocessing.resetState();
                     }
                 }
 

@@ -88,11 +88,12 @@ HEADERS += \
     headers/cpp_interface/videoformat.h \
     headers/cpp_interface/frameratemodel.h \
     headers/cpp_interface/deltaprocessing.h \
+    headers/cpp_interface/teardata.h \
     headers/qml_interface/framerateprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
-    headers/qml_interface/renderer_qml.h \
     headers/qml_interface/tearprocessing_qml.h \
+    headers/qml_interface/renderer_qml.h \
     headers/qml_interface/videocapturelist_qml.h \
     headers/qml_interface/viewer_qml.h \
     headers/qml_interface/exporter_qml.h \
