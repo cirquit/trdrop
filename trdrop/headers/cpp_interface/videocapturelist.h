@@ -97,7 +97,7 @@ public:
         QList<double> recorded_framerates;
         for (size_t i = 0; i < _videocapture_list.size(); ++i)
         {
-            const double framerate = get_recorded_framerate(static_cast<int>(i));
+            const double framerate = std::ceil(get_recorded_framerate(static_cast<int>(i)));
             recorded_framerates.push_back(framerate);
         }
         return recorded_framerates;

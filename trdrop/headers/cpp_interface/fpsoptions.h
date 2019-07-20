@@ -36,11 +36,11 @@ public:
     {
         int x_offset = 1;
         int y_offset = 1;
-
+        // draw shadow
         painter->setPen(QColor(41, 41, 41));
         painter->setFont(displayed_text.font());
         painter->drawText(x + x_offset, y + y_offset, _get_full_text());
-
+        // draw real text
         painter->setPen(fps_plot_color.color());
         painter->setFont(displayed_text.font());
         painter->drawText(x, y, _get_full_text());

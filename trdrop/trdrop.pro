@@ -105,7 +105,8 @@ HEADERS += \
     headers/qml_models/tearoptionsmodel.h \
     headers/qml_models/imageformatmodel.h \
     headers/qml_models/videoformatmodel.h \
-    headers/qml_models/exportoptionsmodel.h
+    headers/qml_models/exportoptionsmodel.h \
+    headers/cpp_interface/plot.h
 
 
 

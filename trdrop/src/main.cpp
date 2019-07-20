@@ -28,6 +28,7 @@
 #include "headers/qml_interface/exporter_qml.h"
 
 #include "headers/cpp_interface/frameratemodel.h"
+#include "headers/cpp_interface/plot.h"
 
 int main(int argc, char *argv[])
 {
@@ -97,6 +98,11 @@ int main(int argc, char *argv[])
     // register the viewer as qml type
     qmlRegisterType<ViewerQML>("Trdrop", 1, 0, "ViewerQML");
 
+    // c++ plotter
+    std::shared_ptr<Plot> shared_plot_instance(new Plot(shared_framerate_model
+                                                      , shared_fps_options_list
+                                                      , shared_resolution_model));
+    // qml objects
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     TearProcessingQML tear_processing_qml(shared_framerate_model, shared_fps_options_list);
@@ -109,7 +115,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml(shared_resolution_model);
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    RendererQML renderer_qml(shared_fps_options_list);
+    RendererQML renderer_qml(shared_fps_options_list, shared_plot_instance);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);

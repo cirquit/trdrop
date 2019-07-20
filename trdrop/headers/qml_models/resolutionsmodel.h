@@ -93,7 +93,11 @@ public:
         qDebug() << "ResolutionModel::getActiveValue() - no resolution selected, this should never happen. Returning first element";
         return _resolutions_list[0];
     }
-
+    //! TODO
+    QSize get_active_size()
+    {
+        return get_active_value().size();
+    }
 
     //! methods
 private:
@@ -106,17 +110,18 @@ private:
     //! TODO
     void _init_options()
     {
+        // currently only 16:9
         _resolutions_list.push_back(Resolution(QSize(960, 540),    true));
         _resolutions_list.push_back(Resolution(QSize(1280, 720),  false));
-        _resolutions_list.push_back(Resolution(QSize(1280, 1080), false));
+        //_resolutions_list.push_back(Resolution(QSize(1280, 1080), false));
         _resolutions_list.push_back(Resolution(QSize(1600, 900),  false));
         _resolutions_list.push_back(Resolution(QSize(1920, 1080), false));
-        _resolutions_list.push_back(Resolution(QSize(2048, 1080), false));
+        _resolutions_list.push_back(Resolution(QSize(2048, 1152), false));
+        //_resolutions_list.push_back(Resolution(QSize(2560, 1440), false));
         _resolutions_list.push_back(Resolution(QSize(2560, 1440), false));
-        _resolutions_list.push_back(Resolution(QSize(3840, 1080), false));
         _resolutions_list.push_back(Resolution(QSize(3840, 2160), false));
-        _resolutions_list.push_back(Resolution(QSize(4096, 2160), false));
-        _resolutions_list.push_back(Resolution(QSize(5120, 2160), false));
+        //_resolutions_list.push_back(Resolution(QSize(4096, 2160), false));
+        //_resolutions_list.push_back(Resolution(QSize(5120, 2160), false));
     }
 
 //! member

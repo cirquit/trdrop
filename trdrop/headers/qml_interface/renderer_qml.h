@@ -12,6 +12,7 @@
 
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/qml_models/exportoptionsmodel.h"
+#include "headers/cpp_interface/plot.h"
 
 class RendererQML : public QObject
 {
@@ -21,9 +22,11 @@ class RendererQML : public QObject
 public:
     //! quick painted item, essentially a label with a drawable interface
     RendererQML(std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+              , std::shared_ptr<Plot> shared_plot_instance
               , QQuickItem *parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
+        , _shared_plot_instance(shared_plot_instance)
     { }
 
 //! methods
@@ -80,7 +83,7 @@ private:
     //! TODO
     void _draw_framerate_graph(QPainter & painter)
     {
-        Q_UNUSED(painter);
+        _shared_plot_instance->draw_framerate_plot(&painter);
     }
     //! TODO
     void _draw_frametime_graph(QPainter & painter)
@@ -104,6 +107,8 @@ private:
     QImage _qml_image;
     //! TODO
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    //! TODO
+    std::shared_ptr<Plot> _shared_plot_instance;
 };
 
 #endif // IMAGEVIEWER_QML_H
