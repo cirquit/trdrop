@@ -28,7 +28,9 @@
 #include "headers/qml_interface/exporter_qml.h"
 
 #include "headers/cpp_interface/frameratemodel.h"
-#include "headers/cpp_interface/plot.h"
+#include "headers/cpp_interface/frametimemodel.h"
+#include "headers/cpp_interface/framerateplot.h"
+#include "headers/cpp_interface/frametimeplot.h"
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
 
     // c++ models
     std::shared_ptr<FramerateModel> shared_framerate_model(new FramerateModel());
+    std::shared_ptr<FrametimeModel> shared_frametime_model(new FrametimeModel());
     std::shared_ptr<QList<FPSOptions>> shared_fps_options_list(new QList<FPSOptions>());
 
     // qml models
@@ -56,11 +59,6 @@ int main(int argc, char *argv[])
     TearOptionsModel tear_options_model;
     engine.rootContext()->setContextProperty("tearOptionsModel", &tear_options_model);
 
-    // prepare the FPS Options Model
-    qmlRegisterType<FPSOptionsModel>();
-    FPSOptionsModel fps_options_model(shared_framerate_model, shared_fps_options_list);
-    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
-
     // prepare the OptionsModel
     qmlRegisterType<GeneralOptionsModel>();
     std::shared_ptr<GeneralOptionsModel> shared_general_options_model(new GeneralOptionsModel());
@@ -68,9 +66,13 @@ int main(int argc, char *argv[])
 
     // prepare ResolutionsModel (Exporter)
     qmlRegisterType<ResolutionsModel>();
-    //ResolutionsModel resolutions_model;
     std::shared_ptr<ResolutionsModel> shared_resolution_model(new ResolutionsModel());
     engine.rootContext()->setContextProperty("resolutionsModel", &(*shared_resolution_model));
+
+    // prepare the FPS Options Model
+    qmlRegisterType<FPSOptionsModel>();
+    FPSOptionsModel fps_options_model(shared_framerate_model, shared_fps_options_list, shared_resolution_model);
+    engine.rootContext()->setContextProperty("fpsOptionsModel", &fps_options_model);
 
     // prepare ImagFormatModel (Exporter)
     qmlRegisterType<ImageFormatModel>();
@@ -99,7 +101,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<ViewerQML>("Trdrop", 1, 0, "ViewerQML");
 
     // c++ plotter
-    std::shared_ptr<Plot> shared_plot_instance(new Plot(shared_framerate_model
+    std::shared_ptr<FrameratePlot> shared_framerate_plot_instance(new FrameratePlot(shared_framerate_model
+                                                      , shared_fps_options_list
+                                                      , shared_resolution_model));
+    std::shared_ptr<FrametimePlot> shared_frametime_plot_instance(new FrametimePlot(shared_frametime_model
                                                       , shared_fps_options_list
                                                       , shared_resolution_model));
     // qml objects
@@ -107,7 +112,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     TearProcessingQML tear_processing_qml(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("tearprocessing", &tear_processing_qml);
-    FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_fps_options_list);
+    FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_frametime_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     DeltaProcessingQML delta_processing_qml(shared_fps_options_list, shared_general_options_model);
     engine.rootContext()->setContextProperty("deltaprocessing", &delta_processing_qml);
@@ -115,7 +120,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml(shared_resolution_model);
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    RendererQML renderer_qml(shared_fps_options_list, shared_plot_instance);
+    RendererQML renderer_qml(shared_fps_options_list, shared_framerate_plot_instance, shared_frametime_plot_instance);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);

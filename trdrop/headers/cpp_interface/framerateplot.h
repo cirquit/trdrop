@@ -1,5 +1,5 @@
-#ifndef PLOT_H
-#define PLOT_H
+#ifndef FRAMERATEPLOT_H
+#define FRAMERATEPLOT_H
 
 #include <QPainter>
 #include <memory>
@@ -7,12 +7,12 @@
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/qml_models/resolutionsmodel.h"
 
-class Plot
+class FrameratePlot
 {
 // constructors
 public:
     //! TODO
-    Plot(std::shared_ptr<FramerateModel> shared_framerate_model
+    FrameratePlot(std::shared_ptr<FramerateModel> shared_framerate_model
        , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
        , std::shared_ptr<ResolutionsModel> shared_resolution_model)
         : _shared_framerate_model(shared_framerate_model)
@@ -112,7 +112,6 @@ private:
             const QString framerate_text = QString::number(static_cast<int>(percent * max_framerate));
 
             // draw shadow
-            // TODO check if this if this needs to be adapted to higher resolutions
             const int x_offset = 1;
             const int y_offset = 1;
             painter->setPen(_text_shadow);
@@ -208,7 +207,7 @@ private:
     {
         return QFont("Fjalla One", _get_font_size());
     }
-
+    //! TODO
     int _get_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -219,7 +218,7 @@ private:
         else if (current_size == QSize(2048, 1152)) return 30;
         else if (current_size == QSize(2560, 1440)) return 37;
         else if (current_size == QSize(3840, 2160)) return 51;
-        qDebug() << "Plot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        qDebug() << "FrameratePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
     //! currently supporting only 16:9
@@ -233,7 +232,7 @@ private:
         else if (current_size == QSize(2048, 1152)) return 0.3;
         else if (current_size == QSize(2560, 1440)) return 0.3;
         else if (current_size == QSize(3840, 2160)) return 0.3;
-        qDebug() << "Plot::_get_font_spacing() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        qDebug() << "FrameratePlot::_get_font_spacing() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 0.3;
     }
     //! TODO
@@ -261,10 +260,10 @@ private:
         else if (current_size == QSize(2048, 1152)) return 4;
         else if (current_size == QSize(2560, 1440)) return 4;
         else if (current_size == QSize(3840, 2160)) return 6;
-        qDebug() << "Plot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        qDebug() << "FrameratePlot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 2;
     }
-
+    //! TODO
     int _get_plotline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -301,4 +300,4 @@ private:
     const int _segment_count;
 };
 
-#endif // PLOT_H
+#endif // FRAMERATEPLOT_H

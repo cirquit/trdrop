@@ -116,8 +116,9 @@ private:
     //! frametime for the last visible frame in milliseconds
     double _calculate_frametime(size_t video_index)
     {
-        size_t recorded_framerate      = _frame_diff_lists[video_index].size();
-        size_t current_framerate_count = _current_framecount_list[video_index];
+        //! yes this the is the recorded framerate, TODO refactor this into a method with comments
+        const size_t recorded_framerate = _frame_diff_lists[video_index].size();
+        size_t current_framerate_count  = _current_framecount_list[video_index];
         // if the recorded framerate is zero, there is no video loaded for that index
         // TODO refactor this
         if (recorded_framerate == 0) return 0;
@@ -129,11 +130,11 @@ private:
         current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);
         // counter of how long the frame is show per 1 / recorded_framerate in seconds
         double frame_time_counter = 0.0;
-        // start looping backwards for the frame_diff_list until we reach for a new frame
+        // start looping backwards for the frame_diff_list until we reach a new frame
         bool iterating_over_same_frame = true;
         while (iterating_over_same_frame)
         {
-            quint8 diff = _frame_diff_lists[video_index][current_framerate_count];
+            const quint8 diff = _frame_diff_lists[video_index][current_framerate_count];
             frame_time_counter += 1.0;
             // loop backwards manually (TODO refactor with stl)
             current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);

@@ -7,6 +7,7 @@
 
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/cpp_interface/frameratemodel.h"
+#include "headers/qml_models/resolutionsmodel.h"
 
 //!
 class FPSOptionsModel : public QAbstractListModel
@@ -17,10 +18,12 @@ public:
     //! TODO
     FPSOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
                   , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+                  , std::shared_ptr<ResolutionsModel> shared_resolution_model
                   , QObject * parent = nullptr)
         : QAbstractListModel(parent)
         , _shared_framerate_model(shared_framerate_model)
         , _shared_fps_options_list(shared_fps_options_list)
+        , _shared_resolution_model(shared_resolution_model)
         , _max_video_count(3)
     {
         _init_options();
@@ -204,7 +207,7 @@ private:
     void _init_options()
     {
         for (quint8 id = 0; id < _max_video_count; ++id) {
-            _shared_fps_options_list->append(FPSOptions(id, _shared_framerate_model));
+            _shared_fps_options_list->append(FPSOptions(id, _shared_framerate_model, _shared_resolution_model));
         }
     }
 
@@ -214,6 +217,8 @@ private:
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! TODO
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    //! TODO
+    std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! TODO
     quint8 _max_video_count;
     //! used by the QAbstractListModel to save the role names from QML

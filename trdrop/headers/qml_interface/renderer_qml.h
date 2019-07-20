@@ -5,14 +5,11 @@
 #include <QPainter>
 #include <QColor>
 
-
-// TODO only for shared pointer
-#include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"
-
+#include <memory>
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/qml_models/exportoptionsmodel.h"
-#include "headers/cpp_interface/plot.h"
+#include "headers/cpp_interface/framerateplot.h"
+#include "headers/cpp_interface/frametimeplot.h"
 
 class RendererQML : public QObject
 {
@@ -22,18 +19,19 @@ class RendererQML : public QObject
 public:
     //! quick painted item, essentially a label with a drawable interface
     RendererQML(std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
-              , std::shared_ptr<Plot> shared_plot_instance
+              , std::shared_ptr<FrameratePlot> shared_framerate_plot_instance
+              , std::shared_ptr<FrametimePlot> shared_frametime_plot_instance
               , QQuickItem *parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
-        , _shared_plot_instance(shared_plot_instance)
+        , _shared_framerate_plot_instance(shared_framerate_plot_instance)
+        , _shared_frametime_plot_instance(shared_frametime_plot_instance)
     { }
 
 //! methods
 public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & image);
-
     //! TODO
     Q_SLOT void processImage(QImage qml_image)
     {
@@ -65,6 +63,7 @@ private:
         int image_width  = _qml_image.size().width();
         int image_height = _qml_image.size().height();
 
+        // this positioning logic is not inside the fps options as we need the index
         for(int i = 0; i < _shared_fps_options_list->size(); ++i)
         {
             const bool options_enabled = (*_shared_fps_options_list)[i].enabled;
@@ -83,12 +82,12 @@ private:
     //! TODO
     void _draw_framerate_graph(QPainter & painter)
     {
-        _shared_plot_instance->draw_framerate_plot(&painter);
+        _shared_framerate_plot_instance->draw_framerate_plot(&painter);
     }
     //! TODO
     void _draw_frametime_graph(QPainter & painter)
     {
-        Q_UNUSED(painter);
+        _shared_frametime_plot_instance->draw_frametime_plot(&painter);
     }
     //! TODO dirty, get this from FileWindow
     int _get_video_count()
@@ -108,7 +107,9 @@ private:
     //! TODO
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
     //! TODO
-    std::shared_ptr<Plot> _shared_plot_instance;
+    std::shared_ptr<FrameratePlot> _shared_framerate_plot_instance;
+    //! TODO
+    std::shared_ptr<FrametimePlot> _shared_frametime_plot_instance;
 };
 
 #endif // IMAGEVIEWER_QML_H

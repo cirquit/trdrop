@@ -106,7 +106,9 @@ HEADERS += \
     headers/qml_models/imageformatmodel.h \
     headers/qml_models/videoformatmodel.h \
     headers/qml_models/exportoptionsmodel.h \
-    headers/cpp_interface/plot.h
+    headers/cpp_interface/framerateplot.h \
+    headers/cpp_interface/frametimeplot.h \
+    headers/cpp_interface/frametimemodel.h
 
 
 

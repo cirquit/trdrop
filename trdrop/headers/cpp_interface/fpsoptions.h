@@ -9,6 +9,7 @@
 #include "headers/cpp_interface/valueitem.h"
 #include "headers/cpp_interface/textedititem.h"
 #include "headers/cpp_interface/frameratemodel.h"
+#include "headers/qml_models/resolutionsmodel.h"
 
 class FPSOptions
 {
@@ -16,10 +17,13 @@ class FPSOptions
 public:
     //! TODO
     FPSOptions(const quint8 video_id
-             , std::shared_ptr<FramerateModel> shared_framerate_model)
+             , std::shared_ptr<FramerateModel> shared_framerate_model
+             , std::shared_ptr<ResolutionsModel> shared_resolution_model)
         : video_id(video_id)
         , enabled(false) // initialized by default to false, because revert_to_default button in options should not reset this
         , _shared_framerate_model(shared_framerate_model)
+        , _shared_resolution_model(shared_resolution_model)
+        , _text_shadow(41, 41, 41) // dark grey
     {
         _init_member();
     }
@@ -37,7 +41,7 @@ public:
         int x_offset = 1;
         int y_offset = 1;
         // draw shadow
-        painter->setPen(QColor(41, 41, 41));
+        painter->setPen(_text_shadow);
         painter->setFont(displayed_text.font());
         painter->drawText(x + x_offset, y + y_offset, _get_full_text());
         // draw real text
@@ -97,7 +101,10 @@ public:
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! the actual recording framerate (e.g most of the time this will be ~60)
     ValueItem<double> recorded_framerate;
-
+    //! TODO
+    std::shared_ptr<ResolutionsModel> _shared_resolution_model;
+    //! TODO
+    QColor _text_shadow;
 };
 
 #endif // FPSOptions_H
