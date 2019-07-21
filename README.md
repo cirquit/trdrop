@@ -2,6 +2,14 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 21.07.2019
+
+Added plots for both frametime and framerate processing. Fixed frametime processing too, this time it hopefully works. Plots are adaptive in scale (width is set in settings (TODO) and height is set by the highest value in the buffer).
+
+Now we need to style the plots slightly (e.g framerate and frametime text above the plots) and stitch all the settings together + maybe create more settings.
+
+![](images/2019-07-21-plots-example.gif)
+
 #### Update 14.07.2019
 
 Added frametime calculation (just a first prototype, need a plot for validation) and tear detection (similar to the one in the currently released trdrop).
