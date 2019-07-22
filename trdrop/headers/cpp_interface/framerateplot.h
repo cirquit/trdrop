@@ -141,7 +141,6 @@ private:
         const int y_pos = y_init_pos - y_bottom_padding;
         painter->drawText(x_pos, y_pos, text);
     }
-
     //! TODO
     void _draw_framerates(QPainter * painter)
     {

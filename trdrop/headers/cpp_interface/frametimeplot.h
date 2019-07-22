@@ -40,6 +40,7 @@ public:
         _draw_plot_outline(painter);
         _draw_plot_inner_lines(painter);
         _draw_text(painter);
+        _draw_eyecandy_text(painter);
         _draw_frametimes(painter);
     }
 
@@ -132,6 +133,22 @@ private:
         }
     }
     //! TODO
+    void _draw_eyecandy_text(QPainter * painter)
+    {
+        const QString text = "FRAMETIME IN MS";
+        painter->setFont(_get_eyecandy_text_font());
+
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width();
+
+        const int y_bottom_padding = _plot_outline.height() / 10;
+        const int x_right_padding  = _plot_outline.width() / 1.45;
+
+        const int x_pos = x_init_pos - x_right_padding;
+        const int y_pos = y_init_pos - y_bottom_padding;
+        painter->drawText(x_pos, y_pos, text);
+    }
+    //! TODO
     void _draw_frametimes(QPainter * painter)
     {
         for (int i = 0; i < (*_shared_fps_options_list).size(); ++i)
@@ -222,6 +239,11 @@ private:
     {
         return QFont("Fjalla One", _get_font_size());
     }
+    //! resolution adaptive font
+    QFont _get_eyecandy_text_font()
+    {
+        return QFont("Fjalla One", _get_eyecandy_font_size());
+    }
     //! resolution adaptive font size
     int _get_font_size()
     {
@@ -233,7 +255,21 @@ private:
         else if (current_size == QSize(2048, 1152)) return 30;
         else if (current_size == QSize(2560, 1440)) return 37;
         else if (current_size == QSize(3840, 2160)) return 51;
-        qDebug() << "Plot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        qDebug() << "FrametimePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        return 13;
+    }
+    //! TODO
+    int _get_eyecandy_font_size()
+    {
+        QSize current_size = _shared_resolution_model->get_active_size();
+        if      (current_size == QSize(960, 540))   return 13 + 3;
+        else if (current_size == QSize(1280, 720))  return 18 + 3;
+        else if (current_size == QSize(1600, 900))  return 22 + 3;
+        else if (current_size == QSize(1920, 1080)) return 27 + 3;
+        else if (current_size == QSize(2048, 1152)) return 30 + 3;
+        else if (current_size == QSize(2560, 1440)) return 37 + 3;
+        else if (current_size == QSize(3840, 2160)) return 51 + 12;
+        qDebug() << "FrametimePlot::_get_eyecandy_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
     //! currently supporting only 16:9
