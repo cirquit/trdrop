@@ -103,16 +103,21 @@ int main(int argc, char *argv[])
     // c++ plotter
     std::shared_ptr<FrameratePlot> shared_framerate_plot_instance(new FrameratePlot(shared_framerate_model
                                                       , shared_fps_options_list
-                                                      , shared_resolution_model));
+                                                      , shared_resolution_model
+                                                      , shared_general_options_model));
     std::shared_ptr<FrametimePlot> shared_frametime_plot_instance(new FrametimePlot(shared_frametime_model
                                                       , shared_fps_options_list
-                                                      , shared_resolution_model));
+                                                      , shared_resolution_model
+                                                      , shared_general_options_model));
     // qml objects
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     TearProcessingQML tear_processing_qml(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("tearprocessing", &tear_processing_qml);
-    FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_frametime_model, shared_fps_options_list);
+    FramerateProcessingQML framerate_processing_qml(shared_framerate_model
+                                                  , shared_frametime_model
+                                                  , shared_fps_options_list
+                                                  , shared_general_options_model);
     engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     DeltaProcessingQML delta_processing_qml(shared_fps_options_list, shared_general_options_model);
     engine.rootContext()->setContextProperty("deltaprocessing", &delta_processing_qml);

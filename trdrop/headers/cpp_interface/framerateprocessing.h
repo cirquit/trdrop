@@ -136,9 +136,6 @@ private:
         while (iterating_over_same_frame)
         {
             const quint8 diff = _frame_diff_lists[video_index][current_framerate_count];
-            //frame_time_counter += 1.0;
-            // loop backwards manually (TODO refactor with stl)
-            //current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);
             if (found_last_diff)
             {
                 if (diff == 0) frame_time_counter += 1.0;
@@ -151,11 +148,6 @@ private:
         double frametime_in_s = frame_time_counter / static_cast<double>(recorded_framerate);
         return frametime_in_s * 1000;
     }
-
-   // [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1]
-   //
-   //  _  _  _  _  _  _  _  _  _  50 50 50 30
-
     //! the inner lists of _frame_diff_lists are initialized to be the size of the framerate of each recorded video
     //! as we can not recognize a higher framerate than the one it was recorded with
     void _init_member(const QList<quint8> recorded_framerate_list)

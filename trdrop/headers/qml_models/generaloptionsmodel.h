@@ -130,6 +130,10 @@ public:
     Q_INVOKABLE QVariant enabledTearAnalysis()      { return _enable_tear_analysis.value(); }
     //! TODO
     bool get_enable_delta_rendering() { return _enable_delta_rendering.value(); }
+    //! TODO
+    uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
+    //! TODO
+    uint8_t get_frametime_range() { return _frametime_plot_range.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -174,12 +178,12 @@ private:
         _enable_delta_rendering.setValue(false);
 
         _framerate_plot_range.setName("Analysis range:");
-        _framerate_plot_range.setTooltip("Length of the framerate plot in seconds (x-axis)");
+        _framerate_plot_range.setTooltip("Length of the framerate plot in frames (x-axis)");
         _framerate_plot_range.setValue(60);
 
         _frametime_plot_range.setName("Analysis range:");
-        _frametime_plot_range.setTooltip("Length of the frametime plot in seconds (x-axis)");
-        _frametime_plot_range.setValue(30);
+        _frametime_plot_range.setTooltip("Length of the frametime plot in frames (x-axis)");
+        _frametime_plot_range.setValue(60);
 
     }
 

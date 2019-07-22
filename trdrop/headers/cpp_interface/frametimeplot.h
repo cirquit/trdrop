@@ -6,6 +6,7 @@
 #include "headers/cpp_interface/frametimemodel.h"
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/qml_models/resolutionsmodel.h"
+#include "headers/qml_models/generaloptionsmodel.h"
 
 class FrametimePlot
 {
@@ -14,10 +15,12 @@ public:
     //! TODO
     FrametimePlot(std::shared_ptr<FrametimeModel> shared_frametime_model
        , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
-       , std::shared_ptr<ResolutionsModel> shared_resolution_model)
+       , std::shared_ptr<ResolutionsModel> shared_resolution_model
+       , std::shared_ptr<GeneralOptionsModel> shared_general_options_model)
         : _shared_frametime_model(shared_frametime_model)
         , _shared_fps_options_list(shared_fps_options_list)
         , _shared_resolution_model(shared_resolution_model)
+        , _shared_general_options_model(shared_general_options_model)
         , _plot_outline_color(160, 160, 160)   // grey
         , _plot_innerline_color(193, 193, 193) // light grey
         , _plot_text_color(255, 255, 255) // white
@@ -153,13 +156,20 @@ private:
         pen.setJoinStyle(Qt::RoundJoin);
         painter->setPen(pen);
 
+        const uint8_t frametime_ticks = _shared_general_options_model->get_frametime_range();
+        // will always be positive, history is fixed in frameratemodel and ticks are restrict
+        const size_t size_difference = ft_history.size() - frametime_ticks;
+        // need the maximums to calculate the position of the point
+        const size_t max_index = ft_history.size() - size_difference;
         const double max_frametime = _shared_frametime_model->get_max_frametime_bounds();
         QPoint previous_point;
         size_t index = 0; // TODO implement enumerate
         // iterating in reverse, stitching every point with each other to draw lines instead of points
-        std::for_each(ft_history.rbegin(), ft_history.rend(), [&](const double frametime)
+        std::for_each(ft_history.rbegin() + size_difference
+                    , ft_history.rend()
+                    , [&](const double frametime)
         {
-            QPoint frametime_point = _to_plot_coords(frametime, max_frametime, index, ft_history.size());
+            QPoint frametime_point = _to_plot_coords(frametime, max_frametime, index, max_index);
             if (index == 0)
             {
                 painter->drawPoint(frametime_point);
@@ -291,6 +301,8 @@ private:
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
     //! TODO
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
+    //! TODO
+    std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
     //! color of the outer lines of the plot
     QColor _plot_outline_color;
     //! color of the inner lines of the plot

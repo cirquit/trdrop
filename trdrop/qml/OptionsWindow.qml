@@ -150,8 +150,8 @@ Window {
                             ToolTip.delay: 500
                             ToolTip.visible: hovered
                             ToolTip.text: model.framerateRangeTooltip
-                            textFromValue: function(value, locale) { return value.toString() + 's'; }
-                            valueFromText: function(value, locale) { return value.replace('s', ''); }
+                            textFromValue: function(value, locale) { return value.toString() + ' frames'; }
+                            valueFromText: function(value, locale) { return value.replace(' frames', ''); }
                             onValueChanged: {
                                 if (model.framerateRangeValue !== value) model.framerateRangeValue = Utils.round(value, 0);
                             }
@@ -205,8 +205,8 @@ Window {
                             ToolTip.delay: 500
                             ToolTip.visible: hovered
                             ToolTip.text: model.frametimeRangeTooltip
-                            textFromValue: function(value, locale) { return value.toString() + 's'; }
-                            valueFromText: function(value, locale) { return value.replace('s', ''); }
+                            textFromValue: function(value, locale) { return value.toString() + ' frames'; }
+                            valueFromText: function(value, locale) { return value.replace(' frames', ''); }
                             onValueChanged: {
                                 if (model.frametimeRangeValue !== value) model.frametimeRangeValue = Utils.round(value, 0);;
                             }
