@@ -38,8 +38,8 @@ public:
     //! TODO
     void paint_fps_text(QPainter * painter, int x, int y)
     {
-        int x_offset = 1;
-        int y_offset = 1;
+        int x_offset = 2;
+        int y_offset = 2;
         // draw shadow
         painter->setPen(_text_shadow);
         painter->setFont(displayed_text.font());
