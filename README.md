@@ -2,6 +2,12 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 23.07.2019
+
+Now only drawing the x/y axis of the plots, stitched some more options together. Implemented overlay exporting with PNG. Fixed some scaling artifacts so now it looks less grainy in the preview window. Also automatic re-scaling of the main window based on your resolution.
+
+![](images/2019-07-23-automatic-resize.gif)
+
 #### Update 22.07.2019
 
 Added shadows and eyecandy text for the plots + added the range functionality for the plots.
