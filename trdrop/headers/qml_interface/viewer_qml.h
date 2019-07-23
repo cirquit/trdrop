@@ -17,7 +17,6 @@ public:
     {
         //! TODO refactor to some global settings
         setImplicitSize(960, 540);
-        //drawDefaultImage();
     }
 
 //! methods
@@ -45,7 +44,7 @@ public:
         if (draw_image.toBool())
         {
             _qml_image = qml_image.copy();
-            _qml_image = _qml_image.scaledToHeight(static_cast<int>(size().height()));
+            _qml_image = _qml_image.scaledToHeight(static_cast<int>(size().height()), Qt::SmoothTransformation);
         }
         update();
     }
@@ -58,7 +57,7 @@ public:
             int x_padding = 0;
             if (size().width() > _qml_image.width())
             {
-                x_padding = (size().width() - _qml_image.width()) / 2;
+                x_padding = static_cast<int>((size().width() - _qml_image.width()) / 2);
             }
             painter->drawImage(0 + x_padding, 0, _qml_image);
         }

@@ -82,6 +82,11 @@ public:
         }
     }
     //! TODO
+    Q_INVOKABLE QVariant getActiveSize()
+    {
+        return get_active_size();
+    }
+    //! TODO
     Resolution get_active_value()
     {
         for (int i = 0; i < _resolutions_list.size(); ++i) {

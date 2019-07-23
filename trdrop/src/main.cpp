@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // register the viewer as qml type
     qmlRegisterType<ViewerQML>("Trdrop", 1, 0, "ViewerQML");
 
-    // c++ plotter
+    // c++ plots
     std::shared_ptr<FrameratePlot> shared_framerate_plot_instance(new FrameratePlot(shared_framerate_model
                                                       , shared_fps_options_list
                                                       , shared_resolution_model
