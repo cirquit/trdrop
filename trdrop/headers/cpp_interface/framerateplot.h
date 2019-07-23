@@ -65,14 +65,14 @@ private:
         const int y_pos = image_height - plot_height - y_bottom_padding;
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
-        //QPen other = _get_outerline_pen();
-        //other.setColor(_text_shadow);
-        //painter->setPen(other);
-        ////painter->drawRect(QRect(x_pos + 2, y_pos + 2, plot_width - 2, plot_height - 2));
-        //
-        // draw the rectangle
+        // draw the x and y axis of the rect
         painter->setPen(_get_outerline_pen());
-        painter->drawRect(_plot_outline);
+        // x axis
+        painter->drawLine(x_pos,              y_pos + plot_height
+                        , x_pos + plot_width, y_pos + plot_height);
+        // y axis
+        painter->drawLine(x_pos,  y_pos
+                        , x_pos , y_pos + plot_height);
 
     }
     //! drawing lines from top to bottom because Rect's x,y is top left
