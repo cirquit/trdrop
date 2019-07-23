@@ -217,7 +217,7 @@ private:
         // calculate y
         const int    plot_height  = _plot_outline.height();
         const double y_percentage = frametime / max_frametime;
-        const double y_inverted   = 1 - y_percentage; // reversing because we y = 0 in the top
+        const double y_inverted   = 1 - y_percentage; // reversing because y = 0 in the top
         const int    y_pos_rel    = static_cast<int>(y_inverted * static_cast<double>(plot_height));
         const int    y_pos        = y_pos_rel + _plot_outline.y();
 

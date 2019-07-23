@@ -70,7 +70,7 @@ public:
                     tear_data_list[i].set_tear_rows(_get_tear_rows(difference_frames[i]));
                 }
             } else {
-                // we could try to calculate the difference for each frame which we have a difference for
+                // we could try to calculate the difference for each frame where we have a previous frame accessable
                 // but it might be a hassle if the second video got deleted live, because the indices get moved
                 // it's easier to simply wait until the new frames arrive at the correct index. I should probably
                 // disable removing files while exporting
