@@ -20,7 +20,13 @@ ApplicationWindow
     menuBar: TrdropMenubar { }
     // default content
     StartupBackground {
+        id: startupBackground
         visible: true
+        // disable the background if the export as overlay and the text would show
+        Connections {
+            target: exportOptionsModel
+            onDataChanged: startupBackground.visible = !exportOptionsModel.exportAsOverlay()
+        }
     }
     // drawn over the startup background for simplicity
     TrdropContent {

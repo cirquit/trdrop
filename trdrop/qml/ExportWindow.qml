@@ -126,6 +126,7 @@ Window {
                     }
                 }
                 ComboBox {
+                    id: imageFormatComboBox
                     Layout.fillWidth: true
                     textRole: "imageFormatName"
                     model: imageFormatModel
@@ -215,6 +216,14 @@ Window {
                         onTriggered: {
                             model.exportAsOverlayValue = !model.exportAsOverlayValue;
                             checked: model.exportAsOverlayValue
+                            if (model.exportAsOverlayValue)
+                            {
+                                // 0 - JPEG, 1 - PNG
+                                imageFormatModel.setActiveValueAt(1);
+                                imageFormatComboBox.currentIndex = 1;
+                            }
+
+                            imagecomposer.updateComposition();
                         }
                     }
                 }

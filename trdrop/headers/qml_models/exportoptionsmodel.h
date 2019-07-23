@@ -159,11 +159,16 @@ public:
     //! TODO
     Q_INVOKABLE QVariant enabledLivePreview(){ return _enable_live_preview.value(); }
     //! TODO
+    Q_INVOKABLE QVariant exportAsOverlay(){ return export_as_overlay(); }
+    //! TODO
     QString get_imagesequence_prefix(){ return _imagesequence_prefix.value(); }
     //! TODO
     QString get_export_directory(){ return _export_directory.value(); }
     //! TODO
     bool export_as_imagesequence(){ return _imagesequence_prefix.enabled(); }
+    //! TODO
+    bool export_as_overlay(){ return _export_as_overlay.value(); }
+
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)

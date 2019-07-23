@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml(shared_resolution_model);
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    RendererQML renderer_qml(shared_fps_options_list, shared_general_options_model, shared_framerate_plot_instance, shared_frametime_plot_instance);
+    RendererQML renderer_qml(shared_fps_options_list, shared_general_options_model, shared_export_options_model, shared_framerate_plot_instance, shared_frametime_plot_instance);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);
