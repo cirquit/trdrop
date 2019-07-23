@@ -9,11 +9,10 @@ ApplicationWindow
 {
     // startup as a fullscreen application
     id: rootWindow
-    //width:
     minimumWidth: Screen.width
     minimumHeight: Screen.height
     visible: true
-
+    // TODO refactor this so the user may choose a light theme
     Material.theme: Material.Dark
     Material.accent: Material.Purple
 
@@ -23,15 +22,10 @@ ApplicationWindow
     StartupBackground {
         visible: true
     }
-    //
+    // drawn over the startup background for simplicity
     TrdropContent {
         visible: true
     }
-    // content
-//    TrdropContent {
-//        visible: true
-//    }
-
     // not needed yet
     // statusBar: TrdropStatusBar { }
 }

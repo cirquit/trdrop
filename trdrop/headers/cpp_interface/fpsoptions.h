@@ -75,14 +75,12 @@ private:
         recorded_framerate.setName("Recorded framerate:");
         recorded_framerate.setTooltip("This is the raw encoded framerate of the clip without frameranalysis");
         recorded_framerate.setValue(0.0);
-
-        // enabled = false;
     }
     //! TODO
     QString _get_full_text() const
     {
         double framerate = _shared_framerate_model->get_framerate_at(video_id);
-        return displayed_text.value() + " " + QString::number(framerate);
+        return displayed_text.value() + " " + QString::number(framerate, 10, 1);
     }
 
 // member
