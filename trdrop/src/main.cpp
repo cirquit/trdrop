@@ -114,10 +114,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
     TearProcessingQML tear_processing_qml(shared_framerate_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("tearprocessing", &tear_processing_qml);
-    FramerateProcessingQML framerate_processing_qml(shared_framerate_model
-                                                  , shared_frametime_model
-                                                  , shared_fps_options_list
-                                                  , shared_general_options_model);
+    FramerateProcessingQML framerate_processing_qml(shared_framerate_model, shared_frametime_model, shared_fps_options_list);
     engine.rootContext()->setContextProperty("framerateprocessing", &framerate_processing_qml);
     DeltaProcessingQML delta_processing_qml(shared_fps_options_list, shared_general_options_model);
     engine.rootContext()->setContextProperty("deltaprocessing", &delta_processing_qml);
@@ -125,7 +122,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
     ImageComposerQML imagecomposer_qml(shared_resolution_model);
     engine.rootContext()->setContextProperty("imagecomposer", &imagecomposer_qml);
-    RendererQML renderer_qml(shared_fps_options_list, shared_framerate_plot_instance, shared_frametime_plot_instance);
+    RendererQML renderer_qml(shared_fps_options_list, shared_general_options_model, shared_framerate_plot_instance, shared_frametime_plot_instance);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);
@@ -156,6 +153,7 @@ int main(int argc, char *argv[])
     // meta data pipeline
     // link the fps options with the renderer
     QObject::connect(&fps_options_model, &FPSOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
+    QObject::connect(&(*shared_general_options_model), &GeneralOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
     // TODO tear options
     // TODO frametime options
     // TODO tear values

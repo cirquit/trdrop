@@ -125,11 +125,15 @@ public:
         resetModel();
     }
     //! TODO
-    Q_INVOKABLE QVariant enabledFramerateAnalysis() { return _enable_fps_analysis.value(); }
+    //Q_INVOKABLE QVariant enabledFramerateAnalysis() { return _enable_fps_analysis.value(); }
     //! TODO
     Q_INVOKABLE QVariant enabledTearAnalysis()      { return _enable_tear_analysis.value(); }
     //! TODO
     bool get_enable_delta_rendering() { return _enable_delta_rendering.value(); }
+    //! TODO
+    bool get_enable_frametime_analysis() { return _enable_frametime_analysis.value(); }
+    //! TODO
+    bool get_enable_framerate_analysis() { return _enable_fps_analysis.value(); }
     //! TODO
     uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
     //! TODO

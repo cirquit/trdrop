@@ -22,7 +22,6 @@ public:
     FramerateProcessingQML(std::shared_ptr<FramerateModel> shared_framerate_model
                          , std::shared_ptr<FrametimeModel> shared_frametime_model
                          , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
-                         , std::shared_ptr<GeneralOptionsModel> shared_general_options_model
                          , QObject * parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
