@@ -21,7 +21,7 @@ public:
         , _shared_fps_options_list(shared_fps_options_list)
         , _shared_resolution_model(shared_resolution_model)
         , _shared_general_options_model(shared_general_options_model)
-        , _plot_outline_color(160, 160, 160)   // grey
+        , _plot_outline_color(236, 236, 236)   // almost white
         , _plot_innerline_color(193, 193, 193) // light grey
         , _plot_text_color(255, 255, 255) // white
         , _text_shadow(41, 41, 41) // dark grey
@@ -65,9 +65,15 @@ private:
         const int y_pos = image_height - plot_height - y_bottom_padding;
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
+        //QPen other = _get_outerline_pen();
+        //other.setColor(_text_shadow);
+        //painter->setPen(other);
+        ////painter->drawRect(QRect(x_pos + 2, y_pos + 2, plot_width - 2, plot_height - 2));
+        //
         // draw the rectangle
         painter->setPen(_get_outerline_pen());
         painter->drawRect(_plot_outline);
+
     }
     //! drawing lines from top to bottom because Rect's x,y is top left
     void _draw_plot_inner_lines(QPainter * painter)
@@ -163,29 +169,21 @@ private:
     //! TODO
     void _draw_framerate(QPainter * painter, const int video_count)
     {
-        const std::deque<double> & fps_history = _shared_framerate_model->get_framerate_history(static_cast<size_t>(video_count));
-        const QColor plot_color                = (*_shared_fps_options_list)[video_count].fps_plot_color.color();
-
-        QPen pen;
-        pen.setStyle(Qt::SolidLine);
-        pen.setWidth(_get_plotline_thickness());
-        pen.setBrush(plot_color);
-        pen.setCapStyle(Qt::FlatCap);
-        pen.setJoinStyle(Qt::RoundJoin);
-        painter->setPen(pen);
-
-
+        const std::deque<double> & framerate_history = _shared_framerate_model->get_framerate_history(static_cast<size_t>(video_count));
+        // set pen to the correct color and line width
+        painter->setPen(_get_framerate_pen(video_count));
+        // how many ticks do we want to display
         const uint8_t framerate_ticks = _shared_general_options_model->get_framerate_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restricted by GUI
-        const size_t size_difference = fps_history.size() - framerate_ticks;
+        const size_t size_difference = framerate_history.size() - framerate_ticks;
         // need the maximums to calculate the position of the point
-        const size_t max_index = fps_history.size() - size_difference;
+        const size_t max_index = framerate_history.size() - size_difference;
         const double max_framerate = _shared_framerate_model->get_max_framerate_bounds();
         QPoint previous_point;
         size_t index = 0; // TODO implement enumerate
         // iterating in reverse, stitching every point with each other to draw lines instead of points
-        std::for_each(fps_history.rbegin() + size_difference
-                    , fps_history.rend()
+        std::for_each(framerate_history.rbegin() + size_difference
+                    , framerate_history.rend()
                     , [&](const double framerate)
         {
             QPoint framerate_point = _to_plot_coords(framerate, max_framerate, index, max_index);
@@ -228,6 +226,7 @@ private:
         QPen pen;
         pen.setWidth(_get_outline_thickness());
         pen.setColor(_plot_outline_color);
+        pen.setJoinStyle(Qt::MiterJoin); // hard counters
         return pen;
     }
     //! resolution adaptive innerline pen
@@ -236,6 +235,18 @@ private:
         QPen pen;
         pen.setWidth(_get_innerline_thickness());
         pen.setColor(_plot_innerline_color);
+        return pen;
+    }
+    //! resolution adaptive pen with the color corresponding the the video index
+    QPen _get_framerate_pen(const int video_index)
+    {
+        const QColor plot_color = (*_shared_fps_options_list)[video_index].fps_plot_color.color();
+        QPen pen;
+        pen.setStyle(Qt::SolidLine);
+        pen.setWidth(_get_plotline_thickness());
+        pen.setBrush(plot_color);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setJoinStyle(Qt::RoundJoin);
         return pen;
     }
     //! resolution adaptive font
@@ -308,13 +319,13 @@ private:
     int _get_innerline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 2;
-        else if (current_size == QSize(1280, 720))  return 2;
-        else if (current_size == QSize(1600, 900))  return 3;
-        else if (current_size == QSize(1920, 1080)) return 3;
-        else if (current_size == QSize(2048, 1152)) return 4;
-        else if (current_size == QSize(2560, 1440)) return 4;
-        else if (current_size == QSize(3840, 2160)) return 6;
+        if      (current_size == QSize(960, 540))   return 1;
+        else if (current_size == QSize(1280, 720))  return 1;
+        else if (current_size == QSize(1600, 900))  return 2;
+        else if (current_size == QSize(1920, 1080)) return 2;
+        else if (current_size == QSize(2048, 1152)) return 3;
+        else if (current_size == QSize(2560, 1440)) return 3;
+        else if (current_size == QSize(3840, 2160)) return 5;
         qDebug() << "FrameratePlot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 2;
     }

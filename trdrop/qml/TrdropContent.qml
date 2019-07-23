@@ -8,6 +8,7 @@ Item {
     id: trdropcontent
     anchors.centerIn: parent
     anchors.fill: parent
+    anchors.margins: 50
 
     // slightly convoluted, this should be reworked
     // the viewer can't take the exportOptionsModel as shared_ptr as its called from QML
@@ -29,5 +30,6 @@ Item {
     ViewerQML {
         id: viewer
         anchors.centerIn: parent
+        anchors.fill: parent
     }
 }

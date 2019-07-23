@@ -21,17 +21,16 @@ public:
         , _shared_fps_options_list(shared_fps_options_list)
         , _shared_resolution_model(shared_resolution_model)
         , _shared_general_options_model(shared_general_options_model)
-        , _plot_outline_color(160, 160, 160)   // grey
+        , _plot_outline_color(236, 236, 236) // almost white
         , _plot_innerline_color(193, 193, 193) // light grey
         , _plot_text_color(255, 255, 255) // white
         , _text_shadow(41, 41, 41) // dark grey
         , _segment_count(3) // we want to split the plot into 3 bars
-        , _eyecandy_text("FRAMERATE IN MS")
+        , _eyecandy_text("FRAMETIME IN MS")
     { }
 
 // methods
 public:
-
     //! top left is (0,0)
     void draw_frametime_plot(QPainter * painter)
     {
@@ -171,16 +170,9 @@ private:
     void _draw_frametime(QPainter * painter, const int video_count)
     {
         const std::deque<double> & ft_history = _shared_frametime_model->get_frametime_history(static_cast<size_t>(video_count));
-        const QColor plot_color               = (*_shared_fps_options_list)[video_count].fps_plot_color.color();
-
-        QPen pen;
-        pen.setStyle(Qt::SolidLine);
-        pen.setWidth(_get_plotline_thickness());
-        pen.setBrush(plot_color);
-        pen.setCapStyle(Qt::FlatCap);
-        pen.setJoinStyle(Qt::RoundJoin);
-        painter->setPen(pen);
-
+        // set pen to the correct color and line width
+        painter->setPen(_get_frametime_pen(video_count));
+        // how many ticks do we want to display
         const uint8_t frametime_ticks = _shared_general_options_model->get_frametime_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restrict
         const size_t size_difference = ft_history.size() - frametime_ticks;
@@ -232,6 +224,7 @@ private:
         QPen pen;
         pen.setWidth(_get_outline_thickness());
         pen.setColor(_plot_outline_color);
+        pen.setJoinStyle(Qt::MiterJoin); // hard counters
         return pen;
     }
     //! resolution adaptive innerline pen
@@ -240,6 +233,18 @@ private:
         QPen pen;
         pen.setWidth(_get_innerline_thickness());
         pen.setColor(_plot_innerline_color);
+        return pen;
+    }
+    //! resolution adaptive pen with the color corresponding the the video index
+    QPen _get_frametime_pen(const int video_index)
+    {
+        const QColor plot_color = (*_shared_fps_options_list)[video_index].fps_plot_color.color();
+        QPen pen;
+        pen.setStyle(Qt::SolidLine);
+        pen.setWidth(_get_plotline_thickness());
+        pen.setBrush(plot_color);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setJoinStyle(Qt::RoundJoin);
         return pen;
     }
     //! resolution adaptive font
@@ -312,13 +317,13 @@ private:
     int _get_innerline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 2;
-        else if (current_size == QSize(1280, 720))  return 2;
-        else if (current_size == QSize(1600, 900))  return 3;
-        else if (current_size == QSize(1920, 1080)) return 3;
-        else if (current_size == QSize(2048, 1152)) return 4;
-        else if (current_size == QSize(2560, 1440)) return 4;
-        else if (current_size == QSize(3840, 2160)) return 6;
+        if      (current_size == QSize(960, 540))   return 1;
+        else if (current_size == QSize(1280, 720))  return 1;
+        else if (current_size == QSize(1600, 900))  return 2;
+        else if (current_size == QSize(1920, 1080)) return 2;
+        else if (current_size == QSize(2048, 1152)) return 3;
+        else if (current_size == QSize(2560, 1440)) return 3;
+        else if (current_size == QSize(3840, 2160)) return 5;
         qDebug() << "FrametimePlot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 2;
     }
@@ -339,13 +344,13 @@ private:
 
 // member
 private:
-    //! TODO
+    //! shared model from main.cpp
     std::shared_ptr<FrametimeModel> _shared_frametime_model;
-    //! TODO
+    //! shared model from main.cpp
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
-    //! TODO
+    //! shared model from main.cpp
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! TODO
+    //! shared model from main.cpp
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
     //! color of the outer lines of the plot
     QColor _plot_outline_color;

@@ -41,13 +41,11 @@ public:
     //! triggers a repainting of the pixmap when the image is copied and drawn
     Q_SLOT void setImage(const QImage & qml_image, QVariant draw_image)
     {
-        //resize(qml_image.size());
-        //qDebug() << "ViewerQML::setImage - " << qml_image;
         _draw_image = draw_image.toBool();
         if (draw_image.toBool())
         {
             _qml_image = qml_image.copy();
-            _qml_image = _qml_image.scaledToWidth(static_cast<int>(size().width()));
+            _qml_image = _qml_image.scaledToHeight(static_cast<int>(size().height()));
         }
         update();
     }
@@ -57,7 +55,12 @@ public:
     {
         if (_draw_image)
         {
-            painter->drawImage(0, 0, _qml_image);
+            int x_padding = 0;
+            if (size().width() > _qml_image.width())
+            {
+                x_padding = (size().width() - _qml_image.width()) / 2;
+            }
+            painter->drawImage(0 + x_padding, 0, _qml_image);
         }
         emit requestNextImages();
     }
