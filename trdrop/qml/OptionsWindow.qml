@@ -82,6 +82,7 @@ Window {
                     flat: true
                     text: "Frametime"
                     font.pointSize: 15
+                    enabled: false
                     highlighted: frametimeOptions.visible
                     onClicked: {
                         generalOptions.visible   = false
@@ -186,7 +187,7 @@ Window {
                             action: Action {
                                 onTriggered: {
                                     model.enableFrametimeValue = !model.enableFrametimeValue;
-                                    frametimeTab.enabled = model.enableFrametimeValue
+                                    //frametimeTab.enabled = model.enableFrametimeValue // we have currently no options to set
                                     frametimeRange.enabled = model.enableFrametimeValue
                                 }
                             }
