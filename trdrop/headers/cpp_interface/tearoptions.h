@@ -35,9 +35,9 @@ private:
         tear_plot_color.setTooltip("Color of the tears in the framerate plot");
         tear_plot_color.setColor("#FAFAFA");
 
-        pixel_difference.setName("Tear percentage:");
-        pixel_difference.setTooltip("How big can the teared frame be to be counted as a new frame for the framerate analysis");
-        pixel_difference.setValue(0);
+        dismiss_tear_percentage.setName("Dismissed tear percentage:");
+        dismiss_tear_percentage.setTooltip("Tears that are smaller than this amount of the image are dismissed");
+        dismiss_tear_percentage.setValue(10.0);
 
         enabled = false;
     }
@@ -49,7 +49,7 @@ public:
     //! TODO
     ColorPickItem tear_plot_color;
     //! TODO
-    ValueItem<quint8> pixel_difference;
+    ValueItem<double> dismiss_tear_percentage;
     //! TODO
     bool enabled;
 //    //! TODO

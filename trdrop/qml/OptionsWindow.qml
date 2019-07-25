@@ -479,7 +479,7 @@ Window {
                             }
 
                             Label {
-                                text: model.pixelDifferenceName
+                                text: model.dismissTearPercentageName
                             }
                             SpinBox {
                                 id: tearPercentage
@@ -488,11 +488,11 @@ Window {
                                 stepSize: 1
                                 editable: true
                                 enabled: model.tearOptionsEnabled
-                                value: model.pixelDifference
+                                value: model.dismissTearPercentage
                                 textFromValue: function(value, locale) { return value.toString() + '%'; }
                                 valueFromText: function(value, locale) { return value.replace('%', ''); }
                                 onValueChanged: {
-                                    if (model.pixelDifference !== value){ model.pixelDifference = value; }
+                                    if (model.dismissTearPercentage !== value){ model.dismissTearPercentage = value; }
                                 }
                             }
                             Button {
@@ -500,7 +500,7 @@ Window {
                                 enabled: model.tearOptionsEnabled
                                 action: Action {
                                     onTriggered: {
-                                        tearOptionsModel.applyTearPercentage(model.pixelDifference)
+                                        tearOptionsModel.applyTearPercentage(model.dismissTearPercentage)
                                     }
                                 }
                             }

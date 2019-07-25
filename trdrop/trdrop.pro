@@ -75,9 +75,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     headers/cpp_interface/checkboxitem.h \
     headers/cpp_interface/fileitem.h \
-    headers/cpp_interface/framerateprocessing.h \
     headers/cpp_interface/resolution.h \
-    headers/cpp_interface/tearprocessing.h \
     headers/cpp_interface/valueitem.h \
     headers/cpp_interface/colorpickitem.h \
     headers/cpp_interface/fpsoptions.h \
@@ -87,17 +85,13 @@ HEADERS += \
     headers/cpp_interface/imageformat.h \
     headers/cpp_interface/videoformat.h \
     headers/cpp_interface/frameratemodel.h \
-    headers/cpp_interface/deltaprocessing.h \
     headers/cpp_interface/teardata.h \
-    headers/qml_interface/framerateprocessing_qml.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
-    headers/qml_interface/tearprocessing_qml.h \
     headers/qml_interface/renderer_qml.h \
     headers/qml_interface/videocapturelist_qml.h \
     headers/qml_interface/viewer_qml.h \
     headers/qml_interface/exporter_qml.h \
-    headers/qml_interface/deltaprocessing_qml.h \
     headers/qml_models/fileitemmodel.h \
     headers/qml_models/fpsoptionsmodel.h \
     headers/qml_models/generaloptionsmodel.h \
@@ -108,7 +102,9 @@ HEADERS += \
     headers/qml_models/exportoptionsmodel.h \
     headers/cpp_interface/framerateplot.h \
     headers/cpp_interface/frametimeplot.h \
-    headers/cpp_interface/frametimemodel.h
+    headers/cpp_interface/frametimemodel.h \
+    headers/cpp_interface/frameprocessing.h \
+    headers/qml_interface/frameprocessing_qml.h
 
 
 

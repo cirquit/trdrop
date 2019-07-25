@@ -221,9 +221,7 @@ Window {
         target: fileItemModel
         onUpdateFileItemPaths: {
             videocapturelist.openAllPaths(filePaths);
-            framerateprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
-            deltaprocessing.resetState();
-            tearprocessing.resetState();
+            frameprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
             fileItemModel.setRecordedFramerates(getVisualFileItemPaths()
                                                ,videocapturelist.getRecordedFramerates());
             fpsOptionsModel.setRecordedFramerates(videocapturelist.getRecordedFramerates());

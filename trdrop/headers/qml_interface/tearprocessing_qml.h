@@ -24,7 +24,6 @@ public:
         , _shared_fps_options_list(shared_fps_options_list)
         , _shared_framerate_model(shared_framerate_model)
     { }
-//    TearProcessingQML(QObject * parent = nullptr)
 
 //! methods
 public:
@@ -34,13 +33,15 @@ public:
     Q_SLOT void processFrames(const QList<cv::Mat> & cv_image_list)
     {
 
-        QList<TearData> teardata_list = _tear_processing.check_for_tears(cv_image_list, _shared_fps_options_list);
+        //QList<TearData> teardata_list = _tear_processing.check_for_tears(cv_image_list, _shared_fps_options_list);
 
-        for (int i = 0; i < teardata_list.size(); ++i) {
+        //for (int i = 0; i < teardata_list.size(); ++i) {
+
+            //quint8 diff = _shared_framerate_model->get_framerate_at_front(i);
             //_shared_framerate_model->set_tear_at(i, tear_list[i]);
             //if (frametime_list[i] != 0) qDebug() << frametime_list[i] << "ms";
             //qDebug() << "TearProcessingQML::processFrames() - tear percentage[" << i << "]: " << teardata_list[i].get_tear_percentage();
-        }
+        //}
         emit framesReady(cv_image_list);
     }
     //! TODO

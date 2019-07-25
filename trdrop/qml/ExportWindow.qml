@@ -282,9 +282,7 @@ Window {
                     onFinishedProcessing: {
                         exportButton.text = "Export";
                         exportProgressBar.value = 0.0;
-                        framerateprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
-                        deltaprocessing.resetState();
-                        tearprocessing.resetState();
+                        frameprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
                     }
                 }
 

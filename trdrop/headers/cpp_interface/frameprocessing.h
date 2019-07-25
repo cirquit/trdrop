@@ -1,5 +1,5 @@
-#ifndef FRAMERATEPROCESSING_H
-#define FRAMERATEPROCESSING_H
+#ifndef FRAMEPROCESSING_H
+#define FRAMEPROCESSING_H
 
 #include <QDebug>
 #include <QList>
@@ -8,16 +8,18 @@
 #include <opencv2/imgcodecs.hpp>
 #include <memory>
 #include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/teardata.h"
+#include "headers/qml_models/tearoptionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
 //! TODO
-class FramerateProcessing
+class FrameProcessing
 {
 
 //! constructors
 public:
     //! TODO
-    FramerateProcessing()
+    FrameProcessing()
         : _received_first_frames(false)
         , _max_video_count(3)
     {
@@ -27,16 +29,29 @@ public:
 
 //! methods
 public:
-    //! TODO
-    void check_for_difference(const QList<cv::Mat> & cv_frame_list
-                            , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list)
+    //! returns the difference frames
+    QList<cv::Mat> check_for_difference(const QList<cv::Mat> & cv_frame_list
+                            , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+                            , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
     {
+        QList<cv::Mat> difference_frames;
+        QList<TearData> tear_data_list;
+
+        // we can only calculate the difference if we have at least two sets of frames
         if (!_received_first_frames)
         {
             _received_first_frames = true;
             _cache_framelist(cv_frame_list);
+            return cv_frame_list;
         } else
         {
+            // default init TODO refactor
+            for (int i = 0; i < cv_frame_list.size(); ++i) {
+                difference_frames.push_back(cv::Mat());
+                const quint64 row_count = static_cast<quint64>(cv_frame_list[i].rows);
+                tear_data_list.push_back(TearData(row_count));
+            }
+
             // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
             // refactored this from the loop to allow omp
             bool all_cached_frames_filled = true;
@@ -49,21 +64,16 @@ public:
                 #pragma omp parallel for
                 for (int i = 0; i < cv_frame_list.size(); ++i)
                 {
-                    // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
-                    //if (_cached_frames[i].empty()) break;
-                    // get the pixel difference from the settings
-                    int current_pixel_difference = static_cast<int>((*shared_fps_options_list)[i].pixel_difference.value());
-                    // check if the previous frame and current frame are equal
-                    bool are_equal = _are_equal_with(_cached_frames[i]
-                                                   , cv_frame_list[i]
-                                                   , current_pixel_difference);
-                    // if the frame is equal, don't increment the whole frame count -> 0
-                    const quint8 diff_frame = are_equal ? 0 : 1;
+                    const quint32 pixel_difference = (*shared_fps_options_list)[i].pixel_difference.value();
+                    difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i], pixel_difference).clone();
+                    tear_data_list[i].set_tear_rows(_get_tear_rows(difference_frames[i]));
+
                     // explicit convertion for linter
                     const size_t _i           = static_cast<size_t>(i);
                     const size_t _frame_count = _current_framecount_list[_i];
-                    // set the diff_frame for the video (_i) for the current count (_frame_count)
-                    _frame_diff_lists[_i][_frame_count] = diff_frame;
+                    // calculate a diff frame based on the amount of "same" rows in the compared frames
+                    double dismiss_tear_percentage = (*shared_tear_options_list)[i].dismiss_tear_percentage.value() / 100;
+                    _frame_diff_lists[_i][_frame_count] = tear_data_list[i].get_diff_percentage(dismiss_tear_percentage);
                 }
             }
             // increments the framecounter for each video and loops automatically
@@ -71,6 +81,7 @@ public:
         }
         // save the current frame list
         _cache_framelist(cv_frame_list);
+        return difference_frames;
     }
     //! calculates the current framerate for each video
     const QList<double> get_framerates()
@@ -160,7 +171,7 @@ private:
             {
                 recorded_framerate = recorded_framerate_list[i];
             }
-            _frame_diff_lists.push_back(std::vector<quint8>(recorded_framerate, 0));
+            _frame_diff_lists.push_back(std::vector<double>(recorded_framerate, 0.0));
             _cached_frames.push_back(cv::Mat());
             _current_framecount_list.push_back(0);
         }
@@ -224,7 +235,75 @@ private:
         if (value == 0) return max_value;
         else return value - 1;
     }
-//! member
+    //! make this chooseable?
+    cv::Mat _get_difference(const cv::Mat & first_frame, const cv::Mat & second_frame, const quint32 pixel_difference) const
+    {
+        cv::Mat difference;
+        //cv::absdiff(first_frame, second_frame, difference);
+        _are_equal_with_draw(first_frame, second_frame, static_cast<int>(pixel_difference), difference);
+        return difference;
+    }
+    //! TODO rethink this
+    //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
+    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixel_difference, cv::Mat & output) const {
+        cv::Mat black_white_frame_a;
+        cv::Mat black_white_frame_b;
+        cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
+        cv::cvtColor(frame_b, black_white_frame_b, cv::COLOR_BGRA2GRAY);
+
+        output = frame_a.clone();
+        for (int i = 0; i < black_white_frame_a.rows; i += 1) {
+            for (int j = 0; j < black_white_frame_a.cols; j += 1) {
+                int ac(std::max(black_white_frame_a.at<uchar>(i, j)
+                              , black_white_frame_b.at<uchar>(i, j)));
+                int bc(std::min(black_white_frame_a.at<uchar>(i, j)
+                              , black_white_frame_b.at<uchar>(i, j)));
+                if (ac - bc > pixel_difference) {
+                    // on difference, set to white
+                    output.at<cv::Vec3b>(i,j)[0] = 255;
+                    output.at<cv::Vec3b>(i,j)[1] = 255;
+                    output.at<cv::Vec3b>(i,j)[2] = 255;
+                } else {
+                    // on "same" pixel, set to black
+                    output.at<cv::Vec3b>(i,j)[0] = 0;
+                    output.at<cv::Vec3b>(i,j)[1] = 0;
+                    output.at<cv::Vec3b>(i,j)[2] = 0;
+                }
+            }
+        }
+    }
+    //! get the rows where we detect a tear (may not be ordered from 0 to max_rows, e.g 0 3 2)
+    std::vector<quint64> _get_tear_rows(const cv::Mat & difference) const
+    {
+        std::vector<quint64> tear_rows;
+        #pragma omp parallel for
+        for (int row = 0; row < difference.rows; ++row)
+        {
+            if (_is_row_a_tear(difference, row))
+            {
+                tear_rows.push_back(static_cast<quint64>(row));
+            }
+        }
+        return tear_rows;
+    }
+    //! short circuits if any pixel in a row is found not to be full black (0,0,0)
+    bool _is_row_a_tear(const cv::Mat & difference, const int row) const
+    {
+        for (int col = 0; col < difference.cols; ++col)
+        {
+            bool red_channel_is_not_black   = difference.at<cv::Vec3b>(row,col)[0] != 0;
+            bool green_channel_is_not_black = difference.at<cv::Vec3b>(row,col)[1] != 0;
+            bool blue_channel_is_not_black  = difference.at<cv::Vec3b>(row,col)[2] != 0;
+            bool pixel_is_not_black = red_channel_is_not_black && green_channel_is_not_black && blue_channel_is_not_black;
+            // if the difference frame is not black, we detected a change in the subsequent image
+            if (pixel_is_not_black)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    //! member
 private:
 
     //! holds the current framecount of each video (used to access the inner lists of _frame_diff_lists)
@@ -234,9 +313,9 @@ private:
     //! TODO
     QList<cv::Mat>                   _cached_frames;
     //! the list which has a list for each video consisting of 0's or 1's, counting the differing frames
-    std::vector<std::vector<quint8>> _frame_diff_lists;
+    std::vector<std::vector<double>> _frame_diff_lists;
     //! TODO
     const quint8                     _max_video_count;
 };
 
-#endif // FRAMERATEPROCESSING_H
+#endif // FRAMEPROCESSING_H

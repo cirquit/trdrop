@@ -40,6 +40,17 @@ public:
         _framerate_history[index].pop_back();
     }
     //! TODO
+    double get_framerate_at_front(const size_t index) const
+    {
+        return _framerate_history[index].front();
+    }
+    //! TODO
+    void change_framerate_at_front(const size_t index, const double value)
+    {
+        _framerate_history[index].front() = value;
+    }
+
+    //! TODO
     double get_framerate_at(const quint8 index) const
     {
         return get_framerate_at(static_cast<size_t>(index));
@@ -99,7 +110,7 @@ private:
 
 private:
     //! TODO
-    size_t              _max_video_count;
+    size_t _max_video_count;
     //! how long do we want to save the framerates?
     const size_t _max_history_ticks;
     //! TODO

@@ -3,7 +3,9 @@
 
 #include <QAbstractTableModel>
 #include <QDebug>
+#include <memory>
 #include "headers/cpp_interface/tearoptions.h"
+
 
 //!
 class TearOptionsModel : public QAbstractListModel
@@ -12,8 +14,10 @@ class TearOptionsModel : public QAbstractListModel
 //! constructors
 public:
     //!
-    TearOptionsModel(QObject * parent = nullptr)
+    TearOptionsModel(std::shared_ptr<QList<TearOptions>> shared_tear_options_list
+                   , QObject * parent = nullptr)
         : QAbstractListModel(parent)
+        , _shared_tear_options_list(shared_tear_options_list)
     {
         _init_options();
         _setup_role_names();
@@ -21,13 +25,13 @@ public:
     //!
     enum TearOptionsRoles
     {
-        ColorPickNameRole          = Qt::UserRole + 50
-      , ColorPickTooltipRole       = Qt::UserRole + 51
-      , ColorPickValueRole         = Qt::UserRole + 52
-      , PixelDifferenceNameRole    = Qt::UserRole + 53
-      , PixelDifferenceTooltipRole = Qt::UserRole + 54
-      , PixelDifferenceValueRole   = Qt::UserRole + 55
-      , TearOptionsEnabled         = Qt::UserRole + 56
+        ColorPickNameRole                = Qt::UserRole + 50
+      , ColorPickTooltipRole             = Qt::UserRole + 51
+      , ColorPickValueRole               = Qt::UserRole + 52
+      , DismissTearPercentageNameRole    = Qt::UserRole + 53
+      , DismissTearPercentageTooltipRole = Qt::UserRole + 54
+      , DismissTearPercentageValueRole   = Qt::UserRole + 55
+      , TearOptionsEnabled               = Qt::UserRole + 56
     };
 //! methods
 public:
@@ -35,7 +39,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
-        return _tear_options_list.size();
+        return _shared_tear_options_list->size();
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
@@ -46,19 +50,19 @@ public:
         switch (role)
         {
             case ColorPickNameRole:
-                return _tear_options_list[row].tear_plot_color.name();
+                return (*_shared_tear_options_list)[row].tear_plot_color.name();
             case ColorPickTooltipRole:
-                return _tear_options_list[row].tear_plot_color.tooltip();
+                return (*_shared_tear_options_list)[row].tear_plot_color.tooltip();
             case ColorPickValueRole:
-                return _tear_options_list[row].tear_plot_color.color();
-            case PixelDifferenceNameRole:
-                return _tear_options_list[row].pixel_difference.name();
-            case PixelDifferenceTooltipRole:
-                return _tear_options_list[row].pixel_difference.tooltip();
-            case PixelDifferenceValueRole:
-                return _tear_options_list[row].pixel_difference.value();
+                return (*_shared_tear_options_list)[row].tear_plot_color.color();
+            case DismissTearPercentageNameRole:
+                return (*_shared_tear_options_list)[row].dismiss_tear_percentage.name();
+            case DismissTearPercentageTooltipRole:
+                return (*_shared_tear_options_list)[row].dismiss_tear_percentage.tooltip();
+            case DismissTearPercentageValueRole:
+                return (*_shared_tear_options_list)[row].dismiss_tear_percentage.value();
             case TearOptionsEnabled:
-                return _tear_options_list[row].enabled;
+                return (*_shared_tear_options_list)[row].enabled;
             default:
                 return QVariant();
         }
@@ -67,13 +71,13 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         int row = index.row();
-        if      (role == ColorPickNameRole)      _tear_options_list[row].tear_plot_color.setName(value.toString());
-        else if (role == ColorPickTooltipRole)   _tear_options_list[row].tear_plot_color.setTooltip(value.toString());
-        else if (role == ColorPickValueRole)     _tear_options_list[row].tear_plot_color.setColor(value.toString());
-        else if (role == PixelDifferenceNameRole)    _tear_options_list[row].pixel_difference.setName(value.toString());
-        else if (role == PixelDifferenceTooltipRole) _tear_options_list[row].pixel_difference.setTooltip(value.toString());
-        else if (role == PixelDifferenceValueRole)   _tear_options_list[row].pixel_difference.setValue(static_cast<quint8>(value.toUInt()));
-        else if (role == TearOptionsEnabled)         _tear_options_list[row].enabled = value.toBool();
+        if      (role == ColorPickNameRole)      (*_shared_tear_options_list)[row].tear_plot_color.setName(value.toString());
+        else if (role == ColorPickTooltipRole)   (*_shared_tear_options_list)[row].tear_plot_color.setTooltip(value.toString());
+        else if (role == ColorPickValueRole)     (*_shared_tear_options_list)[row].tear_plot_color.setColor(value.toString());
+        else if (role == DismissTearPercentageNameRole)    (*_shared_tear_options_list)[row].dismiss_tear_percentage.setName(value.toString());
+        else if (role == DismissTearPercentageTooltipRole) (*_shared_tear_options_list)[row].dismiss_tear_percentage.setTooltip(value.toString());
+        else if (role == DismissTearPercentageValueRole)   (*_shared_tear_options_list)[row].dismiss_tear_percentage.setValue(static_cast<double>(value.toUInt()));
+        else if (role == TearOptionsEnabled)         (*_shared_tear_options_list)[row].enabled = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -90,7 +94,7 @@ public:
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
-            _tear_options_list[id].revert_to_default();
+            (*_shared_tear_options_list)[id].revert_to_default();
         }
         resetModel();
     }
@@ -106,15 +110,15 @@ public:
         QModelIndex q0 = createIndex(0, 0);
         QModelIndex q1 = createIndex(1, 0);
         QModelIndex q2 = createIndex(2, 0);
-        setData(q0, value, PixelDifferenceValueRole);
-        setData(q1, value, PixelDifferenceValueRole);
-        setData(q2, value, PixelDifferenceValueRole);
+        setData(q0, value, DismissTearPercentageValueRole);
+        setData(q1, value, DismissTearPercentageValueRole);
+        setData(q2, value, DismissTearPercentageValueRole);
     }
     //! TODO
     Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
     {
         int video_count = filePaths.size();
-        for(int i = 0; i < _tear_options_list.size(); ++i)
+        for(int i = 0; i < _shared_tear_options_list->size(); ++i)
         {
             const bool loaded_file = i < video_count;
             QModelIndex q = createIndex(i, 0);
@@ -126,19 +130,19 @@ private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[ColorPickNameRole]          = "colorName";
-        _role_names[ColorPickTooltipRole]       = "colorTooltip";
-        _role_names[ColorPickValueRole]         = "color";
-        _role_names[PixelDifferenceNameRole]    = "pixelDifferenceName";
-        _role_names[PixelDifferenceTooltipRole] = "pixelDifferenceTooltip";
-        _role_names[PixelDifferenceValueRole]   = "pixelDifference";
-        _role_names[TearOptionsEnabled]         = "tearOptionsEnabled";
+        _role_names[ColorPickNameRole]                = "colorName";
+        _role_names[ColorPickTooltipRole]             = "colorTooltip";
+        _role_names[ColorPickValueRole]               = "color";
+        _role_names[DismissTearPercentageNameRole]    = "dismissTearPercentageName";
+        _role_names[DismissTearPercentageTooltipRole] = "dismissTearPercentageTooltip";
+        _role_names[DismissTearPercentageValueRole]   = "dismissTearPercentage";
+        _role_names[TearOptionsEnabled]               = "tearOptionsEnabled";
    }
     //! TODO
     void _init_options()
     {
         for (quint8 id = 0; id < 3; ++id) {
-            _tear_options_list.append(TearOptions(id));
+            _shared_tear_options_list->append(TearOptions(id));
         }
     }
 
@@ -147,7 +151,7 @@ private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
     //! TODO
-    QList<TearOptions> _tear_options_list;
+    std::shared_ptr<QList<TearOptions>> _shared_tear_options_list;
 };
 
 
