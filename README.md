@@ -2,6 +2,19 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 27.07.2019
+
+I now included a new algorithm to include the tear detection into the framerate + frametime calculation.
+
+We currenlty support complementing tears:
+
+* `timestep = 0, tearsize: 30% (row 0 - 30)`
+* `timestep = 1, tearsize: 70% (row 31 - 100)`
+
+This will result in the "correct" framerate of `1` in the two frames. I will probably make a visual explanation after the first official release of the qt-branch.
+
+Now I have to think about a tear visualization and the csv export. After these features I have to learn how to deploy on Windows & Linux.
+
 #### Update 23.07.2019
 
 Now only drawing the x/y axis of the plots, stitched some more options together. Implemented overlay exporting with PNG. Fixed some scaling artifacts so now it looks less grainy in the preview window. Also automatic re-scaling of the main window based on your resolution.

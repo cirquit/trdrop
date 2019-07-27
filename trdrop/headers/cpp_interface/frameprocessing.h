@@ -35,7 +35,6 @@ public:
                             , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
     {
         QList<cv::Mat> difference_frames;
-        QList<TearData> tear_data_list;
 
         // we can only calculate the difference if we have at least two sets of frames
         if (!_received_first_frames)
@@ -48,8 +47,6 @@ public:
             // default init TODO refactor
             for (int i = 0; i < cv_frame_list.size(); ++i) {
                 difference_frames.push_back(cv::Mat());
-                const quint64 row_count = static_cast<quint64>(cv_frame_list[i].rows);
-                tear_data_list.push_back(TearData(row_count));
             }
 
             // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
@@ -66,14 +63,14 @@ public:
                 {
                     const quint32 pixel_difference = (*shared_fps_options_list)[i].pixel_difference.value();
                     difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i], pixel_difference).clone();
-                    tear_data_list[i].set_tear_rows(_get_tear_rows(difference_frames[i]));
 
                     // explicit convertion for linter
                     const size_t _i           = static_cast<size_t>(i);
                     const size_t _frame_count = _current_framecount_list[_i];
                     // calculate a diff frame based on the amount of "same" rows in the compared frames
                     double dismiss_tear_percentage = (*shared_tear_options_list)[i].dismiss_tear_percentage.value() / 100;
-                    _frame_diff_lists[_i][_frame_count] = tear_data_list[i].get_diff_percentage(dismiss_tear_percentage);
+                    //_frame_diff_lists[_i][_frame_count] = tear_data_list[i].get_diff_percentage(dismiss_tear_percentage);
+                    _frame_diff_lists[_i][_frame_count] = _get_frame_difference(difference_frames[i], dismiss_tear_percentage);
                 }
             }
             // increments the framecounter for each video and loops automatically
@@ -103,7 +100,6 @@ public:
         }
         return frametimes;
     }
-
     //! resets the state of the object, but to ensure that the class is in a well defined state and nobody misuses it
     //! we need to know the recorded framerates (with no videos loaded this list will be empty)
     void reset_state(const QList<quint8> recorded_framerate_list)
@@ -137,8 +133,6 @@ private:
         if (recorded_framerate == 0) { return 0; }
         // if no frames were analyzed, we can't analyze the frametime, we need a [1, ..., 1] diff window
         if (_calculate_framerate(video_index) < 2.0) { return 0; }
-        // if the current frame is a duplicate, we have to wait until we got a new frame to estimate the time of the previous frame
-        // if (_frame_diff_lists[video_index][current_framerate_count] == 0) { return 0; }
         // counter of how long the frame is show per 1 / recorded_framerate in seconds
         double frame_time_counter = 0.0;
         // start looping backwards for the frame_diff_list until we reach a new frame
@@ -146,13 +140,13 @@ private:
         bool found_last_diff = false;
         while (iterating_over_same_frame)
         {
-            const quint8 diff = _frame_diff_lists[video_index][current_framerate_count];
+            const double diff = _frame_diff_lists[video_index][current_framerate_count];
             if (found_last_diff)
             {
-                if (diff == 0) frame_time_counter += 1.0;
-                if (diff == 1) { frame_time_counter += 1.0; iterating_over_same_frame = false; }
+                if (diff == 0.0) frame_time_counter += 1.0;
+                if (diff > 0) { frame_time_counter += 1.0; iterating_over_same_frame = false; }
             } else {
-                if (diff == 1) found_last_diff = true;
+                if (diff > 0) found_last_diff = true;
             }
             current_framerate_count = _decrement_modulo(current_framerate_count, _frame_diff_lists[video_index].size() - 1);
         }
@@ -178,38 +172,6 @@ private:
         // without a seconds frame frames can't be compared
         _received_first_frames = false;
     }
-    //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
-    bool _are_equal_with(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixelDifference) const {
-        cv::Mat black_white_frame_a;
-        cv::Mat black_white_frame_b;
-        cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
-        cv::cvtColor(frame_b, black_white_frame_b, cv::COLOR_BGRA2GRAY);
-
-        //qDebug() << black_white_frame_a.at<uchar>(0, 0) << "," << black_white_frame_b.at<uchar>(0, 0);
-        for (int i = 0; i < black_white_frame_a.rows; i += 1) {
-            for (int j = 0; j < black_white_frame_a.cols; j += 1) {
-                int ac(std::max(black_white_frame_a.at<uchar>(i, j)
-                              , black_white_frame_b.at<uchar>(i, j)));
-                int bc(std::min(black_white_frame_a.at<uchar>(i, j)
-                              , black_white_frame_b.at<uchar>(i, j)));
-                if (ac - bc > pixelDifference) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    //! TODO rethink this
-    bool _are_equal(const cv::Mat & frame_a, const cv::Mat & frame_b) const {
-        int rindex;
-        for (int i = 0; i < frame_a.rows; ++i) {
-            rindex = i * frame_a.rows;
-            for (int j = 0; j < frame_a.cols; ++j) {
-                if (frame_a.data[rindex + j] != frame_b.data[rindex + j]) return false;
-            }
-        }
-        return true;
-    }
     //! copies the framelist as cv::Mat is a smart pointer and need to be copied manually
     void _cache_framelist(const QList<cv::Mat> _other)
     {
@@ -230,7 +192,7 @@ private:
         }
     }
     //! TODO refactor this?
-    size_t _decrement_modulo(size_t value, size_t max_value)
+    size_t _decrement_modulo(size_t value, size_t max_value) const
     {
         if (value == 0) return max_value;
         else return value - 1;
@@ -245,7 +207,8 @@ private:
     }
     //! TODO rethink this
     //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
-    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixel_difference, cv::Mat & output) const {
+    void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixel_difference, cv::Mat & output) const
+    {
         cv::Mat black_white_frame_a;
         cv::Mat black_white_frame_b;
         cv::cvtColor(frame_a, black_white_frame_a, cv::COLOR_BGRA2GRAY);
@@ -272,49 +235,164 @@ private:
             }
         }
     }
-    //! get the rows where we detect a tear (may not be ordered from 0 to max_rows, e.g 0 3 2)
-    std::vector<quint64> _get_tear_rows(const cv::Mat & difference) const
+    //! returns 0 if the compared frames were identical
+    //! returns 1 if the frames were at least in 1 pixel different
+    //! if we detect a tear, we check how big it is (height) and see if its above the dismiss_tear_percentage
+    //!     if it is, we return the percentage of the frame which was not a tear (e.g 1 - tear_percentage)
+    //!     if it is NOT, we return 1 e.g we think of them as completely different
+    double _get_frame_difference(const cv::Mat & difference, const double dismiss_tear_percentage) const
     {
-        std::vector<quint64> tear_rows;
+        // how much of a row has to be different to see it as a "tear cut"
+        const double tear_row_completness = 0.2;
+        // normalized row differences
+        const std::vector<double> row_differences = _get_row_differences(difference);
+        // if we found a different pixel and no tears, we have to return 1 (as in increment the framerate by 1)
+        bool found_different_pixel = false;
+        //
+        bool tear_found = false;
+        // saving the indices where tears were found. order: (lower, higher) indices
+        std::vector<std::tuple<size_t, size_t>> tear_rows;
+        for (size_t row = 1; row < row_differences.size(); ++row)
+        {
+            const size_t index_A = row - 1;
+            const size_t index_B = row;
+            const double row_diff_A = row_differences[index_A];
+            const double row_diff_B = row_differences[index_B];
+            // save tear indices if we found them
+            if (_are_tear_rows(row_diff_A, row_diff_B, tear_row_completness))
+            {
+                tear_found = true;
+                tear_rows.push_back({ index_A, index_B });
+            }
+            // if a difference is found set it, otherwise use the accumulated result
+            found_different_pixel = row_diff_A > 0.0 || found_different_pixel;
+        }
+        // if a tear was found, we return the remaining part of the frame
+        if (tear_found)
+        {
+            const double max_tear_percentage = _get_max_tear_percentage(row_differences, tear_rows);
+            // if the tear is not big enough, we dismiss it
+            if (max_tear_percentage < dismiss_tear_percentage)
+            {
+                // if we found a different pixel, we round to a full difference -> 100% -> 1.0, otherwise
+                if (found_different_pixel) return 1.0;
+                else return 0.0;
+                // if the tear is big enough, we return the remaining frame
+            } else return 1 - max_tear_percentage;
+        }
+        // if no tear was found but a different pixel was found, we "round" to a full difference -> 100% -> 1.0
+        const bool tear_not_found = !tear_found;
+        if (found_different_pixel && tear_not_found) return 1.0;
+        // if no different pixel was found, it has to be a duplicate frame, e.g (0% difference -> 0.0)
+        return 0.0;
+    }
+    //! returns the percentage of the biggest tear found
+    double _get_max_tear_percentage(const std::vector<double> & row_differences
+                                  , const std::vector<std::tuple<size_t, size_t>> & tear_rows) const
+    {
+        double max_tear_percentage = 0.0;
+        for (size_t i = 0; i < tear_rows.size(); ++i)
+        {
+            const std::tuple<size_t, size_t> tear = tear_rows[i];
+            const size_t index_A = std::get<0>(tear);
+            const size_t index_B = std::get<1>(tear);
+            if (row_differences[index_A] == 0.0)
+            {
+                // go in the direction of index_B + 1
+                size_t index = index_B;
+                size_t counter = 0;
+                while (row_differences[index] > 0.0)
+                {
+                    counter += 1;
+                    if (index == row_differences.size() - 1) break;
+                    index   += 1;
+                }
+                const double tear_percentage = static_cast<double>(counter) / static_cast<double>(row_differences.size());
+                if (tear_percentage > max_tear_percentage) max_tear_percentage = tear_percentage;
+            }
+            if (row_differences[index_B] == 0.0)
+            {
+                // go in the direction of index_A - 1
+                size_t index = index_A;
+                size_t counter = 0;
+                while (row_differences[index] > 0.0)
+                {
+                    counter += 1;
+                    if (index == 0) break;
+                    index   -= 1;
+                }
+                const double tear_percentage = static_cast<double>(counter) / static_cast<double>(row_differences.size());
+                if (tear_percentage > max_tear_percentage) max_tear_percentage = tear_percentage;
+            }
+        }
+        return max_tear_percentage;
+    }
+    //! checks if the two normalized row differences count as a tear
+    bool _are_tear_rows(const double row_diff_A, const double row_diff_B, const double tear_row_completness) const
+    {
+        // the tear happened with the old frame in row_diff_A and new frame in row_diff_B
+        // duplicate row (e.g black)
+        if (row_diff_A == 0.0)
+        {
+            // new row within bounds
+            if (row_diff_B >= tear_row_completness)
+            {
+                return true;
+            }
+        }
+        // the tear happened with the new frame in row_diff_A and old frame in row_diff_B
+        // new row within bounds
+        if (row_diff_A >= tear_row_completness)
+        {
+            // duplicate row (e.g black)
+            if (row_diff_B == 0.0)
+            {
+                return true;
+            }
+        }
+        // otherwise no tear is detected
+        return false;
+    }
+    //! returns a summary for each row how many differences were found (normalized to 0.0 ~ 0% - 1.0 ~ 100%)
+    //! see also _get_row_difference
+    std::vector<double> _get_row_differences(const cv::Mat & difference) const
+    {
+        std::vector<double> row_differences(static_cast<size_t>(difference.rows), 0.0);
         #pragma omp parallel for
         for (int row = 0; row < difference.rows; ++row)
         {
-            if (_is_row_a_tear(difference, row))
-            {
-                tear_rows.push_back(static_cast<quint64>(row));
-            }
+            row_differences[static_cast<size_t>(row)] = _get_row_difference(difference, row);
         }
-        return tear_rows;
+        return row_differences;
     }
-    //! short circuits if any pixel in a row is found not to be full black (0,0,0)
-    bool _is_row_a_tear(const cv::Mat & difference, const int row) const
+    //! return the percentage of the row (0.0 - 1.0) for how many pixel are different (e.g not black)
+    //! if 3 pixel were not black from a 10 pixel row we would return 0.3, e.g 30%
+    double _get_row_difference(const cv::Mat & difference, const int row) const
     {
+        double difference_counter = 0;
+        #pragma omp parallel for reduction(+:difference_counter)
         for (int col = 0; col < difference.cols; ++col)
         {
             bool red_channel_is_not_black   = difference.at<cv::Vec3b>(row,col)[0] != 0;
             bool green_channel_is_not_black = difference.at<cv::Vec3b>(row,col)[1] != 0;
             bool blue_channel_is_not_black  = difference.at<cv::Vec3b>(row,col)[2] != 0;
             bool pixel_is_not_black = red_channel_is_not_black && green_channel_is_not_black && blue_channel_is_not_black;
-            // if the difference frame is not black, we detected a change in the subsequent image
-            if (pixel_is_not_black)
-            {
-                return false;
-            }
+            if (pixel_is_not_black) difference_counter += 1.0;
         }
-        return true;
+        return difference_counter / static_cast<double>(difference.cols);
     }
-    //! member
+//! member
 private:
 
     //! holds the current framecount of each video (used to access the inner lists of _frame_diff_lists)
     std::vector<size_t>              _current_framecount_list;
-    //! TODO
+    //! checks if we already received the first frames (only important on startup)
     bool                             _received_first_frames;
-    //! TODO
+    //! saves the t-1 frames
     QList<cv::Mat>                   _cached_frames;
     //! the list which has a list for each video consisting of 0's or 1's, counting the differing frames
     std::vector<std::vector<double>> _frame_diff_lists;
-    //! TODO
+    //! maximum video count (TODO maybe refactor this in the future)
     const quint8                     _max_video_count;
 };
 
