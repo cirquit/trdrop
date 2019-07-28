@@ -7,6 +7,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <memory>
+
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/cpp_interface/teardata.h"
 #include "headers/qml_models/tearoptionsmodel.h"
@@ -35,7 +36,6 @@ public:
                             , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
     {
         QList<cv::Mat> difference_frames;
-
         // we can only calculate the difference if we have at least two sets of frames
         if (!_received_first_frames)
         {
@@ -47,8 +47,8 @@ public:
             // default init TODO refactor
             for (int i = 0; i < cv_frame_list.size(); ++i) {
                 difference_frames.push_back(cv::Mat());
+                _tear_rows.clear();
             }
-
             // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
             // refactored this from the loop to allow omp
             bool all_cached_frames_filled = true;
@@ -70,7 +70,7 @@ public:
                     // calculate a diff frame based on the amount of "same" rows in the compared frames
                     double dismiss_tear_percentage = (*shared_tear_options_list)[i].dismiss_tear_percentage.value() / 100;
                     //_frame_diff_lists[_i][_frame_count] = tear_data_list[i].get_diff_percentage(dismiss_tear_percentage);
-                    _frame_diff_lists[_i][_frame_count] = _get_frame_difference(difference_frames[i], dismiss_tear_percentage);
+                    _frame_diff_lists[_i][_frame_count] = _get_frame_difference(difference_frames[i], dismiss_tear_percentage, i, cv_frame_list.size());
                 }
             }
             // increments the framecounter for each video and loops automatically
@@ -81,7 +81,7 @@ public:
         return difference_frames;
     }
     //! calculates the current framerate for each video
-    const QList<double> get_framerates()
+    QList<double> get_framerates() const
     {
         QList<double> framerates;
         for (size_t i = 0; i < _frame_diff_lists.size(); ++i)
@@ -100,6 +100,11 @@ public:
         }
         return frametimes;
     }
+    //! returns the tear indices from the last calculation
+    std::vector<TearData> get_tear_indices() const
+    {
+        return _tear_rows;
+    }
     //! resets the state of the object, but to ensure that the class is in a well defined state and nobody misuses it
     //! we need to know the recorded framerates (with no videos loaded this list will be empty)
     void reset_state(const QList<quint8> recorded_framerate_list)
@@ -113,7 +118,7 @@ public:
 //! methods
 private:
     //! sums up the vector with (0's and 1's) to get the resulting framerate
-    double _calculate_framerate(size_t video_index)
+    double _calculate_framerate(size_t video_index) const
     {
         double framecount = std::accumulate(_frame_diff_lists[video_index].begin()
                                           , _frame_diff_lists[video_index].end()
@@ -121,7 +126,7 @@ private:
         return framecount;
     }
     //! frametime for the last visible frame in milliseconds
-    double _calculate_frametime(size_t video_index)
+    double _calculate_frametime(size_t video_index) const
     {
         //! yes this the is the recorded framerate, TODO refactor this into a method with comments
         const size_t recorded_framerate = _frame_diff_lists[video_index].size();
@@ -240,7 +245,7 @@ private:
     //! if we detect a tear, we check how big it is (height) and see if its above the dismiss_tear_percentage
     //!     if it is, we return the percentage of the frame which was not a tear (e.g 1 - tear_percentage)
     //!     if it is NOT, we return 1 e.g we think of them as completely different
-    double _get_frame_difference(const cv::Mat & difference, const double dismiss_tear_percentage) const
+    double _get_frame_difference(const cv::Mat & difference, const double dismiss_tear_percentage, int video_index, int video_count)
     {
         // how much of a row has to be different to see it as a "tear cut"
         const double tear_row_completness = 0.2;
@@ -251,7 +256,7 @@ private:
         //
         bool tear_found = false;
         // saving the indices where tears were found. order: (lower, higher) indices
-        std::vector<std::tuple<size_t, size_t>> tear_rows;
+        //std::vector<std::tuple<size_t, size_t>> tear_rows;
         for (size_t row = 1; row < row_differences.size(); ++row)
         {
             const size_t index_A = row - 1;
@@ -262,7 +267,7 @@ private:
             if (_are_tear_rows(row_diff_A, row_diff_B, tear_row_completness))
             {
                 tear_found = true;
-                tear_rows.push_back({ index_A, index_B });
+                _tear_rows.push_back(TearData(index_A, index_B, static_cast<size_t>(video_index), static_cast<size_t>(video_count), difference.rows));
             }
             // if a difference is found set it, otherwise use the accumulated result
             found_different_pixel = row_diff_A > 0.0 || found_different_pixel;
@@ -270,7 +275,7 @@ private:
         // if a tear was found, we return the remaining part of the frame
         if (tear_found)
         {
-            const double max_tear_percentage = _get_max_tear_percentage(row_differences, tear_rows);
+            const double max_tear_percentage = _get_max_tear_percentage(row_differences, _tear_rows);
             // if the tear is not big enough, we dismiss it
             if (max_tear_percentage < dismiss_tear_percentage)
             {
@@ -288,12 +293,12 @@ private:
     }
     //! returns the percentage of the biggest tear found
     double _get_max_tear_percentage(const std::vector<double> & row_differences
-                                  , const std::vector<std::tuple<size_t, size_t>> & tear_rows) const
+                                  , const std::vector<TearData> & tear_rows) const
     {
         double max_tear_percentage = 0.0;
         for (size_t i = 0; i < tear_rows.size(); ++i)
         {
-            const std::tuple<size_t, size_t> tear = tear_rows[i];
+            const std::tuple<size_t, size_t> tear = tear_rows[i].get_indices();
             const size_t index_A = std::get<0>(tear);
             const size_t index_B = std::get<1>(tear);
             if (row_differences[index_A] == 0.0)
@@ -394,6 +399,9 @@ private:
     std::vector<std::vector<double>> _frame_diff_lists;
     //! maximum video count (TODO maybe refactor this in the future)
     const quint8                     _max_video_count;
+    //! if tears were found, they are saved for a frame here
+    std::vector<TearData>            _tear_rows;
+
 };
 
 #endif // FRAMEPROCESSING_H

@@ -10,6 +10,7 @@
 #include "headers/cpp_interface/frametimemodel.h"
 #include "headers/cpp_interface/fpsoptions.h"
 #include "headers/cpp_interface/tearoptions.h"
+#include "headers/cpp_interface/tearmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
 //! TODO
@@ -25,6 +26,7 @@ public:
                          , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
                          , std::shared_ptr<QList<TearOptions>> shared_tear_options_list
                          , std::shared_ptr<GeneralOptionsModel> shared_general_options_model
+                         , std::shared_ptr<TearModel> shared_tear_model
                          , QObject * parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
@@ -32,6 +34,7 @@ public:
         , _shared_framerate_model(shared_framerate_model)
         , _shared_frametime_model(shared_frametime_model)
         , _shared_general_options_model(shared_general_options_model)
+        , _shared_tear_model(shared_tear_model)
     { }
 
 //! methods
@@ -47,12 +50,14 @@ public:
                                                , _shared_fps_options_list
                                                , _shared_tear_options_list);
         //
-        const QList<double> framerate_list = _frame_processing.get_framerates();
-        const QList<double> frametime_list = _frame_processing.get_frametimes();
+        const QList<double> framerate_list    = _frame_processing.get_framerates();
+        const QList<double> frametime_list    = _frame_processing.get_frametimes();
+        const std::vector<TearData> tear_list = _frame_processing.get_tear_indices();
 
         for (int i = 0; i < framerate_list.size(); ++i) {
             _shared_framerate_model->set_framerate_at(i, framerate_list[i]);
             _shared_frametime_model->set_frametime_at(i, frametime_list[i]);
+            _shared_tear_model->add_tears(tear_list);
         }
         // return the difference frames if set in the options
         const bool render_delta_frames = _shared_general_options_model->get_enable_delta_rendering();
@@ -69,6 +74,7 @@ public:
     {
         _shared_framerate_model->reset_model();
         _shared_frametime_model->reset_model();
+        _shared_tear_model->reset_state();
         _frame_processing.reset_state(recorded_framerate_list);
     }
 
@@ -84,6 +90,8 @@ private:
     std::shared_ptr<FrametimeModel> _shared_frametime_model;
     //! TODO
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
+    //! TODO
+    std::shared_ptr<TearModel> _shared_tear_model;
     //! TODO
     FrameProcessing _frame_processing;
 

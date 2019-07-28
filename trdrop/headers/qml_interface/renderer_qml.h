@@ -11,6 +11,8 @@
 #include "headers/cpp_interface/framerateplot.h"
 #include "headers/cpp_interface/frametimeplot.h"
 
+#include "headers/cpp_interface/tearmodel.h"
+
 class RendererQML : public QObject
 {
     Q_OBJECT
@@ -23,6 +25,7 @@ public:
               , std::shared_ptr<ExportOptionsModel> shared_export_options_model
               , std::shared_ptr<FrameratePlot> shared_framerate_plot_instance
               , std::shared_ptr<FrametimePlot> shared_frametime_plot_instance
+              , std::shared_ptr<TearModel> shared_tear_model
               , QQuickItem *parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
@@ -30,6 +33,7 @@ public:
         , _shared_export_options_model(shared_export_options_model)
         , _shared_framerate_plot_instance(shared_framerate_plot_instance)
         , _shared_frametime_plot_instance(shared_frametime_plot_instance)
+        , _shared_tear_model(shared_tear_model)
     { }
 
 //! methods
@@ -60,6 +64,10 @@ public:
         if (_shared_general_options_model->get_enable_frametime_analysis())
         {
             _draw_frametime_graph(painter);
+        }
+        if (_shared_general_options_model->get_enable_tear_analysis())
+        {
+            _draw_tears(painter);
         }
 
         painter.end();
@@ -105,6 +113,11 @@ private:
     {
         _shared_frametime_plot_instance->draw_frametime_plot(&painter);
     }
+    //! TODO
+    void _draw_tears(QPainter & painter)
+    {
+        _shared_tear_model->draw_tears(&painter);
+    }
     //! TODO dirty, get this from FileWindow
     int _get_video_count()
     {
@@ -130,6 +143,8 @@ private:
     std::shared_ptr<FrameratePlot> _shared_framerate_plot_instance;
     //! TODO
     std::shared_ptr<FrametimePlot> _shared_frametime_plot_instance;
+    //! TODO
+    std::shared_ptr<TearModel> _shared_tear_model;
 };
 
 #endif // IMAGEVIEWER_QML_H

@@ -135,6 +135,8 @@ public:
     //! TODO
     bool get_enable_framerate_analysis() { return _enable_fps_analysis.value(); }
     //! TODO
+    bool get_enable_tear_analysis() { return _enable_tear_analysis.value(); }
+    //! TODO
     uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
     //! TODO
     uint8_t get_frametime_range() { return _frametime_plot_range.value(); }

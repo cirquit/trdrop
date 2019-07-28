@@ -112,6 +112,9 @@ int main(int argc, char *argv[])
                                                       , shared_fps_options_list
                                                       , shared_resolution_model
                                                       , shared_general_options_model));
+    std::shared_ptr<TearModel> shared_tear_model(new TearModel(shared_tear_options_list
+                                                             , shared_resolution_model
+                                                             , shared_general_options_model));
     // qml objects
     VideoCaptureListQML videocapturelist_qml(default_file_items_count);
     engine.rootContext()->setContextProperty("videocapturelist", &videocapturelist_qml);
@@ -119,7 +122,8 @@ int main(int argc, char *argv[])
                                           , shared_frametime_model
                                           , shared_fps_options_list
                                           , shared_tear_options_list
-                                          , shared_general_options_model);
+                                          , shared_general_options_model
+                                          , shared_tear_model);
     engine.rootContext()->setContextProperty("frameprocessing", &frame_processing_qml);
     ImageConverterQML imageconverter_qml;
     engine.rootContext()->setContextProperty("imageconverter", &imageconverter_qml);
@@ -129,7 +133,8 @@ int main(int argc, char *argv[])
                            , shared_general_options_model
                            , shared_export_options_model
                            , shared_framerate_plot_instance
-                           , shared_frametime_plot_instance);
+                           , shared_frametime_plot_instance
+                           , shared_tear_model);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model);
@@ -156,13 +161,8 @@ int main(int argc, char *argv[])
     // meta data pipeline
     // link the fps options with the renderer
     QObject::connect(&fps_options_model, &FPSOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
+    QObject::connect(&tear_options_model, &TearOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
     QObject::connect(&(*shared_general_options_model), &GeneralOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
-    // TODO tear options
-    // TODO frametime options
-    // TODO tear values
-    // TODO fps values
-    // TODO frametime values
-    // TODO general option values
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

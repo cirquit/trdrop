@@ -85,7 +85,6 @@ HEADERS += \
     headers/cpp_interface/imageformat.h \
     headers/cpp_interface/videoformat.h \
     headers/cpp_interface/frameratemodel.h \
-    headers/cpp_interface/teardata.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
     headers/qml_interface/renderer_qml.h \
@@ -104,7 +103,9 @@ HEADERS += \
     headers/cpp_interface/frametimeplot.h \
     headers/cpp_interface/frametimemodel.h \
     headers/cpp_interface/frameprocessing.h \
-    headers/qml_interface/frameprocessing_qml.h
+    headers/qml_interface/frameprocessing_qml.h \
+    headers/cpp_interface/teardata.h \
+    headers/cpp_interface/tearmodel.h
 
 
 
