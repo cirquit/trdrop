@@ -261,7 +261,12 @@ Window {
                     Layout.fillWidth: true
                     enabled: model.exportButtonEnabled
                     text: "Export"
-                    onClicked: {
+                    action: exportButtonAction
+                }
+                Action {
+                    id: exportButtonAction
+                    shortcut: "space"
+                    onTriggered: {
                         if (exporter.isExporting())
                         {
                             exportButton.text = "Export";
@@ -272,6 +277,7 @@ Window {
                         }
                     }
                 }
+
 
                 Connections {
                     target: videocapturelist
