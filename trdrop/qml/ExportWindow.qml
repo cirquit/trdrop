@@ -134,63 +134,23 @@ Window {
                     onActivated: {
                         //let format = imageFormatModel.getValueAt(currentIndex);
                         imageFormatModel.setActiveValueAt(currentIndex);
-
-                        //imagecomposer.resizeComposition(size);
                     }
                 }
 
-
-//                Switch {
-//                    id: exportAsVideoSwitch
-//                    text: model.videoPrefixName
-//                    checked: model.videoPrefixEnabled
-//                    action: Action {
-//                        onTriggered: {
-//                            model.videoPrefixEnabled = !checked;
-//                        }
-//                    }
-//                }
-//                Rectangle {
-//                    border {
-//                        color: "#8066b0"
-//                        width: 1
-//                    }
-//                    Layout.fillWidth: parent
-//                    height: 25
-//                    width: 300
-//                    Layout.leftMargin: 20
-//                    Layout.rightMargin: 20
-//                    color: "transparent"
-//                    TextInput {
-//                        id: exportAsVideoName
-//                        anchors.fill: parent
-//                        leftPadding: 5
-//                        topPadding: 2
-//                        bottomPadding: 2
-//                        enabled: model.videoPrefixEnabled
-//                        text: model.videoPrefixValue
-//                        clip: true
-//                        font.pointSize: 12
-//                        color: enabled ? "#FFFFFF" : "#b0b0b0";
-//                        onEditingFinished: {
-//                            model.videoPrefixValue = text;
-//                        }
-//                    }
-//                }
-//                ComboBox {
-//                    id: exportAsVideoNameEnding
-//                    Layout.fillWidth: true
-//                    textRole: "videoFormatName"
-//                    enabled: false
-//                    model: videoFormatModel
-//                    onActivated: {
-//                        let format = videoFormatModel.getValueAt(currentIndex);
-//                        //console.log(format)
-//                        //let size = resolutionsModel.getSizeAt(currentIndex);
-//                        //imagecomposer.resizeComposition(size);
-//                    }
-//                }
-
+                Switch {
+                    id: exportAsCSVSwitch
+                    text: model.exportCSVName
+                    checked: model.exportCSVValue
+                    action: Action {
+                        onTriggered: {
+                            model.exportCSVValue = !model.exportCSVValue;
+                            checked: model.exportCSVValue
+                        }
+                    }
+                }
+                Label {
+                    Layout.columnSpan: 2
+                }
 
                 Switch {
                     id: enableLivePreviewSwitch

@@ -168,6 +168,8 @@ public:
     bool export_as_imagesequence(){ return _imagesequence_prefix.enabled(); }
     //! TODO
     bool export_as_overlay(){ return _export_as_overlay.value(); }
+    //! TODO
+    bool export_csv(){ return _export_csv.value(); }
 
 //! methods
 private:

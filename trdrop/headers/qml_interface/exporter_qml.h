@@ -5,8 +5,10 @@
 #include <QImage>
 #include <QDebug>
 #include <QDir>
+#include <memory>
 #include "headers/qml_models/exportoptionsmodel.h"
 #include "headers/qml_models/imageformatmodel.h"
+#include "headers/cpp_interface/frameratemodel.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -19,6 +21,7 @@ public:
     //! default constructor, the default size is dependent on the first row of the resolutionModel
     ExporterQML(std::shared_ptr<ExportOptionsModel> export_options_model
               , std::shared_ptr<ImageFormatModel>   imageformat_model
+              , std::shared_ptr<FramerateModel> shared_framerate_model
               , QObject * parent = nullptr)
         : QObject(parent)
         , _is_exporting(false)
@@ -26,6 +29,8 @@ public:
         , _prefix_zeros(10)
         , _export_options_model(export_options_model)
         , _imageformat_model(imageformat_model)
+        , _file_opened(false)
+        , _shared_framerate_model(shared_framerate_model)
     { }
 
 //! methods
@@ -45,6 +50,10 @@ public:
                 QString filepath = _create_image_file_path();
                 image.save(filepath);
             }
+            if (_export_options_model->export_csv())
+            {
+                _append_framerates();
+            }
             _frame_count += 1;
         }
         emit imageReady(image);
@@ -52,7 +61,7 @@ public:
     //! TODO
     Q_SLOT void finishExporting()
     {
-        // TODO
+        _close_csv_file();
         qDebug() << "ExporterQML:finishExporting triggered";
         stopExporting();
     }
@@ -76,6 +85,45 @@ public:
 
 //! methods
 private:
+    //! TODO
+    QString _create_csv_file_path() const
+    {
+        QString directory_path = _export_options_model->get_export_directory();
+        return QDir(directory_path).filePath("trdrop_analysis.csv");
+    }
+    //! TODO
+    void _open_csv_file()
+    {
+        QString csv_file_name = _create_csv_file_path();
+        std::unique_ptr<QFile> new_file = std::unique_ptr<QFile>(new QFile(csv_file_name));
+        _csv_file_handle = std::move(new_file);
+    }
+    //! TODO
+    void _close_csv_file()
+    {
+        _file_opened = false;
+        _csv_file_handle->close();
+    }
+    //! TODO
+    void _append_framerates()
+    {
+        if (!_file_opened)
+        {
+            _open_csv_file();
+            _file_opened = true;
+            _csv_file_handle->open(QIODevice::Append | QIODevice::Text);
+        }
+
+        QTextStream stream(&(*_csv_file_handle));
+        std::vector<double> framerates = _shared_framerate_model->get_framerates();
+
+        for (size_t i = 0; i < framerates.size(); ++i)
+        {
+            stream << framerates[i];
+            if (i < framerates.size() - 1) stream << ",";
+            if (i == framerates.size() - 1) stream << "\n";
+        }
+    }
     //! TODO
     QString _create_image_file_path() const
     {
@@ -110,6 +158,12 @@ public:
     std::shared_ptr<ExportOptionsModel> _export_options_model;
     //! this is shared because it is only dependent on how to save sources
     std::shared_ptr<ImageFormatModel> _imageformat_model;
+    //! TODO
+    std::unique_ptr<QFile> _csv_file_handle;
+    //! TODO
+    bool _file_opened;
+    //! TODO
+    std::shared_ptr<FramerateModel> _shared_framerate_model;
 
 
 };

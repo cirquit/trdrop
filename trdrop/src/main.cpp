@@ -137,7 +137,8 @@ int main(int argc, char *argv[])
                            , shared_tear_model);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
-                           , shared_imageformat_model);
+                           , shared_imageformat_model
+                           , shared_framerate_model);
     engine.rootContext()->setContextProperty("exporter", &exporter_qml);
 
     // sigals in c++ (main processing pipeline)

@@ -62,12 +62,12 @@ private:
         pen.setCapStyle(Qt::FlatCap);
         return pen;
     }
-    //! returns 0 to 225 (starting at 255 and going to 0 by increased _rendered_count)
+    //! returns 0 to 100 (starting at 100 and going to 0 by increased _rendered_count)
     int _get_opacity() const
     {
         const double rendering_percentage = _get_rendering_percentage();
         const double inverted_percentage = 1- rendering_percentage;
-        return static_cast<int>(inverted_percentage * 255.0);
+        return static_cast<int>(inverted_percentage * 100);
     }
     //! returns 1 - 9 (starting at 1 and going to 9 by increased _rendered_count)
     int _get_pen_width(const QSize resolution) const

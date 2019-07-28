@@ -2,6 +2,14 @@
 
 trdrop - a cross platform fps analyzer for raw video data
 
+#### Update 28.07.2019
+
+Added tear visualization and the csv export function. For the tear visualization you can see it either in the frametime plot as well as a single line which stays for 25 frames at the place where the tear was detected and slowly fades out (see the gif).
+
+You can also disable this visualization if need be.
+
+![](images/2019-07-28-tear-visualization.gif)
+
 #### Update 27.07.2019
 
 I now included a new algorithm to include the tear detection into the framerate + frametime calculation.

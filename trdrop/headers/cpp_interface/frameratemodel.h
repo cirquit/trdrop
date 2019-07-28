@@ -49,7 +49,11 @@ public:
     {
         _framerate_history[index].front() = value;
     }
-
+    //! TODO
+    std::vector<double> get_framerates() const
+    {
+        return _framerates;
+    }
     //! TODO
     double get_framerate_at(const quint8 index) const
     {
