@@ -13,8 +13,8 @@ Window {
     title: "Export"
     visible: true
     width: 740
-    height: 390
-    flags: Qt.SubWindow || Qt.WindowSystemMenuHint
+    minimumHeight: 410
+    flags: Qt.Dialog
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {

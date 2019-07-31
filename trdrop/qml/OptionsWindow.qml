@@ -14,8 +14,8 @@ Window {
     title: "Options"
     visible: true
     width: 800
-    height: 700
-    flags: Qt.SubWindow || Qt.WindowSystemMenuHint
+    minimumHeight: 700
+    flags: Qt.Dialog
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
 
