@@ -13,8 +13,8 @@ Window {
     title: "Manage Files"
     visible: true
     width: 800
-    height: 350
-    flags: Qt.SubWindow || Qt.WindowSystemMenuHint
+    minimumHeight: 320
+    flags: Qt.Dialog
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {
