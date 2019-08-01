@@ -99,7 +99,7 @@ public:
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! the actual recording framerate (e.g most of the time this will be ~60)
     ValueItem<double> recorded_framerate;
-    //! TODO
+    //! the current resolution might be needed to adapt the fontsize automatically (currently not used)
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! TODO
     QColor _text_shadow;
