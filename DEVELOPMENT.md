@@ -19,8 +19,9 @@ Short writeup of Windows / Linux (Ubuntu) cross platform development information
 
 * Install [QtCreator](https://www.qt.io/download#)
     - I use the version `5.12.2`, but I hope that any `5.*.*` version works
-    - **Windows:** Check to install the correct compiler, I use `mingw_730`, the 32-bit version
+    - **Windows:** Check to install the correct compiler, I use `mingw_730`, the 32-bit version 
     - **Windows:** Install everything in the default installation directory -> `C:\Qt`
+    -  **Windows:**Developer Options, check  `mingw730_32`
     - **Linux:** Check to install the correct compiler, I use `g++ 7.4.0`
 
 ## Install CMake (Linux)
@@ -40,6 +41,12 @@ Follow the instructions for `https://github.com/cirquit/opencv-template`. You ca
 ## Install OpenCV (Windows)
 
 Install from [https://opencv.org/opencv-4-1-0.html](https://opencv.org/opencv-4-1-0.html), not the `Win Pack`, but the `Sources`. Extract the `opencv-4.1.0` directory to `C:`.
+
+CMake Options:
+```
+Source code: C:/opencv-4.1.0
+Where to build the binaries: C:/opencv-4.1.0/build
+```
 
 Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows](https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows).
 
