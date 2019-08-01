@@ -101,8 +101,12 @@ private:
     //! TODO
     void _close_csv_file()
     {
+        if (_file_opened)
+        {
+            _csv_file_handle->close();
+        }
         _file_opened = false;
-        _csv_file_handle->close();
+
     }
     //! TODO
     void _append_framerates()
