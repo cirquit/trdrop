@@ -27,7 +27,7 @@ MenuBar
         MenuItem
         {
             //shortcut:
-            text: qsTr("Export       Ctrl+E")
+            text: qsTr("Export          Ctrl+E")
             action: Action {
                 shortcut: "Ctrl+E"
                 onTriggered: {
@@ -54,7 +54,7 @@ MenuBar
         title: qsTr("Tools")
         MenuItem
         {
-            text: qsTr("Options       Ctrl+O")
+            text: qsTr("Options          Ctrl+O")
             action: Action {
                 shortcut: "Ctrl+O"
                 onTriggered: {
@@ -65,13 +65,13 @@ MenuBar
             }
         }
     }
-    Menu
-    {
-        title: qsTr("About")
-        MenuItem
-        {
-            text: qsTr("About trdrop")
-            onTriggered: console.log("About trdrop onTriggered")
-        }
-    }
+//    Menu
+//    {
+//        title: qsTr("About")
+//        MenuItem
+//        {
+//            text: qsTr("About trdrop")
+//            onTriggered: console.log("About trdrop onTriggered")
+//        }
+//    }
 }

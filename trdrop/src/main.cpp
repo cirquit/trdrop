@@ -37,10 +37,10 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
     QQuickStyle::setStyle("Material");
-    QFontDatabase::addApplicationFont("qrc:/fonts/FjallaOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/FjallaOne-Regular.ttf");
     // TODO evaluate if we need these fonts
-    QFontDatabase::addApplicationFont("qrc:/fonts/materialdesignicons-webfont.ttf");
-    QFontDatabase::addApplicationFont("qrc:/fonts/Rationale-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/materialdesignicons-webfont.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/Rationale-Regular.ttf");
 
     // TODO add the other fonts?
 
