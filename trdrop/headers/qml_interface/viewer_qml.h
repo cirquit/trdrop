@@ -21,8 +21,8 @@ public:
 
 //! methods
 public:
+    //! TODO
     Q_SIGNAL void requestNextImages();
-
     //! resized the texture, width and height of this item
     Q_SLOT void resize(QSize size)
     {
@@ -43,8 +43,7 @@ public:
         _draw_image = draw_image.toBool();
         if (draw_image.toBool())
         {
-            _qml_image = qml_image.copy();
-            _qml_image = _qml_image.scaledToHeight(static_cast<int>(size().height()), Qt::SmoothTransformation);
+            _qml_image = qml_image.scaledToHeight(static_cast<int>(size().height()), Qt::SmoothTransformation);
         }
         update();
     }

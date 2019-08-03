@@ -42,7 +42,6 @@ public:
     //! TODO
     Q_SLOT void processImage(const QImage & image)
     {
-        //qDebug() << "ExporterQML::processImage()";
         if (isExporting())
         {
             if (_export_options_model->export_as_imagesequence())
@@ -65,7 +64,6 @@ public:
         qDebug() << "ExporterQML:finishExporting triggered";
         stopExporting();
     }
-
     //! TODO
     Q_INVOKABLE void startExporting()
     {
@@ -168,8 +166,6 @@ public:
     bool _file_opened;
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-
-
 };
 
 #endif // EXPORTCONTROLLER_QML_H

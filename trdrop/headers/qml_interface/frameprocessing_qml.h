@@ -45,10 +45,10 @@ public:
     Q_SLOT void processFrames(const QList<cv::Mat> & cv_image_list)
     {
         // calculate the differences between the frames and return the resulting b/w frames
-        QList<cv::Mat> difference_mat_list = _frame_processing.check_for_difference(
-                                                 cv_image_list
-                                               , _shared_fps_options_list
-                                               , _shared_tear_options_list);
+        const QList<cv::Mat> & difference_mat_list = _frame_processing.check_for_difference(
+                                                   cv_image_list
+                                                 , _shared_fps_options_list
+                                                 , _shared_tear_options_list);
         //
         const QList<double> framerate_list    = _frame_processing.get_framerates();
         const QList<double> frametime_list    = _frame_processing.get_frametimes();

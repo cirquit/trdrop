@@ -35,7 +35,6 @@ public:
                             , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
                             , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
     {
-        QList<cv::Mat> difference_frames;
         // we can only calculate the difference if we have at least two sets of frames
         if (!_received_first_frames)
         {
@@ -45,10 +44,7 @@ public:
         } else
         {
             // default init TODO refactor
-            for (int i = 0; i < cv_frame_list.size(); ++i) {
-                difference_frames.push_back(cv::Mat());
-                _tear_rows.clear();
-            }
+            _tear_rows.clear();
             // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
             // refactored this from the loop to allow omp
             bool all_cached_frames_filled = true;
@@ -62,15 +58,15 @@ public:
                 for (int i = 0; i < cv_frame_list.size(); ++i)
                 {
                     const quint32 pixel_difference = (*shared_fps_options_list)[i].pixel_difference.value();
-                    difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i], pixel_difference).clone();
+                    _difference_frames[i] = _get_difference(_cached_frames[i], cv_frame_list[i], pixel_difference).clone();
 
                     // explicit convertion for linter
                     const size_t _i           = static_cast<size_t>(i);
                     const size_t _frame_count = _current_framecount_list[_i];
                     // calculate a diff frame based on the amount of "same" rows in the compared frames
                     double dismiss_tear_percentage = (*shared_tear_options_list)[i].dismiss_tear_percentage.value() / 100;
-                    //_frame_diff_lists[_i][_frame_count] = tear_data_list[i].get_diff_percentage(dismiss_tear_percentage);
-                    _frame_diff_lists[_i][_frame_count] = _get_frame_difference(difference_frames[i], dismiss_tear_percentage, i, cv_frame_list.size());
+                    // fill the frame difference, the diff counter and tears
+                    _frame_diff_lists[_i][_frame_count] = _get_frame_difference(_difference_frames[i], dismiss_tear_percentage, i, cv_frame_list.size());
                 }
             }
             // increments the framecounter for each video and loops automatically
@@ -78,7 +74,7 @@ public:
         }
         // save the current frame list
         _cache_framelist(cv_frame_list);
-        return difference_frames;
+        return _difference_frames;
     }
     //! calculates the current framerate for each video
     QList<double> get_framerates() const
@@ -112,6 +108,7 @@ public:
         _frame_diff_lists.clear();
         _current_framecount_list.clear();
         _cached_frames.clear();
+        _difference_frames.clear();
         _init_member(recorded_framerate_list);
     }
 
@@ -172,13 +169,14 @@ private:
             }
             _frame_diff_lists.push_back(std::vector<double>(recorded_framerate, 0.0));
             _cached_frames.push_back(cv::Mat());
+            _difference_frames.push_back(cv::Mat());
             _current_framecount_list.push_back(0);
         }
         // without a seconds frame frames can't be compared
         _received_first_frames = false;
     }
     //! copies the framelist as cv::Mat is a smart pointer and need to be copied manually
-    void _cache_framelist(const QList<cv::Mat> _other)
+    void _cache_framelist(const QList<cv::Mat> & _other)
     {
         for (int i = 0; i < _other.size(); ++i)
         {
@@ -401,6 +399,8 @@ private:
     const quint8                     _max_video_count;
     //! if tears were found, they are saved for a frame here
     std::vector<TearData>            _tear_rows;
+    //! caches the frame differences which may be rendered if need be
+    QList<cv::Mat>                   _difference_frames;
 
 };
 

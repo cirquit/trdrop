@@ -41,7 +41,7 @@ public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & image);
     //! TODO
-    Q_SLOT void processImage(QImage qml_image)
+    Q_SLOT void processImage(const QImage & qml_image)
     {
         if (qml_image.isNull()) return;
 

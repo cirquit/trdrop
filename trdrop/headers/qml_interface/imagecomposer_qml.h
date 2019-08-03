@@ -26,7 +26,7 @@ public:
 //! methods
 public:
     //! signal to wait for to render the full image
-    Q_SIGNAL void imageReady(QImage image);
+    Q_SIGNAL void imageReady(const QImage & image);
     //! side by side only right now
     Q_SLOT void processImages(const QList<QImage> & _qml_image_list)
     {
@@ -76,8 +76,7 @@ public:
         }
         if (_qml_image_list.size() == 1)
         {
-            _qml_image = _qml_image_list[0].copy();
-            _qml_image = _qml_image.scaledToWidth(_size.width());
+            _qml_image = _qml_image_list[0].scaledToWidth(_size.width());
         }
         emit imageReady(_qml_image);
     }
@@ -85,7 +84,7 @@ public:
     Q_SLOT void updateComposition()
     {
         QSize size = _shared_resolution_model->get_active_value().size();
-        _qml_image = _qml_image.scaledToWidth(size.width());
+        _qml_image = _qml_image.scaledToWidth(size.width()).copy();
         emit imageReady(_qml_image);
     }
 //! methods

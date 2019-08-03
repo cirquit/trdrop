@@ -143,15 +143,15 @@ int main(int argc, char *argv[])
 
     // sigals in c++ (main processing pipeline)
     // pass the QList<cv::Mat> to the converter
-    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &frame_processing_qml, &FrameProcessingQML::processFrames);
+    QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &frame_processing_qml, &FrameProcessingQML::processFrames, Qt::DirectConnection);
     // framerate processing
-    QObject::connect(&frame_processing_qml, &FrameProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames);
-    // pass the QList<QImage> to the composer to mux them together
-    QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages);
-    // pass the QImage to the renderer to render the meta information onto the image
-    QObject::connect(&imagecomposer_qml,    &ImageComposerQML::imageReady,     &renderer_qml,         &RendererQML::processImage);
-    // pass the rendered QImage to the exporter
-    QObject::connect(&renderer_qml,         &RendererQML::imageReady,          &exporter_qml,         &ExporterQML::processImage);
+    QObject::connect(&frame_processing_qml, &FrameProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames, Qt::DirectConnection);
+//    // pass the QList<QImage> to the composer to mux them together
+    QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages, Qt::DirectConnection);
+//    // pass the QImage to the renderer to render the meta information onto the image
+    QObject::connect(&imagecomposer_qml,    &ImageComposerQML::imageReady,     &renderer_qml,         &RendererQML::processImage, Qt::DirectConnection);
+//    // pass the rendered QImage to the exporter
+    QObject::connect(&renderer_qml,         &RendererQML::imageReady,          &exporter_qml,         &ExporterQML::processImage, Qt::DirectConnection);
 
     // if VCL finishes processing, finish exporting (may be needed if it's a video)
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::finishedProcessing, &exporter_qml, &ExporterQML::finishExporting);
