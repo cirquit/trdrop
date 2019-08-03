@@ -13,9 +13,10 @@ Item {
     // slightly convoluted, this should be reworked
     // the viewer can't take the exportOptionsModel as shared_ptr as its called from QML
     // and not from c++
+    // we call the garbage collector to collect the sent images in JS
     Connections {
         target: exporter
-        onImageReady: { viewer.setImage(image, exportOptionsModel.enabledLivePreview()) }
+        onImageReady: { gc(); viewer.setImage(image, exportOptionsModel.enabledLivePreview()) }
     }
 
     Connections {
