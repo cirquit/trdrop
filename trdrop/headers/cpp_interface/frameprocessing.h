@@ -45,6 +45,11 @@ public:
         {
             // default init TODO refactor
             _tear_rows.clear();
+            _difference_frames.clear();
+            for (int i = 0; i < cv_frame_list.size(); ++i)
+            {
+                _difference_frames.push_back(cv::Mat());
+            }
             // if multiple videos are loaded, the cache list has not all frames loaded, wait for next iteration
             // refactored this from the loop to allow omp
             bool all_cached_frames_filled = true;
@@ -246,7 +251,7 @@ private:
     double _get_frame_difference(const cv::Mat & difference, const double dismiss_tear_percentage, int video_index, int video_count)
     {
         // how much of a row has to be different to see it as a "tear cut"
-        const double tear_row_completness = 0.2;
+        const double tear_row_completness = 0.1;
         // normalized row differences
         const std::vector<double> row_differences = _get_row_differences(difference);
         // if we found a different pixel and no tears, we have to return 1 (as in increment the framerate by 1)
