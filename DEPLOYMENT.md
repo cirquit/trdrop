@@ -33,7 +33,7 @@ We currently support latest Win 10 (installed at 31.07.2019) as I build it manua
     - copy the contents of the prepared directory into the `packages\org.cirquit.trdrop\data` directory
     - bump up the version in the `installer\packages\org.cirquit.trdrop\meta\package` file
 * Open the **Qt 5.12.2 (MinGW 730 32-bit)** command line tool and `cd` into the template directory
-    - run `binarycreator --offline-only -c config/config.xml -package TrdropInstaller`
+    - run `binarycreator --offline-only -c config/config.xml -p packages TrdropInstaller`
 
 #### Automated (TODO)
 
