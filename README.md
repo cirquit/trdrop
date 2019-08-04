@@ -71,4 +71,4 @@ trdrop is created with the [Qt framework](https://www.qt.io/) and [OpenCV](https
 
 ## License
 
-We have to run with the LGPLv3 license as Qt forces us to. As far as I understand it (**not a lawyer**), you can use the software commercially. [This seems like a good summary](https://www.embeddeduse.com/2016/04/10/using-qt-5-6-and-later-under-lgpl/) of the restrictions which should be only of interest to the embedded crowd.
+[MIT License](https://en.wikipedia.org/wiki/MIT_License). Commercial use is allowed.
