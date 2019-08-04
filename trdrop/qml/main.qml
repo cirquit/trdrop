@@ -32,6 +32,11 @@ ApplicationWindow
     TrdropContent {
         visible: true
     }
+    // only allow fullscreen view
+    Component.onCompleted: {
+        rootWindow.showFullScreen();
+    }
+
     // not needed yet
     // statusBar: TrdropStatusBar { }
 }

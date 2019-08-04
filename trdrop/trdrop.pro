@@ -71,7 +71,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
 HEADERS += \
     headers/cpp_interface/checkboxitem.h \
     headers/cpp_interface/fileitem.h \
@@ -108,5 +107,4 @@ HEADERS += \
     headers/cpp_interface/tearmodel.h
 
 
-
-
+RC_ICONS = images/trdrop_logo_alpha.ico
