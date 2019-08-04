@@ -31,8 +31,8 @@ unix: LIBS += -L/usr/local/lib \
         -lopencv_videoio \
         -lopencv_video
 
-windows: INCLUDEPATH += c:\opencv-4.1.0\build\install\include
-windows: LIBS += -LC:\\opencv-4.1.0\build\install\x86\mingw\lib \
+windows: INCLUDEPATH += c:\opencv-4.1.0-64\build\install\include
+windows: LIBS += -LC:\\opencv-4.1.0-64\build\install\x64\mingw\lib \
         -lopencv_calib3d410 \
         -lopencv_core410 \
         -lopencv_dnn410 \
