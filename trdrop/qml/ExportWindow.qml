@@ -14,7 +14,7 @@ Window {
     visible: true
     width: 740
     minimumHeight: 410
-    flags: Qt.Dialog
+    flags: Qt.SubWindow //Qt.Dialog
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {

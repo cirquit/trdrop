@@ -14,7 +14,7 @@ Window {
     visible: true
     width: 800
     minimumHeight: 320
-    flags: Qt.Dialog
+    flags: if (Qt.platform.os == "linux") { return Qt.SubWindow } else { return Qt.Dialog }
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {
