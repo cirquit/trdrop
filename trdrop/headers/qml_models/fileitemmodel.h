@@ -34,7 +34,6 @@ public:
       , RecordedFramerateRole = Qt::UserRole + 2
       , QtFilePathRole        = Qt::UserRole + 3
       , FileSelectedRole      = Qt::UserRole + 4
-      , PositionRole          = Qt::UserRole + 5
     };
 //! qml methods - camelCase
 public:
@@ -61,8 +60,6 @@ public:
                 return file_item.filePath();
             case SizeMBRole:
                 return file_item.sizeMB();
-            case PositionRole:
-                return file_item.position();
             case QtFilePathRole:
                 return file_item.qtFilePath();
             case FileSelectedRole:
@@ -79,7 +76,6 @@ public:
         FileItem & file_item = _file_item_list[index.row()];
         if (role == FilePathRole) file_item.setFilePath(value.toString());
         else if (role == SizeMBRole) file_item.setSizeMB(value.toUInt());
-        else if (role == PositionRole) file_item.setPosition(static_cast<quint8>(value.toUInt()));
         else if (role == QtFilePathRole) file_item.setQtFilePath(value.toString());
         else if (role == FileSelectedRole) file_item.setFileSelected(value.toBool());
         else if (role == RecordedFramerateRole) file_item.setRecordedFramerate(value.toDouble());
@@ -174,7 +170,6 @@ private:
     {
         _role_names[FilePathRole]          = "filePath";
         _role_names[SizeMBRole]            = "sizeMB";
-        _role_names[PositionRole]          = "position";
         _role_names[QtFilePathRole]        = "qtFilePath";
         _role_names[FileSelectedRole]      = "fileSelected";
         _role_names[RecordedFramerateRole] = "recordedFramerate";
