@@ -44,10 +44,7 @@ public:
       , DisplayedTextValueRole       = Qt::UserRole + 39
       , DisplayedTextFontRole        = Qt::UserRole + 40
       , DisplayedTextEnabledRole     = Qt::UserRole + 41
-      , RecordedFramerateNameRole    = Qt::UserRole + 42
-      , RecordedFramerateTooltipRole = Qt::UserRole + 43
-      , RecordedFramerateValueRole   = Qt::UserRole + 44
-      , FPSOptionsEnabled            = Qt::UserRole + 46
+      , FPSOptionsEnabled            = Qt::UserRole + 42
     };
 //! methods
 public:
@@ -91,12 +88,6 @@ public:
                  return (*_shared_fps_options_list)[row].displayed_text.font();
             case DisplayedTextEnabledRole:
                  return (*_shared_fps_options_list)[row].displayed_text.enabled();
-            case RecordedFramerateNameRole:
-                 return (*_shared_fps_options_list)[row].recorded_framerate.name();
-            case RecordedFramerateTooltipRole:
-                 return (*_shared_fps_options_list)[row].recorded_framerate.tooltip();
-            case RecordedFramerateValueRole:
-                 return (*_shared_fps_options_list)[row].recorded_framerate.value();
             case FPSOptionsEnabled:
                  return (*_shared_fps_options_list)[row].enabled;
             default:
@@ -119,7 +110,6 @@ public:
         else if (role == DisplayedTextValueRole)     (*_shared_fps_options_list)[row].displayed_text.setValue(value.toString());
         else if (role == DisplayedTextFontRole)      (*_shared_fps_options_list)[row].displayed_text.setFont(value.value<QFont>());
         else if (role == DisplayedTextEnabledRole)   (*_shared_fps_options_list)[row].displayed_text.setEnabled(value.toBool());
-        else if (role == RecordedFramerateValueRole) (*_shared_fps_options_list)[row].recorded_framerate.setValue(value.toDouble());
         else if (role == FPSOptionsEnabled)          (*_shared_fps_options_list)[row].enabled = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
@@ -167,16 +157,6 @@ public:
             setData(q, loaded_file, FPSOptionsEnabled);
         }
     }
-    //! TODO
-    Q_INVOKABLE void setRecordedFramerates(const QList<double> recorded_framerates)
-    {
-        for (int i = 0; i < recorded_framerates.length(); ++i)
-        {
-            const double framerate = recorded_framerates[i];
-            QModelIndex q = createIndex(i, 0);
-            setData(q, framerate, RecordedFramerateValueRole);
-        }
-    }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -196,10 +176,6 @@ private:
         _role_names[DisplayedTextValueRole]     = "displayedText";
         _role_names[DisplayedTextFontRole]      = "displayedTextFont";
         _role_names[DisplayedTextEnabledRole]   = "displayedTextEnabled";
-
-        _role_names[RecordedFramerateNameRole]    = "recordedFramerateName";
-        _role_names[RecordedFramerateTooltipRole] = "recordedFramerateTooltip";
-        _role_names[RecordedFramerateValueRole]   = "recordedFramerate";
 
         _role_names[FPSOptionsEnabled] = "fpsOptionsEnabled";
     }

@@ -1,5 +1,5 @@
-#ifndef FPSOptions_H
-#define FPSOptions_H
+#ifndef FPSOPTIONS_H
+#define FPSOPTIONS_H
 
 #include <QPainter>
 #include <memory>
@@ -15,7 +15,7 @@ class FPSOptions
 {
 // constructors
 public:
-    //! TODO
+    //!
     FPSOptions(const quint8 video_id
              , std::shared_ptr<FramerateModel> shared_framerate_model
              , std::shared_ptr<ResolutionsModel> shared_resolution_model)
@@ -71,10 +71,6 @@ private:
         displayed_text.setValue("FPS:");
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Fjalla One", 18));
-
-        recorded_framerate.setName("Recorded framerate:");
-        recorded_framerate.setTooltip("This is the raw encoded framerate of the clip without frameranalysis");
-        recorded_framerate.setValue(0.0);
     }
     //! TODO
     QString _get_full_text() const
@@ -97,12 +93,10 @@ public:
     bool enabled;
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-    //! the actual recording framerate (e.g most of the time this will be ~60)
-    ValueItem<double> recorded_framerate;
     //! the current resolution might be needed to adapt the fontsize automatically (currently not used)
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! TODO
     QColor _text_shadow;
 };
 
-#endif // FPSOptions_H
+#endif // FPSOPTIONS_H
