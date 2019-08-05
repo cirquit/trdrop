@@ -5,19 +5,18 @@
 #include <QString>
 #include <QInternal>
 
-//!
+//! a wrapper around a bool value with name and tooltip parameters
 class CheckBoxItem
 {
-
 //! constructor
 public:
+    //! default constructor
     CheckBoxItem()
         : _name("")
         , _tooltip("")
         , _value(false)
     { }
-
-    //! set all member
+    //! set members manually
     CheckBoxItem(QString name
                , QString tooltip
                , bool default_value)
@@ -25,8 +24,9 @@ public:
         , _tooltip(tooltip)
         , _value(default_value)
     { }
-
+    //! copy constructor
     CheckBoxItem(const CheckBoxItem & other) = default;
+    //! assignment operator
     CheckBoxItem & operator=(const CheckBoxItem & other) = default;
 
 //! setter methods
@@ -43,9 +43,12 @@ public:
 
 //! member
 private:
-    QString _name;    // name which is shown in the view for the checkbox
-    QString _tooltip; // tooltip which is shown on hover over the checkbox / text
-    bool    _value;   // checkbox value
+    //! name which is shown in the view for the checkbox
+    QString _name;
+    //! tooltip which is shown on hover over the checkbox / text
+    QString _tooltip;
+    //! checkbox value
+    bool    _value;
 };
 
 

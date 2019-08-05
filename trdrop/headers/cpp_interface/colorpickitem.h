@@ -5,20 +5,19 @@
 #include <QString>
 #include <QInternal>
 
-//!
+//! a wrapper around a QString value which is a hex-code for QColor (TODO) with name and tooltip parameters
 class ColorPickItem
 {
 
 //! constructor
 public:
-    //! TODO
+    //! default constructor
     ColorPickItem()
         : _name("")
         , _tooltip("")
         , _color("#FFFFFF")
     { }
-
-    //! set all member
+    //! set members manually
     ColorPickItem(QString name
                 , QString tooltip
                 , QString color)
@@ -26,8 +25,9 @@ public:
         , _tooltip(tooltip)
         , _color(color)
     { }
-
+    //! copy constructor
     ColorPickItem(const ColorPickItem & other) = default;
+    //! assignment operator
     ColorPickItem & operator=(const ColorPickItem & other) = default;
 
 //! setter methods
@@ -44,9 +44,12 @@ public:
 
 //! member
 private:
-    QString _name;    // name which is shown in the view for the checkbox
-    QString _tooltip; // tooltip which is shown on hover over the checkbox / text
-    QString _color;   // color value as hex -> #FFFFFF
+    //! name which is shown in the view for the checkbox
+    QString _name;
+    //! tooltip which is shown on hover over the checkbox / text
+    QString _tooltip;
+    //! color value as hex -> #FFFFFF
+    QString _color;
 };
 
 
