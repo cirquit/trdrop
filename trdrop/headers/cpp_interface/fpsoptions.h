@@ -11,11 +11,13 @@
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/qml_models/resolutionsmodel.h"
 
+//! holds all the framerate options of a single video
+//! is reponsible for the paint_ method of the framerate text
 class FPSOptions
 {
 // constructors
 public:
-    //!
+    //! takes the responsible video_id and several models as we need to access them to be able to paint the framerate text
     FPSOptions(const quint8 video_id
              , std::shared_ptr<FramerateModel> shared_framerate_model
              , std::shared_ptr<ResolutionsModel> shared_resolution_model)
@@ -30,12 +32,12 @@ public:
 
 // methods
 public:
-    //! TODO
+    //! resets the saved options to our default configuration
     void revert_to_default()
     {
         _init_member();
     }
-    //! TODO
+    //! paints the framerate text at the position x, y (top-left is 0,0)
     void paint_fps_text(QPainter * painter, int x, int y)
     {
         int x_offset = 2;
@@ -52,7 +54,7 @@ public:
 
 // methods
 private:
-    //! TODO
+    //! default initialization of the options
     void _init_member()
     {
         fps_plot_color.setName("Framerate plot color");
@@ -72,7 +74,7 @@ private:
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Fjalla One", 18));
     }
-    //! TODO
+    //! adds the framerate prefix text defined in the options to the current framerate of the designated video
     QString _get_full_text() const
     {
         double framerate = _shared_framerate_model->get_framerate_at(video_id);
@@ -81,21 +83,21 @@ private:
 
 // member
 public:
-    //! TODO
-    quint8       video_id;
-    //! TODO
+    //! hold the id (starting from 0) of the responsible video
+    const quint8       video_id;
+    //! framerate color, used for text and plot color
     ColorPickItem fps_plot_color;
-    //! TODO
+    //! how big can the difference in the RGB space get between two pixels for us to detect a difference
     ValueItem<quint32> pixel_difference;
-    //! TODO
+    //! prefix text of the framerate
     TextEditItem displayed_text;
-    //! TODO
+    //! is this option enabled
     bool enabled;
-    //! TODO
+    //! framerate model (to get the current framerate)
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! the current resolution might be needed to adapt the fontsize automatically (currently not used)
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! TODO
+    //! to create a shadow effect we draw the text with an offset first
     QColor _text_shadow;
 };
 

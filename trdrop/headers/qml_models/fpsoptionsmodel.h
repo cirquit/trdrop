@@ -9,13 +9,13 @@
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/qml_models/resolutionsmodel.h"
 
-//!
+//! holds the framerate options for all videos and functions as QML model
 class FPSOptionsModel : public QAbstractListModel
 {
     Q_OBJECT
 //! constructors
 public:
-    //! TODO
+    //! holds shared models because FPSOptions need them
     FPSOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
                   , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
                   , std::shared_ptr<ResolutionsModel> shared_resolution_model
@@ -29,7 +29,7 @@ public:
         _init_options();
         _setup_role_names();
     }
-    //!
+    //! QML enums
     enum FPSOptionsRoles
     {
         ColorPickNameRole            = Qt::UserRole + 30
@@ -48,9 +48,7 @@ public:
     };
 //! methods
 public:
-    //! TODO
-    Q_SIGNAL void propagateFPSOptions(const QList<FPSOptions> fpsOptionsList);
-    //! TODO
+    //! row count of our model
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -58,7 +56,7 @@ public:
     }
     //! a getter for the _role_names to enable the access via QML
     QHash<int, QByteArray> roleNames() const override { return _role_names; }
-    //! QAbstractModel function which is called if a read in QML happens
+    //! called on read in QML
     QVariant data(const QModelIndex & index,int role) const override
     {
         int row = index.row();
@@ -94,7 +92,7 @@ public:
                 return QVariant();
         }
     }
-    //! QAbstractModel function which is called if an assignment in QML happens
+    //! called on assignment in QML
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         int row = index.row();
@@ -122,7 +120,7 @@ public:
         beginResetModel();
         endResetModel();
     }
-    //! apply the pixel difference to all indices
+    //! apply the pixel difference to ALL indices
     Q_INVOKABLE void applyPixelDifference(const QVariant & value)
     {
         QModelIndex q0 = createIndex(0, 0);
@@ -132,13 +130,13 @@ public:
         setData(q1, value, PixelDifferenceValueRole);
         setData(q2, value, PixelDifferenceValueRole);
     }
-    //! apply the pixel difference to all indices
+    //! applies the color to the corresponding row
     Q_INVOKABLE void applyColor(const QVariant & value, const int & row)
     {
         QModelIndex q = createIndex(row, 0);
         setData(q, value, ColorPickValueRole);
     }
-    //! TODO
+    //! reset the model
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
@@ -146,7 +144,7 @@ public:
         }
         resetModel();
     }
-    //! TODO
+    //! enables the corresponding FPSOptions based on the amount of filepaths
     Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
     {
         int video_count = filePaths.size();
@@ -159,7 +157,8 @@ public:
     }
 //! methods
 private:
-    //! Set names to the role name hash container (QHash<int, QByteArray>)
+    //! set names to the role name hash container (QHash<int, QByteArray>)
+    //! QML translates the string-value into the corresponding Enum which is used in this class
     void _setup_role_names()
     {
         _role_names[ColorPickNameRole]    = "colorName";
@@ -179,7 +178,7 @@ private:
 
         _role_names[FPSOptionsEnabled] = "fpsOptionsEnabled";
     }
-    //! TODO
+    //! creates three framerate options
     void _init_options()
     {
         for (quint8 id = 0; id < _max_video_count; ++id) {
@@ -189,14 +188,14 @@ private:
 
 //! member
 private:
-    //! TODO
+    //! framerate model to get the current framerate from, used by FPSOptions
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-    //! TODO
+    //! the "model" of this class
     std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
-    //! TODO
+    //! resolution model, used by FPSOptions
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! TODO
-    quint8 _max_video_count;
+    //! hardcoded maximum video count
+    const quint8 _max_video_count;
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
 };
