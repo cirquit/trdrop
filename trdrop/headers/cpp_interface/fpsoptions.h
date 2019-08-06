@@ -84,7 +84,7 @@ private:
 // member
 public:
     //! hold the id (starting from 0) of the responsible video
-    const quint8       video_id;
+    quint8       video_id;
     //! framerate color, used for text and plot color
     ColorPickItem fps_plot_color;
     //! how big can the difference in the RGB space get between two pixels for us to detect a difference

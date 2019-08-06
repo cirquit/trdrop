@@ -5,14 +5,12 @@
 #include <deque>
 #include <vector>
 
-//! TODO
+//! holds the framerates for all videos + framerate history
 class FramerateModel
 {
-
 //! constructors
 public:
-    //! Holds the framerate information
-    //! saving the history for 180 ticks as we restrict this in the GUI
+    //! saving the history for at most 180 ticks as we restrict this in the GUI
     FramerateModel()
         : _max_video_count(3)
         , _max_history_ticks(180)
@@ -22,32 +20,28 @@ public:
 
 //! methods
 public:
-    //! TODO
+    //! sets the framerate at the video index, removes the oldest value
     void set_framerate_at(const quint8 index, const double value)
     {
         set_framerate_at(static_cast<size_t>(index), value);
     }
-    //! TODO
+    //! sets the framerate at the video index, removes the oldest value
     void set_framerate_at(const int index, const double value)
     {
         set_framerate_at(static_cast<size_t>(index), value);
     }
-    //! TODO
+    //! sets the framerate at the video index, removes the oldest value
+    //! we hold the dp
     void set_framerate_at(const size_t index, const double value)
     {
         _framerates[index] = value;
         _framerate_history[index].push_front(value);
         _framerate_history[index].pop_back();
     }
-    //! TODO
+    //! get the current framerate for the video index
     double get_framerate_at_front(const size_t index) const
     {
         return _framerate_history[index].front();
-    }
-    //! TODO
-    void change_framerate_at_front(const size_t index, const double value)
-    {
-        _framerate_history[index].front() = value;
     }
     //! TODO
     std::vector<double> get_framerates() const
@@ -114,7 +108,7 @@ private:
 
 private:
     //! TODO
-    size_t _max_video_count;
+    const size_t _max_video_count;
     //! how long do we want to save the framerates?
     const size_t _max_history_ticks;
     //! TODO
