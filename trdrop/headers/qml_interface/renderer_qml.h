@@ -41,7 +41,7 @@ public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & image);
     //! TODO
-    Q_SLOT void processImage(const QImage & qml_image)
+    Q_SLOT void processImage(QImage qml_image)
     {
         if (qml_image.isNull()) return;
 
@@ -54,7 +54,7 @@ public:
         }
 
         QPainter painter;
-        painter.begin(&_qml_image);
+        painter.begin(&qml_image);
 
         if (_shared_general_options_model->get_enable_framerate_analysis())
         {
@@ -71,7 +71,7 @@ public:
         }
 
         painter.end();
-        emit imageReady(_qml_image);
+        emit imageReady(qml_image);
     }
     //! TODO
     Q_SLOT void redraw()

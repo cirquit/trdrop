@@ -42,13 +42,19 @@ public:
     {
         int x_offset = 2;
         int y_offset = 2;
+
+        QFont displayed_text_font = displayed_text.font();
+        if (displayed_text_fontsize_override)
+        {
+            displayed_text_font.setPointSize(_get_font_size());
+        }
         // draw shadow
         painter->setPen(_text_shadow);
-        painter->setFont(displayed_text.font());
+        painter->setFont(displayed_text_font);
         painter->drawText(x + x_offset, y + y_offset, _get_full_text());
         // draw real text
         painter->setPen(fps_plot_color.color());
-        painter->setFont(displayed_text.font());
+        painter->setFont(displayed_text_font);
         painter->drawText(x, y, _get_full_text());
     }
 
@@ -73,12 +79,28 @@ private:
         displayed_text.setValue("FPS:");
         displayed_text.setEnabled(true);
         displayed_text.setFont(QFont("Fjalla One", 18));
+
+        displayed_text_fontsize_override = true;
     }
     //! adds the framerate prefix text defined in the options to the current framerate of the designated video
     QString _get_full_text() const
     {
         double framerate = _shared_framerate_model->get_framerate_at(video_id);
         return displayed_text.value() + " " + QString::number(framerate, 10, 1);
+    }
+    //! TODO
+    int _get_font_size()
+    {
+        QSize current_size = _shared_resolution_model->get_active_size();
+        if      (current_size == QSize(960, 540))   return 13;
+        else if (current_size == QSize(1280, 720))  return 18;
+        else if (current_size == QSize(1600, 900))  return 22;
+        else if (current_size == QSize(1920, 1080)) return 27;
+        else if (current_size == QSize(2048, 1152)) return 30;
+        else if (current_size == QSize(2560, 1440)) return 37;
+        else if (current_size == QSize(3840, 2160)) return 60;
+        qDebug() << "FPSOptions::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        return 13;
     }
 
 // member
@@ -91,8 +113,10 @@ public:
     ValueItem<quint32> pixel_difference;
     //! prefix text of the framerate
     TextEditItem displayed_text;
-    //! is this option enabled
+    //! are these fpsoptions enabled
     bool enabled;
+    //! should the fontsize be ignored (to fit the automatic scaling of the plot)
+    bool displayed_text_fontsize_override;
     //! framerate model (to get the current framerate)
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! the current resolution might be needed to adapt the fontsize automatically (currently not used)

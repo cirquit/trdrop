@@ -32,19 +32,20 @@ public:
     //! QML enums
     enum FPSOptionsRoles
     {
-        ColorPickNameRole            = Qt::UserRole + 30
-      , ColorPickTooltipRole         = Qt::UserRole + 31
-      , ColorPickValueRole           = Qt::UserRole + 32
-      , PixelDifferenceNameRole      = Qt::UserRole + 33
-      , PixelDifferenceTooltipRole   = Qt::UserRole + 34
-      , PixelDifferenceValueRole     = Qt::UserRole + 35
-      , PixelDifferenceEnabledRole   = Qt::UserRole + 36
-      , DisplayedTextNameRole        = Qt::UserRole + 37
-      , DisplayedTextTooltipRole     = Qt::UserRole + 38
-      , DisplayedTextValueRole       = Qt::UserRole + 39
-      , DisplayedTextFontRole        = Qt::UserRole + 40
-      , DisplayedTextEnabledRole     = Qt::UserRole + 41
-      , FPSOptionsEnabled            = Qt::UserRole + 42
+        ColorPickNameRole          = Qt::UserRole + 30
+      , ColorPickTooltipRole       = Qt::UserRole + 31
+      , ColorPickValueRole         = Qt::UserRole + 32
+      , PixelDifferenceNameRole    = Qt::UserRole + 33
+      , PixelDifferenceTooltipRole = Qt::UserRole + 34
+      , PixelDifferenceValueRole   = Qt::UserRole + 35
+      , PixelDifferenceEnabledRole = Qt::UserRole + 36
+      , DisplayedTextNameRole      = Qt::UserRole + 37
+      , DisplayedTextTooltipRole   = Qt::UserRole + 38
+      , DisplayedTextValueRole     = Qt::UserRole + 39
+      , DisplayedTextFontRole      = Qt::UserRole + 40
+      , DisplayedTextEnabledRole   = Qt::UserRole + 41
+      , FPSOptionsEnabled          = Qt::UserRole + 42
+      , FontSizeOverrideRole       = Qt::UserRole + 43
     };
 //! methods
 public:
@@ -88,6 +89,8 @@ public:
                  return (*_shared_fps_options_list)[row].displayed_text.enabled();
             case FPSOptionsEnabled:
                  return (*_shared_fps_options_list)[row].enabled;
+            case FontSizeOverrideRole:
+                 return (*_shared_fps_options_list)[row].displayed_text_fontsize_override;
             default:
                 return QVariant();
         }
@@ -109,6 +112,7 @@ public:
         else if (role == DisplayedTextFontRole)      (*_shared_fps_options_list)[row].displayed_text.setFont(value.value<QFont>());
         else if (role == DisplayedTextEnabledRole)   (*_shared_fps_options_list)[row].displayed_text.setEnabled(value.toBool());
         else if (role == FPSOptionsEnabled)          (*_shared_fps_options_list)[row].enabled = value.toBool();
+        else if (role == FontSizeOverrideRole)       (*_shared_fps_options_list)[row].displayed_text_fontsize_override = value.toBool();
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -177,6 +181,8 @@ private:
         _role_names[DisplayedTextEnabledRole]   = "displayedTextEnabled";
 
         _role_names[FPSOptionsEnabled] = "fpsOptionsEnabled";
+
+        _role_names[FontSizeOverrideRole] = "fpsTextSizeOverride";
     }
     //! creates three framerate options
     void _init_options()

@@ -268,7 +268,7 @@ Window {
                     Frame {
                         width: fpsOptions.width * 0.95
                         GridLayout {
-                            columns: 4
+                            columns: 5
 
                             Label {
                                 id: colorLabel
@@ -303,7 +303,7 @@ Window {
                                 }
                             }
                             Button {
-                                Layout.columnSpan: 2
+                                Layout.columnSpan: 3
                                 text:  "Replicate Color"
                                 //ToolTip.text: "Replicate this color to tears and frametime of this video index"
                                 //ToolTip.delay: 500
@@ -338,7 +338,7 @@ Window {
                                 }
                             }
                             Button {
-                                Layout.columnSpan: 2
+                                Layout.columnSpan: 3
                                 text: "Apply to all videos"
                                 enabled: model.fpsOptionsEnabled
                                 action: Action {
@@ -395,8 +395,8 @@ Window {
                             }
                             Switch {
                                 id: fpsTextEnabled
-                                checked: true
-                                enabled: model.fpsOptionsEnabled
+                                checked: model.fpsOptionsEnabled
+                                enabled: true
                                 action: Action {
                                     onTriggered: {
                                         fpsText.enabled = !fpsText.enabled;
@@ -408,6 +408,19 @@ Window {
                                 //ToolTip.text: "Disable text and framerate rendering"
                                 //ToolTip.delay: 500
                                 //ToolTip.visible: hovered
+                            }
+                            Switch {
+                                id: fpsTextSizeOverride
+                                checked: model.fpsTextSizeOverride
+                                enabled: true
+                                action: Action {
+                                    onTriggered: {
+                                        model.fpsTextSizeOverride = !model.fpsTextSizeOverride;
+                                    }
+                                }
+                                ToolTip.text: "Override font size"
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
                             }
                         }
                     }
