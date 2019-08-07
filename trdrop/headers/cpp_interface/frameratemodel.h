@@ -109,7 +109,6 @@ private:
     std::vector<double> _framerates;
     //! all framerate histories, accessable by video index
     std::vector<std::deque<double>> _framerate_history;
-
 };
 
 #endif // FRAMERATEMODEL_H

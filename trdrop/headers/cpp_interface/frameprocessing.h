@@ -13,24 +13,25 @@
 #include "headers/qml_models/tearoptionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
-//! TODO
+//! Holds two consequtive frames, calculates the difference frame and applies
+//! the framerate, tear and frametime detection algorithms
 class FrameProcessing
 {
-
 //! constructors
 public:
-    //! TODO
+    //! default constructor
     FrameProcessing()
         : _received_first_frames(false)
         , _max_video_count(3)
     {
-        QList<quint8> _default_recorded_framerates = { 0, 0, 0 };
-        _init_member(_default_recorded_framerates);
+        _init_member_with_default_recorded_framerates();
     }
 
 //! methods
 public:
-    //! returns the difference frames
+    //! returns difference frames for each video (if a previous frame was accessable)
+    //! fills the member which make the framerate/frametime/tears accessable
+    //! this should be refactored in the future TODO
     QList<cv::Mat> check_for_difference(const QList<cv::Mat> & cv_frame_list
                             , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
                             , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
@@ -160,7 +161,17 @@ private:
         double frametime_in_s = frame_time_counter / static_cast<double>(recorded_framerate);
         return frametime_in_s * 1000;
     }
-    //! the inner lists of _frame_diff_lists are initialized to be the size of the framerate of each recorded video
+    //! wrapper around _init_member, called from the constructor
+    void _init_member_with_default_recorded_framerates()
+    {
+        QList<quint8> _default_recorded_framerates;
+        for (int i = 0; i < _max_video_count; ++i)
+        {
+            _default_recorded_framerates.push_back(0);
+        }
+        return _init_member(_default_recorded_framerates);
+    }
+    //! the lists of _frame_diff_lists are initialized to be the size of the framerate of each recorded video
     //! as we can not recognize a higher framerate than the one it was recorded with
     void _init_member(const QList<quint8> recorded_framerate_list)
     {
@@ -199,13 +210,14 @@ private:
             if (recorded_framerate != 0) _current_framecount_list[i] %= recorded_framerate;
         }
     }
-    //! TODO refactor this?
+    //! TODO this seems dirty, should be in a util file?
     size_t _decrement_modulo(size_t value, size_t max_value) const
     {
         if (value == 0) return max_value;
         else return value - 1;
     }
-    //! make this chooseable?
+    //! calculates the difference between the two frames
+    //! following the opencv "api" so the methods are interchangeable
     cv::Mat _get_difference(const cv::Mat & first_frame, const cv::Mat & second_frame, const quint32 pixel_difference) const
     {
         cv::Mat difference;
@@ -213,7 +225,8 @@ private:
         _are_equal_with_draw(first_frame, second_frame, static_cast<int>(pixel_difference), difference);
         return difference;
     }
-    //! TODO rethink this
+    //! comparing the greyscale values of two frames and drawing a white pixel for a great enough difference
+    //! test omp for performance gains
     //! take a look at https://stackoverflow.com/questions/18464710/how-to-do-per-element-comparison-and-do-different-operation-according-to-result
     void _are_equal_with_draw(const cv::Mat & frame_a, const cv::Mat & frame_b, const int pixel_difference, cv::Mat & output) const
     {
@@ -259,7 +272,6 @@ private:
         //
         bool tear_found = false;
         // saving the indices where tears were found. order: (lower, higher) indices
-        //std::vector<std::tuple<size_t, size_t>> tear_rows;
         for (size_t row = 1; row < row_differences.size(); ++row)
         {
             const size_t index_A = row - 1;
@@ -294,7 +306,7 @@ private:
         // if no different pixel was found, it has to be a duplicate frame, e.g (0% difference -> 0.0)
         return 0.0;
     }
-    //! returns the percentage of the biggest tear found
+    //! returns the percentage of the biggest tear found by comparing the height
     double _get_max_tear_percentage(const std::vector<double> & row_differences
                                   , const std::vector<TearData> & tear_rows) const
     {
@@ -336,6 +348,7 @@ private:
         return max_tear_percentage;
     }
     //! checks if the two normalized row differences count as a tear
+    //! tear_row_completeness defines the least amount of different pixel consequtive rows have to have to be counted as tear
     bool _are_tear_rows(const double row_diff_A, const double row_diff_B, const double tear_row_completness) const
     {
         // the tear happened with the old frame in row_diff_A and new frame in row_diff_B
@@ -391,7 +404,6 @@ private:
     }
 //! member
 private:
-
     //! holds the current framecount of each video (used to access the inner lists of _frame_diff_lists)
     std::vector<size_t>              _current_framecount_list;
     //! checks if we already received the first frames (only important on startup)
@@ -400,13 +412,12 @@ private:
     QList<cv::Mat>                   _cached_frames;
     //! the list which has a list for each video consisting of 0's or 1's, counting the differing frames
     std::vector<std::vector<double>> _frame_diff_lists;
-    //! maximum video count (TODO maybe refactor this in the future)
+    //! maximum video count
     const quint8                     _max_video_count;
     //! if tears were found, they are saved for a frame here
     std::vector<TearData>            _tear_rows;
     //! caches the frame differences which may be rendered if need be
     QList<cv::Mat>                   _difference_frames;
-
 };
 
 #endif // FRAMEPROCESSING_H
