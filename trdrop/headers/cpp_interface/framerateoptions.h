@@ -1,5 +1,5 @@
-#ifndef FPSOPTIONS_H
-#define FPSOPTIONS_H
+#ifndef FRAMERATEOPTIONS_H
+#define FRAMERATEOPTIONS_H
 
 #include <QPainter>
 #include <memory>
@@ -13,14 +13,14 @@
 
 //! holds all the framerate options of a single video
 //! is reponsible for the paint_ method of the framerate text
-class FPSOptions
+class FramerateOptions
 {
 // constructors
 public:
     //! takes the responsible video_id and several models as we need to access them to be able to paint the framerate text
-    FPSOptions(const quint8 video_id
-             , std::shared_ptr<FramerateModel> shared_framerate_model
-             , std::shared_ptr<ResolutionsModel> shared_resolution_model)
+    FramerateOptions(const quint8 video_id
+                   , std::shared_ptr<FramerateModel> shared_framerate_model
+                   , std::shared_ptr<ResolutionsModel> shared_resolution_model)
         : video_id(video_id)
         , enabled(false) // initialized by default to false, because revert_to_default button in options should not reset this
         , _shared_framerate_model(shared_framerate_model)
@@ -88,7 +88,7 @@ private:
         double framerate = _shared_framerate_model->get_framerate_at(video_id);
         return displayed_text.value() + " " + QString::number(framerate, 10, 1);
     }
-    //! TODO
+    //! resolution adaptive font size
     int _get_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -125,4 +125,4 @@ public:
     QColor _text_shadow;
 };
 
-#endif // FPSOPTIONS_H
+#endif // FRAMERATEOPTIONS_H

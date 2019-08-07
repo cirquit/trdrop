@@ -224,7 +224,7 @@ Window {
             frameprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
             fileItemModel.setRecordedFramerates(getVisualFileItemPaths()
                                                ,videocapturelist.getRecordedFramerates());
-            fpsOptionsModel.updateEnabledRows(filePaths);
+            framerateOptionsModel.updateEnabledRows(filePaths);
             tearOptionsModel.updateEnabledRows(filePaths);
             exportOptionsModel.setEnabledExportButton(filePaths.length > 0);
             videocapturelist.readNextFrames();

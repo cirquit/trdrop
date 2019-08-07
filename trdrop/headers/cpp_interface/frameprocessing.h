@@ -8,7 +8,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <memory>
 
-#include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/framerateoptions.h"
 #include "headers/cpp_interface/teardata.h"
 #include "headers/qml_models/tearoptionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
@@ -32,7 +32,7 @@ public:
 public:
     //! returns the difference frames
     QList<cv::Mat> check_for_difference(const QList<cv::Mat> & cv_frame_list
-                            , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+                            , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
                             , std::shared_ptr<QList<TearOptions>> shared_tear_options_list)
     {
         // we can only calculate the difference if we have at least two sets of frames

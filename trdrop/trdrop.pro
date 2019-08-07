@@ -77,7 +77,6 @@ HEADERS += \
     headers/cpp_interface/resolution.h \
     headers/cpp_interface/valueitem.h \
     headers/cpp_interface/colorpickitem.h \
-    headers/cpp_interface/fpsoptions.h \
     headers/cpp_interface/tearoptions.h \
     headers/cpp_interface/textedititem.h \
     headers/cpp_interface/videocapturelist.h \
@@ -91,7 +90,6 @@ HEADERS += \
     headers/qml_interface/viewer_qml.h \
     headers/qml_interface/exporter_qml.h \
     headers/qml_models/fileitemmodel.h \
-    headers/qml_models/fpsoptionsmodel.h \
     headers/qml_models/generaloptionsmodel.h \
     headers/qml_models/resolutionsmodel.h \
     headers/qml_models/tearoptionsmodel.h \
@@ -104,7 +102,9 @@ HEADERS += \
     headers/cpp_interface/frameprocessing.h \
     headers/qml_interface/frameprocessing_qml.h \
     headers/cpp_interface/teardata.h \
-    headers/cpp_interface/tearmodel.h
+    headers/cpp_interface/tearmodel.h \
+    headers/cpp_interface/framerateoptions.h \
+    headers/qml_models/framerateoptionsmodel.h
 
 
 RC_ICONS = images/trdrop_logo_alpha.ico

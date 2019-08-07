@@ -8,7 +8,7 @@
 #include "headers/cpp_interface/frameprocessing.h"
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/cpp_interface/frametimemodel.h"
-#include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/framerateoptions.h"
 #include "headers/cpp_interface/tearoptions.h"
 #include "headers/cpp_interface/tearmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
@@ -23,7 +23,7 @@ public:
     //! default constructor
     FrameProcessingQML(std::shared_ptr<FramerateModel> shared_framerate_model
                          , std::shared_ptr<FrametimeModel> shared_frametime_model
-                         , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+                         , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
                          , std::shared_ptr<QList<TearOptions>> shared_tear_options_list
                          , std::shared_ptr<GeneralOptionsModel> shared_general_options_model
                          , std::shared_ptr<TearModel> shared_tear_model
@@ -81,7 +81,7 @@ public:
 // methods
 private:
     //! TODO
-    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
     //! TODO
     std::shared_ptr<QList<TearOptions>> _shared_tear_options_list;
     //! TODO

@@ -4,7 +4,7 @@
 #include <QPainter>
 #include <memory>
 #include "headers/cpp_interface/frameratemodel.h"
-#include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/framerateoptions.h"
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
@@ -14,7 +14,7 @@ class FrameratePlot
 public:
     //! TODO
     FrameratePlot(std::shared_ptr<FramerateModel> shared_framerate_model
-       , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+       , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
        , std::shared_ptr<ResolutionsModel> shared_resolution_model
        , std::shared_ptr<GeneralOptionsModel> shared_general_options_model)
         : _shared_framerate_model(shared_framerate_model)
@@ -349,7 +349,7 @@ private:
     //! TODO
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! TODO
-    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
     //! TODO
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! TODO

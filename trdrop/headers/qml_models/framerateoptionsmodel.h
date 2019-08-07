@@ -1,23 +1,23 @@
-#ifndef FPSOPTIONSMODEL_H
-#define FPSOPTIONSMODEL_H
+#ifndef FRAMERATEOPTIONSMODEL_H
+#define FRAMERATEOPTIONSMODEL_H
 
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <memory>
 
-#include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/framerateoptions.h"
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/qml_models/resolutionsmodel.h"
 
 //! holds the framerate options for all videos and functions as QML model
-class FPSOptionsModel : public QAbstractListModel
+class FramerateOptionsModel : public QAbstractListModel
 {
     Q_OBJECT
 //! constructors
 public:
     //! holds shared models because FPSOptions need them
-    FPSOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
-                  , std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+    FramerateOptionsModel(std::shared_ptr<FramerateModel> shared_framerate_model
+                  , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
                   , std::shared_ptr<ResolutionsModel> shared_resolution_model
                   , QObject * parent = nullptr)
         : QAbstractListModel(parent)
@@ -188,7 +188,7 @@ private:
     void _init_options()
     {
         for (quint8 id = 0; id < _max_video_count; ++id) {
-            _shared_fps_options_list->append(FPSOptions(id, _shared_framerate_model, _shared_resolution_model));
+            _shared_fps_options_list->append(FramerateOptions(id, _shared_framerate_model, _shared_resolution_model));
         }
     }
 
@@ -197,7 +197,7 @@ private:
     //! framerate model to get the current framerate from, used by FPSOptions
     std::shared_ptr<FramerateModel> _shared_framerate_model;
     //! the "model" of this class
-    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
     //! resolution model, used by FPSOptions
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! hardcoded maximum video count
@@ -206,4 +206,4 @@ private:
     QHash<int, QByteArray> _role_names;
 };
 
-#endif // FPSOPTIONSMODEL_H
+#endif // FRAMERATEOPTIONSMODEL_H

@@ -6,7 +6,7 @@
 #include <QColor>
 
 #include <memory>
-#include "headers/cpp_interface/fpsoptions.h"
+#include "headers/cpp_interface/framerateoptions.h"
 #include "headers/qml_models/exportoptionsmodel.h"
 #include "headers/cpp_interface/framerateplot.h"
 #include "headers/cpp_interface/frametimeplot.h"
@@ -20,7 +20,7 @@ class RendererQML : public QObject
 //! constructors
 public:
     //! quick painted item, essentially a label with a drawable interface
-    RendererQML(std::shared_ptr<QList<FPSOptions>> shared_fps_options_list
+    RendererQML(std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
               , std::shared_ptr<GeneralOptionsModel> shared_general_options_model
               , std::shared_ptr<ExportOptionsModel> shared_export_options_model
               , std::shared_ptr<FrameratePlot> shared_framerate_plot_instance
@@ -134,7 +134,7 @@ private:
     //! cached image to draw onto
     QImage _qml_image;
     //! TODO
-    std::shared_ptr<QList<FPSOptions>> _shared_fps_options_list;
+    std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
     //! TODO
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
     //! TODO

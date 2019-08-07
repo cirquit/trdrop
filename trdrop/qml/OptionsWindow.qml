@@ -235,7 +235,7 @@ Window {
                                     fpsTab.enabled  = true;
                                     tearTab.enabled = true;
                                     frametimeTab.enabled = true;
-                                    fpsOptionsModel.revertModelToDefault();
+                                    framerateOptionsModel.revertModelToDefault();
                                     generalOptionsModel.revertModelToDefault();
                                 }
                             }
@@ -259,7 +259,7 @@ Window {
                     spacing: 4
                     model: DelegateModel {
                         id: fpsOptionsVisual
-                        model: fpsOptionsModel
+                        model: framerateOptionsModel
                         delegate: fpsOptionsDelegate
                     }
                 }
@@ -342,7 +342,7 @@ Window {
                                 text: "Apply to all videos"
                                 enabled: model.fpsOptionsEnabled
                                 action: Action {
-                                    onTriggered: fpsOptionsModel.applyPixelDifference(model.pixelDifference)
+                                    onTriggered: framerateOptionsModel.applyPixelDifference(model.pixelDifference)
                                 }
                             }
 
@@ -487,7 +487,7 @@ Window {
                                 enabled: model.tearOptionsEnabled
                                 action: Action {
                                     onTriggered:
-                                        fpsOptionsModel.applyColor(model.color, index)
+                                        framerateOptionsModel.applyColor(model.color, index)
                                 }
                             }
 

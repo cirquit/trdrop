@@ -31,44 +31,38 @@ public:
         set_framerate_at(static_cast<size_t>(index), value);
     }
     //! sets the framerate at the video index, removes the oldest value
-    //! we hold the dp
     void set_framerate_at(const size_t index, const double value)
     {
         _framerates[index] = value;
         _framerate_history[index].push_front(value);
         _framerate_history[index].pop_back();
     }
-    //! get the current framerate for the video index
-    double get_framerate_at_front(const size_t index) const
-    {
-        return _framerate_history[index].front();
-    }
-    //! TODO
+    //! returns all current framerates for each video
     std::vector<double> get_framerates() const
     {
         return _framerates;
     }
-    //! TODO
+    //! get the current framerate for the video index
     double get_framerate_at(const quint8 index) const
     {
         return get_framerate_at(static_cast<size_t>(index));
     }
-    //! TODO
+    //! get the current framerate for the video index
     double get_framerate_at(const int index) const
     {
         return get_framerate_at(static_cast<size_t>(index));
     }
-    //! TODO
+    //! get the current framerate for the video index
     double get_framerate_at(const size_t index) const
     {
         return _framerates[index];
     }
-    //! TODO
+    //! returns the full framerate history for a video index
     std::deque<double> get_framerate_history(const size_t index) const
     {
         return _framerate_history[index];
     }
-    //! TODO
+    //! get the maximum framerate over all videos
     double get_max_framerate_bounds() const
     {
         double framerate = 0;
@@ -87,14 +81,14 @@ public:
         }
         return framerate;
     }
-    //! TODO
+    //! resets the model to the initial configuration
     void reset_model()
     {
         _init_member();
     }
 //! methods
 private:
-    //! TODO
+    //! initial configuration (nulled)
     void _init_member()
     {
         _framerates.clear();
@@ -107,13 +101,13 @@ private:
     }
 
 private:
-    //! TODO
+    //! maximum amount of videos we can process
     const size_t _max_video_count;
-    //! how long do we want to save the framerates?
+    //! how long do we want to save the framerates
     const size_t _max_history_ticks;
-    //! TODO
+    //! the most current framerates for each video
     std::vector<double> _framerates;
-    //! TODO
+    //! all framerate histories, accessable by video index
     std::vector<std::deque<double>> _framerate_history;
 
 };
