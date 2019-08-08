@@ -4,19 +4,19 @@
 #include <QtDebug>
 #include <QString>
 
-//! TODO
+//! enumerating our supported formats
 enum ImageFormatType
 {
     JPEG = 0
   , PNG  = 1
 };
 
-//! TODO
+//! image format wrapper for qml dropdown and enum <-> string convertion
 class ImageFormat
 {
 // constructors
 public:
-    //! TODO
+    //! default constructor
     ImageFormat(const ImageFormatType imageformat_type
               , bool enabled)
         : _imageformat_type(imageformat_type)
@@ -24,9 +24,9 @@ public:
     { }
 // methods
 public:
-    //! TODO
+    //! returns the enum
     ImageFormatType value() const { return _imageformat_type; }
-    //! TODO
+    //! convertion between enum <-> string
     QString name() const {
         switch (_imageformat_type) {
             case JPEG:
@@ -38,16 +38,17 @@ public:
                 return ".jpg";
         }
     }
-    //! TODO
+    //! getter
     bool enabled() const { return _enabled; }
-    //! TODO
+    //! setter
     void setEnabled(bool other){ _enabled = other; }
 
 // member
 private:
-    //! TODO
+    //! current value
     ImageFormatType _imageformat_type;
-    bool _enabled;
+    //! used to save the currently selected value in the dropdown list (QML), managed from outside
+    bool            _enabled;
 };
 
 #endif // IMAGEFORMAT_H

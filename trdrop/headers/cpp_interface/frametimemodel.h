@@ -5,13 +5,12 @@
 #include <deque>
 #include <vector>
 
-//! TODO
+//! holds the frametimes for all videos + history
 class FrametimeModel
 {
-
 //! constructors
 public:
-    //! Holds the frametime information
+    //! holds the frametime information
     //! saving the history for 180 ticks as we restrict this in the GUI
     FrametimeModel()
         : _max_video_count(3)
@@ -22,44 +21,44 @@ public:
 
 //! methods
 public:
-    //! TODO
+    //! sets the frametime at the video index, removes the oldest value
     void set_frametime_at(const quint8 index, const double value)
     {
         set_frametime_at(static_cast<size_t>(index), value);
     }
-    //! TODO
+    //! sets the frametime at the video index, removes the oldest value
     void set_frametime_at(const int index, const double value)
     {
         set_frametime_at(static_cast<size_t>(index), value);
     }
-    //! TODO
+    //! sets the frametime at the video index, removes the oldest value
     void set_frametime_at(const size_t index, const double value)
     {
         _frametimes[index] = value;
         _frametime_history[index].push_front(value);
         _frametime_history[index].pop_back();
     }
-    //! TODO
+    //! get the current frametime for the video index
     double get_frametime_at(const quint8 index) const
     {
         return get_frametime_at(static_cast<size_t>(index));
     }
-    //! TODO
+    //! get the current frametime for the video index
     double get_frametime_at(const int index) const
     {
         return get_frametime_at(static_cast<size_t>(index));
     }
-    //! TODO
+    //! get the current frametime for the video index
     double get_frametime_at(const size_t index) const
     {
         return _frametimes[index];
     }
-    //! TODO
+    //! returns the full framerate history for a video index
     std::deque<double> get_frametime_history(const size_t index) const
     {
         return _frametime_history[index];
     }
-    //! TODO
+    //! get the maximum frametime over all videos
     double get_max_frametime_bounds() const
     {
         double frametime = 0;
@@ -78,14 +77,14 @@ public:
         }
         return frametime;
     }
-    //! TODO
+    //! resets the model to the initial configuration
     void reset_model()
     {
         _init_member();
     }
 //! methods
 private:
-    //! TODO
+    //! initial configuration (nulled)
     void _init_member()
     {
         _frametimes.clear();
@@ -98,13 +97,13 @@ private:
     }
 
 private:
-    //! TODO
+    //! maximum amount of videos we can process
     size_t              _max_video_count;
-    //! how long do we want to save the frametimes?
+    //! how long do we want to save the framerates
     const size_t _max_history_ticks;
-    //! TODO
+    //! holds the current frametimes for each video
     std::vector<double> _frametimes;
-    //! TODO
+    //! all frametime histories, accessable by video index
     std::vector<std::deque<double>> _frametime_history;
 
 };

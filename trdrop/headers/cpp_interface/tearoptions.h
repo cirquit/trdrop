@@ -6,13 +6,13 @@
 #include "headers/cpp_interface/valueitem.h"
 #include "headers/cpp_interface/textedititem.h"
 
-//! TODO
+//! holds the tear options for a video
 class TearOptions
 {
 // constructors
 public:
-    //! TODO
-    TearOptions(quint8 & video_id)
+    //! default constructor
+    TearOptions(const quint8 video_id)
         : video_id(video_id)
     {
         _init_member();
@@ -20,7 +20,7 @@ public:
 
 // methods
 public:
-    //! TODO
+    //! initializes the values to default
     void revert_to_default()
     {
         _init_member();
@@ -28,7 +28,7 @@ public:
 
 // methods
 private:
-    //! TODO
+    //! default initialization
     void _init_member()
     {
         tear_plot_color.setName("Tear plot color:");
@@ -44,16 +44,14 @@ private:
 
 // member
 public:
-    //! TODO
+    //! current video id
     quint8       video_id;
-    //! TODO
+    //! tears may have a different color
     ColorPickItem tear_plot_color;
-    //! TODO
+    //! used in the calculation of tears
     ValueItem<double> dismiss_tear_percentage;
-    //! TODO
+    //! option may be disabled
     bool enabled;
-//    //! TODO
-//    TextEditItem displayed_text;
 };
 
 #endif // TEAROPTIONS_H

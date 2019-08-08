@@ -4,35 +4,34 @@
 #include <QSize>
 #include <QString>
 
+//! resolution wrapper for qml dropdown
 class Resolution
 {
 // constructors
 public:
-    //! TODO
+    //! defualt constructor
     Resolution(const QSize size, const bool enabled)
         : _size(size)
         , _enabled(enabled)
     { }
 // methods
 public:
-    //! TODO
+    //! setter
     void setSize(const QSize other){ _size = other; }
-    //! TODO
+    //! getter
     QSize size() const { return _size; }
-    //! TODO
+    //! setter
     void setEnabled(const bool other){ _enabled = other; }
-    //! TODO
+    //! getter
     bool enabled() const { return _enabled; }
-    //! TODO
+    //! string convertion
     QString name() const { return QString::number(_size.width()) + "x" + QString::number(_size.height()); }
 // member
 private:
-    //! TODO
+    //! current size
     QSize _size;
-    //! TODO
+    //! used to save the currently selected value in the dropdown list (QML), managed from outside
     bool _enabled;
-
 };
-
 
 #endif // RESOLUTION_H

@@ -5,14 +5,14 @@
 #include <QString>
 #include <QInternal>
 
-//! TODO
+//! QML wrapper around any value
 template <typename VALUE>
 class ValueItem
 {
 
 //! constructor
 public:
-    //! TODO
+    //! default init
     ValueItem()
         : _name("")
         , _tooltip("")
@@ -20,7 +20,7 @@ public:
         , _enabled(true)
     { }
 
-    //! set all member
+    //! manual init
     ValueItem(QString name
             , QString tooltip
             , VALUE value
@@ -30,7 +30,7 @@ public:
         , _value(value)
         , _enabled(enabled)
     { }
-
+    //! copy + assign constructors
     ValueItem(const ValueItem & other) = default;
     ValueItem & operator=(const ValueItem & other) = default;
 

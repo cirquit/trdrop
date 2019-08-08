@@ -8,11 +8,12 @@
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
+//! "Painter" class for the frametime plot
 class FrametimePlot
 {
 // constructors
 public:
-    //! TODO
+    //! constructor with the shared options and models
     FrametimePlot(std::shared_ptr<FrametimeModel> shared_frametime_model
        , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
        , std::shared_ptr<ResolutionsModel> shared_resolution_model
@@ -160,7 +161,7 @@ private:
         painter->setPen(_plot_text_color);
         painter->drawText(x_pos, y_pos, _eyecandy_text);
     }
-    //! TODO
+    //! draws the frametime graph for each available video
     void _draw_frametimes(QPainter * painter)
     {
         for (int i = 0; i < (*_shared_fps_options_list).size(); ++i)
@@ -171,12 +172,12 @@ private:
             }
         }
     }
-    //! TODO
-    void _draw_frametime(QPainter * painter, const int video_count)
+    //! draws the frametime graph
+    void _draw_frametime(QPainter * painter, const int video_index)
     {
-        const std::deque<double> & ft_history = _shared_frametime_model->get_frametime_history(static_cast<size_t>(video_count));
+        const std::deque<double> & ft_history = _shared_frametime_model->get_frametime_history(static_cast<size_t>(video_index));
         // set pen to the correct color and line width
-        painter->setPen(_get_frametime_pen(video_count));
+        painter->setPen(_get_frametime_pen(video_index));
         // how many ticks do we want to display
         const uint8_t frametime_ticks = _shared_general_options_model->get_frametime_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restrict
@@ -276,7 +277,7 @@ private:
         qDebug() << "FrametimePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
-    //! TODO
+    //! resolution adaptive font size
     int _get_eyecandy_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -304,7 +305,7 @@ private:
         qDebug() << "FrametimePlot::_get_font_spacing() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 0.3;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_outline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -318,7 +319,7 @@ private:
         qDebug() << "FrametimePlot::_get_outline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_innerline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -332,7 +333,7 @@ private:
         qDebug() << "FrametimePlot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 2;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_plotline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -349,13 +350,13 @@ private:
 
 // member
 private:
-    //! shared model from main.cpp
+    //! all the frametimes are saved here
     std::shared_ptr<FrametimeModel> _shared_frametime_model;
-    //! shared model from main.cpp
+    //! used to check if the current framerate rendering is enabled (frametime is curretly dependent on this)
     std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
-    //! shared model from main.cpp
+    //! current resolution
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! shared model from main.cpp
+    //! used to check if the frametime plot is enabled
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
     //! color of the outer lines of the plot
     QColor _plot_outline_color;

@@ -6,13 +6,13 @@
 #include <QFont>
 #include <QInternal>
 
-//! TODO
+//! QML wrapper for a textfield
 class TextEditItem
 {
 
 //! constructor
 public:
-    //! TODO
+    //! default constructor
     TextEditItem()
         : _name("")
         , _tooltip("")
@@ -21,7 +21,7 @@ public:
         , _enabled(true)
     { }
 
-    //! set all member
+    //! manual initialization
     TextEditItem(QString name
             , QString tooltip
             , QString value
@@ -33,7 +33,7 @@ public:
         , _font(font)
         , _enabled(enabled)
     { }
-
+    //! copy & assign constructor
     TextEditItem(const TextEditItem & other) = default;
     TextEditItem & operator=(const TextEditItem & other) = default;
 
@@ -59,7 +59,7 @@ private:
     QString _tooltip; // tooltip which is shown on hover over the checkbox / text
     QString _value;   // text
     QFont   _font;    // font of the text
-    bool    _enabled; // is this item enabled (possibly used for visible)
+    bool    _enabled; // textfield may be disabled
 };
 
 

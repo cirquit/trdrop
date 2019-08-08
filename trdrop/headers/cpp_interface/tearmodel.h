@@ -9,11 +9,12 @@
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
+//! holds all the tears
 class TearModel
 {
 // constructors
 public:
-    //! TODO
+    //! model with shared options
     TearModel(std::shared_ptr<QList<TearOptions>> shared_tear_options_list
            , std::shared_ptr<ResolutionsModel> shared_resolution_model
            , std::shared_ptr<GeneralOptionsModel> shared_general_options_model)
@@ -59,13 +60,13 @@ private:
 
 // member
 private:
-    //! TODO
+    //! holds all the tears for all videos
     std::vector<TearData> _tear_list;
-    //! TODO
+    //! needed for the color
     std::shared_ptr<QList<TearOptions>> _shared_tear_options_list;
-    //! TODO
+    //! holds the current resolution
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! TODO
+    //! not used currently
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
 };
 

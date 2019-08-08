@@ -349,7 +349,7 @@ private:
 private:
     //! all the framerates are stored here
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-    //! used to check if the current framerate options is enabled
+    //! used to check if the current framerate rendering is enabled
     std::shared_ptr<QList<FramerateOptions>> _shared_framerate_options_list;
     //! holds the current resolution
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;

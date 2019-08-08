@@ -6,19 +6,19 @@
 #include <QPainter>
 #include <QDebug>
 
+//! wrapper around a single tear, holds all the information to paint the tear
 class TearData
 {
 // constructors
 public:
-
-    //! holds the indices which defined a tear and the according video_index
+    //! holds the indices which defined a tear and the according video_index + meta information
     TearData(size_t index_A, size_t index_B, size_t video_index, size_t video_count, int original_video_heigth)
         : _index_A(index_A)
         , _index_B(index_B)
         , _video_index(video_index)
         , _video_count(video_count)
         , _original_video_height(original_video_heigth)
-        , _tear_visibility_count(25) // TODO refactor this
+        , _tear_visibility_count(25)
         , _rendered_count(0)
     { }
 // methods
@@ -49,6 +49,7 @@ public:
     std::tuple<size_t, size_t> get_indices() const { return std::make_tuple(_index_A, _index_B); }
     //! if _rendered_count is greater than _tear_visibility_count, we should stop rendering
     bool done_rendering() const { return _get_rendering_percentage() > 1.0; }
+
 // methods
 private:
     //! returns the pen with the accoring opacity and size dependent on the _rendered_count
@@ -88,19 +89,19 @@ private:
     double _get_rendering_percentage() const { return static_cast<double>(_rendered_count) / static_cast<double>(_tear_visibility_count); }
 // member
 private:
-    //! TODO
+    //! first index of the tear (defined by two indices)
     size_t _index_A;
-    //! TODO
+    //! second index of the tear (defined by two indicies)
     size_t _index_B;
-    //! TODO
+    //! video association
     size_t _video_index;
-    //! TODO
+    //! how many videos are rendered
     size_t _video_count;
-    //! TODO
+    //! used to calculate the correct height of the tear, independent of the current resolution
     int    _original_video_height;
     //! show the tear for these amount of frames
     size_t _tear_visibility_count;
-    //! TODO
+    //! how often did we render the tear already?
     size_t _rendered_count;
 };
 
