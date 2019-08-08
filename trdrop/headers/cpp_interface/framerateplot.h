@@ -8,17 +8,18 @@
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/generaloptionsmodel.h"
 
+//! "Painter" class for the framerate plot
 class FrameratePlot
 {
 // constructors
 public:
-    //! TODO
+    //! constructor with the shared options and models
     FrameratePlot(std::shared_ptr<FramerateModel> shared_framerate_model
        , std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
        , std::shared_ptr<ResolutionsModel> shared_resolution_model
        , std::shared_ptr<GeneralOptionsModel> shared_general_options_model)
         : _shared_framerate_model(shared_framerate_model)
-        , _shared_fps_options_list(shared_fps_options_list)
+        , _shared_framerate_options_list(shared_fps_options_list)
         , _shared_resolution_model(shared_resolution_model)
         , _shared_general_options_model(shared_general_options_model)
         , _plot_outline_color(236, 236, 236)   // almost white
@@ -31,8 +32,8 @@ public:
 
 // methods
 public:
-
-    //! top left is (0,0)
+    //! top left is (0,0), painter has to be pointed to the image by the renderer
+    //! order of drawing functions is essential
     void draw_framerate_plot(QPainter * painter)
     {
         painter->setRenderHint(QPainter::Antialiasing);
@@ -47,7 +48,8 @@ public:
 
 // methods
 private:
-    //! draws a rectangle based on the resolution and sets the _plot_outline member for every successor to use
+    //! draws a rectangle based on the resolution and sets the _plot_outline member
+    //! NO constants INDEPEDENT  of the resolution may be used
     void _draw_plot_outline(QPainter * painter)
     {
         // make it dependent on the current resolution
@@ -132,7 +134,7 @@ private:
             painter->drawText(x_pos, y_pos, framerate_text);
         }
     }
-    //! TODO
+    //! draws the text above the plot
     void _draw_eyecandy_text(QPainter * painter)
     {
         painter->setFont(_get_eyecandy_text_font());
@@ -155,18 +157,18 @@ private:
         painter->setPen(_plot_text_color);
         painter->drawText(x_pos, y_pos, _eyecandy_text);
     }
-    //! TODO
+    //! draws all framerates graphs options are enabled
     void _draw_framerates(QPainter * painter)
     {
-        for (int i = 0; i < (*_shared_fps_options_list).size(); ++i)
+        for (int i = 0; i < (*_shared_framerate_options_list).size(); ++i)
         {
-            if ((*_shared_fps_options_list)[i].enabled)
+            if ((*_shared_framerate_options_list)[i].enabled)
             {
                 _draw_framerate(painter, i);
             }
         }
     }
-    //! TODO
+    //! draws the graph into the plot by connecting the samples with lines (from right to left)
     void _draw_framerate(QPainter * painter, const int video_count)
     {
         const std::deque<double> & framerate_history = _shared_framerate_model->get_framerate_history(static_cast<size_t>(video_count));
@@ -204,7 +206,7 @@ private:
                          , const size_t index
                          , const size_t max_size)
     {
-        // caluclate x
+        // calculate x
         const int    plot_width   = _plot_outline.width();
         const double x_percentage = static_cast<double>(index) / static_cast<double>(max_size - 1);
         const int    x_pos_rel    = static_cast<int>(x_percentage * static_cast<double>(plot_width));
@@ -212,7 +214,7 @@ private:
         // calculate y
         const int    plot_height  = _plot_outline.height();
         const double y_percentage = framerate / max_framerate;
-        const double y_inverted   = 1 - y_percentage; // reversing because we y = 0 in the top
+        const double y_inverted   = 1 - y_percentage; // reversing because y = 0 in the top
         const int    y_pos_rel    = static_cast<int>(y_inverted * static_cast<double>(plot_height));
         const int    y_pos        = y_pos_rel + _plot_outline.y();
 
@@ -240,7 +242,7 @@ private:
     //! resolution adaptive pen with the color corresponding the the video index
     QPen _get_framerate_pen(const int video_index)
     {
-        const QColor plot_color = (*_shared_fps_options_list)[video_index].fps_plot_color.color();
+        const QColor plot_color = (*_shared_framerate_options_list)[video_index].fps_plot_color.color();
         QPen pen;
         pen.setStyle(Qt::SolidLine);
         pen.setWidth(_get_plotline_thickness());
@@ -259,7 +261,7 @@ private:
     {
         return QFont("Fjalla One", _get_eyecandy_font_size());
     }
-    //! TODO
+    //! resolution adaptive font size
     int _get_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -273,7 +275,7 @@ private:
         qDebug() << "FrameratePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
-    //! TODO
+    //! resolution adaptive font size
     int _get_eyecandy_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -301,7 +303,7 @@ private:
         qDebug() << "FrameratePlot::_get_font_spacing() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 0.3;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_outline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -315,7 +317,7 @@ private:
         qDebug() << "Plot::_get_outline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_innerline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -329,7 +331,7 @@ private:
         qDebug() << "FrameratePlot::_get_innerline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 2;
     }
-    //! TODO
+    //! resolution adaptive line size
     int _get_plotline_thickness()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
@@ -343,16 +345,15 @@ private:
         qDebug() << "Plot::_get_plotline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
     }
-
 // member
 private:
-    //! TODO
+    //! all the framerates are stored here
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-    //! TODO
-    std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
-    //! TODO
+    //! used to check if the current framerate options is enabled
+    std::shared_ptr<QList<FramerateOptions>> _shared_framerate_options_list;
+    //! holds the current resolution
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
-    //! TODO
+    //! used to get the framerate plot range
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
     //! color of the outer lines of the plot
     QColor _plot_outline_color;
