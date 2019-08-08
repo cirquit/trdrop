@@ -5,14 +5,14 @@
 #include <QList>
 #include "opencv2/opencv.hpp"
 
-//! TODO
+//! holds all the opencv videocaptures and defines the "API" for accessing frames / restarting videos
 class VideoCaptureList
 {
 
 // constructors
 public:
     //! preallocates every container
-    VideoCaptureList(quint8 prealloc_video_count)
+    VideoCaptureList(const quint8 prealloc_video_count)
     {
         frame_list.reserve(prealloc_video_count);
         frame_count_list.reserve(prealloc_video_count);
@@ -40,26 +40,26 @@ public:
         }
         return successful_frame_read;
     }
-    //! simple getter
+    //! getter
     bool no_videos_opened() const { return _videocapture_list.empty(); }
-    //! simple getter
+    //! getter by video index
     cv::Mat get_frame_by_index(const int index) const
     {
         return frame_list[index];
     }
-    //! simple getter (adapted for qt index type)
+    //! getter by video index
     quint64 get_frame_count_by_index(const int index) const
     {
         const size_t _index = static_cast<size_t>(index);
         return frame_count_list[_index];
     }
-    //! simple getter (adapted for qt index type)
+    //! getter by video index
     cv::VideoCapture get_videocapture_by_index(const int index) const
     {
         const size_t _index = static_cast<size_t>(index);
         return _videocapture_list[_index];
     }
-    //! simple getter
+    //! getter by video index
     quint64 get_max_framecount_by_index(const int index) const
     {
         const double max_frame_count = get_videocapture_by_index(index).get(cv::CAP_PROP_FRAME_COUNT);
@@ -86,7 +86,7 @@ public:
         }
         _prepare_frame_lists();
     }
-    //! TODO
+    //! getter
     size_t get_open_videos_count() const
     {
         return _videocapture_list.size();
@@ -110,8 +110,7 @@ public:
 
 // methods
 private:
-
-    //! reset all state of the object
+    //! removes the frames and the loaded videos
     void _reset_state()
     {
         frame_list.clear();

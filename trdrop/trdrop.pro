@@ -81,7 +81,6 @@ HEADERS += \
     headers/cpp_interface/textedititem.h \
     headers/cpp_interface/videocapturelist.h \
     headers/cpp_interface/imageformat.h \
-    headers/cpp_interface/videoformat.h \
     headers/cpp_interface/frameratemodel.h \
     headers/qml_interface/imagecomposer_qml.h \
     headers/qml_interface/imageconverter_qml.h \
