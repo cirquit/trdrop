@@ -12,13 +12,15 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 
+//! QML wrapper to save images and csv
 class ExporterQML : public QObject {
 
     Q_OBJECT
     Q_PROPERTY(bool _is_exporting READ isExporting WRITE setIsExporting)
+
 //! constructors
 public:
-    //! default constructor, the default size is dependent on the first row of the resolutionModel
+    //! initializes the exporter
     ExporterQML(std::shared_ptr<ExportOptionsModel> export_options_model
               , std::shared_ptr<ImageFormatModel>   imageformat_model
               , std::shared_ptr<FramerateModel> shared_framerate_model
@@ -35,11 +37,11 @@ public:
 
 //! methods
 public:
-    //! TODO
+    //! signal to wait for if the export is finished for the frame
     Q_SIGNAL void imageReady(const QImage & image);
-    //! TODO
+    //! exporter may request next images on start of the exporting process
     Q_SIGNAL void requestNextImages();
-    //! TODO
+    //! saves the image and appends the framerates into the csv
     Q_SLOT void processImage(const QImage & image)
     {
         if (isExporting())
@@ -57,46 +59,46 @@ public:
         }
         emit imageReady(image);
     }
-    //! TODO
+    //! on export finish trigger
     Q_SLOT void finishExporting()
     {
         _close_csv_file();
         qDebug() << "ExporterQML:finishExporting triggered";
         stopExporting();
     }
-    //! TODO
+    //! on start exporting trigger
     Q_INVOKABLE void startExporting()
     {
         setIsExporting(true);
         emit requestNextImages();
     }
-    //! TODO
+    //! temporarly stop exporting
     Q_INVOKABLE void stopExporting()
     {
         setIsExporting(false);
         _frame_count = 0;
     }
-    //! TODO
+    //! setter
     Q_SLOT void setIsExporting(bool other){ _is_exporting = other; }
-    //! TODO
+    //! getter
     Q_SLOT bool isExporting(){ return _is_exporting; }
 
 //! methods
 private:
-    //! TODO
+    //! hardcoded filename with the same directory as the exported imagesequence
     QString _create_csv_file_path() const
     {
         QString directory_path = _export_options_model->get_export_directory();
         return QDir(directory_path).filePath("trdrop_analysis.csv");
     }
-    //! TODO
+    //! opens the filehandle
     void _open_csv_file()
     {
         QString csv_file_name = _create_csv_file_path();
         std::unique_ptr<QFile> new_file = std::unique_ptr<QFile>(new QFile(csv_file_name));
         _csv_file_handle = std::move(new_file);
     }
-    //! TODO
+    //! closes the filehandle if it's opened
     void _close_csv_file()
     {
         if (_file_opened)
@@ -106,7 +108,7 @@ private:
         _file_opened = false;
 
     }
-    //! TODO
+    //! appends the current framerates to the csv file, opens it if need be
     void _append_framerates()
     {
         if (!_file_opened)
@@ -126,7 +128,7 @@ private:
             if (i == framerates.size() - 1) stream << "\n";
         }
     }
-    //! TODO
+    //! constructos the image filepath from the directory, imageprefix and extention
     QString _create_image_file_path() const
     {
         QString directory_path = _export_options_model->get_export_directory();
@@ -136,6 +138,7 @@ private:
     }
     //! TODO make _prefix_zeros dependent on the amount of frames
     //! This looks wrong on so many levels, maybe use printf or something
+    //! returns the framecount as string with prefixed zeros
     QString _get_frame_count() const
     {
         QString frame_count = QString::number(_frame_count);
@@ -150,21 +153,21 @@ private:
 
 //! member
 public:
-    //! TODO
+    //! is set via QML
     bool _is_exporting;
-    //! TODO
+    //! used for constructing the image filepath
     quint64 _frame_count;
-    //! TODO
+    //! how many numbers should the image filepath have
     const quint8 _prefix_zeros;
-    //! this is shared because it is only dependent on how to save sources
+    //! used to get image filepath + misc export options
     std::shared_ptr<ExportOptionsModel> _export_options_model;
-    //! this is shared because it is only dependent on how to save sources
+    //! used to extract the image extention
     std::shared_ptr<ImageFormatModel> _imageformat_model;
-    //! TODO
+    //! filehandle
     std::unique_ptr<QFile> _csv_file_handle;
-    //! TODO
+    //! is set via QML
     bool _file_opened;
-    //! TODO
+    //! use to get the current framerates for csv file exporting
     std::shared_ptr<FramerateModel> _shared_framerate_model;
 };
 

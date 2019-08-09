@@ -118,7 +118,7 @@ public:
         emit dataChanged(index, toIndex);
         return true;
     }
-    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
+    //! tells the views that the model's state has changed, triggers a recomputation of each delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
@@ -140,7 +140,7 @@ public:
         QModelIndex q = createIndex(row, 0);
         setData(q, value, ColorPickValueRole);
     }
-    //! reset the model
+    //! inits default options and triggers an update for all "listeners"
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
@@ -148,7 +148,7 @@ public:
         }
         resetModel();
     }
-    //! enables the corresponding FPSOptions based on the amount of filepaths
+    //! enables the corresponding FramerateOptions based on the amount of filepaths
     Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
     {
         int video_count = filePaths.size();
@@ -184,7 +184,7 @@ private:
 
         _role_names[FontSizeOverrideRole] = "fpsTextSizeOverride";
     }
-    //! creates three framerate options
+    //! default framerate options
     void _init_options()
     {
         for (quint8 id = 0; id < _max_video_count; ++id) {
@@ -196,7 +196,7 @@ private:
 private:
     //! framerate model to get the current framerate from, used by FPSOptions
     std::shared_ptr<FramerateModel> _shared_framerate_model;
-    //! the "model" of this class
+    //! the model of this class
     std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
     //! resolution model, used by FPSOptions
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;

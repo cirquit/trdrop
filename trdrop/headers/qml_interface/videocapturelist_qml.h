@@ -8,14 +8,14 @@
 
 #include "headers/cpp_interface/videocapturelist.h"
 
-//! A wrapper for videocaputrelist
+//! A wrapper for videocapturelist in qml
 class VideoCaptureListQML : public QObject {
 
     Q_OBJECT
 
 //! constructors
 public:
-    //! initializes the videocapture list
+    //! default constructor
     VideoCaptureListQML(quint8 prealloc_video_count,
             QObject *parent = nullptr)
           : QObject(parent)
@@ -37,7 +37,7 @@ public:
             qDebug() << "Capture.readNextFrames() got triggered with no videos opened, this should never happen";
             return;
         }
-        // read the frames if possible
+        // read the frames if possible, emit corresponding signals
         bool successful_reads = _videocapture_list.populate_next_frames();
         if (!successful_reads)
         {
@@ -45,17 +45,14 @@ public:
             emit finishedProcessing();
             return;
         }
-        //qDebug() << "VideoCaptureListQML::readNextFrames()";
         emit framesReady(_videocapture_list.frame_list);
     }
     //! tries to open all videos
     Q_SLOT void openAllPaths(const QList<QVariant> & path_list)
     {
-        //qDebug() << "VideoCaptureListQML::openAllPaths(): Trying to open" << path_list.size() << "videos";
         _videocapture_list.open_videos(path_list);
     }
     //! returns the shortest progress of the video 0: start, 1: end of video, because we terminate the export
-    //! if one of the videos is done
     Q_INVOKABLE QVariant getShortestVideoProgress() const
     {
         int video_count = static_cast<int>(_videocapture_list.get_open_videos_count());
@@ -81,12 +78,12 @@ public:
     {
         _videocapture_list.restart_state();
     }
-    //! TODO
+    //! returns the recorded framerates of all videos
     Q_INVOKABLE QList<double> getRecordedFramerates() const
     {
         return _get_recorded_framerates();
     }
-    //! TODO
+    //! returns the recorded framerates of all videos in quint8
     Q_INVOKABLE QList<quint8> getUnsignedRecordedFramerates() const
     {
         QList<double> recorded_framerates = _get_recorded_framerates();
@@ -97,16 +94,18 @@ public:
         }
         return unsigned_recorded_framerates;
     }
-
+    //! returns the currently opened video count
+    Q_INVOKABLE QVariant getOpenVideosCount() const { return static_cast<quint8>(_videocapture_list.get_open_videos_count()) ; }
+//! methods
 private:
-    //! TODO
-    double _get_video_progress(const int index) const
+    //! get the current video progress based on the video_index
+    double _get_video_progress(const int video_index) const
     {
-        const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(index);
-        const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(index);
+        const quint64 current_frame_count = _videocapture_list.get_frame_count_by_index(video_index);
+        const quint64 max_frame_count     = _videocapture_list.get_max_framecount_by_index(video_index);
         return static_cast<double>(current_frame_count) / static_cast<double>(max_frame_count);
     }
-    //! TODO
+    //! gets the framerates with which the videos were recorded
     QList<double> _get_recorded_framerates() const
     {
         return _videocapture_list.get_recorded_framerates();
@@ -114,7 +113,7 @@ private:
 
 //! member
 private:
-    //! TODO
+    //! internal videocapture object
     VideoCaptureList _videocapture_list;
 };
 

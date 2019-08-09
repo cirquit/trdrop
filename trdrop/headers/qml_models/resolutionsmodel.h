@@ -5,20 +5,20 @@
 #include <QDebug>
 #include "headers/cpp_interface/resolution.h"
 
-//! TODO
+//! qml model wrapper around resolutions
 class ResolutionsModel : public QAbstractListModel
 {
     Q_OBJECT
 //! constructors
 public:
-    //!
+    //! default constructor
     ResolutionsModel(QObject * parent = nullptr)
         : QAbstractListModel(parent)
     {
         _init_options();
         _setup_role_names();
     }
-    //!
+    //! role names
     enum ResolutionsModelRoles
     {
         ResolutionPickNameRole = Qt::UserRole + 60
@@ -26,7 +26,7 @@ public:
     };
 //! methods
 public:
-    //!
+    //! amount of possible resolutions in _resolutions_list
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -59,20 +59,19 @@ public:
         emit dataChanged(index, toIndex);
         return true;
     }
-    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
+    //! tells the views that the model's state has changed, triggers a recomputation of each delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
         endResetModel();
     }
-    //! TODO
+    //! getter
     Q_INVOKABLE QVariant getSizeAt(const int & row)
     {
         QModelIndex q = createIndex(row, 0);
         return data(q, ResolutionPickSizeRole);
     }
-
-    //! TODO
+    //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Q_INVOKABLE void setActiveValueAt(const int & row)
     {
         for (int i = 0; i < _resolutions_list.size(); ++i)
@@ -81,12 +80,12 @@ public:
             _resolutions_list[i].setEnabled(enabled);
         }
     }
-    //! TODO
+    //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Q_INVOKABLE QVariant getActiveSize()
     {
         return get_active_size();
     }
-    //! TODO
+    //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Resolution get_active_value()
     {
         for (int i = 0; i < _resolutions_list.size(); ++i) {
@@ -98,7 +97,7 @@ public:
         qDebug() << "ResolutionModel::getActiveValue() - no resolution selected, this should never happen. Returning first element";
         return _resolutions_list[0];
     }
-    //! TODO
+    //! need this to make drop-down lists work (enabled signalizes the "current" options)
     QSize get_active_size()
     {
         return get_active_value().size();
@@ -112,7 +111,7 @@ private:
         _role_names[ResolutionPickNameRole] = "resolutionName";
         _role_names[ResolutionPickSizeRole] = "resolution";
    }
-    //! TODO
+    //! initial options, currently supporting only 16:9
     void _init_options()
     {
         // currently only 16:9
@@ -133,7 +132,7 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
+    //! the "model"
     QList<Resolution> _resolutions_list;
 };
 

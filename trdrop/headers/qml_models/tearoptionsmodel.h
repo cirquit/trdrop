@@ -6,14 +6,13 @@
 #include <memory>
 #include "headers/cpp_interface/tearoptions.h"
 
-
-//!
+//! holds the tear options for all videos and functions as QML model
 class TearOptionsModel : public QAbstractListModel
 {
     Q_OBJECT
 //! constructors
 public:
-    //!
+    //! default constructor
     TearOptionsModel(std::shared_ptr<QList<TearOptions>> shared_tear_options_list
                    , QObject * parent = nullptr)
         : QAbstractListModel(parent)
@@ -22,7 +21,7 @@ public:
         _init_options();
         _setup_role_names();
     }
-    //!
+    //! role names
     enum TearOptionsRoles
     {
         ColorPickNameRole                = Qt::UserRole + 50
@@ -35,7 +34,7 @@ public:
     };
 //! methods
 public:
-    //!
+    //! row count of our model
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -83,14 +82,13 @@ public:
         emit dataChanged(index, toIndex);
         return true;
     }
-
-    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
+    //! tells the views that the model's state has changed, triggers a recomputation of each delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
         endResetModel();
     }
-    //! TODO
+    //! inits default options and triggers an update for all "listeners"
     Q_INVOKABLE void revertModelToDefault()
     {
         for (quint8 id = 0; id < 3; ++id) {
@@ -114,7 +112,7 @@ public:
         setData(q1, value, DismissTearPercentageValueRole);
         setData(q2, value, DismissTearPercentageValueRole);
     }
-    //! TODO
+    //! enables the corresponding TearOptions based on the amount of filepaths
     Q_INVOKABLE void updateEnabledRows(const QList<QVariant> filePaths)
     {
         int video_count = filePaths.size();
@@ -138,7 +136,7 @@ private:
         _role_names[DismissTearPercentageValueRole]   = "dismissTearPercentage";
         _role_names[TearOptionsEnabled]               = "tearOptionsEnabled";
    }
-    //! TODO
+    //! default tear options
     void _init_options()
     {
         for (quint8 id = 0; id < 3; ++id) {
@@ -150,7 +148,7 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
+    //! our "model"
     std::shared_ptr<QList<TearOptions>> _shared_tear_options_list;
 };
 

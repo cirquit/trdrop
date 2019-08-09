@@ -8,7 +8,7 @@
 #include "headers/cpp_interface/valueitem.h"
 #include "headers/cpp_interface/textedititem.h"
 
-//!
+//! qml model wrapper around ExportOptions
 class ExportOptionsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -30,10 +30,6 @@ public:
       , ImagesequencePrefixTooltipRole = Qt::UserRole + 103
       , ImagesequencePrefixEnabledRole = Qt::UserRole + 104
       , ImagesequencePrefixValueRole   = Qt::UserRole + 105
-      , VideoPrefixNameRole            = Qt::UserRole + 106
-      , VideoPrefixTooltipRole         = Qt::UserRole + 107
-      , VideoPrefixEnabledRole         = Qt::UserRole + 108
-      , VideoPrefixValueRole           = Qt::UserRole + 109
       , ExportAsOverlayNameRole        = Qt::UserRole + 110
       , ExportAsOverlayTooltipRole     = Qt::UserRole + 111
       , ExportAsOverlayValueRole       = Qt::UserRole + 112
@@ -73,14 +69,6 @@ public:
                 return _imagesequence_prefix.enabled();
             case ImagesequencePrefixValueRole:
                 return _imagesequence_prefix.value();
-            case VideoPrefixNameRole:
-                return _videoname_prefix.name();
-            case VideoPrefixTooltipRole:
-                return _videoname_prefix.tooltip();
-            case VideoPrefixEnabledRole:
-                return _videoname_prefix.enabled();
-            case VideoPrefixValueRole:
-                return _videoname_prefix.value();
             case ExportAsOverlayNameRole:
                 return _export_as_overlay.name();
             case ExportAsOverlayTooltipRole:
@@ -109,28 +97,17 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role) override
     {
         Q_UNUSED(index)
-        if (role == ImagesequencePrefixEnabledRole)
-        {   // only one can be selected at once
-            _imagesequence_prefix.setEnabled(!value.toBool());
-            _videoname_prefix.setEnabled(value.toBool());
-        }
-        else if (role == VideoPrefixEnabledRole)
-        {   // only one can be selected at once
-            _videoname_prefix.setEnabled(!value.toBool());
-            _imagesequence_prefix.setEnabled(value.toBool());
-        }
-        else if (role == ExportDirectoryValueRole)       _export_directory.setValue(value.toString());
+        if (role == ExportDirectoryValueRole)            _export_directory.setValue(value.toString());
         else if (role == ExportAsOverlayValueRole)       _export_as_overlay.setValue(value.toBool());
         else if (role == ExportCSVValueRole)             _export_csv.setValue(value.toBool());
         else if (role == ImagesequencePrefixValueRole)   _imagesequence_prefix.setValue(value.toString());
         else if (role == ImagesequencePrefixEnabledRole) _imagesequence_prefix.setEnabled(value.toBool());
-        else if (role == VideoPrefixValueRole)           _videoname_prefix.setValue(value.toString());
-        else if (role == VideoPrefixEnabledRole)         _videoname_prefix.setEnabled(value.toBool());
         else if (role == EnableLivePreviewValueRole)     _enable_live_preview.setValue(value.toBool());
         else if (role == EnabledExportButtonRole)        _enabled_export_button = value.toBool();
         else return false;
-        QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
-        emit dataChanged(index, toIndex);
+        //QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
+        //emit dataChanged(index, toIndex);
+        resetModel();
         return true;
     }
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
@@ -139,36 +116,36 @@ public:
         beginResetModel();
         endResetModel();
     }
-    //! TODO
+    //! inits default options and triggers an update for all "listeners"
     Q_INVOKABLE void revertModelToDefault()
     {
         _init_options();
         resetModel();
     }
-    //! TODO
+    //! calling c++ QStandardPaths to use them in QML
     Q_INVOKABLE QVariant getDefaultMoviesDirectory() const
     {
         return QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
     }
-    //! TODO
+    //! setter
     Q_INVOKABLE void setEnabledExportButton(bool other)
     {
         QModelIndex q = createIndex(0, 0);
         setData(q, other, EnabledExportButtonRole);
     }
-    //! TODO
+    //! getter
     Q_INVOKABLE QVariant enabledLivePreview(){ return _enable_live_preview.value(); }
-    //! TODO
+    //! getter
     Q_INVOKABLE QVariant exportAsOverlay(){ return export_as_overlay(); }
-    //! TODO
+    //! getter
     QString get_imagesequence_prefix(){ return _imagesequence_prefix.value(); }
-    //! TODO
+    //! getter
     QString get_export_directory(){ return _export_directory.value(); }
-    //! TODO
+    //! getter
     bool export_as_imagesequence(){ return _imagesequence_prefix.enabled(); }
-    //! TODO
+    //! getter
     bool export_as_overlay(){ return _export_as_overlay.value(); }
-    //! TODO
+    //! getter
     bool export_csv(){ return _export_csv.value(); }
 
 //! methods
@@ -182,10 +159,6 @@ private:
         _role_names[ImagesequencePrefixTooltipRole] = "imagesequencePrefixTooltip";
         _role_names[ImagesequencePrefixEnabledRole] = "imagesequencePrefixEnabled";
         _role_names[ImagesequencePrefixValueRole]   = "imagesequencePrefixValue";
-        _role_names[VideoPrefixNameRole]            = "videoPrefixName";
-        _role_names[VideoPrefixTooltipRole]         = "videoPrefixTooltip";
-        _role_names[VideoPrefixEnabledRole]         = "videoPrefixEnabled";
-        _role_names[VideoPrefixValueRole]           = "videoPrefixValue";
         _role_names[ExportAsOverlayNameRole]        = "exportAsOverlayName";
         _role_names[ExportAsOverlayTooltipRole]     = "exportAsOverlayTooltip";
         _role_names[ExportAsOverlayValueRole]       = "exportAsOverlayValue";
@@ -198,10 +171,9 @@ private:
         _role_names[EnableLivePreviewValueRole]     = "enableLivePreviewValue";
 
     }
-    //!TODO
+    //! default initial options
     void _init_options()
     {
-
         _export_directory.setName("Export to directory");
         _export_directory.setFont(QFont("Helvetica", 15));
         _export_directory.setEnabled(true);
@@ -225,33 +197,24 @@ private:
         _imagesequence_prefix.setEnabled(true);
         _imagesequence_prefix.setFont(QFont("Helvetica", 15));
 
-        _videoname_prefix.setName("Export as video");
-        _videoname_prefix.setValue("videoanalysis_");
-        _videoname_prefix.setTooltip("Export the graph only");
-        _videoname_prefix.setEnabled(false);
-        _videoname_prefix.setFont(QFont("Helvetica", 15));
-
         _enabled_export_button = false;
-
     }
 
 //! member
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
+    //! exportdirectory may be manually typed
     TextEditItem _export_directory;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _export_as_overlay;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _enable_live_preview;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _export_csv;
-    //! TODO
+    //! imageprefix name
     TextEditItem _imagesequence_prefix;
-    //! TODO
-    TextEditItem _videoname_prefix;
-    //! TODO
+    //!
     bool _enabled_export_button;
 };
 

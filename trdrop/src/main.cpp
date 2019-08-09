@@ -14,7 +14,6 @@
 #include "headers/qml_models/tearoptionsmodel.h"
 #include "headers/qml_models/resolutionsmodel.h"
 #include "headers/qml_models/imageformatmodel.h"
-#include "headers/qml_models/videoformatmodel.h"
 #include "headers/qml_models/exportoptionsmodel.h"
 
 #include "headers/qml_interface/videocapturelist_qml.h"
@@ -41,8 +40,6 @@ int main(int argc, char *argv[])
     // TODO evaluate if we need these fonts
     QFontDatabase::addApplicationFont(":/fonts/materialdesignicons-webfont.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Rationale-Regular.ttf");
-
-    // TODO add the other fonts?
 
     // c++ models
     std::shared_ptr<FramerateModel> shared_framerate_model(new FramerateModel());
@@ -81,11 +78,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<ImageFormatModel>();
     std::shared_ptr<ImageFormatModel> shared_imageformat_model(new ImageFormatModel());
     engine.rootContext()->setContextProperty("imageFormatModel", &(*shared_imageformat_model));
-
-    // prepare VideoFormatModel (Exporter)
-    qmlRegisterType<VideoFormatModel>();
-    VideoFormatModel videoformat_model;
-    engine.rootContext()->setContextProperty("videoFormatModel", &videoformat_model);
 
     // prepare ExportOptionsModel (Exporter)
     qmlRegisterType<ExportOptionsModel>();
@@ -145,7 +137,7 @@ int main(int argc, char *argv[])
     // pass the QList<cv::Mat> to the converter
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::framesReady, &frame_processing_qml, &FrameProcessingQML::processFrames, Qt::DirectConnection);
     // framerate processing
-    QObject::connect(&frame_processing_qml, &FrameProcessingQML::framesReady, &imageconverter_qml, &ImageConverterQML::processFrames, Qt::DirectConnection);
+    QObject::connect(&frame_processing_qml, &FrameProcessingQML::framesReady,  &imageconverter_qml,   &ImageConverterQML::processFrames, Qt::DirectConnection);
     // pass the QList<QImage> to the composer to mux them together
     QObject::connect(&imageconverter_qml,   &ImageConverterQML::imagesReady,   &imagecomposer_qml,    &ImageComposerQML::processImages, Qt::DirectConnection);
     // pass the QImage to the renderer to render the meta information onto the image
@@ -153,17 +145,17 @@ int main(int argc, char *argv[])
     // pass the rendered QImage to the exporter
     QObject::connect(&renderer_qml,         &RendererQML::imageReady,          &exporter_qml,         &ExporterQML::processImage, Qt::DirectConnection);
 
-    // if VCL finishes processing, finish exporting (may be needed if it's a video)
+    // if VCL finishes processing, finish exporting (close io-handles if need be)
     QObject::connect(&videocapturelist_qml, &VideoCaptureListQML::finishedProcessing, &exporter_qml, &ExporterQML::finishExporting);
 
     // the exporter may trigger a request for new frames from VCL
     QObject::connect(&exporter_qml,         &ExporterQML::requestNextImages,   &videocapturelist_qml, &VideoCaptureListQML::readNextFrames);
 
     // meta data pipeline
-    // link the fps options with the renderer
-    QObject::connect(&framerate_options_model, &FramerateOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
-    QObject::connect(&tear_options_model, &TearOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
-    QObject::connect(&(*shared_general_options_model), &GeneralOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
+    // link the options with the renderer
+    QObject::connect(&framerate_options_model,         &FramerateOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
+    QObject::connect(&tear_options_model,              &TearOptionsModel::dataChanged,      &renderer_qml, &RendererQML::redraw);
+    QObject::connect(&(*shared_general_options_model), &GeneralOptionsModel::dataChanged,   &renderer_qml, &RendererQML::redraw);
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

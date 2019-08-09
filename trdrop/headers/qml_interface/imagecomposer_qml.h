@@ -27,7 +27,7 @@ public:
 public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & image);
-    //! side by side only right now
+    //! composes the videos depending on the video count side by side, emits imageReady
     Q_SLOT void processImages(const QList<QImage> & _qml_image_list)
     {
         QSize _size = _shared_resolution_model->get_active_value().size();
@@ -80,7 +80,7 @@ public:
         }
         emit imageReady(_qml_image);
     }
-    //! TODO
+    //! if the resolution changes, we need to rescale the composition
     Q_SLOT void updateComposition()
     {
         QSize size = _shared_resolution_model->get_active_value().size();
@@ -89,7 +89,7 @@ public:
     }
 //! methods
 private:
-    //! TODO
+    //! crops the center of the image based on the video count which defines the width
     QImage _get_center_from_image(const QImage & image, quint8 video_count)
     {
         QSize _size = _shared_resolution_model->get_active_value().size();
@@ -105,9 +105,9 @@ private:
 
 //! member
 private:
-    //! TODO
+    //! temp copy of the image, needed for resize
     QImage _qml_image;
-    //! TODO
+    //! used for current resolution
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
 };
 

@@ -6,7 +6,7 @@
 #include "headers/cpp_interface/checkboxitem.h"
 #include "headers/cpp_interface/valueitem.h"
 
-//!
+//! qml wrapper around general options
 class GeneralOptionsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -43,7 +43,7 @@ public:
     };
 //! methods
 public:
-    //!
+    //! row count of our model
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -112,33 +112,29 @@ public:
         emit dataChanged(index, toIndex);
         return true;
     }
-    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
+    //! tells the views that the model's state has changed, triggers a recomputation of each delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
         endResetModel();
     }
-    //! TODO
+    //! inits default options and triggers an update for all "listeners"
     Q_INVOKABLE void revertModelToDefault()
     {
         _init_options();
         resetModel();
     }
-    //! TODO
-    //Q_INVOKABLE QVariant enabledFramerateAnalysis() { return _enable_fps_analysis.value(); }
-    //! TODO
-    Q_INVOKABLE QVariant enabledTearAnalysis()      { return _enable_tear_analysis.value(); }
-    //! TODO
+    //! getter
     bool get_enable_delta_rendering() { return _enable_delta_rendering.value(); }
-    //! TODO
+    //! getter
     bool get_enable_frametime_analysis() { return _enable_frametime_analysis.value(); }
-    //! TODO
+    //! getter
     bool get_enable_framerate_analysis() { return _enable_fps_analysis.value(); }
-    //! TODO
+    //! getter
     bool get_enable_tear_analysis() { return _enable_tear_analysis.value(); }
-    //! TODO
+    //! getter
     uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
-    //! TODO
+    //! getter
     uint8_t get_frametime_range() { return _frametime_plot_range.value(); }
 //! methods
 private:
@@ -164,7 +160,7 @@ private:
         _role_names[FrametimeRangeTooltipRole]       = "frametimeRangeTooltip";
         _role_names[FrametimeRangeValueRole]         = "frametimeRangeValue";
     }
-    //!TODO
+    //! initial setting
     void _init_options()
     {
         _enable_fps_analysis.setName("Enable framerate analysis");
@@ -197,20 +193,18 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _enable_fps_analysis;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _enable_tear_analysis;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _enable_frametime_analysis;
-    //! TODO
+    //! essentially a bool
     CheckBoxItem _enable_delta_rendering;
-    //! TODO
+    //! wrapped quint8
     ValueItem<quint8> _framerate_plot_range;
-    //! TODO
+    //! wrapped quint8
     ValueItem<quint8> _frametime_plot_range;
-
-
 };
 
 #endif // GENERALOPTIONSMODEL_H

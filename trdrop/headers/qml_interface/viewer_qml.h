@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QColor>
 
+//! QML wrapper around quickpainteditem to show a qimage
 class ViewerQML : public QQuickPaintedItem
 {
     Q_OBJECT
@@ -21,16 +22,16 @@ public:
 
 //! methods
 public:
-    //! TODO
+    //! may request a new image when rendering is done
     Q_SIGNAL void requestNextImages();
-    //! resized the texture, width and height of this item
+    //! resized the texture (image), width and height of this item
     Q_SLOT void resize(QSize size)
     {
         setWidth(size.width());
         setHeight(size.height());
         setTextureSize(size);
     }
-    //! TODO
+    //! draw a default image
     Q_SLOT void drawDefaultImage()
     {
         const QSize default_size(960, 540);
@@ -48,7 +49,6 @@ public:
         update();
     }
     //! draws the image on the drawable space of the element and request new frames
-    //! this is inside this method because I'm not sure if the drawing is async
     void paint(QPainter * painter)
     {
         if (_draw_image)
@@ -67,7 +67,7 @@ public:
 private:
     //! image to be rendered
     QImage _qml_image;
-    //! TODO
+    //! as qml "objects" can't have shared_ptr, we extract it via signal and call setImage with this option as argument
     bool _draw_image;
 };
 

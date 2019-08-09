@@ -88,15 +88,9 @@ Window {
                 }
 
 
-                Switch {
+                Label {
                     id: exportAsImageSequenceSwitch
                     text: model.imagesequencePrefixName
-                    checked: model.imagesequencePrefixEnabled
-                    action: Action {
-                        onTriggered: {
-                            model.imagesequencePrefixEnabled = !checked;
-                        }
-                    }
                 }
                 Rectangle {
                     border {

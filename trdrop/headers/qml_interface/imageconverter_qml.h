@@ -81,12 +81,12 @@ private:
             }
         }
     }
-    //! TODO, maybe expand to the video sizes of the frames
+    //! may be refactored to adapt to resolution, but this is currently not needed
     QImage _get_default_qimage() { return QImage(); }
 
 //! member
 public:
-    //! list to be send by the signal
+    //! list to be send by the imagesReady signal
     QList<QImage> _qml_image_list;
 };
 

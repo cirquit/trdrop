@@ -5,20 +5,20 @@
 #include <QDebug>
 #include "headers/cpp_interface/imageformat.h"
 
-//! TODO
+//! qml model wrapper for imageformat
 class ImageFormatModel : public QAbstractListModel
 {
     Q_OBJECT
 //! constructors
 public:
-    //!
+    //! default constructor
     ImageFormatModel(QObject * parent = nullptr)
         : QAbstractListModel(parent)
     {
         _init_options();
         _setup_role_names();
     }
-    //!
+    //! role names
     enum ImageFormatModelRoles
     {
         ImageFormatNameRole  = Qt::UserRole + 70
@@ -26,7 +26,7 @@ public:
     };
 //! methods
 public:
-    //!
+    //! number of possible imageformats
     int rowCount(const QModelIndex & parent = QModelIndex()) const override
     {
         Q_UNUSED(parent)
@@ -49,13 +49,13 @@ public:
                 return QVariant();
         }
     }
-    //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate
+    //! tells the views that the model's state has changed, triggers a recomputation of each delegate
     Q_INVOKABLE void resetModel()
     {
         beginResetModel();
         endResetModel();
     }
-    //! TODO
+    //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Q_INVOKABLE void setActiveValueAt(const int & row)
     {
         for (int i = 0; i < _imageformat_list.size(); ++i)
@@ -64,7 +64,7 @@ public:
             _imageformat_list[i].setEnabled(enabled);
         }
     }
-    //! TODO
+    //! get the currently selected option
     ImageFormat get_active_value()
     {
         for (int i = 0; i < _imageformat_list.size(); ++i) {
@@ -76,7 +76,6 @@ public:
         qDebug() << "ImageFormatModel::getActiveValue() - no imageformat selected, this should never happen. Returning first element";
         return _imageformat_list[0];
     }
-
     //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -85,7 +84,7 @@ private:
         _role_names[ImageFormatNameRole]  = "imageFormatName";
         _role_names[ImageFormatValueRole] = "imageFormatValue";
    }
-    //! TODO
+    //! initial setting (jpg is default)
     void _init_options()
     {
         _imageformat_list.push_back(ImageFormat(ImageFormatType::JPEG, true));
@@ -96,7 +95,7 @@ private:
 private:
     //! used by the QAbstractListModel to save the role names from QML
     QHash<int, QByteArray> _role_names;
-    //! TODO
+    //! the "model"
     QList<ImageFormat> _imageformat_list;
 };
 

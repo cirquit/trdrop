@@ -13,13 +13,14 @@
 
 #include "headers/cpp_interface/tearmodel.h"
 
+//! Renders all visual elements (plots / text / tears) onto the qimage
 class RendererQML : public QObject
 {
     Q_OBJECT
 
 //! constructors
 public:
-    //! quick painted item, essentially a label with a drawable interface
+    //! default constructor
     RendererQML(std::shared_ptr<QList<FramerateOptions>> shared_fps_options_list
               , std::shared_ptr<GeneralOptionsModel> shared_general_options_model
               , std::shared_ptr<ExportOptionsModel> shared_export_options_model
@@ -40,15 +41,17 @@ public:
 public:
     //! signal to wait for to render the full image
     Q_SIGNAL void imageReady(const QImage & image);
-    //! TODO
+    //! paints all elements and emits imageReady when done
     Q_SLOT void processImage(QImage qml_image)
     {
+        // if somehow the image is null, we don't terminate (should not happen)
         if (qml_image.isNull()) return;
 
+        // convert to alpha
         if (_shared_export_options_model->export_as_overlay())
         {
-            _qml_image = QImage(qml_image.size(), QImage::Format_ARGB32);
-            _qml_image.fill(Qt::transparent);
+            qml_image = QImage(qml_image.size(), QImage::Format_ARGB32);
+            qml_image.fill(Qt::transparent);
         } else {
             _qml_image = qml_image.copy();
         }
@@ -56,15 +59,18 @@ public:
         QPainter painter;
         painter.begin(&qml_image);
 
+        // paint framerate dependent "widgets"
         if (_shared_general_options_model->get_enable_framerate_analysis())
         {
             _draw_fps_text(painter);
             _draw_framerate_graph(painter);
         }
+        // paint frametime dependent "widgets"
         if (_shared_general_options_model->get_enable_frametime_analysis())
         {
             _draw_frametime_graph(painter);
         }
+        // paint tear depedent "widgets"
         if (_shared_general_options_model->get_enable_tear_analysis())
         {
             _draw_tears(painter);
@@ -73,14 +79,15 @@ public:
         painter.end();
         emit imageReady(qml_image);
     }
-    //! TODO
+    //! can be triggered if options change
     Q_SLOT void redraw()
     {
         processImage(_qml_image);
     }
 
+//! methods
 private:
-    //! TODO
+    //! paint framerate text
     void _draw_fps_text(QPainter & painter)
     {
         int video_count  = _get_video_count();
@@ -103,22 +110,22 @@ private:
             }
         }
     }
-    //! TODO
+    //! calls the underlying instance to draw the graph
     void _draw_framerate_graph(QPainter & painter)
     {
         _shared_framerate_plot_instance->draw_framerate_plot(&painter);
     }
-    //! TODO
+    //! calls the underlying instance to draw the graph
     void _draw_frametime_graph(QPainter & painter)
     {
         _shared_frametime_plot_instance->draw_frametime_plot(&painter);
     }
-    //! TODO
+    //! calls each tearmodel to draw each tear
     void _draw_tears(QPainter & painter)
     {
         _shared_tear_model->draw_tears(&painter);
     }
-    //! TODO dirty, get this from FileWindow
+    //! returns the amount of videos loaded (slightly dirty)
     int _get_video_count()
     {
         int video_count = 0;
@@ -133,17 +140,17 @@ private:
 private:
     //! cached image to draw onto
     QImage _qml_image;
-    //! TODO
+    //! used to get te video_count
     std::shared_ptr<QList<FramerateOptions>> _shared_fps_options_list;
-    //! TODO
+    //! used to check what needs to be drawn
     std::shared_ptr<GeneralOptionsModel> _shared_general_options_model;
-    //! TODO
+    //! used to check if overlay only is exported
     std::shared_ptr<ExportOptionsModel> _shared_export_options_model;
-    //! TODO
+    //! used draw the framerate plot
     std::shared_ptr<FrameratePlot> _shared_framerate_plot_instance;
-    //! TODO
+    //! used to draw frametime plot
     std::shared_ptr<FrametimePlot> _shared_frametime_plot_instance;
-    //! TODO
+    //! used to draw the tears
     std::shared_ptr<TearModel> _shared_tear_model;
 };
 

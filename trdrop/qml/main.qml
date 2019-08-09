@@ -24,8 +24,8 @@ ApplicationWindow
         visible: true
         // disable the background if the export as overlay and the text would show
         Connections {
-            target: exportOptionsModel
-            onDataChanged: startupBackground.visible = !exportOptionsModel.exportAsOverlay()
+            target: fileItemModel
+            onDataChanged: startupBackground.visible = videocapturelist.getOpenVideosCount() === 0;
         }
     }
     // drawn over the startup background for simplicity
