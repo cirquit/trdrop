@@ -305,9 +305,9 @@ Window {
                             Button {
                                 Layout.columnSpan: 3
                                 text:  "Replicate Color"
-                                //ToolTip.text: "Replicate this color to tears and frametime of this video index"
-                                //ToolTip.delay: 500
-                                //ToolTip.visible: hovered
+                                ToolTip.text: "Replicate this color to tears of this video index"
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
                                 enabled: model.fpsOptionsEnabled
                                 action: Action {
                                     onTriggered:
@@ -405,9 +405,9 @@ Window {
                                         model.displayedTextEnabled = fpsText.enabled
                                     }
                                 }
-                                //ToolTip.text: "Disable text and framerate rendering"
-                                //ToolTip.delay: 500
-                                //ToolTip.visible: hovered
+                                ToolTip.text: "Disable text"
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
                             }
                             Switch {
                                 id: fpsTextSizeOverride
@@ -507,6 +507,9 @@ Window {
                                 onValueChanged: {
                                     if (model.dismissTearPercentage !== value){ model.dismissTearPercentage = value; }
                                 }
+                                ToolTip.text: "Tears that take less than this percentage of the video height count as new frame"
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
                             }
                             Button {
                                 text: "Apply to all"
