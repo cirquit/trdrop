@@ -17,9 +17,13 @@
 ## Binaries
 
 ```diff
-- This is highly volatile as I'm not sure if the installer works for everybody yet
-- Please create an issue if you encounter problems
+- Please create an issue if you encounter problems and search the closed issues for already solved ones.
+
+- If you want to have a specific feature in mind, please attach as much exemplary information as possible (screenshots, mockups)
 ```
+
+* [**Issues**](https://github.com/cirquit/trdrop/issues?q=is%3Aopen+is%3Aissue)
+* [**Solved Issues**](https://github.com/cirquit/trdrop/issues?q=is%3Aissue+is%3Aclosed)
 
 See the [**release page**](https://github.com/cirquit/trdrop/releases) for the Windows installer. Other distributions are on the roadmap (Linux, MacOS).
 
