@@ -3,7 +3,7 @@
     <img height="100" src="images/logos/trdrop_logo_alpha.png">
 </p>
 
-# trdrop
+# trdrop - v1.0.0
 ###### ˈtɛr-dɹɑp - a raw video analysis program
 
 ## Examples
