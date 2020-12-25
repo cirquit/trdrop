@@ -18,7 +18,7 @@ Short writeup of Windows / Linux (Ubuntu) cross platform development information
 ## Install Qt
 
 * Install [QtCreator](https://www.qt.io/download#)
-    - I use the version `5.12.2`, but I hope that any `5.*.*` version works
+    - I use the Qt version `5.12.2`, but I hope that any `5.*.*` version works
     - **Windows:** Check to install the correct compiler, I use `mingw_730`, the 32-bit version 
     - **Windows:** Install everything in the default installation directory -> `C:\Qt`
     -  **Windows:**Developer Options, check  `mingw730_32`
