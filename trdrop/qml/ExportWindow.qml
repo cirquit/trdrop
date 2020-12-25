@@ -244,7 +244,7 @@ Window {
                     target: videocapturelist
                     onFramesReady: {
                         exportProgressBar.value = videocapturelist.getShortestVideoProgress();
-                        exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "%";
+                        exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "% (Click/Space to pause)";
                     }
                     onFinishedProcessing: {
                         exportButton.text = "Export";
