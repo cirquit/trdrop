@@ -16,12 +16,12 @@ Item {
     // we call the garbage collector to collect the sent images in JS
     Connections {
         target: exporter
-        onImageReady: { gc(); viewer.setImage(image, exportOptionsModel.enabledLivePreview()) }
+        function onImageReady(image) { gc(); viewer.setImage(image, exportOptionsModel.enabledLivePreview()) }
     }
 
     Connections {
         target: viewer
-        onRequestNextImages: {
+        function onRequestNextImages() {
             if (exporter.isExporting()){
                 videocapturelist.readNextFrames()
             }

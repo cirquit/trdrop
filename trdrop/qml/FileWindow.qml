@@ -25,9 +25,9 @@ Window {
             MouseArea {
                 id: fileDragArea
                 property bool held: false
-                anchors { left: parent.left; right: parent.right }
-                width: fileElement.width
-                height: fileElement.height
+                anchors { leftMargin: 10; rightMargin: 10; topMargin: 10; bottomMargin: 10}
+                width: fileManagementWindow.width - 30
+                height: fileManagementWindow.height / 3 - 10
                 // pointer to the currently held item
                 drag.target: held ? fileElement : undefined
                 // scroll vertically
@@ -219,7 +219,7 @@ Window {
 
     Connections {
         target: fileItemModel
-        onUpdateFileItemPaths: {
+        function onUpdateFileItemPaths(filePaths) {
             videocapturelist.openAllPaths(filePaths);
             frameprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());
             fileItemModel.setRecordedFramerates(getVisualFileItemPaths()

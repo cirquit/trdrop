@@ -207,6 +207,7 @@ Window {
                     onActivated: {
                         resolutionsModel.setActiveValueAt(currentIndex);
                         imagecomposer.updateComposition();
+                        console.log("resolution triggered")
                     }
                 }
                 Label { }
@@ -242,11 +243,11 @@ Window {
 
                 Connections {
                     target: videocapturelist
-                    onFramesReady: {
+                    function onFramesReady() {
                         exportProgressBar.value = videocapturelist.getShortestVideoProgress();
                         exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "% (Click/Space to pause)";
                     }
-                    onFinishedProcessing: {
+                    function onFinishedProcessing() {
                         exportButton.text = "Export";
                         exportProgressBar.value = 0.0;
                         frameprocessing.resetState(videocapturelist.getUnsignedRecordedFramerates());

@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    app.setOrganizationName("trdrop");
+    app.setOrganizationDomain("trdrop");
     QQuickStyle::setStyle("Material");
     QFontDatabase::addApplicationFont(":/fonts/FjallaOne-Regular.ttf");
     // TODO evaluate if we need these fonts

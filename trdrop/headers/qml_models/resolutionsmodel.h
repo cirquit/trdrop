@@ -79,6 +79,7 @@ public:
             bool enabled = i == row;
             _resolutions_list[i].setEnabled(enabled);
         }
+        qDebug() << "ResolutionModel(c++): setActiveValueAt: " << row;
     }
     //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Q_INVOKABLE QVariant getActiveSize()
