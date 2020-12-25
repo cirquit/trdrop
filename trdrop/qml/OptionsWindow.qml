@@ -146,7 +146,7 @@ Window {
                         SpinBox {
                             id: framerateRange
                             from: 30
-                            to: 180
+                            to: 600
                             stepSize: 10
                             editable: true
                             value: model.framerateRangeValue
