@@ -40,6 +40,12 @@ public:
       , FrametimeRangeNameRole          = Qt::UserRole + 15
       , FrametimeRangeTooltipRole       = Qt::UserRole + 16
       , FrametimeRangeValueRole         = Qt::UserRole + 17
+      , FramerateMaxFPSNameRole         = Qt::UserRole + 18
+      , FramerateMaxFPSTooltipRole      = Qt::UserRole + 19
+      , FramerateMaxFPSValueRole        = Qt::UserRole + 20
+      , FrametimeMaxMSNameRole          = Qt::UserRole + 21
+      , FrametimeMaxMSTooltipRole       = Qt::UserRole + 22
+      , FrametimeMaxMSValueRole         = Qt::UserRole + 23
     };
 //! methods
 public:
@@ -93,6 +99,18 @@ public:
                 return _frametime_plot_range.tooltip();
             case FrametimeRangeValueRole:
                 return _frametime_plot_range.value();
+            case FramerateMaxFPSNameRole:
+                return _framerate_max_fps.name();
+            case FramerateMaxFPSTooltipRole:
+                return _framerate_max_fps.tooltip();
+            case FramerateMaxFPSValueRole:
+                return _framerate_max_fps.value();
+            case FrametimeMaxMSNameRole:
+                return _frametime_max_ms.name();
+            case FrametimeMaxMSTooltipRole:
+                return _frametime_max_ms.tooltip();
+            case FrametimeMaxMSValueRole:
+                return _frametime_max_ms.value();
             default:
                 return QVariant();
         }
@@ -107,6 +125,8 @@ public:
         else if (role == EnableDeltaRenderingValueRole) _enable_delta_rendering.setValue(value.toBool());
         else if (role == FramerateRangeValueRole) _framerate_plot_range.setValue(static_cast<quint8>(value.toUInt()));
         else if (role == FrametimeRangeValueRole) _frametime_plot_range.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<quint8>(value.toUInt()));
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -136,6 +156,10 @@ public:
     uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
     //! getter
     uint8_t get_frametime_range() { return _frametime_plot_range.value(); }
+    //! getter
+    uint8_t get_framerate_max_fps() { return _framerate_max_fps.value(); }
+    //! getter
+    uint8_t get_frametime_max_ms() { return _frametime_max_ms.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -159,6 +183,12 @@ private:
         _role_names[FrametimeRangeNameRole]          = "frametimeRangeName";
         _role_names[FrametimeRangeTooltipRole]       = "frametimeRangeTooltip";
         _role_names[FrametimeRangeValueRole]         = "frametimeRangeValue";
+        _role_names[FramerateMaxFPSNameRole]         = "framerateMaxFPSName";
+        _role_names[FramerateMaxFPSTooltipRole]      = "framerateMaxFPSTooltip";
+        _role_names[FramerateMaxFPSValueRole]        = "framerateMaxFPSValue";
+        _role_names[FrametimeMaxMSNameRole]          = "frametimeMaxMSName";
+        _role_names[FrametimeMaxMSTooltipRole]       = "frametimeMaxMSTooltip";
+        _role_names[FrametimeMaxMSValueRole]         = "frametimeMaxMSValue";
     }
     //! initial setting
     void _init_options()
@@ -183,9 +213,17 @@ private:
         _framerate_plot_range.setTooltip("Length of the framerate plot in frames (x-axis)");
         _framerate_plot_range.setValue(60);
 
+        _framerate_max_fps.setName("Max FPS:");
+        _framerate_max_fps.setTooltip("Height of the framerate plot in framerate (y-axis)");
+        _framerate_max_fps.setValue(60);
+
         _frametime_plot_range.setName("Analysis range:");
         _frametime_plot_range.setTooltip("Length of the frametime plot in frames (x-axis)");
         _frametime_plot_range.setValue(60);
+
+        _frametime_max_ms.setName("Max Frametime:");
+        _frametime_max_ms.setTooltip("Height of the frametime plot in ms (y-axis)");
+        _frametime_max_ms.setValue(100);
 
     }
 
@@ -204,7 +242,11 @@ private:
     //! wrapped quint8
     ValueItem<quint8> _framerate_plot_range;
     //! wrapped quint8
+    ValueItem<quint8> _framerate_max_fps;
+    //! wrapped quint8
     ValueItem<quint8> _frametime_plot_range;
+    //! wrapped quint8
+    ValueItem<quint8> _frametime_max_ms;
 };
 
 #endif // GENERALOPTIONSMODEL_H

@@ -115,8 +115,9 @@ Window {
                 Component {
                     id: generalOptionsDelegate
                     GridLayout {
-                        rows: 4
+                        rows: 5
                         columns: 3
+                        // 1st row
                         Switch {
                             text: model.enableFramerateName
                             checked: model.enableFramerateValue
@@ -128,6 +129,7 @@ Window {
                                     model.enableFramerateValue = !model.enableFramerateValue;
                                     fpsTab.enabled = model.enableFramerateValue;
                                     framerateRange.enabled = model.enableFramerateValue;
+                                    framerateMaxFPS.enabled = model.enableFramerateValue;
                                     if (model.enableFramerateValue === false)
                                     {
                                         model.enableTearsValue = false;
@@ -157,6 +159,31 @@ Window {
                                 if (model.framerateRangeValue !== value) model.framerateRangeValue = Utils.round(value, 0);
                             }
                         }
+
+                        // 2nd row
+                        Label {}
+                        Label {
+                            Layout.leftMargin: 20
+                            text: model.framerateMaxFPSName
+                        }
+                        SpinBox {
+                            id: framerateMaxFPS
+                            from: 10
+                            to: 255
+                            stepSize: 5
+                            editable: true
+                            value: model.framerateMaxFPSValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.framerateMaxFPSTooltip
+                            textFromValue: function(value, locale) { return value.toString() + ' fps'; }
+                            valueFromText: function(value, locale) { return value.replace(' fps', ''); }
+                            onValueChanged: {
+                                if (model.framerateMaxFPSValue !== value) model.framerateMaxFPSValue = Utils.round(value, 0);
+                            }
+                        }
+
+                        // 3rd row
                         Switch {
                             Layout.columnSpan: 3
                             text: model.enableTearsName
@@ -178,6 +205,7 @@ Window {
                             }
                         }
 
+                        // 4th row
                         Switch {
                             text: model.enableFrametimeName
                             checked: model.enableFrametimeValue
@@ -189,6 +217,7 @@ Window {
                                     model.enableFrametimeValue = !model.enableFrametimeValue;
                                     //frametimeTab.enabled = model.enableFrametimeValue // we have currently no options to set
                                     frametimeRange.enabled = model.enableFrametimeValue
+                                    frametimeMaxMS.enabled = model.enableFrametimeValue
                                 }
                             }
                         }
@@ -213,6 +242,30 @@ Window {
                             }
                         }
 
+                        // 5th row
+                        Label {}
+                        Label {
+                            Layout.leftMargin: 20
+                            text: model.frametimeMaxMSName
+                        }
+                        SpinBox {
+                            id: frametimeMaxMS
+                            from: 10
+                            to: 200
+                            stepSize: 5
+                            editable: true
+                            value: model.frametimeMaxMSValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.frametimeMaxMSTooltip
+                            textFromValue: function(value, locale) { return value.toString() + ' ms'; }
+                            valueFromText: function(value, locale) { return value.replace(' ms', ''); }
+                            onValueChanged: {
+                                if (model.frametimeMaxMSValue !== value) model.frametimeMaxMSValue = Utils.round(value, 0);
+                            }
+                        }
+
+                        // 6th row
                         Switch {
                             Layout.columnSpan: 3
                             text: model.enableDeltaRenderingName

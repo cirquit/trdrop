@@ -121,7 +121,7 @@ private:
 
             // get framerate as text (1 - ...) is because we draw from top to bottom
             const double percent = 1 - static_cast<double>(i) / static_cast<double>(_segment_count);
-            const double max_framerate = _shared_framerate_model->get_max_framerate_bounds();
+            const double max_framerate = _shared_general_options_model->get_framerate_max_fps(); //_shared_framerate_model->get_max_framerate_bounds();
             const QString framerate_text = QString::number(static_cast<int>(percent * max_framerate));
 
             // draw shadow
@@ -180,7 +180,7 @@ private:
         const size_t size_difference = framerate_history.size() - framerate_ticks;
         // need the maximums to calculate the position of the point
         const size_t max_index = framerate_history.size() - size_difference;
-        const double max_framerate = _shared_framerate_model->get_max_framerate_bounds();
+        const double max_framerate = _shared_general_options_model->get_framerate_max_fps(); // _shared_framerate_model->get_max_framerate_bounds();
         QPoint previous_point;
         size_t index = 0; // TODO implement enumerate
         // iterating in reverse, stitching every point with each other to draw lines instead of points
