@@ -115,7 +115,7 @@ Window {
                 Component {
                     id: generalOptionsDelegate
                     GridLayout {
-                        rows: 5
+                        rows: 7
                         columns: 3
                         // 1st row
                         Switch {
@@ -276,6 +276,20 @@ Window {
                             action: Action {
                                 onTriggered: {
                                     model.enableDeltaRenderingValue = !model.enableDeltaRenderingValue;
+                                }
+                            }
+                        }
+                        // 7th row
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.enableFramerateCenteringName
+                            checked: model.enableFramerateCenteringValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableFramerateCenteringTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableFramerateCenteringValue = !model.enableFramerateCenteringValue;
                                 }
                             }
                         }

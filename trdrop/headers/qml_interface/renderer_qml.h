@@ -6,6 +6,7 @@
 #include <QColor>
 
 #include <memory>
+#include <cmath>
 #include "headers/cpp_interface/framerateoptions.h"
 #include "headers/qml_models/exportoptionsmodel.h"
 #include "headers/cpp_interface/framerateplot.h"
@@ -35,6 +36,7 @@ public:
         , _shared_framerate_plot_instance(shared_framerate_plot_instance)
         , _shared_frametime_plot_instance(shared_frametime_plot_instance)
         , _shared_tear_model(shared_tear_model)
+        , _cached_images(30, QImage()) // currently hardcoded to 30 on startup (half of 60 of the default framerate analysis time)
     { }
 
 //! methods
@@ -53,8 +55,11 @@ public:
             qml_image = QImage(qml_image.size(), QImage::Format_ARGB32);
             qml_image.fill(Qt::transparent);
         } else {
-            _qml_image = qml_image.copy();
+            qml_image = _get_next_image(qml_image).copy();
         }
+
+        // saving the image for redraw purposes
+        _qml_image = qml_image.copy();
 
         QPainter painter;
         painter.begin(&qml_image);
@@ -82,6 +87,7 @@ public:
     //! can be triggered if options change
     Q_SLOT void redraw()
     {
+        _reshape_cached_image_queue();
         processImage(_qml_image);
     }
 
@@ -136,6 +142,53 @@ private:
         return video_count;
     }
 
+    //! default image to display until the framerate plot reaches the state to show the image (center)
+    QImage _get_default_image() const
+    {
+        QSize size;
+        // kind of scuffed to code it in here, but as the resolution is only set in the export options it doesnt make sense to include them here
+        if (_qml_image.isNull())
+        {
+            size = QSize(960, 540);
+        }
+        else
+        {
+            size = _qml_image.size();
+        }
+        QImage default_image(size, QImage::Format_RGB888);
+        QColor black(0, 0, 0);
+        default_image.fill(black);
+        return default_image;
+    }
+
+    //! returns the next frame which should be at the "center" of the FPS graph
+    //! the next frame which is "popped from the front" is the next one
+    //! logic is based on the assumption that `_cached_images.size` == framerate anaylsis range / 2 from general options
+    QImage _get_next_image(const QImage & original_next_frame)
+    {
+        _cached_images.push_back(original_next_frame);
+        QImage next_image = _cached_images.front().copy();
+        _cached_images.pop_front();
+        if (next_image.isNull())
+        {
+            QImage filler_image(original_next_frame.size(), QImage::Format_RGB888);
+            QColor black(0, 0, 0);
+            filler_image.fill(black);
+            return filler_image;
+        }
+        return next_image;
+    }
+    //! reshape the image queue to fit the half of the framerate plot
+    void _reshape_cached_image_queue()
+    {
+        int new_container_size = std::round((*_shared_general_options_model).get_framerate_range() / 2);
+        QImage default_image = _get_default_image();
+        _cached_images.resize(0); // remove previously added frames
+        _cached_images.resize(new_container_size, default_image);
+    }
+
+
+
 //! member
 private:
     //! cached image to draw onto
@@ -152,6 +205,10 @@ private:
     std::shared_ptr<FrametimePlot> _shared_frametime_plot_instance;
     //! used to draw the tears
     std::shared_ptr<TearModel> _shared_tear_model;
+    //! Test - caching images
+    std::deque<QImage> _cached_images;
+    //! Test - max amount of cached images
+    int _image_cache_size;
 };
 
 #endif // IMAGEVIEWER_QML_H

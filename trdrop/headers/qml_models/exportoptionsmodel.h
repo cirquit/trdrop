@@ -170,6 +170,7 @@ private:
         _role_names[EnableLivePreviewTooltipRole]   = "enableLivePreviewTooltip";
         _role_names[EnableLivePreviewValueRole]     = "enableLivePreviewValue";
 
+
     }
     //! default initial options
     void _init_options()

@@ -22,30 +22,33 @@ public:
     //! manage the access to FileItem member from QML
     enum GeneralOptionsRoles
     {
-        EnableFramerateNameRole         = Qt::UserRole
-      , EnableFramerateTooltipRole      = Qt::UserRole + 1
-      , EnableFramerateValueRole        = Qt::UserRole + 2
-      , EnableTearsNameRole             = Qt::UserRole + 3
-      , EnableTearsTooltipRole          = Qt::UserRole + 4
-      , EnableTearsValueRole            = Qt::UserRole + 5
-      , EnableFrametimeNameRole         = Qt::UserRole + 6
-      , EnableFrametimeTooltipRole      = Qt::UserRole + 7
-      , EnableFrametimeValueRole        = Qt::UserRole + 8
-      , EnableDeltaRenderingNameRole    = Qt::UserRole + 9
-      , EnableDeltaRenderingTooltipRole = Qt::UserRole + 10
-      , EnableDeltaRenderingValueRole   = Qt::UserRole + 11
-      , FramerateRangeNameRole          = Qt::UserRole + 12
-      , FramerateRangeTooltipRole       = Qt::UserRole + 13
-      , FramerateRangeValueRole         = Qt::UserRole + 14
-      , FrametimeRangeNameRole          = Qt::UserRole + 15
-      , FrametimeRangeTooltipRole       = Qt::UserRole + 16
-      , FrametimeRangeValueRole         = Qt::UserRole + 17
-      , FramerateMaxFPSNameRole         = Qt::UserRole + 18
-      , FramerateMaxFPSTooltipRole      = Qt::UserRole + 19
-      , FramerateMaxFPSValueRole        = Qt::UserRole + 20
-      , FrametimeMaxMSNameRole          = Qt::UserRole + 21
-      , FrametimeMaxMSTooltipRole       = Qt::UserRole + 22
-      , FrametimeMaxMSValueRole         = Qt::UserRole + 23
+        EnableFramerateNameRole             = Qt::UserRole
+      , EnableFramerateTooltipRole          = Qt::UserRole + 1
+      , EnableFramerateValueRole            = Qt::UserRole + 2
+      , EnableTearsNameRole                 = Qt::UserRole + 3
+      , EnableTearsTooltipRole              = Qt::UserRole + 4
+      , EnableTearsValueRole                = Qt::UserRole + 5
+      , EnableFrametimeNameRole             = Qt::UserRole + 6
+      , EnableFrametimeTooltipRole          = Qt::UserRole + 7
+      , EnableFrametimeValueRole            = Qt::UserRole + 8
+      , EnableDeltaRenderingNameRole        = Qt::UserRole + 9
+      , EnableDeltaRenderingTooltipRole     = Qt::UserRole + 10
+      , EnableDeltaRenderingValueRole       = Qt::UserRole + 11
+      , FramerateRangeNameRole              = Qt::UserRole + 12
+      , FramerateRangeTooltipRole           = Qt::UserRole + 13
+      , FramerateRangeValueRole             = Qt::UserRole + 14
+      , FrametimeRangeNameRole              = Qt::UserRole + 15
+      , FrametimeRangeTooltipRole           = Qt::UserRole + 16
+      , FrametimeRangeValueRole             = Qt::UserRole + 17
+      , FramerateMaxFPSNameRole             = Qt::UserRole + 18
+      , FramerateMaxFPSTooltipRole          = Qt::UserRole + 19
+      , FramerateMaxFPSValueRole            = Qt::UserRole + 20
+      , FrametimeMaxMSNameRole              = Qt::UserRole + 21
+      , FrametimeMaxMSTooltipRole           = Qt::UserRole + 22
+      , FrametimeMaxMSValueRole             = Qt::UserRole + 23
+      , EnableFrametimeCenteringNameRole    = Qt::UserRole + 24
+      , EnableFrametimeCenteringTooltipRole = Qt::UserRole + 25
+      , EnableFrametimeCenteringValueRole   = Qt::UserRole + 26
     };
 //! methods
 public:
@@ -111,6 +114,12 @@ public:
                 return _frametime_max_ms.tooltip();
             case FrametimeMaxMSValueRole:
                 return _frametime_max_ms.value();
+            case EnableFrametimeCenteringNameRole:
+                return _enable_framerate_centering.name();
+            case EnableFrametimeCenteringTooltipRole:
+                return _enable_framerate_centering.tooltip();
+            case EnableFrametimeCenteringValueRole:
+                return _enable_framerate_centering.value();
             default:
                 return QVariant();
         }
@@ -127,6 +136,7 @@ public:
         else if (role == FrametimeRangeValueRole) _frametime_plot_range.setValue(static_cast<quint8>(value.toUInt()));
         else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<quint8>(value.toUInt()));
         else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == EnableFrametimeCenteringValueRole) _enable_framerate_centering.setValue(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -160,35 +170,40 @@ public:
     uint8_t get_framerate_max_fps() { return _framerate_max_fps.value(); }
     //! getter
     uint8_t get_frametime_max_ms() { return _frametime_max_ms.value(); }
+    //! getter
+    bool get_enable_framerate_centering() { return _enable_framerate_centering.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
     void _setup_role_names()
     {
-        _role_names[EnableFramerateNameRole]         = "enableFramerateName";
-        _role_names[EnableFramerateTooltipRole]      = "enableFramerateTooltip";
-        _role_names[EnableFramerateValueRole]        = "enableFramerateValue";
-        _role_names[EnableTearsNameRole]             = "enableTearsName";
-        _role_names[EnableTearsTooltipRole]          = "enableTearsTooltip";
-        _role_names[EnableTearsValueRole]            = "enableTearsValue";
-        _role_names[EnableFrametimeNameRole]         = "enableFrametimeName";
-        _role_names[EnableFrametimeTooltipRole]      = "enableFrametimeTooltip";
-        _role_names[EnableFrametimeValueRole]        = "enableFrametimeValue";
-        _role_names[EnableDeltaRenderingNameRole]    = "enableDeltaRenderingName";
-        _role_names[EnableDeltaRenderingTooltipRole] = "enableDeltaRenderingTooltip";
-        _role_names[EnableDeltaRenderingValueRole]   = "enableDeltaRenderingValue";
-        _role_names[FramerateRangeNameRole]          = "framerateRangeName";
-        _role_names[FramerateRangeTooltipRole]       = "framerateRangeTooltip";
-        _role_names[FramerateRangeValueRole]         = "framerateRangeValue";
-        _role_names[FrametimeRangeNameRole]          = "frametimeRangeName";
-        _role_names[FrametimeRangeTooltipRole]       = "frametimeRangeTooltip";
-        _role_names[FrametimeRangeValueRole]         = "frametimeRangeValue";
-        _role_names[FramerateMaxFPSNameRole]         = "framerateMaxFPSName";
-        _role_names[FramerateMaxFPSTooltipRole]      = "framerateMaxFPSTooltip";
-        _role_names[FramerateMaxFPSValueRole]        = "framerateMaxFPSValue";
-        _role_names[FrametimeMaxMSNameRole]          = "frametimeMaxMSName";
-        _role_names[FrametimeMaxMSTooltipRole]       = "frametimeMaxMSTooltip";
-        _role_names[FrametimeMaxMSValueRole]         = "frametimeMaxMSValue";
+        _role_names[EnableFramerateNameRole]             = "enableFramerateName";
+        _role_names[EnableFramerateTooltipRole]          = "enableFramerateTooltip";
+        _role_names[EnableFramerateValueRole]            = "enableFramerateValue";
+        _role_names[EnableTearsNameRole]                 = "enableTearsName";
+        _role_names[EnableTearsTooltipRole]              = "enableTearsTooltip";
+        _role_names[EnableTearsValueRole]                = "enableTearsValue";
+        _role_names[EnableFrametimeNameRole]             = "enableFrametimeName";
+        _role_names[EnableFrametimeTooltipRole]          = "enableFrametimeTooltip";
+        _role_names[EnableFrametimeValueRole]            = "enableFrametimeValue";
+        _role_names[EnableDeltaRenderingNameRole]        = "enableDeltaRenderingName";
+        _role_names[EnableDeltaRenderingTooltipRole]     = "enableDeltaRenderingTooltip";
+        _role_names[EnableDeltaRenderingValueRole]       = "enableDeltaRenderingValue";
+        _role_names[FramerateRangeNameRole]              = "framerateRangeName";
+        _role_names[FramerateRangeTooltipRole]           = "framerateRangeTooltip";
+        _role_names[FramerateRangeValueRole]             = "framerateRangeValue";
+        _role_names[FrametimeRangeNameRole]              = "frametimeRangeName";
+        _role_names[FrametimeRangeTooltipRole]           = "frametimeRangeTooltip";
+        _role_names[FrametimeRangeValueRole]             = "frametimeRangeValue";
+        _role_names[FramerateMaxFPSNameRole]             = "framerateMaxFPSName";
+        _role_names[FramerateMaxFPSTooltipRole]          = "framerateMaxFPSTooltip";
+        _role_names[FramerateMaxFPSValueRole]            = "framerateMaxFPSValue";
+        _role_names[FrametimeMaxMSNameRole]              = "frametimeMaxMSName";
+        _role_names[FrametimeMaxMSTooltipRole]           = "frametimeMaxMSTooltip";
+        _role_names[FrametimeMaxMSValueRole]             = "frametimeMaxMSValue";
+        _role_names[EnableFrametimeCenteringNameRole]    = "enableFramerateCenteringName";
+        _role_names[EnableFrametimeCenteringTooltipRole] = "enableFramerateCenteringTooltip";
+        _role_names[EnableFrametimeCenteringValueRole]   = "enableFramerateCenteringValue";
     }
     //! initial setting
     void _init_options()
@@ -225,6 +240,9 @@ private:
         _frametime_max_ms.setTooltip("Height of the frametime plot in ms (y-axis)");
         _frametime_max_ms.setValue(100);
 
+        _enable_framerate_centering.setName("Enable FPS graph centering");
+        _enable_framerate_centering.setTooltip("The center of the framerate plot is now showing the \"current\" framerate, not the right most edge");
+        _enable_framerate_centering.setValue(true);
     }
 
 //! member
@@ -247,6 +265,8 @@ private:
     ValueItem<quint8> _frametime_plot_range;
     //! wrapped quint8
     ValueItem<quint8> _frametime_max_ms;
+    //! essentially a bool
+    CheckBoxItem _enable_framerate_centering;
 };
 
 #endif // GENERALOPTIONSMODEL_H
