@@ -252,25 +252,25 @@ private:
         QPoint bottom(x_pos, y_pos);
         QPoint top_right(top_right_x, top_right_y);
         triangle << top_left << bottom << top_right;
-        // draw filled polygon (todo refactor)
+
+        // draw filled polygon
         QBrush brush(_plot_outline_color);
         brush.setStyle(Qt::SolidPattern);
         painter->setPen(_get_outerline_pen());
         painter->setBrush(brush);
         painter->drawPolygon(triangle);
     }
-    //!
+    //! draws a vertical center line
     void _draw_center_line(QPainter * painter)
     {
         const int y_init_pos = _plot_outline.y();
         const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
 
         const int y_bottom_padding = _plot_outline.height() / 80;
-        //const int x_right_padding  = _plot_outline.width() / 10;
 
-        const int x_pos = x_init_pos; // - x_right_padding;
+        const int x_pos = x_init_pos;
         const int y_pos = y_init_pos + y_bottom_padding;
-        // draw horizontal line
+        // draw vertical line
         QPoint top_line_point(x_pos, y_pos);
         QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
         painter->drawLine(top_line_point, bottom_line_point);

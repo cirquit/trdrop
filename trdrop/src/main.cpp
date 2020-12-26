@@ -130,7 +130,8 @@ int main(int argc, char *argv[])
                            , shared_export_options_model
                            , shared_framerate_plot_instance
                            , shared_frametime_plot_instance
-                           , shared_tear_model);
+                           , shared_tear_model
+                           , shared_resolution_model);
     engine.rootContext()->setContextProperty("renderer", &renderer_qml);
     ExporterQML exporter_qml(shared_export_options_model
                            , shared_imageformat_model

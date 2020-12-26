@@ -28,6 +28,7 @@ public:
               , std::shared_ptr<FrameratePlot> shared_framerate_plot_instance
               , std::shared_ptr<FrametimePlot> shared_frametime_plot_instance
               , std::shared_ptr<TearModel> shared_tear_model
+              , std::shared_ptr<ResolutionsModel> shared_resolution_model
               , QQuickItem *parent = nullptr)
         : QObject(parent)
         , _shared_fps_options_list(shared_fps_options_list)
@@ -36,6 +37,7 @@ public:
         , _shared_framerate_plot_instance(shared_framerate_plot_instance)
         , _shared_frametime_plot_instance(shared_frametime_plot_instance)
         , _shared_tear_model(shared_tear_model)
+        , _shared_resolution_model(shared_resolution_model)
         , _cached_images(30, QImage()) // currently hardcoded to 30 on startup (half of 60 of the default framerate analysis time)
     { }
 
@@ -87,7 +89,11 @@ public:
     //! can be triggered if options change
     Q_SLOT void redraw()
     {
-        _reshape_cached_image_queue();
+        int framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
+        if (!_is_cached_image_queue_size_valid(framerate_analysis_range))
+        {
+            _reshape_cached_image_queue();
+        }
         processImage(_qml_image);
     }
 
@@ -165,6 +171,10 @@ private:
     //! logic is based on the assumption that `_cached_images.size` == framerate anaylsis range / 2 from general options
     QImage _get_next_image(const QImage & original_next_frame)
     {
+        if (original_next_frame == _qml_image)
+        {
+            return _qml_image;
+        }
         _cached_images.push_back(original_next_frame);
         QImage next_image = _cached_images.front().copy();
         _cached_images.pop_front();
@@ -189,7 +199,12 @@ private:
         _cached_images.resize(0); // remove previously added frames
         _cached_images.resize(new_container_size, default_image);
     }
-
+    //! queue size has to be half the length of the framerate analysis range to show the "current" image when the plot reaches the center
+    bool _is_cached_image_queue_size_valid(const int framerate_analysis_range) const
+    {
+        const unsigned long long half_range = framerate_analysis_range / 2;
+        return _cached_images.size() == half_range;
+    }
 
 
 //! member
@@ -208,6 +223,8 @@ private:
     std::shared_ptr<FrametimePlot> _shared_frametime_plot_instance;
     //! used to draw the tears
     std::shared_ptr<TearModel> _shared_tear_model;
+    //! stores the current resolution
+    std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! Test - caching images
     std::deque<QImage> _cached_images;
     //! Test - max amount of cached images
