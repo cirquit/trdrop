@@ -32,7 +32,7 @@ unix: LIBS += -L/usr/local/lib \
         -lopencv_video
 
 windows: INCLUDEPATH += c:\opencv-4.5.1\build\install\include
-windows: LIBS += -Lc:\opencv-4.5.1\build\install\x64\mingw\lib \
+windows: LIBS += -Lc:\opencv-4.5.1\build_64\install\x64\mingw\lib \
         -lopencv_calib3d451 \
         -lopencv_core451 \
         -lopencv_dnn451 \

@@ -160,7 +160,6 @@ private:
         default_image.fill(black);
         return default_image;
     }
-
     //! returns the next frame which should be at the "center" of the FPS graph
     //! the next frame which is "popped from the front" is the next one
     //! logic is based on the assumption that `_cached_images.size` == framerate anaylsis range / 2 from general options
@@ -175,6 +174,10 @@ private:
             QColor black(0, 0, 0);
             filler_image.fill(black);
             return filler_image;
+        }
+        if (next_image.size() != original_next_frame.size())
+        {
+            next_image = next_image.scaledToHeight(original_next_frame.size().height());
         }
         return next_image;
     }

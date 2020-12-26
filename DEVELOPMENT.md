@@ -6,12 +6,10 @@ Short writeup of Windows / Linux (Ubuntu) cross platform development information
 * Install Qt
 * Install CMake (Linux)
 * Install CMake (Windows)
-* Install GStreamer (Linux)
-* Install GStreamer (Windows)
 * Install FFmpeg (Linux)
 * Install FFmpeg (Windows)
-* Install OpenCV 4.1 (Linux)
-* Install OpenCV 4.1 (Windows)
+* Compile OpenCV 4.1 (Linux)
+* Compile OpenCV 4.1 (Windows)
 
 ## Setup an initial repository for Qt
 
@@ -19,9 +17,9 @@ Short writeup of Windows / Linux (Ubuntu) cross platform development information
 
 * Install [QtCreator](https://www.qt.io/download#)
     - I use the Qt version `5.12.2`, but I hope that any `5.*.*` version works
-    - **Windows:** Check to install the correct compiler, I use `mingw_730`, the 32-bit version 
+    - **Windows:** Check to install the correct compiler, I use `mingw_810`, the 64-bit version 
     - **Windows:** Install everything in the default installation directory -> `C:\Qt`
-    -  **Windows:**Developer Options, check  `mingw730_32`
+    - **Windows:** Developer Options, check `mingw810_64`
     - **Linux:** Check to install the correct compiler, I use `g++ 7.4.0`
 
 ## Install CMake (Linux)
@@ -40,31 +38,33 @@ Follow the instructions for `https://github.com/cirquit/opencv-template`. You ca
 
 ## Install OpenCV (Windows)
 
-Install from [https://opencv.org/opencv-4-1-0.html](https://opencv.org/opencv-4-1-0.html), not the `Win Pack`, but the `Sources`. Extract the `opencv-4.1.0` directory to `C:`.
+Install from [https://opencv.org/releases/](https://opencv.org/releases/), not the `Win Pack`, but the `Sources`. Extract the `opencv-4.5.1` directory to `C:`.
 
 CMake Options:
 ```
-Source code: C:/opencv-4.1.0
-Where to build the binaries: C:/opencv-4.1.0/build
+Source code: C:/opencv-4.5.1
+Where to build the binaries: C:/opencv-4.5.1/build_64
 ```
 
-Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows](https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows).
+Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows]().
 
-The only difference is that I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build` instead a new one at `C:\opencv-build`.
+The differences to that tutorial:
+* I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build_64` instead a new one at `C:\opencv-build`
+* Using the 64 bit compilation because of the RAM restriction with 32 bit. 32 bit compilation works out of the box if the PATH variable is set accordingly + 64 is replaced with 86 or 32 in the paths
 
 My PATH environment variable for comparisson:
 
 ```
-1) C:\Qt\Tools\mingw730_32\bin
-2) C:\Qt\5.12.2\mingw73_32\bin
-3) C:\opencv-4.1.0\build\install\x86\mingw\bin
+1) C:\Qt\Tools\mingw810_64\bin
+2) C:\Qt\5.12.2\mingw810_64\bin
+3) C:\opencv-4.5.1\build\install\x64\mingw\bin
 ```
 
 > 1) is needed for CMake to get the correct compiler (gcc / g++)
 
 > 2) is needed for the qt libraries on runtime (Qt5Gui.dll)
 
-> 3) is possibly needed for some opencv specific stuff (TODO test this)
+> 3) is possibly needed for some opencv specific stuff (with 32bit program runs from QtCreator with this, 64 doesn't seem to work)
 
 Pick the following flags configuration (deviating from the default configuration):
 
@@ -80,4 +80,4 @@ You may have to set the CMake settings multiple times, e.g. after the `WITH_QT` 
 
 #### Current shortcomings
 
-* Can't run the executable from QtCreator, need to manually locate it inside the build directory
+* Can't run the executable from QtCreator, need to manually locate it inside the build directory if compiled with 64-bit

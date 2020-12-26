@@ -240,7 +240,7 @@ Window {
                     target: videocapturelist
                     function onFramesReady() {
                         exportProgressBar.value = videocapturelist.getShortestVideoProgress();
-                        exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "% (Click/Space to pause)";
+                        exportButton.text       = Utils.round(videocapturelist.getShortestVideoProgress() * 100, 1) + "% (Space to pause)";
                     }
                     function onFinishedProcessing() {
                         exportButton.text = "Export";

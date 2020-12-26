@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <memory>
+#include <cmath>
 #include "headers/cpp_interface/frameratemodel.h"
 #include "headers/cpp_interface/framerateoptions.h"
 #include "headers/qml_models/resolutionsmodel.h"
@@ -43,6 +44,8 @@ public:
         _draw_plot_inner_lines(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
+        _draw_center_triangle(painter);
+        _draw_center_line(painter);
         _draw_framerates(painter);
     }
 
@@ -220,6 +223,58 @@ private:
 
         return QPoint(x_pos, y_pos);
     }
+    //! draws the pointing arrow in the center
+    void _draw_center_triangle(QPainter * painter)
+    {
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 25;
+
+        const int x_pos = x_init_pos;
+        const int y_pos = y_init_pos - y_bottom_padding;
+
+        // drawing a unilateral triangle, pointing downwards. The bottom point is the x/y-pos
+        const int triangle_side_length = _plot_outline.width() / 60;
+        const int c = triangle_side_length;
+        const int b = triangle_side_length;
+        // a^2 + b^2 = c^2 => a = sqrt(c^2 - b^2)
+        // taking half of b cause we need the height at the center of b
+        const int triangle_height = std::sqrt(std::pow(c, 2) - std::pow(b / 2, 2));
+        const int top_left_x = x_pos - triangle_side_length / 2;
+        const int top_left_y = y_pos - triangle_height;
+        const int top_right_x = x_pos + triangle_side_length / 2;
+        const int top_right_y = y_pos - triangle_height;
+
+        // construct the triangle as polygon
+        QPolygon triangle;
+        QPoint top_left(top_left_x, top_left_y);
+        QPoint bottom(x_pos, y_pos);
+        QPoint top_right(top_right_x, top_right_y);
+        triangle << top_left << bottom << top_right;
+        // draw filled polygon (todo refactor)
+        QBrush brush(_plot_outline_color);
+        brush.setStyle(Qt::SolidPattern);
+        painter->setPen(_get_outerline_pen());
+        painter->setBrush(brush);
+        painter->drawPolygon(triangle);
+    }
+    //!
+    void _draw_center_line(QPainter * painter)
+    {
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 80;
+        //const int x_right_padding  = _plot_outline.width() / 10;
+
+        const int x_pos = x_init_pos; // - x_right_padding;
+        const int y_pos = y_init_pos + y_bottom_padding;
+        // draw horizontal line
+        QPoint top_line_point(x_pos, y_pos);
+        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
+        painter->drawLine(top_line_point, bottom_line_point);
+    }
 // methods
 private:
     //! resolution adaptive outerline pen
@@ -228,7 +283,7 @@ private:
         QPen pen;
         pen.setWidth(_get_outline_thickness());
         pen.setColor(_plot_outline_color);
-        pen.setJoinStyle(Qt::MiterJoin); // hard counters
+        pen.setJoinStyle(Qt::MiterJoin); // hard corners
         return pen;
     }
     //! resolution adaptive innerline pen
