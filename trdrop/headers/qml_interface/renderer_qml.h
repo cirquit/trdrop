@@ -105,6 +105,7 @@ private:
         int video_count  = _get_video_count();
         int image_width  = _qml_image.size().width();
         int image_height = _qml_image.size().height();
+        size_t frame_index = _get_current_frame_index();
 
         // this positioning logic is not inside the fps options as we need the index
         for(int i = 0; i < _shared_fps_options_list->size(); ++i)
@@ -118,7 +119,7 @@ private:
                 int y_step = static_cast<int>(image_height / 12);
                 int x = x_padding + x_step * i; // width
                 int y = y_step; // height
-                (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y);
+                (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y, frame_index);
             }
         }
     }
@@ -205,7 +206,13 @@ private:
         const unsigned long long half_range = framerate_analysis_range / 2;
         return _cached_images.size() == half_range;
     }
-
+    //! calculates the "current" frame index. current means the value which is at the center of the plot if the option is enabled in general settings
+    size_t _get_current_frame_index() const
+    {
+        const int framerate_range = (*_shared_general_options_model).get_framerate_range();
+        const size_t half_range = std::round(framerate_range / 2);
+        return half_range;
+    }
 
 //! member
 private:

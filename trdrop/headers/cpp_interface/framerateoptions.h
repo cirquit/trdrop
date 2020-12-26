@@ -38,7 +38,7 @@ public:
         _init_member();
     }
     //! paints the framerate text at the position x, y (top-left is 0,0)
-    void paint_fps_text(QPainter * painter, int x, int y)
+    void paint_fps_text(QPainter * painter, const int x, const int y, const size_t frame_index)
     {
         int x_offset = 2;
         int y_offset = 2;
@@ -51,11 +51,11 @@ public:
         // draw shadow
         painter->setPen(_text_shadow);
         painter->setFont(displayed_text_font);
-        painter->drawText(x + x_offset, y + y_offset, _get_full_text());
+        painter->drawText(x + x_offset, y + y_offset, _get_full_text(frame_index));
         // draw real text
         painter->setPen(fps_plot_color.color());
         painter->setFont(displayed_text_font);
-        painter->drawText(x, y, _get_full_text());
+        painter->drawText(x, y, _get_full_text(frame_index));
     }
 
 // methods
@@ -82,10 +82,10 @@ private:
 
         displayed_text_fontsize_override = true;
     }
-    //! adds the framerate prefix text defined in the options to the current framerate of the designated video
-    QString _get_full_text() const
+    //! adds the framerate prefix text defined in the options to the framerate of the designated video
+    QString _get_full_text(const size_t frame_index) const
     {
-        double framerate = _shared_framerate_model->get_framerate_at(video_id);
+        double framerate = _shared_framerate_model->get_framerate_history(video_id)[frame_index];
         return displayed_text.value() + " " + QString::number(framerate, 10, 1);
     }
     //! resolution adaptive font size
