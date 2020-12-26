@@ -18,6 +18,7 @@ Window {
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
     Pane {
+        id: fileManagementPane
         width: parent.width
         height: parent.height
         Component {
@@ -25,9 +26,9 @@ Window {
             MouseArea {
                 id: fileDragArea
                 property bool held: false
-                anchors { leftMargin: 10; rightMargin: 10; topMargin: 10; bottomMargin: 10}
-                width: fileManagementWindow.width - 30
-                height: fileManagementWindow.height / 3 - 10
+                anchors { left: parent.left; right: parent.right }
+                width: fileElement.width
+                height: fileElement.height
                 // pointer to the currently held item
                 drag.target: held ? fileElement : undefined
                 // scroll vertically
