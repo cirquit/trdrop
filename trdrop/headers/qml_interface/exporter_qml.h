@@ -132,6 +132,10 @@ private:
     QString _create_image_file_path() const
     {
         QString directory_path = _export_options_model->get_export_directory();
+        if (!QDir(directory_path).exists())
+        {
+            QDir().mkdir(directory_path);
+        }
         QString imagesequence_prefix = _export_options_model->get_imagesequence_prefix();
         QString image_postfix = _imageformat_model->get_active_value().name();
         return QDir(directory_path).filePath(imagesequence_prefix + _get_frame_count() + image_postfix);
