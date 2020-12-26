@@ -455,7 +455,7 @@ Window {
 
                             Label {
                                 id: colorLabel
-                                text: model.colorName + ":"
+                                text: model.colorName
                                 Layout.rightMargin: 5
                             }
                             Rectangle {
