@@ -35,7 +35,7 @@ public:
 public:
     //! top left is (0,0), painter has to be pointed to the image by the renderer
     //! order of drawing functions is essential
-    void draw_framerate_plot(QPainter * painter)
+    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
@@ -44,8 +44,11 @@ public:
         _draw_plot_inner_lines(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
-        _draw_center_triangle(painter);
-        _draw_center_line(painter);
+        if (enable_framerate_centering)
+        {
+            _draw_center_triangle(painter);
+            _draw_center_line(painter);
+        }
         _draw_framerates(painter);
     }
 

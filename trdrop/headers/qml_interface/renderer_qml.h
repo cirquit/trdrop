@@ -126,7 +126,8 @@ private:
     //! calls the underlying instance to draw the graph
     void _draw_framerate_graph(QPainter & painter)
     {
-        _shared_framerate_plot_instance->draw_framerate_plot(&painter);
+        bool enable_framerate_centering = (*_shared_general_options_model).get_enable_framerate_centering();
+        _shared_framerate_plot_instance->draw_framerate_plot(&painter, enable_framerate_centering);
     }
     //! calls the underlying instance to draw the graph
     void _draw_frametime_graph(QPainter & painter)
@@ -172,13 +173,17 @@ private:
     //! logic is based on the assumption that `_cached_images.size` == framerate anaylsis range / 2 from general options
     QImage _get_next_image(const QImage & original_next_frame)
     {
-        if (original_next_frame == _qml_image)
-        {
-            return _qml_image;
-        }
+        bool enable_framerate_centering = (*_shared_general_options_model).get_enable_framerate_centering();
+        // save the image in case the framerate centering is enabled mid-run
         _cached_images.push_back(original_next_frame);
         QImage next_image = _cached_images.front().copy();
         _cached_images.pop_front();
+        // if its disabled, return the incoming image
+        if (!enable_framerate_centering)
+        {
+            return original_next_frame;
+        }
+        // if its enabled, check if the cache_image deque already had "real" images saved (happens at the start of an export where only dummy images are stored)
         if (next_image.isNull())
         {
             QImage filler_image(original_next_frame.size(), QImage::Format_RGB888);
@@ -186,6 +191,7 @@ private:
             filler_image.fill(black);
             return filler_image;
         }
+        // it we have a resized image incoming, resize the stored image
         if (next_image.size() != original_next_frame.size())
         {
             next_image = next_image.scaledToHeight(original_next_frame.size().height());
@@ -209,9 +215,16 @@ private:
     //! calculates the "current" frame index. current means the value which is at the center of the plot if the option is enabled in general settings
     size_t _get_current_frame_index() const
     {
-        const int framerate_range = (*_shared_general_options_model).get_framerate_range();
-        const size_t half_range = std::round(framerate_range / 2);
-        return half_range;
+        if ((*_shared_general_options_model).get_enable_framerate_centering())
+        {
+            const int framerate_range = (*_shared_general_options_model).get_framerate_range();
+            const size_t half_range = std::round(framerate_range / 2);
+            return half_range;
+        }
+        else {
+            // if centering is not set, the most current value is at the front of the framerate_history deque
+            return 0;
+        }
     }
 
 //! member
@@ -234,8 +247,6 @@ private:
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! Test - caching images
     std::deque<QImage> _cached_images;
-    //! Test - max amount of cached images
-    int _image_cache_size;
 };
 
 #endif // IMAGEVIEWER_QML_H
