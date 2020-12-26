@@ -125,7 +125,6 @@ Window {
                     model: imageFormatModel
                     //enabled: model.imagesequencePrefixEnabled
                     onActivated: {
-                        //let format = imageFormatModel.getValueAt(currentIndex);
                         imageFormatModel.setActiveValueAt(currentIndex);
                     }
                 }
@@ -137,7 +136,6 @@ Window {
                     action: Action {
                         onTriggered: {
                             model.exportCSVValue = !model.exportCSVValue;
-                            checked: model.exportCSVValue
                         }
                     }
                     ToolTip.text: "Exports the framerate into a trdrop_analysis.csv into the export directory for each video"
@@ -155,7 +153,6 @@ Window {
                     action: Action {
                         onTriggered: {
                             model.enableLivePreviewValue = !model.enableLivePreviewValue;
-                            checked: model.enableLivePreviewValue
                         }
                     }
                     ToolTip.text: "Enables the live rendering of the resulting video"
@@ -173,7 +170,6 @@ Window {
                     action: Action {
                         onTriggered: {
                             model.exportAsOverlayValue = !model.exportAsOverlayValue;
-                            checked: model.exportAsOverlayValue
                             if (model.exportAsOverlayValue)
                             {
                                 // 0 - JPEG, 1 - PNG
@@ -202,12 +198,11 @@ Window {
                     Layout.leftMargin: 20
                     Layout.rightMargin: 20
                     Layout.fillWidth: true
-                    textRole: "resolutionName"
                     model: resolutionsModel
+                    textRole: "resolutionName"
                     onActivated: {
                         resolutionsModel.setActiveValueAt(currentIndex);
                         imagecomposer.updateComposition();
-                        console.log("resolution triggered")
                     }
                 }
                 Label { }

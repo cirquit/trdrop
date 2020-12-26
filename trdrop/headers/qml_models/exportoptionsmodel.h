@@ -105,9 +105,9 @@ public:
         else if (role == EnableLivePreviewValueRole)     _enable_live_preview.setValue(value.toBool());
         else if (role == EnabledExportButtonRole)        _enabled_export_button = value.toBool();
         else return false;
-        //QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
-        //emit dataChanged(index, toIndex);
-        resetModel();
+        QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
+        emit dataChanged(index, toIndex);
+        //resetModel();
         return true;
     }
     //! tells the views that the model's state has changed -> this triggers a "recompution" of the delegate

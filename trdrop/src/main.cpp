@@ -4,6 +4,7 @@
 #include <QQuickView>
 #include <QQmlContext>
 #include <QFontDatabase>
+//#include <QQmlDebuggingEnabler>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -32,6 +33,7 @@
 int main(int argc, char *argv[])
 {
     // general application stuff
+    //QQmlDebuggingEnabler enabler;
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
