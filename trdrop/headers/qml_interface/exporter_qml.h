@@ -64,6 +64,7 @@ public:
     {
         _close_csv_file();
         qDebug() << "ExporterQML:finishExporting triggered";
+        _frame_count = 0;
         stopExporting();
     }
     //! on start exporting trigger
@@ -76,7 +77,6 @@ public:
     Q_INVOKABLE void stopExporting()
     {
         setIsExporting(false);
-        _frame_count = 0;
     }
     //! setter
     Q_SLOT void setIsExporting(bool other){ _is_exporting = other; }
