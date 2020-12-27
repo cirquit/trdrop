@@ -242,7 +242,7 @@ private:
 
         _enable_framerate_centering.setName("Enable FPS graph centering");
         _enable_framerate_centering.setTooltip("The center of the framerate plot is now showing the \"current\" framerate, not the right most edge");
-        _enable_framerate_centering.setValue(true);
+        _enable_framerate_centering.setValue(false);
     }
 
 //! member

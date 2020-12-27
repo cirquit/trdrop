@@ -13,8 +13,8 @@ Window {
     id: optionsWindow
     title: "Options"
     visible: true
-    width: 800
-    minimumHeight: 700
+    width: 900
+    minimumHeight: 800
     flags: if (Qt.platform.os == "linux") { return Qt.SubWindow } else { return Qt.Dialog }
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
@@ -336,7 +336,7 @@ Window {
                         width: fpsOptions.width * 0.95
                         GridLayout {
                             columns: 5
-
+                            // 1st row
                             Label {
                                 id: colorLabel
                                 text: model.colorName + ":"
@@ -381,7 +381,7 @@ Window {
                                         tearOptionsModel.applyColor(model.color, index)
                                 }
                             }
-
+                            // 2nd row
                             Label {
                                 text: model.pixelDifferenceName + ":"
                                 Layout.rightMargin: 5
@@ -412,7 +412,7 @@ Window {
                                     onTriggered: framerateOptionsModel.applyPixelDifference(model.pixelDifference)
                                 }
                             }
-
+                            // 3rd row
                             Label {
                                 text: model.displayedTextName
                             }
@@ -488,6 +488,43 @@ Window {
                                 ToolTip.text: "Override font size"
                                 ToolTip.delay: 500
                                 ToolTip.visible: hovered
+                            }
+                            // 4th row
+                            Label {
+                                text: model.fpsTextPositionName + ":"
+                                Layout.rightMargin: 5
+                                //ToolTip.text: model.pixelDifferenceTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
+                            Slider {
+                                id: textPositioningSlider
+                                from: 0.0
+                                to: 1.0
+                                enabled: model.fpsOptionsEnabled
+                                stepSize: 0.01
+                                value: model.fpsTextPosition
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                ToolTip.text: model.fpsTextPositionTooltip
+                                onMoved: {
+                                    if (model.fpsTextPosition !== value) model.fpsTextPosition = Utils.round(value, 2);
+                                }
+                            }
+                            Label {
+                                text: model.fpsTextPosition
+                                Layout.rightMargin: 5
+                                //ToolTip.text: model.pixelDifferenceTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
+                            Button {
+                                Layout.columnSpan: 2
+                                text: "Apply to all videos"
+                                enabled: model.fpsOptionsEnabled
+                                action: Action {
+                                    onTriggered: framerateOptionsModel.applyFPSTextPosition(model.fpsTextPosition)
+                                }
                             }
                         }
                     }

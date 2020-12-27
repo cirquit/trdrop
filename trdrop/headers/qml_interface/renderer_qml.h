@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <cmath>
+#include <iostream>
 #include "headers/cpp_interface/framerateoptions.h"
 #include "headers/qml_models/exportoptionsmodel.h"
 #include "headers/cpp_interface/framerateplot.h"
@@ -112,12 +113,12 @@ private:
         {
             const bool options_enabled = (*_shared_fps_options_list)[i].enabled;
             const bool text_enabled    = (*_shared_fps_options_list)[i].displayed_text.enabled();
+            const double rel_fps_text_position = (*_shared_fps_options_list)[i].rel_fps_text_position.value();
             if (options_enabled && text_enabled)
             {
-                int x_padding = static_cast<int>(image_width / 28);
                 int x_step = static_cast<int>(image_width / video_count);
                 int y_step = static_cast<int>(image_height / 12);
-                int x = x_padding + x_step * i; // width
+                int x = x_step * i + (x_step * rel_fps_text_position); // width
                 int y = y_step; // height
                 (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y, frame_index);
             }
