@@ -82,9 +82,13 @@ private:
 
         displayed_text_fontsize_override = true;
 
-        rel_fps_text_position.setName("Relative FPS Text Pos.");
-        rel_fps_text_position.setTooltip("TODO");
-        rel_fps_text_position.setValue(0.05);
+        rel_fps_text_x_position.setName("Relative FPS Text X Pos.");
+        rel_fps_text_x_position.setTooltip("TODO");
+        rel_fps_text_x_position.setValue(0.05);
+
+        rel_fps_text_y_position.setName("Relative FPS Text Y Pos.");
+        rel_fps_text_y_position.setTooltip("TODO");
+        rel_fps_text_y_position.setValue(0.05);
     }
     //! adds the framerate prefix text defined in the options to the framerate of the designated video
     QString _get_full_text(const size_t frame_index) const
@@ -127,8 +131,10 @@ public:
     std::shared_ptr<ResolutionsModel> _shared_resolution_model;
     //! to create a shadow effect we draw the text with an offset first
     QColor text_shadow;
-    //! fps text position (relative to the viewport, between (0,1) where 0 is the most left
-    ValueItem<double> rel_fps_text_position;
+    //! X fps text position (relative to the viewport, between (0,1) where 0 is the most left
+    ValueItem<double> rel_fps_text_x_position;
+    //! Y fps text position (relative to the viewport, between (0,1) where 0 is the top
+    ValueItem<double> rel_fps_text_y_position;
 };
 
 #endif // FRAMERATEOPTIONS_H

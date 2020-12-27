@@ -46,9 +46,12 @@ public:
       , DisplayedTextEnabledRole   = Qt::UserRole + 41
       , FPSOptionsEnabled          = Qt::UserRole + 42
       , FontSizeOverrideRole       = Qt::UserRole + 43
-      , FPSTextPositionNameRole    = Qt::UserRole + 44
-      , FPSTextPositionTooltipRole = Qt::UserRole + 45
-      , FPSTextPositionValueRole   = Qt::UserRole + 46
+      , FPSTextXPositionNameRole    = Qt::UserRole + 44
+      , FPSTextXPositionTooltipRole = Qt::UserRole + 45
+      , FPSTextXPositionValueRole   = Qt::UserRole + 46
+      , FPSTextYPositionNameRole    = Qt::UserRole + 47
+      , FPSTextYPositionTooltipRole = Qt::UserRole + 48
+      , FPSTextYPositionValueRole   = Qt::UserRole + 49
     };
 //! methods
 public:
@@ -94,12 +97,18 @@ public:
                  return (*_shared_fps_options_list)[row].enabled;
             case FontSizeOverrideRole:
                  return (*_shared_fps_options_list)[row].displayed_text_fontsize_override;
-            case FPSTextPositionNameRole:
-                return (*_shared_fps_options_list)[row].rel_fps_text_position.name();
-            case FPSTextPositionTooltipRole:
-                return (*_shared_fps_options_list)[row].rel_fps_text_position.tooltip();
-            case FPSTextPositionValueRole:
-                return (*_shared_fps_options_list)[row].rel_fps_text_position.value();
+            case FPSTextXPositionNameRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_x_position.name();
+            case FPSTextXPositionTooltipRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_x_position.tooltip();
+            case FPSTextXPositionValueRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_x_position.value();
+            case FPSTextYPositionNameRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_y_position.name();
+            case FPSTextYPositionTooltipRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_y_position.tooltip();
+            case FPSTextYPositionValueRole:
+                return (*_shared_fps_options_list)[row].rel_fps_text_y_position.value();
             default:
                 return QVariant();
         }
@@ -122,7 +131,8 @@ public:
         else if (role == DisplayedTextEnabledRole)   (*_shared_fps_options_list)[row].displayed_text.setEnabled(value.toBool());
         else if (role == FPSOptionsEnabled)          (*_shared_fps_options_list)[row].enabled = value.toBool();
         else if (role == FontSizeOverrideRole)       (*_shared_fps_options_list)[row].displayed_text_fontsize_override = value.toBool();
-        else if (role == FPSTextPositionValueRole)   (*_shared_fps_options_list)[row].rel_fps_text_position.setValue(value.toDouble());
+        else if (role == FPSTextXPositionValueRole)   (*_shared_fps_options_list)[row].rel_fps_text_x_position.setValue(value.toDouble());
+        else if (role == FPSTextYPositionValueRole)   (*_shared_fps_options_list)[row].rel_fps_text_y_position.setValue(value.toDouble());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -151,14 +161,24 @@ public:
         setData(q, value, ColorPickValueRole);
     }
     //! applies the color to the corresponding row
-    Q_INVOKABLE void applyFPSTextPosition(const QVariant & value)
+    Q_INVOKABLE void applyFPSTextXPosition(const QVariant & value)
     {
         QModelIndex q0 = createIndex(0, 0);
         QModelIndex q1 = createIndex(1, 0);
         QModelIndex q2 = createIndex(2, 0);
-        setData(q0, value, FPSTextPositionValueRole);
-        setData(q1, value, FPSTextPositionValueRole);
-        setData(q2, value, FPSTextPositionValueRole);
+        setData(q0, value, FPSTextXPositionValueRole);
+        setData(q1, value, FPSTextXPositionValueRole);
+        setData(q2, value, FPSTextXPositionValueRole);
+    }
+    //! applies the color to the corresponding row
+    Q_INVOKABLE void applyFPSTextYPosition(const QVariant & value)
+    {
+        QModelIndex q0 = createIndex(0, 0);
+        QModelIndex q1 = createIndex(1, 0);
+        QModelIndex q2 = createIndex(2, 0);
+        setData(q0, value, FPSTextYPositionValueRole);
+        setData(q1, value, FPSTextYPositionValueRole);
+        setData(q2, value, FPSTextYPositionValueRole);
     }
     //! inits default options and triggers an update for all "listeners"
     Q_INVOKABLE void revertModelToDefault()
@@ -204,9 +224,13 @@ private:
 
         _role_names[FontSizeOverrideRole] = "fpsTextSizeOverride";
 
-        _role_names[FPSTextPositionNameRole]    = "fpsTextPositionName";
-        _role_names[FPSTextPositionTooltipRole] = "fpsTextPositionTooltip";
-        _role_names[FPSTextPositionValueRole]   = "fpsTextPosition";
+        _role_names[FPSTextXPositionNameRole]    = "fpsTextXPositionName";
+        _role_names[FPSTextXPositionTooltipRole] = "fpsTextXPositionTooltip";
+        _role_names[FPSTextXPositionValueRole]   = "fpsTextXPosition";
+
+        _role_names[FPSTextYPositionNameRole]    = "fpsTextYPositionName";
+        _role_names[FPSTextYPositionTooltipRole] = "fpsTextYPositionTooltip";
+        _role_names[FPSTextYPositionValueRole]   = "fpsTextYPosition";
     }
     //! default framerate options
     void _init_options()

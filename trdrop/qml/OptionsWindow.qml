@@ -14,7 +14,7 @@ Window {
     title: "Options"
     visible: true
     width: 900
-    minimumHeight: 800
+    minimumHeight: 900
     flags: if (Qt.platform.os == "linux") { return Qt.SubWindow } else { return Qt.Dialog }
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
@@ -491,28 +491,28 @@ Window {
                             }
                             // 4th row
                             Label {
-                                text: model.fpsTextPositionName + ":"
+                                text: model.fpsTextXPositionName + ":"
                                 Layout.rightMargin: 5
                                 //ToolTip.text: model.pixelDifferenceTooltip
                                 //ToolTip.delay: 500
                                 //ToolTip.visible: hovered
                             }
                             Slider {
-                                id: textPositioningSlider
+                                id: textPositioningXSlider
                                 from: 0.0
                                 to: 1.0
                                 enabled: model.fpsOptionsEnabled
                                 stepSize: 0.01
-                                value: model.fpsTextPosition
+                                value: model.fpsTextXPosition
                                 ToolTip.delay: 500
                                 ToolTip.visible: hovered
-                                ToolTip.text: model.fpsTextPositionTooltip
+                                ToolTip.text: model.fpsTextPositionXTooltip
                                 onMoved: {
-                                    if (model.fpsTextPosition !== value) model.fpsTextPosition = Utils.round(value, 2);
+                                    if (model.fpsTextXPosition !== value) model.fpsTextXPosition = Utils.round(value, 2);
                                 }
                             }
                             Label {
-                                text: model.fpsTextPosition
+                                text: model.fpsTextXPosition
                                 Layout.rightMargin: 5
                                 //ToolTip.text: model.pixelDifferenceTooltip
                                 //ToolTip.delay: 500
@@ -523,7 +523,44 @@ Window {
                                 text: "Apply to all videos"
                                 enabled: model.fpsOptionsEnabled
                                 action: Action {
-                                    onTriggered: framerateOptionsModel.applyFPSTextPosition(model.fpsTextPosition)
+                                    onTriggered: framerateOptionsModel.applyFPSTextXPosition(model.fpsTextXPosition)
+                                }
+                            }
+                            // 5th row
+                            Label {
+                                text: model.fpsTextYPositionName + ":"
+                                Layout.rightMargin: 5
+                                //ToolTip.text: model.pixelDifferenceTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
+                            Slider {
+                                id: textPositioningYSlider
+                                from: 0.0
+                                to: 1.0
+                                enabled: model.fpsOptionsEnabled
+                                stepSize: 0.01
+                                value: model.fpsTextYPosition
+                                ToolTip.delay: 500
+                                ToolTip.visible: hovered
+                                ToolTip.text: model.fpsTextYPositionTooltip
+                                onMoved: {
+                                    if (model.fpsTextYPosition !== value) model.fpsTextYPosition = Utils.round(value, 2);
+                                }
+                            }
+                            Label {
+                                text: model.fpsTextYPosition
+                                Layout.rightMargin: 5
+                                //ToolTip.text: model.pixelDifferenceTooltip
+                                //ToolTip.delay: 500
+                                //ToolTip.visible: hovered
+                            }
+                            Button {
+                                Layout.columnSpan: 2
+                                text: "Apply to all videos"
+                                enabled: model.fpsOptionsEnabled
+                                action: Action {
+                                    onTriggered: framerateOptionsModel.applyFPSTextYPosition(model.fpsTextYPosition)
                                 }
                             }
                         }

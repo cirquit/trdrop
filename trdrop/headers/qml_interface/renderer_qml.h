@@ -113,12 +113,13 @@ private:
         {
             const bool options_enabled = (*_shared_fps_options_list)[i].enabled;
             const bool text_enabled    = (*_shared_fps_options_list)[i].displayed_text.enabled();
-            const double rel_fps_text_position = (*_shared_fps_options_list)[i].rel_fps_text_position.value();
+            const double rel_fps_text_x_position = (*_shared_fps_options_list)[i].rel_fps_text_x_position.value();
+            const double rel_fps_text_y_position = (*_shared_fps_options_list)[i].rel_fps_text_y_position.value();
             if (options_enabled && text_enabled)
             {
                 int x_step = static_cast<int>(image_width / video_count);
-                int y_step = static_cast<int>(image_height / 12);
-                int x = x_step * i + (x_step * rel_fps_text_position); // width
+                int y_step = static_cast<int>(image_height * rel_fps_text_y_position);
+                int x = x_step * i + (x_step * rel_fps_text_x_position); // width
                 int y = y_step; // height
                 (*_shared_fps_options_list)[i].paint_fps_text(&painter, x, y, frame_index);
             }
