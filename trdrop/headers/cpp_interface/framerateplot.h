@@ -29,6 +29,7 @@ public:
         , _text_shadow(41, 41, 41) // dark grey
         , _segment_count(4) // we want to split the plot into 4 bars
         , _eyecandy_text("FRAMERATE")
+        , _x_axis_prefix_text("ANALYSIS RANGE: ")
     { }
 
 // methods
@@ -49,7 +50,9 @@ public:
             _draw_center_triangle(painter);
             _draw_center_line(painter);
         }
+        _draw_x_axis_text(painter);
         _draw_framerates(painter);
+
     }
 
 // methods
@@ -162,6 +165,32 @@ private:
         // draw text
         painter->setPen(_plot_text_color);
         painter->drawText(x_pos, y_pos, _eyecandy_text);
+    }
+    //! draws the text below the plot
+    void _draw_x_axis_text(QPainter * painter)
+    {
+        painter->setFont(_get_eyecandy_text_font());
+
+        const uint8_t framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
+        const QString framerate_analysis_range_text = _x_axis_prefix_text + QString::number(framerate_analysis_range) + " seconds";
+
+        const int y_init_pos = _plot_outline.y() + _plot_outline.height();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 4.2;
+        const int x_right_padding  = _plot_outline.width() / 7.8;
+
+        const int x_pos = x_init_pos - x_right_padding;
+        const int y_pos = y_init_pos + y_bottom_padding;
+
+        // draw shadow
+        const int x_offset = 2;
+        const int y_offset = 2;
+        painter->setPen(_text_shadow);
+        painter->drawText(x_pos + x_offset, y_pos + y_offset, framerate_analysis_range_text);
+        // draw text
+        painter->setPen(_plot_text_color);
+        painter->drawText(x_pos, y_pos, framerate_analysis_range_text);
     }
     //! draws all framerates graphs options are enabled
     void _draw_framerates(QPainter * painter)
@@ -427,6 +456,8 @@ private:
     const int _segment_count;
     //! similar to a title for the plot
     QString _eyecandy_text;
+    //! text that is positioned below the x axis
+    QString _x_axis_prefix_text;
 };
 
 #endif // FRAMERATEPLOT_H
