@@ -127,6 +127,9 @@ Window {
                     onActivated: {
                         imageFormatModel.setActiveValueAt(currentIndex);
                     }
+                    Component.onCompleted: {
+                        currentIndex = imageFormatModel.getActiveValueIndex();
+                    }
                 }
 
                 Switch {
@@ -203,6 +206,9 @@ Window {
                     onActivated: {
                         resolutionsModel.setActiveValueAt(currentIndex);
                         imagecomposer.updateComposition();
+                    }
+                    Component.onCompleted: {
+                        currentIndex = resolutionsModel.getActiveValueIndex();
                     }
                 }
                 Label { }

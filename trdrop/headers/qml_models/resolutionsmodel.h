@@ -85,6 +85,19 @@ public:
     {
         return get_active_size();
     }
+    //! need this to set the active value on the load, cause the ComboBox accesses data() with row 0 on startup, without checking the enabled values
+    Q_INVOKABLE QVariant getActiveValueIndex()
+    {
+        for (int i = 0; i < _resolutions_list.size(); ++i) {
+            if (_resolutions_list[i].enabled())
+            {
+                int row = i;
+                return row;
+            }
+        }
+        qDebug() << "ResolutionModel::getActiveValueIndex() - no resolution selected, this should never happen. Returning first element";
+        return 0;
+    }
     //! need this to make drop-down lists work (enabled signalizes the "current" options)
     Resolution get_active_value()
     {

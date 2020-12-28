@@ -64,6 +64,20 @@ public:
             _imageformat_list[i].setEnabled(enabled);
         }
     }
+    //! need this to set the active value on the load, cause the ComboBox accesses data() with row 0 on startup, without checking the enabled values
+    Q_INVOKABLE QVariant getActiveValueIndex()
+    {
+        for (int i = 0; i < _imageformat_list.size(); ++i) {
+            if (_imageformat_list[i].enabled())
+            {
+                int row = i;
+                return row;
+            }
+        }
+        qDebug() << "ImageFormatModel::getActiveValueIndex() - no resolution selected, this should never happen. Returning first element";
+        return 0;
+    }
+
     //! get the currently selected option
     ImageFormat get_active_value()
     {
