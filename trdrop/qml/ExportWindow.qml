@@ -116,6 +116,9 @@ Window {
                         onEditingFinished: {
                             model.imagesequencePrefixValue = text;
                         }
+                        Component.onCompleted: {
+                            text = model.imagesequencePrefixValue
+                        }
                     }
                 }
                 ComboBox {
@@ -237,7 +240,10 @@ Window {
                             exportProgressBar.value = 0.0;
                             exporter.stopExporting();
                         } else {
-                            exporter.startExporting()
+                            if (videocapturelist.getOpenVideosCount() > 0)
+                            {
+                                exporter.startExporting()
+                            }
                         }
                     }
                 }
