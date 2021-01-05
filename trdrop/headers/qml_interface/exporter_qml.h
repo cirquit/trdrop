@@ -89,7 +89,8 @@ private:
     QString _create_csv_file_path() const
     {
         QString directory_path = _export_options_model->get_export_directory();
-        return QDir(directory_path).filePath("trdrop_analysis.csv");
+        QString csv_filename = _export_options_model->get_csv_filename();
+        return QDir(directory_path).filePath(csv_filename);
     }
     //! opens the filehandle
     void _open_csv_file()
@@ -116,6 +117,7 @@ private:
             _open_csv_file();
             _file_opened = true;
             _csv_file_handle->open(QIODevice::Append | QIODevice::Text);
+            QTextStream stream(&(*_csv_file_handle));
         }
 
         QTextStream stream(&(*_csv_file_handle));

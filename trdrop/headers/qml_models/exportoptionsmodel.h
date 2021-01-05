@@ -40,6 +40,10 @@ public:
       , EnableLivePreviewNameRole      = Qt::UserRole + 117
       , EnableLivePreviewTooltipRole   = Qt::UserRole + 118
       , EnableLivePreviewValueRole     = Qt::UserRole + 119
+      , CSVFileNameNameRole          = Qt::UserRole + 120
+      , CSVFileNameTooltipRole       = Qt::UserRole + 121
+      , CSVFileNameEnabledRole       = Qt::UserRole + 122
+      , CSVFileNameValueRole         = Qt::UserRole + 123
     };
 //! methods
 public:
@@ -89,6 +93,14 @@ public:
                 return _enable_live_preview.value();
             case EnabledExportButtonRole:
                 return _enabled_export_button;
+            case CSVFileNameNameRole:
+                return _csv_filename.name();
+            case CSVFileNameTooltipRole:
+                return _csv_filename.tooltip();
+            case CSVFileNameEnabledRole:
+                return _csv_filename.enabled();
+            case CSVFileNameValueRole:
+                return _csv_filename.value();
             default:
                 return QVariant();
         }
@@ -102,6 +114,8 @@ public:
         else if (role == ExportCSVValueRole)             _export_csv.setValue(value.toBool());
         else if (role == ImagesequencePrefixValueRole)   _imagesequence_prefix.setValue(value.toString());
         else if (role == ImagesequencePrefixEnabledRole) _imagesequence_prefix.setEnabled(value.toBool());
+        else if (role == CSVFileNameValueRole)           _csv_filename.setValue(value.toString());
+        else if (role == CSVFileNameEnabledRole)         _csv_filename.setEnabled(value.toBool());
         else if (role == EnableLivePreviewValueRole)     _enable_live_preview.setValue(value.toBool());
         else if (role == EnabledExportButtonRole)        _enabled_export_button = value.toBool();
         else return false;
@@ -142,6 +156,8 @@ public:
     //! getter
     QString get_export_directory(){ return _export_directory.value(); }
     //! getter
+    QString get_csv_filename(){ return _csv_filename.value(); }
+    //! getter
     bool export_as_imagesequence(){ return _imagesequence_prefix.enabled(); }
     //! getter
     bool export_as_overlay(){ return _export_as_overlay.value(); }
@@ -169,8 +185,10 @@ private:
         _role_names[EnableLivePreviewNameRole]      = "enableLivePreviewName";
         _role_names[EnableLivePreviewTooltipRole]   = "enableLivePreviewTooltip";
         _role_names[EnableLivePreviewValueRole]     = "enableLivePreviewValue";
-
-
+        _role_names[CSVFileNameNameRole]            = "csvFileNameName";
+        _role_names[CSVFileNameTooltipRole]         = "csvFileNameTooltip";
+        _role_names[CSVFileNameEnabledRole]         = "csvFileNameEnabled";
+        _role_names[CSVFileNameValueRole]           = "csvFileNameValue";
     }
     //! default initial options
     void _init_options()
@@ -198,6 +216,12 @@ private:
         _imagesequence_prefix.setEnabled(true);
         _imagesequence_prefix.setFont(QFont("Helvetica", 15));
 
+        _csv_filename.setName("Export as csv"); // not used because a switch already shows that text
+        _csv_filename.setTooltip("csv filename");
+        _csv_filename.setValue("trdrop_analysis.csv");
+        _csv_filename.setEnabled(false); // by default false, same as the csv export
+        _csv_filename.setFont(QFont("Helvetica", 15));
+
         _enabled_export_button = false;
     }
 
@@ -215,6 +239,8 @@ private:
     CheckBoxItem _export_csv;
     //! imageprefix name
     TextEditItem _imagesequence_prefix;
+    //! csv file prefix name
+    TextEditItem _csv_filename;
     //!
     bool _enabled_export_button;
 };

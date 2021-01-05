@@ -142,14 +142,46 @@ Window {
                     action: Action {
                         onTriggered: {
                             model.exportCSVValue = !model.exportCSVValue;
+                            //exportAsCSVSwitchName.enabled = model.exportCSVValue;
                         }
                     }
                     ToolTip.text: "Exports the framerate into a trdrop_analysis.csv into the export directory for each video"
                     ToolTip.delay: 500
                     ToolTip.visible: hovered
                 }
+                Rectangle {
+                    border {
+                        color: "#8066b0"
+                        width: 1
+                    }
+                    Layout.fillWidth: parent
+                    height: 25
+                    width: 300
+                    Layout.leftMargin: 20
+                    Layout.rightMargin: 20
+                    color: "transparent"
+                    TextInput {
+                        id: exportAsCSVSwitchName
+                        anchors.fill: parent
+                        leftPadding: 5
+                        topPadding: 2
+                        bottomPadding: 2
+                        enabled: model.exportCSVValue
+                        text: model.csvFileNameValue
+                        clip: true
+
+                        font.pointSize: 12
+                        color: enabled ? "#FFFFFF" : "#b0b0b0";
+                        onEditingFinished: {
+                            model.csvFileNameValue = text;
+                        }
+                        Component.onCompleted: {
+                            text = model.csvFileNameValue
+                        }
+                    }
+                }
                 Label {
-                    Layout.columnSpan: 2
+                    Layout.columnSpan: 1
                 }
 
                 Switch {
