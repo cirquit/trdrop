@@ -97,6 +97,12 @@ public:
         }
         processImage(_qml_image);
     }
+    //! can be triggered if you need to reshape the cached image queue + redraw
+    Q_SLOT void forced_reshape_redraw()
+    {
+        _reshape_cached_image_queue();
+        processImage(_qml_image);
+    }
 
 //! methods
 private:

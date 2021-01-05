@@ -161,6 +161,7 @@ int main(int argc, char *argv[])
     QObject::connect(&framerate_options_model,         &FramerateOptionsModel::dataChanged, &renderer_qml, &RendererQML::redraw);
     QObject::connect(&tear_options_model,              &TearOptionsModel::dataChanged,      &renderer_qml, &RendererQML::redraw);
     QObject::connect(&(*shared_general_options_model), &GeneralOptionsModel::dataChanged,   &renderer_qml, &RendererQML::redraw);
+    QObject::connect(&file_item_model,                 &FileItemModel::updateFileItemPaths, &renderer_qml, &RendererQML::forced_reshape_redraw);
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
