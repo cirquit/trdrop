@@ -129,7 +129,8 @@ private:
     void _draw_framerate_graph(QPainter & painter)
     {
         bool enable_framerate_centering = (*_shared_general_options_model).get_enable_framerate_centering();
-        _shared_framerate_plot_instance->draw_framerate_plot(&painter, enable_framerate_centering);
+        bool enable_x_axis_text = (*_shared_general_options_model).get_enable_x_axis_text();
+        _shared_framerate_plot_instance->draw_framerate_plot(&painter, enable_framerate_centering, enable_x_axis_text);
     }
     //! calls the underlying instance to draw the graph
     void _draw_frametime_graph(QPainter & painter)

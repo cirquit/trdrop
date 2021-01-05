@@ -115,7 +115,7 @@ Window {
                 Component {
                     id: generalOptionsDelegate
                     GridLayout {
-                        rows: 7
+                        rows: 8
                         columns: 3
                         // 1st row
                         Switch {
@@ -127,6 +127,10 @@ Window {
                             action: Action {
                                 onTriggered: {
                                     model.enableFramerateValue = !model.enableFramerateValue;
+                                    if (!model.enableFramerateValue)
+                                    {
+                                        model.enableXAxisTextValue = false;
+                                    }
                                     fpsTab.enabled = model.enableFramerateValue;
                                     framerateRange.enabled = model.enableFramerateValue;
                                     framerateMaxFPS.enabled = model.enableFramerateValue;
@@ -294,6 +298,21 @@ Window {
                             }
                         }
 
+                        // 8th row
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.enableXAxisTextName
+                            checked: model.enableXAxisTextValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.enableXAxisTextTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.enableXAxisTextValue = !model.enableXAxisTextValue;
+                                }
+                            }
+                        }
+                        // 9th row
                         Button {
                             Layout.columnSpan: 3
                             text: "Revert to default settings"

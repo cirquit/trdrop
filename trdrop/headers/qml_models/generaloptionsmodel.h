@@ -49,6 +49,9 @@ public:
       , EnableFrametimeCenteringNameRole    = Qt::UserRole + 24
       , EnableFrametimeCenteringTooltipRole = Qt::UserRole + 25
       , EnableFrametimeCenteringValueRole   = Qt::UserRole + 26
+      , EnableXAxisTextNameRole             = Qt::UserRole + 27
+      , EnableXAxisTextTooltipRole          = Qt::UserRole + 28
+      , EnableXAxisTextValueRole            = Qt::UserRole + 29
     };
 //! methods
 public:
@@ -120,6 +123,12 @@ public:
                 return _enable_framerate_centering.tooltip();
             case EnableFrametimeCenteringValueRole:
                 return _enable_framerate_centering.value();
+            case EnableXAxisTextNameRole:
+                return _enable_x_axis_text.name();
+            case EnableXAxisTextTooltipRole:
+                return _enable_x_axis_text.tooltip();
+            case EnableXAxisTextValueRole:
+                return _enable_x_axis_text.value();
             default:
                 return QVariant();
         }
@@ -137,6 +146,7 @@ public:
         else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<quint8>(value.toUInt()));
         else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<quint8>(value.toUInt()));
         else if (role == EnableFrametimeCenteringValueRole) _enable_framerate_centering.setValue(value.toBool());
+        else if (role == EnableXAxisTextValueRole) _enable_x_axis_text.setValue(value.toBool());
         else return false;
         QModelIndex toIndex(createIndex(rowCount() - 1, index.column()));
         emit dataChanged(index, toIndex);
@@ -172,6 +182,8 @@ public:
     uint8_t get_frametime_max_ms() { return _frametime_max_ms.value(); }
     //! getter
     bool get_enable_framerate_centering() { return _enable_framerate_centering.value(); }
+    //! getter
+    bool get_enable_x_axis_text() { return _enable_x_axis_text.value(); }
 //! methods
 private:
     //! Set names to the role name hash container (QHash<int, QByteArray>)
@@ -204,6 +216,9 @@ private:
         _role_names[EnableFrametimeCenteringNameRole]    = "enableFramerateCenteringName";
         _role_names[EnableFrametimeCenteringTooltipRole] = "enableFramerateCenteringTooltip";
         _role_names[EnableFrametimeCenteringValueRole]   = "enableFramerateCenteringValue";
+        _role_names[EnableXAxisTextNameRole]             = "enableXAxisTextName";
+        _role_names[EnableXAxisTextTooltipRole]          = "enableXAxisTextTooltip";
+        _role_names[EnableXAxisTextValueRole]            = "enableXAxisTextValue";
     }
     //! initial setting
     void _init_options()
@@ -243,6 +258,10 @@ private:
         _enable_framerate_centering.setName("Enable FPS graph centering");
         _enable_framerate_centering.setTooltip("The center of the framerate plot is now showing the \"current\" framerate, not the right most edge");
         _enable_framerate_centering.setValue(false);
+
+        _enable_x_axis_text.setName("Enable framerate analysis range text");
+        _enable_x_axis_text.setTooltip("Draws the framerate anaylsis range text below the framerate plot");
+        _enable_x_axis_text.setValue(true);
     }
 
 //! member
@@ -267,6 +286,8 @@ private:
     ValueItem<quint8> _frametime_max_ms;
     //! essentially a bool
     CheckBoxItem _enable_framerate_centering;
+    //! essentially a bool
+    CheckBoxItem _enable_x_axis_text;
 };
 
 #endif // GENERALOPTIONSMODEL_H

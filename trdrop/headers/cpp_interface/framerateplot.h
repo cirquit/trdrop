@@ -36,7 +36,7 @@ public:
 public:
     //! top left is (0,0), painter has to be pointed to the image by the renderer
     //! order of drawing functions is essential
-    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering)
+    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering, bool enable_x_axis_text)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
@@ -50,7 +50,10 @@ public:
             _draw_center_triangle(painter);
             _draw_center_line(painter);
         }
-        _draw_x_axis_text(painter);
+        if (enable_x_axis_text)
+        {
+            _draw_x_axis_text(painter);
+        }
         _draw_framerates(painter);
 
     }
@@ -172,7 +175,7 @@ private:
         painter->setFont(_get_eyecandy_text_font());
 
         const uint8_t framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
-        const QString framerate_analysis_range_text = _x_axis_prefix_text + QString::number(framerate_analysis_range) + " seconds";
+        const QString framerate_analysis_range_text = _x_axis_prefix_text + QString::number(framerate_analysis_range) + " frames";
 
         const int y_init_pos = _plot_outline.y() + _plot_outline.height();
         const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
