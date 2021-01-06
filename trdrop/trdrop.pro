@@ -105,4 +105,4 @@ HEADERS += \
     headers/qml_models/framerateoptionsmodel.h
 
 
-RC_ICONS = images/trdrop_logo_alpha.ico
+RC_ICONS = images/trdrop_logo_alpha_wide_contour.ico
