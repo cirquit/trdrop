@@ -3,6 +3,9 @@
 
 #include <QPainter>
 #include <memory>
+#include <random>
+#include <iostream>
+#include <cstdlib>
 
 #include "headers/cpp_interface/checkboxitem.h"
 #include "headers/cpp_interface/colorpickitem.h"
@@ -65,7 +68,7 @@ private:
     {
         fps_plot_color.setName("Framerate plot color");
         fps_plot_color.setTooltip("Color of the framerate graph of this video index in the framerate plot");
-        fps_plot_color.setColor("#FAFAFA");
+        fps_plot_color.setColor(_get_random_color());
 
         pixel_difference.setName("Pixel difference");
         pixel_difference.setTooltip("Pixel Difference Margin (0 - 255)\n \
@@ -109,6 +112,15 @@ private:
         else if (current_size == QSize(3840, 2160)) return 60;
         qDebug() << "FPSOptions::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
+    }
+    //! custom palettes so the default color is not white
+    QString _get_random_color()
+    {
+        QList<QString> colors { "#cdf6cb", "#ecd2e5", "#a8cc9a", "#c1eae0", "#f4f4e0"
+                              , "#6ac4cd", "#a2ebeb", "#e6f2f4", "#ff7cc2" };
+        int index = rand() % (colors.size());
+        QString color = colors[index];
+        return color;
     }
 
 // member

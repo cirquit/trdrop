@@ -235,6 +235,7 @@ private:
     //! default framerate options
     void _init_options()
     {
+        srand((int) time(0));
         for (quint8 id = 0; id < _max_video_count; ++id) {
             _shared_fps_options_list->append(FramerateOptions(id, _shared_framerate_model, _shared_resolution_model));
         }
