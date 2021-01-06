@@ -3,7 +3,7 @@
     <img height="100" src="images/logos/trdrop_logo_alpha.png">
 </p>
 
-# trdrop - v1.1.0-beta
+# trdrop - v1.1.1
 ###### ˈtɛr-dɹɑp - a raw video analysis program
 
 ## Examples
@@ -53,10 +53,11 @@ Hence the name **tr** (short for tear) and a framerate **drop**.
 * **Frametime** estimation
     - Customizable plot visualization (`color` + `time`)
 * **Tear** detection
-    - complementing tears don't change the framerate
+    - complementing tears don't change the framerate (configurable)
     - Visualization (`color`)
 * CSV export
     - Framerate
+    - Frametime
 * Visual overlay export
 * Difference frame export
 
