@@ -38,6 +38,11 @@ public:
         _frametime_history[index].push_front(value);
         _frametime_history[index].pop_back();
     }
+    //! returns all current frametimes for each video
+    std::vector<double> get_frametimes() const
+    {
+        return _frametimes;
+    }
     //! get the current frametime for the video index
     double get_frametime_at(const quint8 index) const
     {

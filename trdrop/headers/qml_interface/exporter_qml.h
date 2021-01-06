@@ -9,6 +9,7 @@
 #include "headers/qml_models/exportoptionsmodel.h"
 #include "headers/qml_models/imageformatmodel.h"
 #include "headers/cpp_interface/frameratemodel.h"
+#include "headers/cpp_interface/frametimemodel.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 
@@ -24,6 +25,7 @@ public:
     ExporterQML(std::shared_ptr<ExportOptionsModel> export_options_model
               , std::shared_ptr<ImageFormatModel>   imageformat_model
               , std::shared_ptr<FramerateModel> shared_framerate_model
+              , std::shared_ptr<FrametimeModel> shared_frametime_model
               , QObject * parent = nullptr)
         : QObject(parent)
         , _is_exporting(false)
@@ -33,6 +35,7 @@ public:
         , _imageformat_model(imageformat_model)
         , _file_opened(false)
         , _shared_framerate_model(shared_framerate_model)
+        , _shared_frametime_model(shared_frametime_model)
         , _active_video_count(0)
     { }
 
@@ -134,7 +137,8 @@ private:
             QTextStream stream(&(*_csv_file_handle));
             for (int i = 0; i < _active_video_count; ++i)
             {
-                stream << "FPS " << _file_item_list[i];
+                stream << "FPS of " << _file_item_list[i] << ",";
+                stream << "Frametime in MS of " << _file_item_list[i];
                 if (i < _active_video_count - 1) stream << ",";
                 if (i == _active_video_count - 1) stream << "\n";
             }
@@ -142,10 +146,12 @@ private:
 
         QTextStream stream(&(*_csv_file_handle));
         std::vector<double> framerates = _shared_framerate_model->get_framerates();
+        std::vector<double> frametimes = _shared_frametime_model->get_frametimes();
 
         for (int i = 0; i < _active_video_count; ++i)
         {
-            stream << framerates[i];
+            stream << framerates[i] << ",";
+            stream << frametimes[i];
             if (i < _active_video_count - 1) stream << ",";
             if (i == _active_video_count - 1) stream << "\n";
         }
@@ -195,6 +201,8 @@ public:
     bool _file_opened;
     //! use to get the current framerates for csv file exporting
     std::shared_ptr<FramerateModel> _shared_framerate_model;
+    //! use to get the current frametimes for csv file exporting
+    std::shared_ptr<FrametimeModel> _shared_frametime_model;
     //! video count update through the fileitem model and its signal (see FileWindow.qml)
     int _active_video_count = 0;
     //! storage for the video paths
