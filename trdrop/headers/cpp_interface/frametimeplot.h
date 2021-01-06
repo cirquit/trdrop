@@ -23,7 +23,7 @@ public:
         , _shared_resolution_model(shared_resolution_model)
         , _shared_general_options_model(shared_general_options_model)
         , _plot_outline_color(236, 236, 236) // almost white
-        , _plot_innerline_color(193, 193, 193) // light grey
+        , _plot_innerline_color(255, 255, 255, 100) // white + 40% opacity
         , _plot_text_color(255, 255, 255) // white
         , _text_shadow(41, 41, 41) // dark grey
         , _segment_count(3) // we want to split the plot into 3 bars
@@ -38,17 +38,18 @@ public:
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
 
-        _draw_plot_outline(painter);
+        _set_plot_outline();
         _draw_plot_inner_lines(painter);
+        _draw_frametimes(painter);
+        _draw_plot_outline(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
-        _draw_frametimes(painter);
     }
 
 // methods
 private:
-    //! draws a rectangle based on the resolution and sets the _plot_outline member for every successor to use
-    void _draw_plot_outline(QPainter * painter)
+    //! fills the member `_plot_outline` which is the reference for all future function calls
+    void _set_plot_outline()
     {
         // make it dependent on the current resolution
         const QSize current_size = _shared_resolution_model->get_active_size();
@@ -72,14 +73,31 @@ private:
                           - y_framerate_plot_padding;
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
-        // draw the x and y axis of the rect
+    }
+    //! draws a rectangle based on the resolution and sets the _plot_outline member for every successor to use
+    void _draw_plot_outline(QPainter * painter)
+    {
+        const int x_pos = _plot_outline.x();
+        const int y_pos = _plot_outline.y();
+        const int plot_height = _plot_outline.height();
+        const int plot_width = _plot_outline.width();
+        // paint function
+        auto paint = [&]()
+        {
+            // x axis
+            painter->drawLine(x_pos,              y_pos + plot_height
+                            , x_pos + plot_width, y_pos + plot_height);
+            // y axis
+            painter->drawLine(x_pos,  y_pos
+                            , x_pos , y_pos + plot_height);
+        };
+        // draw black outline
+        painter->setPen(_get_outerline_shadow_pen());
+        paint();
+        // draw white line
         painter->setPen(_get_outerline_pen());
-        // x axis
-        painter->drawLine(x_pos,              y_pos + plot_height
-                        , x_pos + plot_width, y_pos + plot_height);
-        // y axis
-        painter->drawLine(x_pos,  y_pos
-                        , x_pos , y_pos + plot_height);
+        paint();
+
     }
     //! drawing lines from top to bottom because Rect's x,y is top left
     void _draw_plot_inner_lines(QPainter * painter)
@@ -129,8 +147,8 @@ private:
             const QString framerate_text = QString::number(static_cast<int>(percent * max_framerate));
 
             // draw shadow
-            const int x_offset = 2;
-            const int y_offset = 2;
+            const int x_offset = _get_shadow_text_offset();
+            const int y_offset = x_offset;
             painter->setPen(_text_shadow);
             painter->drawText(x_pos + x_offset, y_pos + y_offset, framerate_text);
             // draw text
@@ -153,8 +171,8 @@ private:
         const int y_pos = y_init_pos - y_bottom_padding;
 
         // draw shadow
-        const int x_offset = 2;
-        const int y_offset = 2;
+        const int x_offset = _get_shadow_text_offset();
+        const int y_offset = x_offset;
         painter->setPen(_text_shadow);
         painter->drawText(x_pos + x_offset, y_pos + y_offset, _eyecandy_text);
         // draw text
@@ -231,6 +249,15 @@ private:
         pen.setWidth(_get_outline_thickness());
         pen.setColor(_plot_outline_color);
         pen.setJoinStyle(Qt::MiterJoin); // hard counters
+        return pen;
+    }
+    //! resolution adaptive outerline pen
+    QPen _get_outerline_shadow_pen()
+    {
+        QPen pen;
+        pen.setWidth(_get_outline_thickness()+3);
+        pen.setColor(_text_shadow);
+        pen.setJoinStyle(Qt::MiterJoin); // hard corners
         return pen;
     }
     //! resolution adaptive innerline pen
@@ -311,11 +338,11 @@ private:
         QSize current_size = _shared_resolution_model->get_active_size();
         if      (current_size == QSize(960, 540))   return 3;
         else if (current_size == QSize(1280, 720))  return 3;
-        else if (current_size == QSize(1600, 900))  return 4;
-        else if (current_size == QSize(1920, 1080)) return 4;
-        else if (current_size == QSize(2048, 1152)) return 5;
-        else if (current_size == QSize(2560, 1440)) return 5;
-        else if (current_size == QSize(3840, 2160)) return 7;
+        else if (current_size == QSize(1600, 900))  return 5;
+        else if (current_size == QSize(1920, 1080)) return 5;
+        else if (current_size == QSize(2048, 1152)) return 7;
+        else if (current_size == QSize(2560, 1440)) return 7;
+        else if (current_size == QSize(3840, 2160)) return 10;
         qDebug() << "FrametimePlot::_get_outline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
     }
@@ -347,7 +374,22 @@ private:
         qDebug() << "FrametimePlot::_get_plotline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
     }
-    //! the manually set max frametime is the default as long as we dont overstep the real frametime bounds, then we scale as usual
+    //! get text offset for shadows below the text
+    int _get_shadow_text_offset()
+    {
+        QSize current_size = _shared_resolution_model->get_active_size();
+        if      (current_size == QSize(960, 540))   return 2;
+        else if (current_size == QSize(1280, 720))  return 3;
+        else if (current_size == QSize(1600, 900))  return 4;
+        else if (current_size == QSize(1920, 1080)) return 4;
+        else if (current_size == QSize(2048, 1152)) return 5;
+        else if (current_size == QSize(2560, 1440)) return 5;
+        else if (current_size == QSize(3840, 2160)) return 7;
+        qDebug() << "FrametimePlot::_get_shadow_text_offset() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        return 3;
+    }
+
+    //! the manually set max frametime is the default as long as we dont overstep the real frametime bounds, then we scale the plot
     double _get_max_frametime() const
     {
         const double manual_set_max_frametime = _shared_general_options_model->get_frametime_max_ms();

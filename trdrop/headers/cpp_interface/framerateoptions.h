@@ -43,8 +43,8 @@ public:
     //! paints the framerate text at the position x, y (top-left is 0,0)
     void paint_fps_text(QPainter * painter, const int x, const int y, const size_t frame_index)
     {
-        int x_offset = 2;
-        int y_offset = 2;
+        const int x_offset = _get_shadow_text_offset();
+        const int y_offset = x_offset;
 
         QFont displayed_text_font = displayed_text.font();
         if (displayed_text_fontsize_override)
@@ -91,7 +91,7 @@ private:
 
         rel_fps_text_y_position.setName("Relative FPS Text Y Pos.");
         rel_fps_text_y_position.setTooltip("TODO");
-        rel_fps_text_y_position.setValue(0.05);
+        rel_fps_text_y_position.setValue(0.1);
     }
     //! adds the framerate prefix text defined in the options to the framerate of the designated video
     QString _get_full_text(const size_t frame_index) const
@@ -113,10 +113,24 @@ private:
         qDebug() << "FPSOptions::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
+    //! get text offset for shadows below the text
+    int _get_shadow_text_offset()
+    {
+        QSize current_size = _shared_resolution_model->get_active_size();
+        if      (current_size == QSize(960, 540))   return 2;
+        else if (current_size == QSize(1280, 720))  return 3;
+        else if (current_size == QSize(1600, 900))  return 4;
+        else if (current_size == QSize(1920, 1080)) return 4;
+        else if (current_size == QSize(2048, 1152)) return 5;
+        else if (current_size == QSize(2560, 1440)) return 5;
+        else if (current_size == QSize(3840, 2160)) return 7;
+        qDebug() << "FramerateOptions::_get_shadow_text_offset() - there is no case for the current resolution(" << current_size << "), this should never happen";
+        return 3;
+    }
     //! custom palettes so the default color is not white
     QString _get_random_color()
     {
-        QList<QString> colors { "#cdf6cb", "#ecd2e5", "#a8cc9a", "#c1eae0", "#f4f4e0"
+        QList<QString> colors { "#cdf6cb", "#ecd2e5", "#a8cc9a", "#c1eae0"
                               , "#6ac4cd", "#a2ebeb", "#e6f2f4", "#ff7cc2" };
         int index = rand() % (colors.size());
         QString color = colors[index];
