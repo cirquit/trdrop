@@ -37,6 +37,7 @@ public:
     QString qtFilePath()        const { return _qt_file_path; }
     bool    fileSelected()      const { return _file_selected; }
     double  recordedFramerate() const { return _recorded_framerate; }
+    bool    isDefault()         const { return _file_path == "" && _size_mb == 0; }
 //! member
 private:
     //! raw file path

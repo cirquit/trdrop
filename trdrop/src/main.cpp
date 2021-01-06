@@ -164,7 +164,8 @@ int main(int argc, char *argv[])
     QObject::connect(&file_item_model,                 &FileItemModel::updateFileItemPaths, &renderer_qml, &RendererQML::forced_reshape_redraw);
     // if new videos are added, finish the exporting (closes the csv filehandle)
     QObject::connect(&file_item_model,                 &FileItemModel::updateFileItemPaths, &exporter_qml, &ExporterQML::finishExporting);
-
+    // if new videos are added, update the count so we can export the correct amount of entries for the csv file
+    QObject::connect(&file_item_model,                 &FileItemModel::updateFileItemPaths, &exporter_qml, &ExporterQML::updateVideoCount);
 
     // load application
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

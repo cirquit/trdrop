@@ -40,10 +40,10 @@ public:
       , EnableLivePreviewNameRole      = Qt::UserRole + 117
       , EnableLivePreviewTooltipRole   = Qt::UserRole + 118
       , EnableLivePreviewValueRole     = Qt::UserRole + 119
-      , CSVFileNameNameRole          = Qt::UserRole + 120
-      , CSVFileNameTooltipRole       = Qt::UserRole + 121
-      , CSVFileNameEnabledRole       = Qt::UserRole + 122
-      , CSVFileNameValueRole         = Qt::UserRole + 123
+      , CSVFileNameNameRole            = Qt::UserRole + 120
+      , CSVFileNameTooltipRole         = Qt::UserRole + 121
+      , CSVFileNameEnabledRole         = Qt::UserRole + 122
+      , CSVFileNameValueRole           = Qt::UserRole + 123
     };
 //! methods
 public:
