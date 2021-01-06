@@ -125,7 +125,7 @@ private:
 
             // get framerate as text (1 - ...) is because we draw from top to bottom
             const double percent = 1 - static_cast<double>(i) / static_cast<double>(_segment_count);
-            const double max_framerate = _shared_general_options_model->get_frametime_max_ms(); //_shared_frametime_model->get_max_frametime_bounds();
+            const double max_framerate = _get_max_frametime();
             const QString framerate_text = QString::number(static_cast<int>(percent * max_framerate));
 
             // draw shadow
@@ -184,7 +184,7 @@ private:
         const size_t size_difference = ft_history.size() - frametime_ticks;
         // need the maximums to calculate the position of the point
         const size_t max_index = ft_history.size() - size_difference;
-        const double max_frametime = _shared_general_options_model->get_frametime_max_ms(); //_shared_frametime_model->get_max_frametime_bounds();
+        const double max_frametime = _get_max_frametime();
         QPoint previous_point;
         size_t index = 0; // TODO implement enumerate
         // iterating in reverse, stitching every point with each other to draw lines instead of points
@@ -346,6 +346,14 @@ private:
         else if (current_size == QSize(3840, 2160)) return 7;
         qDebug() << "FrametimePlot::_get_plotline_thickness() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 3;
+    }
+    //! the manually set max frametime is the default as long as we dont overstep the real frametime bounds, then we scale as usual
+    double _get_max_frametime() const
+    {
+        const double manual_set_max_frametime = _shared_general_options_model->get_frametime_max_ms();
+        const double real_max_frametime = _shared_frametime_model->get_max_frametime_bounds();
+        if (manual_set_max_frametime < real_max_frametime) return real_max_frametime;
+        return manual_set_max_frametime;
     }
 
 // member

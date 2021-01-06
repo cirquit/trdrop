@@ -141,10 +141,10 @@ public:
         else if (role == EnableTearsValueRole) _enable_tear_analysis.setValue(value.toBool());
         else if (role == EnableFrametimeValueRole) _enable_frametime_analysis.setValue(value.toBool());
         else if (role == EnableDeltaRenderingValueRole) _enable_delta_rendering.setValue(value.toBool());
-        else if (role == FramerateRangeValueRole) _framerate_plot_range.setValue(static_cast<quint8>(value.toUInt()));
-        else if (role == FrametimeRangeValueRole) _frametime_plot_range.setValue(static_cast<quint8>(value.toUInt()));
-        else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<quint8>(value.toUInt()));
-        else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<quint8>(value.toUInt()));
+        else if (role == FramerateRangeValueRole) _framerate_plot_range.setValue(static_cast<int>(value.toUInt()));
+        else if (role == FrametimeRangeValueRole) _frametime_plot_range.setValue(static_cast<int>(value.toUInt()));
+        else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<int>(value.toUInt()));
+        else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<int>(value.toUInt()));
         else if (role == EnableFrametimeCenteringValueRole) _enable_framerate_centering.setValue(value.toBool());
         else if (role == EnableXAxisTextValueRole) _enable_x_axis_text.setValue(value.toBool());
         else return false;
@@ -173,13 +173,13 @@ public:
     //! getter
     bool get_enable_tear_analysis() { return _enable_tear_analysis.value(); }
     //! getter
-    uint8_t get_framerate_range() { return _framerate_plot_range.value(); }
+    int get_framerate_range() { return _framerate_plot_range.value(); }
     //! getter
-    uint8_t get_frametime_range() { return _frametime_plot_range.value(); }
+    int get_frametime_range() { return _frametime_plot_range.value(); }
     //! getter
-    uint8_t get_framerate_max_fps() { return _framerate_max_fps.value(); }
+    int get_framerate_max_fps() { return _framerate_max_fps.value(); }
     //! getter
-    uint8_t get_frametime_max_ms() { return _frametime_max_ms.value(); }
+    int get_frametime_max_ms() { return _frametime_max_ms.value(); }
     //! getter
     bool get_enable_framerate_centering() { return _enable_framerate_centering.value(); }
     //! getter
@@ -276,14 +276,14 @@ private:
     CheckBoxItem _enable_frametime_analysis;
     //! essentially a bool
     CheckBoxItem _enable_delta_rendering;
-    //! wrapped quint8
-    ValueItem<quint8> _framerate_plot_range;
-    //! wrapped quint8
-    ValueItem<quint8> _framerate_max_fps;
-    //! wrapped quint8
-    ValueItem<quint8> _frametime_plot_range;
-    //! wrapped quint8
-    ValueItem<quint8> _frametime_max_ms;
+    //! wrapped int
+    ValueItem<int> _framerate_plot_range;
+    //! wrapped int
+    ValueItem<int> _framerate_max_fps;
+    //! wrapped int
+    ValueItem<int> _frametime_plot_range;
+    //! wrapped int
+    ValueItem<int> _frametime_max_ms;
     //! essentially a bool
     CheckBoxItem _enable_framerate_centering;
     //! essentially a bool

@@ -172,8 +172,8 @@ Window {
                         }
                         SpinBox {
                             id: framerateMaxFPS
-                            from: 10
-                            to: 255
+                            from: 3 // 3 segments at least (0-1-2-3)
+                            to: 999 // max font size for 3 chars
                             stepSize: 5
                             editable: true
                             value: model.framerateMaxFPSValue
@@ -254,8 +254,8 @@ Window {
                         }
                         SpinBox {
                             id: frametimeMaxMS
-                            from: 10
-                            to: 200
+                            from: 3 // 3 segments at least (0-1-2-3)
+                            to: 999 // max font size for 3 chars
                             stepSize: 5
                             editable: true
                             value: model.frametimeMaxMSValue
