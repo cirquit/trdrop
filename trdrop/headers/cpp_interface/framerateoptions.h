@@ -67,11 +67,11 @@ private:
     void _init_member()
     {
         fps_plot_color.setName("Framerate plot color");
-        fps_plot_color.setTooltip("Color of the framerate graph of this video index in the framerate plot");
+        fps_plot_color.setTooltip("Color of the framerate and frametime graph of this video index");
         fps_plot_color.setColor(_get_random_color());
 
         pixel_difference.setName("Pixel difference");
-        pixel_difference.setTooltip("Pixel Difference Margin (0 - 255)\n \
+        pixel_difference.setTooltip("Pixel Difference Margin (0 - 255)\n\
     Currently every frame is converted to greyscale and compared on a pixel basis. Greater is more \"forgiving\"\n\
     Example: \"5\" - The difference in color may be up to 5 to NOT trigger a new frame");
         pixel_difference.setValue(0);
@@ -86,11 +86,11 @@ private:
         displayed_text_fontsize_override = true;
 
         rel_fps_text_x_position.setName("Relative FPS Text X Pos.");
-        rel_fps_text_x_position.setTooltip("TODO");
+        rel_fps_text_x_position.setTooltip("");
         rel_fps_text_x_position.setValue(0.05);
 
         rel_fps_text_y_position.setName("Relative FPS Text Y Pos.");
-        rel_fps_text_y_position.setTooltip("TODO");
+        rel_fps_text_y_position.setTooltip("");
         rel_fps_text_y_position.setValue(0.1);
     }
     //! adds the framerate prefix text defined in the options to the framerate of the designated video

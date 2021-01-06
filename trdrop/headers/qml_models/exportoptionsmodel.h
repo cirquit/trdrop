@@ -199,25 +199,25 @@ private:
         _export_directory.setValue(getDefaultMoviesDirectory().toString());
 
         _export_as_overlay.setName("Export as overlay");
-        _export_as_overlay.setTooltip("Export the graph only");
+        _export_as_overlay.setTooltip("Video content replaced by an alpha channel, only showing the graph (.png only)");
         _export_as_overlay.setValue(false);
 
         _enable_live_preview.setName("Enable live preview");
-        _enable_live_preview.setTooltip("Show the rendered frames");
+        _enable_live_preview.setTooltip("Disabling this will not show the created imagesequence, but will speed up the exporting");
         _enable_live_preview.setValue(true);
 
         _export_csv.setName("Export csv");
-        _export_csv.setTooltip("Export framerate as csv file");
+        _export_csv.setTooltip("Export framerate/frametime for each video as csv file in the same directory as the images");
         _export_csv.setValue(false);
 
         _imagesequence_prefix.setName("Export as imagesequence");
-        _imagesequence_prefix.setTooltip("Export the analysis as imagesequence");
+        _imagesequence_prefix.setTooltip("Appends the frame number after the set name (e.g. exportsequence_0000000000)");
         _imagesequence_prefix.setValue("exportsequence_");
         _imagesequence_prefix.setEnabled(true);
         _imagesequence_prefix.setFont(QFont("Helvetica", 15));
 
-        _csv_filename.setName("Export as csv"); // not used because a switch already shows that text
-        _csv_filename.setTooltip("csv filename");
+        _csv_filename.setName("CSV Filename"); // not used because a switch already shows that text
+        _csv_filename.setTooltip("");
         _csv_filename.setValue("trdrop_analysis.csv");
         _csv_filename.setEnabled(false); // by default false, same as the csv export
         _csv_filename.setFont(QFont("Helvetica", 15));

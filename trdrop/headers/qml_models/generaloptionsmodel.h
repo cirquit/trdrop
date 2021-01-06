@@ -224,7 +224,7 @@ private:
     void _init_options()
     {
         _enable_fps_analysis.setName("Enable framerate analysis");
-        _enable_fps_analysis.setTooltip("Renders the framerate plot and framerate text");
+        _enable_fps_analysis.setTooltip("Renders the framerate plot and the framerate text");
         _enable_fps_analysis.setValue(true);
 
         _enable_tear_analysis.setName("Enable tear analysis");

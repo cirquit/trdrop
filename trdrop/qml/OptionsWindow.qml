@@ -14,7 +14,7 @@ Window {
     title: "Options"
     visible: true
     width: 900
-    minimumHeight: 900
+    minimumHeight: 940
     flags: if (Qt.platform.os == "linux") { return Qt.SubWindow } else { return Qt.Dialog }
     Material.theme: Material.Dark
     Material.accent: Material.DeepPurple
@@ -360,9 +360,6 @@ Window {
                                 id: colorLabel
                                 text: model.colorName + ":"
                                 Layout.rightMargin: 5
-                                ToolTip.text: model.colorTooltip
-                                ToolTip.delay: 500
-                                ToolTip.visible: hovered
                             }
                             Rectangle {
                                 id: fpsColorRectangle
@@ -523,9 +520,6 @@ Window {
                                 enabled: model.fpsOptionsEnabled
                                 stepSize: 0.01
                                 value: model.fpsTextXPosition
-                                ToolTip.delay: 500
-                                ToolTip.visible: hovered
-                                ToolTip.text: model.fpsTextPositionXTooltip
                                 onMoved: {
                                     if (model.fpsTextXPosition !== value) model.fpsTextXPosition = Utils.round(value, 2);
                                 }
@@ -560,9 +554,6 @@ Window {
                                 enabled: model.fpsOptionsEnabled
                                 stepSize: 0.01
                                 value: model.fpsTextYPosition
-                                ToolTip.delay: 500
-                                ToolTip.visible: hovered
-                                ToolTip.text: model.fpsTextYPositionTooltip
                                 onMoved: {
                                     if (model.fpsTextYPosition !== value) model.fpsTextYPosition = Utils.round(value, 2);
                                 }
@@ -628,7 +619,6 @@ Window {
                                 Layout.leftMargin:  50
                                 Layout.rightMargin: 50
                                 Layout.fillWidth: true
-                                ToolTip.text: model.colorTooltip
                                 MouseArea {
                                     anchors.fill: parent
                                     enabled: model.tearOptionsEnabled
@@ -667,7 +657,7 @@ Window {
                                 onValueChanged: {
                                     if (model.dismissTearPercentage !== value){ model.dismissTearPercentage = value; }
                                 }
-                                ToolTip.text: "Tears that take less than this percentage of the video height count as new frame"
+                                ToolTip.text: "Tears that take less than this percentage of the video height count as new frame\nExample: Video has 30FPS. If 40% of the frame is from the previous frame, but 60% is new, this can lead to 60FPS.\nTo count this as the correct 30 FPS, you need to set the Tear Difference to 50%."
                                 ToolTip.delay: 500
                                 ToolTip.visible: hovered
                             }

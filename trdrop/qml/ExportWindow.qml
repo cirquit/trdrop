@@ -2,9 +2,9 @@ import QtQuick 2.12
 import QtQml.Models 2.1
 import QtQuick.Window 2.12
 import QtQuick.Controls.Material 2.12
-import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
+import QtQuick.Controls 2.15
 
 import "../utils.js" as Utils
 
@@ -12,7 +12,7 @@ Window {
     id: exportWindow
     title: "Export"
     visible: true
-    width: 740
+    width: 700
     minimumHeight: 410
     flags: if (Qt.platform.os == "linux") { return Qt.SubWindow } else { return Qt.Dialog }
     Material.theme: Material.Dark
@@ -145,7 +145,7 @@ Window {
                             //exportAsCSVSwitchName.enabled = model.exportCSVValue;
                         }
                     }
-                    ToolTip.text: "Exports the framerate into a trdrop_analysis.csv into the export directory for each video"
+                    ToolTip.text: model.exportCSVTooltip
                     ToolTip.delay: 500
                     ToolTip.visible: hovered
                 }
@@ -193,7 +193,7 @@ Window {
                             model.enableLivePreviewValue = !model.enableLivePreviewValue;
                         }
                     }
-                    ToolTip.text: "Enables the live rendering of the resulting video"
+                    ToolTip.text: model.enableLivePreviewTooltip
                     ToolTip.delay: 500
                     ToolTip.visible: hovered
                 }
@@ -218,7 +218,7 @@ Window {
                             imagecomposer.updateComposition();
                         }
                     }
-                    ToolTip.text: "Exports the graph/text overlay (png only)"
+                    ToolTip.text: model.exportAsOverlayTooltip
                     ToolTip.delay: 500
                     ToolTip.visible: hovered
 
