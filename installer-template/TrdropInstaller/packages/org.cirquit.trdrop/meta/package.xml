@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+	<DisplayName>trdrop</DisplayName>
+	<Description>This will install Trdrop on your computer.</Description>
+	<Version>1.1.1</Version>
+	<ReleaseDate>2021-01-06</ReleaseDate>
+	<Licenses>
+		<License name="MIT License Agreement" file="LICENSE.txt"></License>
+	</Licenses>
+	<StartMenuDir>Trdrop</StartMenuDir>
+	<TargetDir>@HomeDir@/Trdrop</TargetDir>
+	<Default>true</Default>
+</Package>

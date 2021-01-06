@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+	<Name>trdrop</Name>
+	<Version>1.1.1</Version>
+	<Title>Trdrop Installer</Title>
+	<Publisher>cirquit</Publisher>
+	<StartMenuDir>Trdrop</StartMenuDir>
+	<TargetDir>@HomeDir@/Trdrop</TargetDir>
+</Installer>
