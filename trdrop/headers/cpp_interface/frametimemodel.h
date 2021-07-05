@@ -11,10 +11,10 @@ class FrametimeModel
 //! constructors
 public:
     //! holds the frametime information
-    //! saving the history for 180 ticks as we restrict this in the GUI
+    //! saving the history for 1200 ticks as we restrict this in the GUI
     FrametimeModel()
         : _max_video_count(3)
-        , _max_history_ticks(180)
+        , _max_history_ticks(1200)
     {
         _init_member();
     }

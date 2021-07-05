@@ -241,7 +241,7 @@ private:
 
         _framerate_plot_range.setName("Analysis range:");
         _framerate_plot_range.setTooltip("Length of the framerate plot in frames (x-axis)");
-        _framerate_plot_range.setValue(60);
+        _framerate_plot_range.setValue(360);
 
         _framerate_max_fps.setName("Max FPS:");
         _framerate_max_fps.setTooltip("Height of the framerate plot in framerate (y-axis)");
@@ -249,7 +249,7 @@ private:
 
         _frametime_plot_range.setName("Analysis range:");
         _frametime_plot_range.setTooltip("Length of the frametime plot in frames (x-axis)");
-        _frametime_plot_range.setValue(60);
+        _frametime_plot_range.setValue(360);
 
         _frametime_max_ms.setName("Max Frametime:");
         _frametime_max_ms.setTooltip("Height of the frametime plot in ms (y-axis)");
@@ -257,11 +257,11 @@ private:
 
         _enable_framerate_centering.setName("Enable FPS graph centering");
         _enable_framerate_centering.setTooltip("The center of the framerate plot is now showing the \"current\" framerate, not the right most edge");
-        _enable_framerate_centering.setValue(false);
+        _enable_framerate_centering.setValue(true);
 
         _enable_x_axis_text.setName("Enable framerate analysis range text");
         _enable_x_axis_text.setTooltip("Draws the framerate anaylsis range text below the framerate plot");
-        _enable_x_axis_text.setValue(true);
+        _enable_x_axis_text.setValue(false);
     }
 
 //! member

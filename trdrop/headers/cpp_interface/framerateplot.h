@@ -191,7 +191,7 @@ private:
     {
         painter->setFont(_get_eyecandy_text_font());
 
-        const uint8_t framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
+        const int framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
         const QString framerate_analysis_range_text = _x_axis_prefix_text + QString::number(framerate_analysis_range) + " frames";
 
         const int y_init_pos = _plot_outline.y() + _plot_outline.height();
@@ -230,7 +230,7 @@ private:
         // set pen to the correct color and line width
         painter->setPen(_get_framerate_pen(video_count));
         // how many ticks do we want to display
-        const uint8_t framerate_ticks = _shared_general_options_model->get_framerate_range();
+        const int framerate_ticks = _shared_general_options_model->get_framerate_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restricted by GUI
         const size_t size_difference = framerate_history.size() - framerate_ticks;
         // need the maximums to calculate the position of the point

@@ -150,7 +150,7 @@ Window {
                         SpinBox {
                             id: framerateRange
                             from: 30
-                            to: 180
+                            to: 1200
                             stepSize: 10
                             editable: true
                             value: model.framerateRangeValue
@@ -232,7 +232,7 @@ Window {
                         SpinBox {
                             id: frametimeRange
                             from: 30
-                            to: 180
+                            to: 1200
                             stepSize: 10
                             editable: true
                             value: model.frametimeRangeValue

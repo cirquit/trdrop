@@ -197,7 +197,7 @@ private:
         // set pen to the correct color and line width
         painter->setPen(_get_frametime_pen(video_index));
         // how many ticks do we want to display
-        const uint8_t frametime_ticks = _shared_general_options_model->get_frametime_range();
+        const int frametime_ticks = _shared_general_options_model->get_frametime_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restrict
         const size_t size_difference = ft_history.size() - frametime_ticks;
         // need the maximums to calculate the position of the point
