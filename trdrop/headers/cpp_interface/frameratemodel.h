@@ -10,10 +10,11 @@ class FramerateModel
 {
 //! constructors
 public:
-    //! saving the history for at most 180 ticks as we restrict this in the GUI
+    //! saving the history for at most 720 ticks as we restrict this in the GUI
+    //! max value 6 seconds for 120hz and 12 seconds for 60hz
     FramerateModel()
         : _max_video_count(3)
-        , _max_history_ticks(180)
+        , _max_history_ticks(720)
     {
         _init_member();
     }
