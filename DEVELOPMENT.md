@@ -28,7 +28,7 @@ Execute in the command line `sudo apt-get install cmake`
 
 ## Install CMake (Windows)
 
-Use the `.msi` installer from [https://cmake.org/download/](https://cmake.org/download/). Pick the option to add CMake to the `PATH`.
+Use the `.msi` installer from https://cmake.org/download/. Pick the option to add CMake to the `PATH`.
 
 ## Install OpenCV (Linux)
 
@@ -38,15 +38,16 @@ Follow the instructions for `https://github.com/cirquit/opencv-template`. You ca
 
 ## Install OpenCV (Windows)
 
-Install from [https://opencv.org/releases/](https://opencv.org/releases/), not the `Win Pack`, but the `Sources`. Extract the `opencv-4.5.1` directory to `C:`.
+Install from https://opencv.org/releases/, not the `Win Pack`, but the `Sources`. Extract the `opencv-4.5.1` directory to `C:`.
 
 CMake Options:
+
 ```
 Source code: C:/opencv-4.5.1
 Where to build the binaries: C:/opencv-4.5.1/build_64
 ```
 
-Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows]().
+Follow the installation instructions of https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows.
 
 The differences to that tutorial:
 * I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build_64` instead a new one at `C:\opencv-build`
@@ -71,7 +72,7 @@ Pick the following flags configuration (deviating from the default configuration
 * [ ] Build_JAVA
 * [ ] Build_opencv_java_bindings_generator
 * [ ] Build_opencv_python_bindings_generator
-* [Release] CMAKE_BUILD_TYPE
+* CMAKE_BUILD_TYPE: Release
 * [X] WITH_OPENGL
 * [X] WITH_QT
 * [ ] WITH_OPENCL_D3D11_NV
