@@ -74,7 +74,7 @@ Window {
                     FileDialog {
                         id: fileDialog
                         title: "Please choose an uncompressed video"
-                        nameFilters: ["Video files (*.mp4 *.avi *.raw)", "All files (*)"]
+                        nameFilters: ["Video files (*.avi *.mp4 *.mov *.mkv *.raw)", "All files (*)"]
                         visible: false
                         folder: shortcuts.movies
                         onAccepted: {
