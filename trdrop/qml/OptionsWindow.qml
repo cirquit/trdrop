@@ -312,6 +312,19 @@ Window {
                                 }
                             }
                         }
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.EnableTriangleName
+                            checked: model.EnableTriangleValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.EnableTriangleTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.EnableTriangleValue = !model.EnableTriangleValue;
+                                }
+                            }
+                        }
                         // 9th row
                         Button {
                             Layout.columnSpan: 3
