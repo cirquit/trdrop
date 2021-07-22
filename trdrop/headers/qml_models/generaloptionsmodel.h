@@ -274,8 +274,8 @@ private:
         _enable_triangle_centering.setTooltip("Displays Triangle Playhead in center of framerate graph.");
         _enable_triangle_centering.setValue(false);
 
-        _enable_framerate_centering.setName("Enable FPS graph centering");
-        _enable_framerate_centering.setTooltip("The center of the framerate plot is now showing the \"current\" framerate, not the right most edge");
+        _enable_framerate_centering.setName("Enable Frame graph centering");
+        _enable_framerate_centering.setTooltip("The center of the framerate and frametime plot is now showing the \"current\" framerate, not the right most edge");
         _enable_framerate_centering.setValue(true);
 
         _enable_x_axis_text.setName("Enable framerate analysis range text");

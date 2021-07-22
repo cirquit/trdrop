@@ -142,7 +142,8 @@ private:
     //! calls the underlying instance to draw the graph
     void _draw_frametime_graph(QPainter & painter)
     {
-        _shared_frametime_plot_instance->draw_frametime_plot(&painter);
+        bool enable_framerate_centering = (*_shared_general_options_model).get_enable_framerate_centering();
+        _shared_frametime_plot_instance->draw_frametime_plot(&painter, enable_framerate_centering);
     }
     //! calls each tearmodel to draw each tear
     void _draw_tears(QPainter & painter)

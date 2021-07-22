@@ -33,13 +33,17 @@ public:
 // methods
 public:
     //! top left is (0,0)
-    void draw_frametime_plot(QPainter * painter)
+    void draw_frametime_plot(QPainter * painter, bool enable_framerate_centering)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
 
         _set_plot_outline();
         _draw_plot_inner_lines(painter);
+        if (enable_framerate_centering)
+        {
+        _draw_center_line(painter);
+        }
         _draw_frametimes(painter);
         _draw_plot_outline(painter);
         _draw_text(painter);
@@ -222,6 +226,26 @@ private:
             index++;
         });
     }
+    //! draws a vertical center line
+    void _draw_center_line(QPainter * painter)
+    {
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 80;
+
+        const int x_pos = x_init_pos;
+        const int y_pos = y_init_pos + y_bottom_padding;
+        // define vertical line
+        QPoint top_line_point(x_pos, y_pos);
+        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
+        // draw "shadow"
+        painter->setPen(_get_centerline_shadow_pen());
+        painter->drawLine(top_line_point, bottom_line_point);
+        // draw white line
+        painter->setPen(_get_centerline_pen());
+        painter->drawLine(top_line_point, bottom_line_point);
+    }
     //! calculates the x,y position of the framerate based on its index and value
     QPoint _to_plot_coords(const double frametime
                          , const double max_frametime
@@ -248,7 +272,27 @@ private:
         QPen pen;
         pen.setWidth(_get_outline_thickness());
         pen.setColor(_plot_outline_color);
-        pen.setJoinStyle(Qt::MiterJoin); // hard counters
+        pen.setJoinStyle(Qt::MiterJoin); // hard corners
+        return pen;
+    }
+    //! resolution adaptive outerline pen
+    QPen _get_centerline_pen()
+    {
+        QPen pen;
+        pen.setWidth(_get_outline_thickness());
+        QColor color = _plot_outline_color;
+        pen.setColor(color);
+        pen.setJoinStyle(Qt::MiterJoin); // hard corners
+        return pen;
+    }
+    //! resolution adaptive outerline pen
+    QPen _get_centerline_shadow_pen()
+    {
+        QPen pen;
+        pen.setWidth(_get_outline_thickness());
+        QColor color = _text_shadow;
+        pen.setColor(color);
+        pen.setJoinStyle(Qt::MiterJoin); // hard corners
         return pen;
     }
     //! resolution adaptive outerline pen
