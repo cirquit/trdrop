@@ -215,6 +215,26 @@ private:
         painter->setPen(_plot_text_color);
         painter->drawText(x_pos, y_pos, framerate_analysis_range_text);
     }
+    //! draws a vertical center line
+    void _draw_center_line(QPainter * painter)
+    {
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 80;
+
+        const int x_pos = x_init_pos;
+        const int y_pos = y_init_pos + y_bottom_padding;
+        // define vertical line
+        QPoint top_line_point(x_pos, y_pos);
+        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
+        // draw "shadow"
+        painter->setPen(_get_centerline_shadow_pen());
+        painter->drawLine(top_line_point, bottom_line_point);
+        // draw white line
+        painter->setPen(_get_centerline_pen());
+        painter->drawLine(top_line_point, bottom_line_point);
+    }
     //! draws all framerates graphs options are enabled
     void _draw_framerates(QPainter * painter)
     {
@@ -314,26 +334,6 @@ private:
         painter->setPen(_get_outerline_pen());
         painter->setBrush(brush);
         painter->drawPolygon(triangle);
-    }
-    //! draws a vertical center line
-    void _draw_center_line(QPainter * painter)
-    {
-        const int y_init_pos = _plot_outline.y();
-        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
-
-        const int y_bottom_padding = _plot_outline.height() / 80;
-
-        const int x_pos = x_init_pos;
-        const int y_pos = y_init_pos + y_bottom_padding;
-        // define vertical line
-        QPoint top_line_point(x_pos, y_pos);
-        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
-        // draw "shadow"
-        painter->setPen(_get_centerline_shadow_pen());
-        painter->drawLine(top_line_point, bottom_line_point);
-        // draw white line
-        painter->setPen(_get_centerline_pen());
-        painter->drawLine(top_line_point, bottom_line_point);
     }
 // methods
 private:
