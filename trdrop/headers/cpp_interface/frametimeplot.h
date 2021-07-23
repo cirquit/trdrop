@@ -27,7 +27,7 @@ public:
         , _plot_text_color(255, 255, 255) // white
         , _text_shadow(41, 41, 41) // dark grey
         , _segment_count(3) // we want to split the plot into 3 bars
-        , _eyecandy_text("FRAMETIME IN MS")
+        , _eyecandy_text("Frametime (ms)")
     { }
 
 // methods
@@ -169,7 +169,7 @@ private:
         const int x_init_pos = _plot_outline.x() + _plot_outline.width();
 
         const int y_bottom_padding = _plot_outline.height() / 10;
-        const int x_right_padding  = static_cast<int>(_plot_outline.width() / 1.45);
+        const int x_right_padding  = static_cast<int>(_plot_outline.width() / 2.55);
 
         const int x_pos = x_init_pos - x_right_padding;
         const int y_pos = y_init_pos - y_bottom_padding;
@@ -338,13 +338,13 @@ private:
     int _get_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 13;
-        else if (current_size == QSize(1280, 720))  return 18;
-        else if (current_size == QSize(1600, 900))  return 22;
-        else if (current_size == QSize(1920, 1080)) return 27;
-        else if (current_size == QSize(2048, 1152)) return 30;
-        else if (current_size == QSize(2560, 1440)) return 37;
-        else if (current_size == QSize(3840, 2160)) return 51;
+        if      (current_size == QSize(960, 540))   return 8;
+        else if (current_size == QSize(1280, 720))  return 12;
+        else if (current_size == QSize(1600, 900))  return 15;
+        else if (current_size == QSize(1920, 1080)) return 20;
+        else if (current_size == QSize(2048, 1152)) return 22;
+        else if (current_size == QSize(2560, 1440)) return 29;
+        else if (current_size == QSize(3840, 2160)) return 35;
         qDebug() << "FrametimePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
@@ -352,13 +352,13 @@ private:
     int _get_eyecandy_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 13 + 3;
-        else if (current_size == QSize(1280, 720))  return 18 + 3;
-        else if (current_size == QSize(1600, 900))  return 22 + 3;
-        else if (current_size == QSize(1920, 1080)) return 27 + 3;
-        else if (current_size == QSize(2048, 1152)) return 30 + 3;
-        else if (current_size == QSize(2560, 1440)) return 37 + 3;
-        else if (current_size == QSize(3840, 2160)) return 51 + 12;
+        if      (current_size == QSize(960, 540))   return 8 + 3;
+        else if (current_size == QSize(1280, 720))  return 12 + 3;
+        else if (current_size == QSize(1600, 900))  return 15 + 3;
+        else if (current_size == QSize(1920, 1080)) return 20 + 3;
+        else if (current_size == QSize(2048, 1152)) return 22 + 3;
+        else if (current_size == QSize(2560, 1440)) return 29 + 3;
+        else if (current_size == QSize(3840, 2160)) return 35 + 12;
         qDebug() << "FrametimePlot::_get_eyecandy_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
