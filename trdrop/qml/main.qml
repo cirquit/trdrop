@@ -7,10 +7,10 @@ import QtQuick.Controls.Styles 1.4
 
 ApplicationWindow
 {
-    // startup as a fullscreen application
+    // startup as a windowed application
     id: rootWindow
-    minimumWidth: Screen.width
-    minimumHeight: Screen.height
+    minimumWidth: 1280
+    minimumHeight: 720
     visible: true
     // TODO refactor this so the user may choose a light theme
     Material.theme: Material.Dark
