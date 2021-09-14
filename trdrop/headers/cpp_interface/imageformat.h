@@ -9,6 +9,8 @@ enum ImageFormatType
 {
     JPEG = 0
   , PNG  = 1
+  , TIFF = 2
+  , BMP  = 3
 };
 
 //! image format wrapper for qml dropdown and enum <-> string convertion
@@ -33,6 +35,10 @@ public:
                 return ".jpg";
             case PNG:
                 return ".png";
+            case TIFF:
+                return ".tiff";
+            case BMP:
+                return ".bmp";
             default:
                 qDebug() << "ImageFormat::name() was called with unknown ImageFormatType " << _imageformat_type << ", using .jpg";
                 return ".jpg";
