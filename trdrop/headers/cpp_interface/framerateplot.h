@@ -36,12 +36,17 @@ public:
 public:
     //! top left is (0,0), painter has to be pointed to the image by the renderer
     //! order of drawing functions is essential
-    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering, bool enable_triangle_centering, bool enable_x_axis_text)
+    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering, bool enable_triangle_centering, bool enable_bg_shadow, bool enable_x_axis_text)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
 
         _set_plot_bounds();
+        if (enable_bg_shadow)
+        {
+            _draw_bg_shadow(painter);
+        }
+        _draw_plot_outline(painter);
         _draw_plot_inner_lines(painter);
         if (enable_framerate_centering)
         {
@@ -52,7 +57,6 @@ public:
             _draw_center_triangle(painter);
         }
         _draw_framerates(painter);
-        _draw_plot_outline(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
         if (enable_x_axis_text)
@@ -81,6 +85,12 @@ private:
         const int y_pos = image_height - plot_height - y_bottom_padding;
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
+    }
+    void _draw_bg_shadow(QPainter * painter)
+    {
+        painter->setBrush(QColor(0, 0, 0, 180)); // todo: make this adjustable
+        painter->setPen(QColor(0, 0, 0, 0));     // transparent for rectangle to draw
+        painter->drawRect(_plot_outline);
     }
     //! draws a rectangle based on the resolution
     //! NO constants INDEPEDENT of the resolution may be used

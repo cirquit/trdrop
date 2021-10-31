@@ -33,19 +33,23 @@ public:
 // methods
 public:
     //! top left is (0,0)
-    void draw_frametime_plot(QPainter * painter, bool enable_framerate_centering)
+    void draw_frametime_plot(QPainter * painter, bool enable_framerate_centering, bool enable_bg_shadow)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
 
         _set_plot_outline();
+        if (enable_bg_shadow)
+        {
+        _draw_bg_shadow(painter);
+        }
+        _draw_plot_outline(painter);
         _draw_plot_inner_lines(painter);
         if (enable_framerate_centering)
         {
         _draw_center_line(painter);
         }
         _draw_frametimes(painter);
-        _draw_plot_outline(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
     }
@@ -77,6 +81,12 @@ private:
                           - y_framerate_plot_padding;
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
+    }
+    void _draw_bg_shadow(QPainter * painter)
+    {
+        painter->setBrush(QColor(0, 0, 0, 180)); // todo: make this adjustable
+        painter->setPen(QColor(0, 0, 0, 0));     // transparent for rectangle to draw
+        painter->drawRect(_plot_outline);
     }
     //! draws a rectangle based on the resolution and sets the _plot_outline member for every successor to use
     void _draw_plot_outline(QPainter * painter)

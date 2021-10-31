@@ -325,6 +325,19 @@ Window {
                                 }
                             }
                         }
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.EnableBGShadowName
+                            checked: model.EnableBGShadowValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.EnableBGShadowTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.EnableBGShadowValue = !model.EnableBGShadowValue;
+                                }
+                            }
+                        }
                         // 9th row
                         Button {
                             Layout.columnSpan: 3

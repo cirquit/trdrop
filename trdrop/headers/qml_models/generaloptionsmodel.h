@@ -55,6 +55,9 @@ public:
       , EnableTriangleNameRole              = Qt::UserRole + 30
       , EnableTriangleTooltipRole           = Qt::UserRole + 31
       , EnableTriangleValueRole             = Qt::UserRole + 32
+      , EnableBGShadowNameRole              = Qt::UserRole + 33
+      , EnableBGShadowTooltipRole           = Qt::UserRole + 34
+      , EnableBGShadowValueRole             = Qt::UserRole + 35
     };
 //! methods
 public:
@@ -132,6 +135,12 @@ public:
                 return _enable_triangle_centering.tooltip();
             case EnableTriangleValueRole:
                 return _enable_triangle_centering.value();
+            case EnableBGShadowNameRole:
+                return _enable_bg_shadow.name();
+            case EnableBGShadowTooltipRole:
+                return _enable_bg_shadow.tooltip();
+            case EnableBGShadowValueRole:
+                return _enable_bg_shadow.value();
             case EnableXAxisTextNameRole:
                 return _enable_x_axis_text.name();
             case EnableXAxisTextTooltipRole:
@@ -155,6 +164,7 @@ public:
         else if (role == FramerateMaxFPSValueRole) _framerate_max_fps.setValue(static_cast<int>(value.toUInt()));
         else if (role == FrametimeMaxMSValueRole) _frametime_max_ms.setValue(static_cast<int>(value.toUInt()));
         else if (role == EnableTriangleValueRole) _enable_triangle_centering.setValue(value.toBool());
+        else if (role == EnableBGShadowValueRole) _enable_bg_shadow.setValue(value.toBool());
         else if (role == EnableFrametimeCenteringValueRole) _enable_framerate_centering.setValue(value.toBool());
         else if (role == EnableXAxisTextValueRole) _enable_x_axis_text.setValue(value.toBool());
         else return false;
@@ -192,6 +202,8 @@ public:
     int get_frametime_max_ms() { return _frametime_max_ms.value(); }
     //! getter
     bool get_enable_triangle_centering() { return _enable_triangle_centering.value(); }
+    //! getter
+    bool get_enable_bg_shadow() { return _enable_bg_shadow.value(); }
     //! getter
     bool get_enable_framerate_centering() { return _enable_framerate_centering.value(); }
     //! getter
@@ -231,6 +243,9 @@ private:
         _role_names[EnableTriangleNameRole]              = "EnableTriangleName";
         _role_names[EnableTriangleTooltipRole]           = "EnableTriangleTooltip";
         _role_names[EnableTriangleValueRole]             = "EnableTriangleValue";
+        _role_names[EnableBGShadowNameRole]              = "EnableBGShadowName";
+        _role_names[EnableBGShadowTooltipRole]           = "EnableBGShadowTooltip";
+        _role_names[EnableBGShadowValueRole]             = "EnableBGShadowValue";
         _role_names[EnableXAxisTextNameRole]             = "enableXAxisTextName";
         _role_names[EnableXAxisTextTooltipRole]          = "enableXAxisTextTooltip";
         _role_names[EnableXAxisTextValueRole]            = "enableXAxisTextValue";
@@ -274,6 +289,10 @@ private:
         _enable_triangle_centering.setTooltip("Displays Triangle Playhead in center of framerate graph.");
         _enable_triangle_centering.setValue(false);
 
+        _enable_bg_shadow.setName("Enable Graph Background Shadow");
+        _enable_bg_shadow.setTooltip("Improves readability of graph.");
+        _enable_bg_shadow.setValue(true);
+
         _enable_framerate_centering.setName("Enable Frame graph centering");
         _enable_framerate_centering.setTooltip("The center of the framerate and frametime plot is now showing the \"current\" framerate, not the right most edge");
         _enable_framerate_centering.setValue(true);
@@ -307,6 +326,8 @@ private:
     CheckBoxItem _enable_framerate_centering;
     //! essentially a bool
     CheckBoxItem _enable_triangle_centering;
+    //! essentially a bool
+    CheckBoxItem _enable_bg_shadow;
     //! essentially a bool
     CheckBoxItem _enable_x_axis_text;
 };
