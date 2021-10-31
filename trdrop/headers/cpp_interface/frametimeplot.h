@@ -95,19 +95,14 @@ private:
         const int y_pos = _plot_outline.y();
         const int plot_height = _plot_outline.height();
         const int plot_width = _plot_outline.width();
-        // paint function
-        auto paint = [&]()
-        {
-            // x axis
-            painter->drawLine(x_pos,              y_pos + plot_height
-                            , x_pos + plot_width, y_pos + plot_height);
-            // y axis
-            painter->drawLine(x_pos,  y_pos
-                            , x_pos , y_pos + plot_height);
-        };
         // draw white line
         painter->setPen(_get_outerline_pen());
-        paint();
+        // x axis
+        painter->drawLine(x_pos,              y_pos + plot_height
+                        , x_pos + plot_width, y_pos + plot_height);
+        // y axis
+        painter->drawLine(x_pos,  y_pos
+                        , x_pos , y_pos + plot_height);
 
     }
     //! drawing lines from top to bottom because Rect's x,y is top left
