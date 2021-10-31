@@ -105,9 +105,6 @@ private:
             painter->drawLine(x_pos,  y_pos
                             , x_pos , y_pos + plot_height);
         };
-        // draw black outline
-        painter->setPen(_get_outerline_shadow_pen());
-        paint();
         // draw white line
         painter->setPen(_get_outerline_pen());
         paint();
@@ -249,9 +246,6 @@ private:
         // define vertical line
         QPoint top_line_point(x_pos, y_pos);
         QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
-        // draw "shadow"
-        painter->setPen(_get_centerline_shadow_pen());
-        painter->drawLine(top_line_point, bottom_line_point);
         // draw white line
         painter->setPen(_get_centerline_pen());
         painter->drawLine(top_line_point, bottom_line_point);
@@ -302,15 +296,6 @@ private:
         pen.setWidth(_get_outline_thickness());
         QColor color = _text_shadow;
         pen.setColor(color);
-        pen.setJoinStyle(Qt::MiterJoin); // hard corners
-        return pen;
-    }
-    //! resolution adaptive outerline pen
-    QPen _get_outerline_shadow_pen()
-    {
-        QPen pen;
-        pen.setWidth(_get_outline_thickness()+3);
-        pen.setColor(_text_shadow);
         pen.setJoinStyle(Qt::MiterJoin); // hard corners
         return pen;
     }
