@@ -310,7 +310,7 @@ private:
         pen.setStyle(Qt::SolidLine);
         pen.setWidth(_get_plotline_thickness());
         pen.setBrush(plot_color);
-        pen.setCapStyle(Qt::FlatCap);
+        pen.setCapStyle(Qt::RoundCap);
         pen.setJoinStyle(Qt::RoundJoin);
         return pen;
     }
