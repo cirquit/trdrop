@@ -12,7 +12,7 @@ Added tear visualization and the csv export function. For the tear visualization
 
 You can also disable this visualization if need be.
 
-![](images/2019-07-28-tear-visualization.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-28-tear-visualization.gif)
 
 #### Update 27.07.2019
 
@@ -31,13 +31,13 @@ Now I have to think about a tear visualization and the csv export. After these f
 
 Now only drawing the x/y axis of the plots, stitched some more options together. Implemented overlay exporting with PNG. Fixed some scaling artifacts so now it looks less grainy in the preview window. Also automatic re-scaling of the main window based on your resolution.
 
-![](images/2019-07-23-automatic-resize.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-23-automatic-resize.gif)
 
 #### Update 22.07.2019
 
 Added shadows and eyecandy text for the plots + added the range functionality for the plots.
 
-![](images/2019-07-22-plots-options.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-22-plots-options.gif)
 
 #### Update 21.07.2019
 
@@ -45,7 +45,7 @@ Added plots for both frametime and framerate processing. Fixed frametime process
 
 Now we need to style the plots slightly (e.g framerate and frametime text above the plots) and stitch all the settings together + maybe create more settings.
 
-![](images/2019-07-21-plots-example.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-21-plots-example.gif)
 
 #### Update 14.07.2019
 
@@ -76,7 +76,7 @@ Had multiple updates throughout the week:
 
 Next steps are implementing the frametime and tear calculation. Then we can at last get to the plotting implementation.
 
-![](images/2019-07-13-full-showcase-delta-renderering.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-13-full-showcase-delta-renderering.gif)
 
 #### Update 09.07.2019
 
@@ -84,7 +84,7 @@ Added a version of delta rendering via [cv::absdiff](https://docs.opencv.org/3.4
 
 In this gif you can see the tears. But this way of visualization is not the way we calculate the frame difference so this will be changed in the future, as this clip should have ~ 30FPS. But the general functionality is there so it's possible to change it anytime.
 
-![](images/2019-07-09-tear-delta-rendering.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-09-tear-delta-rendering.gif)
 
 
 #### Update 08.07.2019
@@ -99,14 +99,14 @@ To build on Windows, you need to follow this very much unfinished [DEVELOPMENT.m
 
 Resetting state (fps, loaded frames currently) if the opened files are modified. Now using the shortest video to stop the export and using it to show the progress. Now I will try run this on Windows, I only need to manage to install opencv with qt correctly. Hopefully this will be finished until the end of the week.
 
-![](images/2019-07-04-resetting-state.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-04-resetting-state.gif)
 
 
 #### Update 02.07.2019
 
 First framerate analysis is working for multiple videos! I'm currently exporting images only and probably not implement the video encoding because it has some licensing problems which I simply ignored (h264). Importing in your favourite post-processing software is also probably easier with a imagesequence.
 
-![](images/2019-07-02-setup-first-fps-analysis.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-02-setup-first-fps-analysis.gif)
 
 If you install `ffmpeg` you can simply use this command to create [the following video](videos/2019-07-02-first-fps-analysis.mp4).
 
@@ -118,7 +118,7 @@ If you install `ffmpeg` you can simply use this command to create [the following
 
 Found a QImage to OpenCV convertion, but determined that its not necessarily needed yet, as I can also save QImages directly to the hard drive. Finalized the gui of the export settings, now I have to make it functional.
 
-![](images/2019-06-25-export-settings.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-25-export-settings.gif)
 
 #### Update 23.06.2019
 
@@ -130,32 +130,32 @@ The only thing to test right now is the conversion between internal qt images to
 
 Finally got the Framerate Text working on resize and for multiple videos simultaneously.
 
-![](images/2019-06-17-fps-text-resize.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-17-fps-text-resize.gif)
 
 #### Update 11.06.2019
 
 Options are now enabled dependent on the amount of the videos that are selected. I also got some text overlay from the options rendered over the video, currently working on making it scale by size.
 
-![](images/2019-06-11-dependent-options.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-11-dependent-options.gif)
 
 #### Update 10.06.2019
 
 Resizing from export dialog works, even live. Default export location is movies on every platform (os-indepedent). Composing now works too, but not automatic centering if the ratio is different (16:9) -> (4:3) will produce black beams, may fix this later.
 
-![](images/2019-06-10-videos-composing-resizing.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-10-videos-composing-resizing.gif)
 
 
 #### Update 08.06.2019
 
 Started with the export dialog, got progress bar working, an export button and started with choosing the directory. Also working on the composing tool for multiple videos and automatic resizing, but as you can see in the gif some of the image channels are still wrongly displayed.
 
-![](images/2019-06-08-export-progress.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-08-export-progress.gif)
 
 #### Update 02.06.2019
 
 Fused the FileDialog with the rendering for up to 3 videos in parallel. Currenlty still rendering only one video at a time. The Rendering Button is for debugging purposes, will be the export window in the future.
 
-![](images/2019-06-02-videos-loading-progress.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-06-02-videos-loading-progress.gif)
 
 #### Update 31.05.2019
 
@@ -169,27 +169,27 @@ Got OpenCV finally to show videos in a QWidget. Now it's up to do that in QML.
 
 Added more general options with a custom spinbox with text. Also tearoptions with a shared color option. Tooltips work on the general pane but not the others yet? Also got OpenCV running from a previous project on Linux, now porting it to Windows.
 
-![](images/2019-05-23-general-options-progress.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-23-general-options-progress.gif)
 
-![](images/2019-05-23-tear-options-progress.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-23-tear-options-progress.gif)
 
 #### Update 20.05.2019
 
 Added the Framerate options with a color picking / font picking / text editing functionality. Also added a reset settings button.
 
-[Webm this time, gif convertion failed](images/2019-05-20-fps-options-progress.webm)
+[Webm this time, gif convertion failed](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-20-fps-options-progress.webm)
 
 #### Update 16.05.2019
 
 Started with the options menu. Colorpicking works!
 
-![](images/2019-05-16-options-menu-progress.gif)
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-16-options-menu-progress.gif)
 
 #### Update 14.05.2019
 
 Got the fileitemmodel working with c++ and qml. Added transition animations because they look good. Now focusing on the options dialog. Hopefully this will be faster as the model will be the same implementation as the fileitem one.
 
-![](images/2019-05-14-filechoose-dialog-progress.gif).
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-14-filechoose-dialog-progress.gif).
 
 #### Update 12.05.2019
 
@@ -197,7 +197,7 @@ Created the qt branch, currently building up the knowledge needed to use the Qt 
 
 This is the current progress video for the file choose dialog with ordering.
 
-![](images/2019-05-12-filechoose-dialog-progress.gif).
+![](https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-05-12-filechoose-dialog-progress.gif)
 
 #### Update 24.04.2019
 
