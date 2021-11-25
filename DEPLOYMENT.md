@@ -2,23 +2,13 @@
 
 ## Windows
 
-We currently support latest Win 10 (installed at 31.07.2019) as I build it manually in a virtual machine.
-
-#### Manually
+#### Manual
 
 ##### Create the executable
 
-* Install Virtualbox
-* Get Win10.iso (64-bit) from the [official Microsoft homepage](https://www.microsoft.com/en-us/software-download/windows10ISO)
-* Install Windows, skip activation
 * Install [QtCreator (open-source version)](https://www.qt.io/download) and the Qt Installer Framework 3.0 (included, have to check it)
-* Build OpenCV and the application in Release mode, see detailed instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
-* Copy all the `.dll`'s from the following directories
-    - `C:\opencv-4.5.1\build_64\install\x64\mingw\bin`
-    - `C:\Qt\Tools\mingw810_64\bin`
-* To the release directory of the application
-* Go to the release directory of the application, in my case `C:\Users\asa\Documents\github-repos\trdrop\build-trdrop-Desktop_Qt_5_15_2_MinGW_64_bit-Release\release`
-* Execute the following command `windeployqt.exe --qmldir C:\Users\asa\Documents\github-repos\trdrop\trdrop .`
+* Build OpenCV and the application in Release mode, see detailed instructions in [Compile OpenCV (Windows) (DEVELOPMENT.md)](DEVELOPMENT.md#compile-opencv-windows)
+* Follow Running Trdrop with Qt Creator in [Running Trdrop with Qt Creator (Windows) (DEVELOPMENT.md)](DEVELOPMENT.md#running-trdrop-with-qt-creator-windows)
 * Now the executable has the correct dlls in the directory to run on a different system!
 
 ##### Create the installer
@@ -38,8 +28,6 @@ We currently support latest Win 10 (installed at 31.07.2019) as I build it manua
 
 #### Automated (TODO)
 
-
-
 ## Linux (TODO)
 
-## Mac OS (TODO)
+## MacOS (TODO)

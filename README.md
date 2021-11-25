@@ -9,9 +9,9 @@
 ## Examples
 
 <p align="center">
-    <img height="160" src="images/2019-07-28-tear-visualization.gif">
-    <img height="160" src="images/2019-07-22-plots-options.gif">
-    <img height="160" src="images/2019-07-13-full-showcase-delta-renderering.gif">
+    <img height="160" src="https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-28-tear-visualization.gif">
+    <img height="160" src="https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-22-plots-options.gif">
+    <img height="160" src="https://github.com/cirquit/trdrop/raw/ef4462994df90fdc3b2c961a76e874a4a964a12e/images/2019-07-13-full-showcase-delta-renderering.gif">
 </p>
 
 ## Binaries
