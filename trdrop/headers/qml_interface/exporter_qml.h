@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QImage>
+#include <QImageWriter>
 #include <QDebug>
 #include <QDir>
 #include <memory>
@@ -53,7 +54,10 @@ public:
             if (_export_options_model->export_as_imagesequence())
             {
                 QString filepath = _create_image_file_path();
-                image.save(filepath);
+                QImageWriter writer(filepath);
+                writer.setCompression(1); // use compression for tiff+jpeg
+                writer.setOptimizedWrite(true);
+                writer.write(image);
             }
             if (_export_options_model->export_csv())
             {
