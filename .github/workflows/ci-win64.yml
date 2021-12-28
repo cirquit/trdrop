@@ -1,0 +1,105 @@
+name: (Windows x64) Build and publish
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get short SHA and set Qt + OpenCV version
+        run: |
+          echo "SHORT_SHA=$($env:GITHUB_SHA.SubString(0,7))" >> $env:GITHUB_ENV
+          echo qtver=5.15.2 >> $env:GITHUB_ENV
+          echo opencv_ver=4.5.1 >> $env:GITHUB_ENV
+
+      - name: Cache Object files
+        uses: actions/cache@v1
+        id: cache1
+        with:
+          path: C:\build_temp
+          key: ${{ runner.os }}-ObjectFilesCache
+
+      - name: Restore cache
+        if: steps.cache1.outputs.cache-hit == 'true'
+        run: |
+          mkdir release
+          cd c:\build_temp
+          Copy-Item *.o, *.c, *.cpp, *.h ${env:GITHUB_WORKSPACE}\release
+
+      - name: Download Precompiled OpenCV libs
+        run: |
+          mkdir C:\downloads
+          $opencv_ver1=${env:opencv_ver}
+          curl -fL https://github.com/illusion0001/opencv-build/releases/download/${opencv_ver1}/opencv-${opencv_ver1}.7z -o C:\downloads\opencv-${opencv_ver1}.7z
+          7z -r x C:\downloads\opencv-${opencv_ver1}.7z -oc:\downloads\
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: C:\Qt
+          key: ${{ runner.os }}-Qt-Cache
+
+      - name: Download Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ env.qtver }}
+          arch: win64_mingw81
+          dir: C:\
+          tools: tools_ifw,4.1.1,qt.tools.ifw.41 tools_qtcreator,5.0.2-0,qt.tools.qtcreator,qt.tools.
+
+      - name: Add Qt and MinGW to environment variable
+        run: |
+          $qtver1=$env:qtver
+          $opencv_ver1=${env:opencv_ver}
+          echo Qt_Install="C:\Qt" >> $env:GITHUB_ENV
+          echo OpenCV_DIR="C:\downloads\opencv-${opencv_ver1}" >> $env:GITHUB_ENV
+          echo MinGWBin="C:\msys64\mingw64\bin" >> $env:GITHUB_ENV
+
+      - name: Build Trdrop
+        run: |
+          qmake -o Makefile trdrop\trdrop.pro -spec win32-g++ "CONFIG+=qtquickcompiler" "OBJECTS_DIR=C:\build_temp" "MOC_DIR=C:\build_temp"
+          mingw32-make -f Makefile.Release
+
+      - name: Cleanup object files
+        run: |
+          cd release
+          Move-Item -Force *.o, *.c, *.cpp, *.h C:\build_temp
+
+      - name: Prepare trdrop for artifact
+        run: |
+          cd $env:MinGWBin
+          copy-item libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, libgomp-1.dll $env:GITHUB_WORKSPACE\release
+          cd $env:OpenCV_DIR\build_64\install\x64\mingw\bin
+          copy-item libopencv_core451.dll, libopencv_imgcodecs451.dll, libopencv_imgproc451.dll, libopencv_videoio451.dll, opencv_videoio_ffmpeg451_64.dll $env:GITHUB_WORKSPACE\release
+          windeployqt --qmldir $env:GITHUB_WORKSPACE $env:GITHUB_WORKSPACE\release
+
+      - name: Cleanup for packaging
+        run: |
+          cd release
+          Remove-Item -Recurse -Force audio, bearer, iconengines, mediaservice, playlistformats, qmltooling, QtGraphicalEffects, styles, translations, D3Dcompiler_47.dll, opengl32sw.dll, libGLESv2.dll
+
+      - name: Create Release Archive
+        run: |
+          cd release
+          7z a -m0=LZMA2 -mx9 ..\trdrop-release-${env:SHORT_SHA}.7z
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: trdrop-release-${{ env.SHORT_SHA }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name != 'pull_request'
+        run: gh release create $env:SHORT_SHA "trdrop-release-$env:SHORT_SHA.7z" --target $env:GITHUB_SHA -t "Trdrop Release - $env:SHORT_SHA"
+
