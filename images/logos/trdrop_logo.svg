@@ -1,0 +1,11 @@
+<svg version="1.2" baseProfile="tiny-ps" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+	<title>trdrop_logo_text-svg</title>
+	<style>
+		tspan { white-space:pre }
+		.s0 { fill: #e7e7e7 } 
+	</style>
+	<g id="Layer">
+		<path id="Layer" class="s0" d="m68.25 123.14c55.13 31.83 109.42 63.18 164.42 94.93c-16.9 26.48-40.24 42.55-71.08 45.44c-39.71 3.72-71.29-11.65-91.87-45.99c-18.27-30.47-17.46-62.17-1.47-94.38z" />
+		<path id="Layer" class="s0" d="m76 108.31c23.5-25.25 48.33-48.31 71.89-72.73c0.95 0.68 1.54 0.99 1.98 1.43c23.06 23.13 47.07 45.41 68.91 69.64c25.02 27.75 30.15 60.12 18.57 94.82l-161.35-93.16z" />
+	</g>
+</svg>
