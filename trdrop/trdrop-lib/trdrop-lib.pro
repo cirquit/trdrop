@@ -1,10 +1,19 @@
+# ----------------
+# qt configuration
+# ----------------
 QT -= gui
 
+# ----------------
+# project configuration
+# ----------------
 TARGET = trdrop-lib
 TEMPLATE = lib
 DEFINES += TRDROPLIB_LIBRARY
 CONFIG += c++14
 
+# ----------------
+# filepaths
+# ----------------
 INCLUDEPATH += source
 
 SOURCES += \
