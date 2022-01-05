@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=trdrop
+Comment=Calculate video analytics from unprocessed video (framerate, frametime, etc.)
+Exec=trdrop-ui
+Icon=trdrop_logo
+Categories=Utility;
