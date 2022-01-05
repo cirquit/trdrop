@@ -1,24 +1,23 @@
-QT       += core gui
+# ----------------
+# qt configuration
+# ----------------
+QT += testlib
+QT -= gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+# ----------------
+# project configuration
+# ----------------
+TARGET = trdrop-tests
+TEMPLATE = app
+CONFIG += c++14 console
+CONFIG -= app_bundle
 
-CONFIG += c++11
-
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+# ----------------
+# filepaths
+# ----------------
+INCLUDEPATH += source
 
 SOURCES += \
-    main.cpp \
-    tests.cpp
+    source/main.cpp
 
-HEADERS += \
-    tests.h
-
-FORMS += \
-    tests.ui
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+# HEADERS +=
