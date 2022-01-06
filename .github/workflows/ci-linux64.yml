@@ -1,0 +1,61 @@
+name: (Linux x64) build and test
+
+on: 
+  push:
+    branches: [ v2 ]
+  pull_request:
+    branches: [ v2 ]
+
+jobs:
+  
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Test Environment Variables
+        id: manual-env-test
+        run: |
+          echo "Home: ${HOME}"
+          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "GITHUB_SHA: ${GITHUB_SHA}"
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          ls
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-qtcache
+
+      - name: Get short SHA and set Qt version
+        run: |
+          echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $env:GITHUB_ENV
+          echo QT_VERSION=5.15.2 >> $env:GITHUB_ENV
+
+      - name: Install Qt
+        id: install-qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: $QT_VERSION
+        
+      - name: Compile
+        run: |
+          rm -rf build
+          mkdir -p build/debug
+          cd build/debug
+          qmake ../../trdrop -config debug
+          make
+          ls
+
+      - name: Run tests
+        run: |
+          ls
+          cd ../..
+          ./build/debug/trdrop-tests/trdrop-tests
