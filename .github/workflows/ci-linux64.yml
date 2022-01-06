@@ -7,7 +7,7 @@ on:
     branches: [ v2 ]
 
 jobs:
-  build-on-18.04-linux:
+  build-linux:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
