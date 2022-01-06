@@ -38,10 +38,11 @@ jobs:
         if: steps.cache-qt.outputs.cache-hit == 'true'
         run: |
           echo PATH=/home/runner/work/trdrop/Qt/5.15.2/gcc_64/bin:$PATH >> $env:GITHUB_ENV
+          echo $PATH
 
       - name: Compile
         run: |
-          printenv 
+          echo $PATH 
           rm -rf build
           mkdir -p build/debug
           cd build/debug
