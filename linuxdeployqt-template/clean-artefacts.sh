@@ -6,5 +6,6 @@ rm ./usr/lib/lib*
 rm -r ./usr/translations
 rm -r ./usr/share/doc
 rm -r ./usr/plugins
+rm -r ./usr/qml
 
 rm ./AppRun ./.DirIcon ./trdrop.desktop ./trdrop_logo.png ./*.AppImage
