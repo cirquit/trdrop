@@ -25,7 +25,7 @@ jobs:
           echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
           echo QT_VERSION=5.15.2 >> $GITHUB_ENV
 
-      - name: Install Qt if not cached
+      - name: Install Qt
         id: install-qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -47,17 +47,18 @@ jobs:
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
-          pwd
-          sudo apt install libgstreamer1.0-dev
-          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          cp build/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
-          cd linuxdeployqt-template
-          ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
+          ldd build/release/trdrop-ui/trdrop-ui
+          # pwd
+          # sudo apt install libgstreamer1.0-dev
+          # wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          # chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+          # cp build/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
+          # cd linuxdeployqt-template
+          # ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
 
-      - name: Upload AppImage
-        if: startsWith(github.event.head_commit.message, 'Release')
-        uses: actions/upload-artifact@v2
-        with:
-          name: trdrop.AppImage
-          path: linuxdeployqt-template/*.AppImage
+      # - name: Upload AppImage
+      #   if: startsWith(github.event.head_commit.message, 'Release')
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: trdrop.AppImage
+      #     path: linuxdeployqt-template/*.AppImage
