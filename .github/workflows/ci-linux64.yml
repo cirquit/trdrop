@@ -35,6 +35,7 @@ jobs:
         
       - name: Compile
         run: |
+          PATH=${{ env:GITHUB_WORKSPACE }}/Qt/5.15.2/gcc_64/bin:$PATH
           rm -rf build
           mkdir -p build/debug
           cd build/debug
