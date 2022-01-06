@@ -24,23 +24,20 @@ jobs:
         run: |
           echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
           echo QT_VERSION=5.15.2 >> $GITHUB_ENV
-          echo $SHORT_SHA
-          echo $QT_VERSION
 
       - name: Install Qt if not cached
         id: install-qt
         uses: jurplel/install-qt-action@v2
-        if: steps.cache-qt.outputs.cache-hit != 'true'
+        # if: steps.cache-qt.outputs.cache-hit != 'true'
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           version: 5.15.2 
         
-      - name: Add qmake path to PATH if Qt is cached
-        id: cached-qt-postop
-        if: steps.cache-qt.outputs.cache-hit == 'true'
-        run: |
-          echo PATH=/home/runner/work/trdrop/Qt/5.15.2/gcc_64/bin:$PATH >> $GITHUB_ENV
-          echo $PATH
+      # - name: Add qmake path to PATH if Qt is cached
+      #   id: cached-qt-postop
+      #   if: steps.cache-qt.outputs.cache-hit == 'true'
+      #   run: |
+      #     echo PATH=/home/runner/work/trdrop/Qt/5.15.2/gcc_64/bin:$PATH >> $GITHUB_ENV
 
       - name: Compile
         run: |
