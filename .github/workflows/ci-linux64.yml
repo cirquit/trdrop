@@ -7,7 +7,6 @@ on:
     branches: [ v2 ]
 
 jobs:
-  
   build-linux:
     runs-on: ubuntu-18.04
     steps:
@@ -26,12 +25,13 @@ jobs:
           echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $env:GITHUB_ENV
           echo QT_VERSION=5.15.2 >> $env:GITHUB_ENV
 
-      - name: Install Qt
+      - name: Install Qt if not cached
         id: install-qt
+        if: steps.cache-qt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          version: 5.15.2
+          version: ${{ env.QT_VERSION }}
         
       - name: Compile
         run: |
