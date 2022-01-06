@@ -27,7 +27,6 @@ jobs:
 
       - name: Install Qt if not cached
         id: install-qt
-        if: steps.cache-qt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -35,7 +34,7 @@ jobs:
         
       - name: Compile
         run: |
-          PATH=${{ env.GITHUB_WORKSPACE }}/Qt/5.15.2/gcc_64/bin:$PATH
+          printenv
           rm -rf build
           mkdir -p build/debug
           cd build/debug
