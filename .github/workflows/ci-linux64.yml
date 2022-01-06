@@ -28,13 +28,14 @@ jobs:
       - name: Install Qt if not cached
         id: install-qt
         uses: jurplel/install-qt-action@v2
+        if: steps.cache-qt.outputs.cache-hit != 'true'
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           version: 5.15.2 
         
       - name: Compile
         run: |
-          printenv
+          printenv 
           rm -rf build
           mkdir -p build/debug
           cd build/debug
