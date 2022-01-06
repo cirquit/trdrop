@@ -33,6 +33,7 @@ jobs:
         
       - name: Compile
         run: |
+          pwd
           rm -rf build
           mkdir -p build/debug
           cd build/debug
