@@ -28,20 +28,12 @@ jobs:
       - name: Install Qt if not cached
         id: install-qt
         uses: jurplel/install-qt-action@v2
-        # if: steps.cache-qt.outputs.cache-hit != 'true'
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          version: 5.15.2 
+          version: ${{ env.QT_VERSION }} 
         
-      # - name: Add qmake path to PATH if Qt is cached
-      #   id: cached-qt-postop
-      #   if: steps.cache-qt.outputs.cache-hit == 'true'
-      #   run: |
-      #     echo PATH=/home/runner/work/trdrop/Qt/5.15.2/gcc_64/bin:$PATH >> $GITHUB_ENV
-
       - name: Compile
         run: |
-          echo $PATH 
           rm -rf build
           mkdir -p build/debug
           cd build/debug
