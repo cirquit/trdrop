@@ -30,7 +30,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          version: ${{ env.QT_VERSION }}
+          version: 5.15.2 
         
       - name: Compile
         run: |
