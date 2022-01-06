@@ -33,6 +33,12 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           version: 5.15.2 
         
+      - name: Add qmake path to PATH if Qt is cached
+        id: cached-qt-postop
+        if: steps.cache-qt.outputs.cache-hit == 'true'
+        run: |
+          echo PATH=/home/runner/work/trdrop/Qt/5.15.2/gcc_64/bin:$PATH >> $env:GITHUB_ENV
+
       - name: Compile
         run: |
           printenv 
