@@ -199,7 +199,7 @@ private:
         _export_directory.setValue(getDefaultMoviesDirectory().toString());
 
         _export_as_overlay.setName("Export as overlay");
-        _export_as_overlay.setTooltip("Video content replaced by an alpha channel, only showing the graph (.png only)");
+        _export_as_overlay.setTooltip("Video content replaced by an alpha channel, only showing the graph (.tiff only)");
         _export_as_overlay.setValue(false);
 
         _enable_live_preview.setName("Enable live preview");

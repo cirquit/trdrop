@@ -102,7 +102,7 @@ private:
     void _init_options()
     {
         _imageformat_list.push_back(ImageFormat(ImageFormatType::JPEG, true));
-        _imageformat_list.push_back(ImageFormat(ImageFormatType::PNG, false));
+        _imageformat_list.push_back(ImageFormat(ImageFormatType::TIFF, false));
     }
 
 //! member

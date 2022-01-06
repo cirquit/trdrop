@@ -150,7 +150,16 @@ private:
             // get framerate as text (1 - ...) is because we draw from top to bottom
             const double percent = 1 - static_cast<double>(i) / static_cast<double>(_segment_count);
             const double max_framerate = _get_max_frametime();
-            const QString framerate_text = QString::number(static_cast<int>(percent * max_framerate));
+            QString framerate_text = QString::number(static_cast<float>(percent * max_framerate), 100, 1);
+            // remove .0 from 0 values, 50, 100, 150, etc..
+            while(framerate_text.back() == '0')
+            {
+                framerate_text.chop(1);
+            }
+            while(framerate_text.back() == '.')
+            {
+                framerate_text.chop(1);
+            }
 
             // draw shadow
             const int x_offset = _get_shadow_text_offset();
