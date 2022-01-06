@@ -35,24 +35,12 @@ jobs:
         
       - name: Compile
         run: |
-          echo "pwd"
-          pwd
-          echo "ls"
-          ls
-          echo "ls .."
-          ls ..
           rm -rf build
           mkdir -p build/debug
           cd build/debug
-          pwd
-          ls ..
-          ls ../../
           qmake ../../trdrop/trdrop.pro -config debug
           make
-          pwd
 
       - name: Run tests
         run: |
-          pwd
-          cd ../..
           ./build/debug/trdrop-tests/trdrop-tests
