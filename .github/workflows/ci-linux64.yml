@@ -47,11 +47,13 @@ jobs:
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
+          pwd
+          sudo apt install libgstreamer1.0-dev
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
           cp build/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
           cd linuxdeployqt-template
-          ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
+          ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
 
       - name: Upload AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
