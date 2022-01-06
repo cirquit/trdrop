@@ -150,7 +150,7 @@ Window {
                         SpinBox {
                             id: framerateRange
                             from: 30
-                            to: 180
+                            to: 1200
                             stepSize: 10
                             editable: true
                             value: model.framerateRangeValue
@@ -232,7 +232,7 @@ Window {
                         SpinBox {
                             id: frametimeRange
                             from: 30
-                            to: 180
+                            to: 1200
                             stepSize: 10
                             editable: true
                             value: model.frametimeRangeValue
@@ -309,6 +309,32 @@ Window {
                             action: Action {
                                 onTriggered: {
                                     model.enableXAxisTextValue = !model.enableXAxisTextValue;
+                                }
+                            }
+                        }
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.EnableTriangleName
+                            checked: model.EnableTriangleValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.EnableTriangleTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.EnableTriangleValue = !model.EnableTriangleValue;
+                                }
+                            }
+                        }
+                        Switch {
+                            Layout.columnSpan: 3
+                            text: model.EnableBGShadowName
+                            checked: model.EnableBGShadowValue
+                            ToolTip.delay: 500
+                            ToolTip.visible: hovered
+                            ToolTip.text: model.EnableBGShadowTooltip
+                            action: Action {
+                                onTriggered: {
+                                    model.EnableBGShadowValue = !model.EnableBGShadowValue;
                                 }
                             }
                         }

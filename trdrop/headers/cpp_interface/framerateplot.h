@@ -28,7 +28,7 @@ public:
         , _plot_text_color(255, 255, 255) // white
         , _text_shadow(41, 41, 41) // dark grey
         , _segment_count(4) // we want to split the plot into 4 bars
-        , _eyecandy_text("FRAMERATE")
+        , _eyecandy_text("Framerate (fps)")
         , _x_axis_prefix_text("ANALYSIS RANGE: ")
     { }
 
@@ -36,20 +36,27 @@ public:
 public:
     //! top left is (0,0), painter has to be pointed to the image by the renderer
     //! order of drawing functions is essential
-    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering, bool enable_x_axis_text)
+    void draw_framerate_plot(QPainter * painter, bool enable_framerate_centering, bool enable_triangle_centering, bool enable_bg_shadow, bool enable_x_axis_text)
     {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::HighQualityAntialiasing);
 
         _set_plot_bounds();
+        if (enable_bg_shadow)
+        {
+            _draw_bg_shadow(painter);
+        }
+        _draw_plot_outline(painter);
         _draw_plot_inner_lines(painter);
         if (enable_framerate_centering)
         {
-            _draw_center_triangle(painter);
             _draw_center_line(painter);
         }
+        if (enable_triangle_centering)
+        {
+            _draw_center_triangle(painter);
+        }
         _draw_framerates(painter);
-        _draw_plot_outline(painter);
         _draw_text(painter);
         _draw_eyecandy_text(painter);
         if (enable_x_axis_text)
@@ -79,6 +86,12 @@ private:
         // set the member
         _plot_outline = QRect(x_pos, y_pos, plot_width, plot_height);
     }
+    void _draw_bg_shadow(QPainter * painter)
+    {
+        painter->setBrush(QColor(0, 0, 0, 180)); // todo: make this adjustable
+        painter->setPen(QColor(0, 0, 0, 0));     // transparent for rectangle to draw
+        painter->drawRect(_plot_outline);
+    }
     //! draws a rectangle based on the resolution
     //! NO constants INDEPEDENT of the resolution may be used
     void _draw_plot_outline(QPainter * painter)
@@ -88,14 +101,6 @@ private:
         const int plot_height = _plot_outline.height();
         const int plot_width = _plot_outline.width();
 
-        // draw shadow
-        painter->setPen(_get_outerline_shadow_pen());
-        // x axis
-        painter->drawLine(x_pos,   y_pos + plot_height
-                        , x_pos + plot_width, y_pos + plot_height);
-        // y axis
-        painter->drawLine(x_pos, y_pos
-                        , x_pos, y_pos + plot_height);
         // draw the x and y axis of the rect
         painter->setPen(_get_outerline_pen());
         // x axis
@@ -191,7 +196,7 @@ private:
     {
         painter->setFont(_get_eyecandy_text_font());
 
-        const uint8_t framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
+        const int framerate_analysis_range = (*_shared_general_options_model).get_framerate_range();
         const QString framerate_analysis_range_text = _x_axis_prefix_text + QString::number(framerate_analysis_range) + " frames";
 
         const int y_init_pos = _plot_outline.y() + _plot_outline.height();
@@ -212,6 +217,23 @@ private:
         painter->setPen(_plot_text_color);
         painter->drawText(x_pos, y_pos, framerate_analysis_range_text);
     }
+    //! draws a vertical center line
+    void _draw_center_line(QPainter * painter)
+    {
+        const int y_init_pos = _plot_outline.y();
+        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
+
+        const int y_bottom_padding = _plot_outline.height() / 80;
+
+        const int x_pos = x_init_pos;
+        const int y_pos = y_init_pos + y_bottom_padding;
+        // define vertical line
+        QPoint top_line_point(x_pos, y_pos);
+        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
+        // draw white line
+        painter->setPen(_get_centerline_pen());
+        painter->drawLine(top_line_point, bottom_line_point);
+    }
     //! draws all framerates graphs options are enabled
     void _draw_framerates(QPainter * painter)
     {
@@ -230,7 +252,7 @@ private:
         // set pen to the correct color and line width
         painter->setPen(_get_framerate_pen(video_count));
         // how many ticks do we want to display
-        const uint8_t framerate_ticks = _shared_general_options_model->get_framerate_range();
+        const int framerate_ticks = _shared_general_options_model->get_framerate_range();
         // will always be positive, history is fixed in frameratemodel and ticks are restricted by GUI
         const size_t size_difference = framerate_history.size() - framerate_ticks;
         // need the maximums to calculate the position of the point
@@ -312,26 +334,6 @@ private:
         painter->setBrush(brush);
         painter->drawPolygon(triangle);
     }
-    //! draws a vertical center line
-    void _draw_center_line(QPainter * painter)
-    {
-        const int y_init_pos = _plot_outline.y();
-        const int x_init_pos = _plot_outline.x() + _plot_outline.width() / 2;
-
-        const int y_bottom_padding = _plot_outline.height() / 80;
-
-        const int x_pos = x_init_pos;
-        const int y_pos = y_init_pos + y_bottom_padding;
-        // define vertical line
-        QPoint top_line_point(x_pos, y_pos);
-        QPoint bottom_line_point(x_pos, y_pos + _plot_outline.height() * 0.98);
-        // draw "shadow"
-        painter->setPen(_get_centerline_shadow_pen());
-        painter->drawLine(top_line_point, bottom_line_point);
-        // draw white line
-        painter->setPen(_get_centerline_pen());
-        painter->drawLine(top_line_point, bottom_line_point);
-    }
 // methods
 private:
     //! resolution adaptive outerline pen
@@ -363,15 +365,6 @@ private:
         pen.setJoinStyle(Qt::MiterJoin); // hard corners
         return pen;
     }
-    //! resolution adaptive outerline pen
-    QPen _get_outerline_shadow_pen()
-    {
-        QPen pen;
-        pen.setWidth(_get_outline_thickness()+3);
-        pen.setColor(_text_shadow);
-        pen.setJoinStyle(Qt::MiterJoin); // hard corners
-        return pen;
-    }
     //! resolution adaptive innerline pen
     QPen _get_innerline_pen()
     {
@@ -388,7 +381,7 @@ private:
         pen.setStyle(Qt::SolidLine);
         pen.setWidth(_get_plotline_thickness());
         pen.setBrush(plot_color);
-        pen.setCapStyle(Qt::FlatCap);
+        pen.setCapStyle(Qt::RoundCap);
         pen.setJoinStyle(Qt::RoundJoin);
         return pen;
     }
@@ -406,13 +399,13 @@ private:
     int _get_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 13;
-        else if (current_size == QSize(1280, 720))  return 18;
-        else if (current_size == QSize(1600, 900))  return 22;
-        else if (current_size == QSize(1920, 1080)) return 27;
-        else if (current_size == QSize(2048, 1152)) return 30;
-        else if (current_size == QSize(2560, 1440)) return 37;
-        else if (current_size == QSize(3840, 2160)) return 51;
+        if      (current_size == QSize(960, 540))   return 8;
+        else if (current_size == QSize(1280, 720))  return 12;
+        else if (current_size == QSize(1600, 900))  return 15;
+        else if (current_size == QSize(1920, 1080)) return 20;
+        else if (current_size == QSize(2048, 1152)) return 22;
+        else if (current_size == QSize(2560, 1440)) return 29;
+        else if (current_size == QSize(3840, 2160)) return 35;
         qDebug() << "FrameratePlot::_get_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }
@@ -420,13 +413,13 @@ private:
     int _get_eyecandy_font_size()
     {
         QSize current_size = _shared_resolution_model->get_active_size();
-        if      (current_size == QSize(960, 540))   return 13 + 3;
-        else if (current_size == QSize(1280, 720))  return 18 + 3;
-        else if (current_size == QSize(1600, 900))  return 22 + 3;
-        else if (current_size == QSize(1920, 1080)) return 27 + 3;
-        else if (current_size == QSize(2048, 1152)) return 30 + 3;
-        else if (current_size == QSize(2560, 1440)) return 37 + 3;
-        else if (current_size == QSize(3840, 2160)) return 51 + 12;
+        if      (current_size == QSize(960, 540))   return 8 + 3;
+        else if (current_size == QSize(1280, 720))  return 12 + 3;
+        else if (current_size == QSize(1600, 900))  return 15 + 3;
+        else if (current_size == QSize(1920, 1080)) return 20 + 3;
+        else if (current_size == QSize(2048, 1152)) return 22 + 3;
+        else if (current_size == QSize(2560, 1440)) return 29 + 3;
+        else if (current_size == QSize(3840, 2160)) return 35 + 12;
         qDebug() << "FrameratePlot::_get_eyecandy_font_size() - there is no case for the current resolution(" << current_size << "), this should never happen";
         return 13;
     }

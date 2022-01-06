@@ -59,6 +59,14 @@ public:
         painter->setPen(fps_plot_color.color());
         painter->setFont(displayed_text_font);
         painter->drawText(x, y, _get_full_text(frame_index));
+        // draw text in white
+        // todo(illusion): find a better way to do this
+        // we are drawing the text on top
+        // there are small artifacts from the text drawn before this one.
+        QColor white_color = QColor(255, 255, 255);
+        painter->setPen(white_color);
+        painter->setFont(displayed_text_font);
+        painter->drawText(x, y, displayed_text.value());
     }
 
 // methods
