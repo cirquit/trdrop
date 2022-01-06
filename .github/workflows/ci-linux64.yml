@@ -33,9 +33,12 @@ jobs:
         
       - name: Compile
         run: |
+          echo "pwd"
           pwd
-          cd trdrop
-          pwd
+          echo "ls"
+          ls
+          echo "ls .."
+          ls ..
           rm -rf build
           mkdir -p build/debug
           cd build/debug
