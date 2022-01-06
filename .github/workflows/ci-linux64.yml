@@ -37,6 +37,9 @@ jobs:
           rm -rf build
           mkdir -p build/debug
           cd build/debug
+          pwd
+          ls ..
+          ls ../../
           qmake ../../trdrop/trdrop.pro -config debug
           make
           pwd
