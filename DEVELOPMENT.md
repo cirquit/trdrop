@@ -3,24 +3,35 @@
 Short writeup of Windows / Linux (Ubuntu) cross platform development information with Qt
 
 * Setup an initial repository
-* Install Qt
+* Install Qt 5.15.2
 * Install CMake (Linux)
 * Install CMake (Windows)
+* Compile OpenCV 4.5.1 (Linux)
+* Compile OpenCV 4.5.1 (Windows)
+<!-- we're only using qimage save, comment these for now
 * Install FFmpeg (Linux)
 * Install FFmpeg (Windows)
-* Compile OpenCV 4.1 (Linux)
-* Compile OpenCV 4.1 (Windows)
+-->
+## Setup an initial repository
 
-## Setup an initial repository for Qt
+**Linux:**
+
+**Windows:**
+
+1. Install [Git](https://git-scm.com/download/win)
+
+2. With your terminal of chioce and working directory, run `git clone https://github.com/cirquit/trdrop.git`
 
 ## Install Qt
 
 * Install [QtCreator](https://www.qt.io/download#)
-    - I use the Qt version `5.12.2`, but I hope that any `5.*.*` version works
-    - **Windows:** Check to install the correct compiler, I use `mingw_810`, the 64-bit version 
-    - **Windows:** Install everything in the default installation directory -> `C:\Qt`
-    - **Windows:** Developer Options, check `mingw810_64`
-    - **Linux:** Check to install the correct compiler, I use `g++ 7.4.0`
+ - Qt version `5.15.2`
+ - **Windows:**
+ - Check to install the correct compiler, I use `mingw_810`, the 64-bit version 
+ - Developer Options, check `mingw810_64`
+ - Create an Environment Variable `Qt_Install` pointing to your downloaded Qt directory. i.e `C:\Qt`
+ - **Linux:**
+ - Check to install the correct compiler, I use `g++ 7.4.0`
 
 ## Install CMake (Linux)
 
@@ -28,56 +39,80 @@ Execute in the command line `sudo apt-get install cmake`
 
 ## Install CMake (Windows)
 
-Use the `.msi` installer from [https://cmake.org/download/](https://cmake.org/download/). Pick the option to add CMake to the `PATH`.
+Use the `.msi` installer from https://cmake.org/download/. Pick the option to add CMake to the `PATH`.
 
-## Install OpenCV (Linux)
+## Compile OpenCV (Linux)
 
 Follow the instructions for `https://github.com/cirquit/opencv-template`. You can check if your installation works by running the examples in this template repository.
 
 **Troubleshooting:** If the libraries are still not found after the installation, don't forget to run `sudo ldconfig -v`.
 
-## Install OpenCV (Windows)
+## Compile OpenCV (Windows)
 
-Install from [https://opencv.org/releases/](https://opencv.org/releases/), not the `Win Pack`, but the `Sources`. Extract the `opencv-4.5.1` directory to `C:`.
+1. Download OpenCV version 4.5.1 from https://opencv.org/releases/, not the `Win Pack`, but the `Sources`. Extract the `opencv-4.5.1` directory to somewhere on your computer.
 
-CMake Options:
-```
-Source code: C:/opencv-4.5.1
-Where to build the binaries: C:/opencv-4.5.1/build_64
-```
+2. Create an Environment Variable `OpenCV_DIR` pointing to your extracted OpenCV source code. i.e `Z:\3rdparty\opencv-4.5.1`
 
-Follow the installation instructions of [https://wiki.qt.io/How_to_setup_Qt_and_openCV_on_Windows]().
-
-The differences to that tutorial:
-* I created the build directory inside the opencv-dir `C:\opencv-4.1.0\build_64` instead a new one at `C:\opencv-build`
-* Using the 64 bit compilation because of the RAM restriction with 32 bit. 32 bit compilation works out of the box if the PATH variable is set accordingly + 64 is replaced with 86 or 32 in the paths
-
-My PATH environment variable for comparisson:
+2.1. Add the following folders to your path
 
 ```
-1) C:\Qt\Tools\mingw810_64\bin
-2) C:\Qt\5.12.2\mingw810_64\bin
-3) C:\opencv-4.5.1\build\install\x64\mingw\bin
+%Qt_Install%\Tools\mingw810_64\bin
+%Qt_Install%\5.15.2\mingw81_64\bin
 ```
 
-> 1) is needed for CMake to get the correct compiler (gcc / g++)
+3. CMake Options:
 
-> 2) is needed for the qt libraries on runtime (Qt5Gui.dll)
+```
+Source code: (your opencv directory)
+Where to build the binaries: (your opencv directory)/build_64
+```
 
-> 3) is possibly needed for some opencv specific stuff (with 32bit program runs from QtCreator with this, 64 doesn't seem to work)
+Then click Configure, choose the following settings:
 
-Pick the following flags configuration (deviating from the default configuration):
+```
+Specify the generator for this project: MinGW Makefiles
+Specify native compilers, next
+Compilers C:   (your Qt installation)\Tools\mingw810_64\bin\gcc.exe
+Compilers C++: (your Qt installation)\Tools\mingw810_64\bin\g++.exe
+```
 
-* [ ] Build_JAVA
-* [ ] Build_opencv_java_bindings_generator
-* [ ] Build_opencv_python_bindings_generator
-* [Release] CMAKE_BUILD_TYPE
-* [X] WITH_OPENGL
-* [X] WITH_QT
-* [ ] WITH_OPENCL_D3D11_NV
+Click Finish.
 
-You may have to set the CMake settings multiple times, e.g. after the `WITH_QT` flag you have to set additional variables.
+4. Pick the following flags configuration (deviating from the default configuration):
 
-#### Current shortcomings
+```
+[ ] Build_JAVA
+[ ] Build_opencv_java_bindings_generator
+[ ] Build_opencv_python_bindings_generator
+CMAKE_BUILD_TYPE: Release
+[X] WITH_OPENGL
+[X] WITH_QT
+[ ] WITH_OPENCL_D3D11_NV
+```
 
-* Can't run the executable from QtCreator, need to manually locate it inside the build directory if compiled with 64-bit
+5. Click Generate
+
+6. Once finished, with your terminal of choice, cd into `%OpenCV_DIR%/build_64`
+
+7. Run the following commands:
+
+```
+mingw32-make -j 8
+mingw32-make install
+```
+
+## Running Trdrop with Qt Creator (Windows)
+
+1. Open `trdrop.pro` set config to MinGW 8.1.0 64 Bit, Build Config to Release.
+
+2. With your terminal of chioce, go to the release directory of the application in my case `C:\git\trdrop\build-trdrop-Desktop_Qt_5_15_2_MinGW_64_bit-Release\release`
+
+2. Execute the following commands:
+
+```
+copy %OpenCV_Dir%\build_64\install\x64\mingw\bin\*.dll .
+copy %Qt_Install%\Tools\mingw810_64\bin\*.dll .
+windeployqt.exe --qmldir ..\..\trdrop .
+```
+
+3. Running after compiling from Qt Creator should work. You can find the built binaries in `trdrop_root\build-trdrop-Desktop_Qt_5_15_2_MinGW_64_bit-Release\release`
