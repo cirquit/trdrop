@@ -9,14 +9,14 @@ on:
 jobs:
   build-windows:
     runs-on: windows-2019
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-        - name: Get short SHA and set Qt version
-          run: |
-            echo "SHORT_SHA=$($env:GITHUB_SHA.SubString(0,7))" >> $env:GITHUB_ENV
-            echo QT_VERSION=5.15.2 >> $env:GITHUB_ENV
+      - name: Get short SHA and set Qt version
+        run: |
+          echo "SHORT_SHA=$($env:GITHUB_SHA.SubString(0,7))" >> $env:GITHUB_ENV
+          echo QT_VERSION=5.15.2 >> $env:GITHUB_ENV
 
   #       # - name: Cache Object files
   #       #   uses: actions/cache@v1
@@ -32,63 +32,63 @@ jobs:
   #       #     cd c:\build_temp
   #       #     Copy-Item *.o, *.c, *.cpp, *.h ${env:GITHUB_WORKSPACE}\release
 
-         - name: Cache Qt
-           id: cache-qt
-           uses: actions/cache@v1
-           with:
-             path: C:\Qt
-             key: ${{ runner.os }}-Qt-Cache
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: C:\Qt
+          key: ${{ runner.os }}-Qt-Cache
+ 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ env.QT_VERSION }}
+          arch: win64_mingw81
+          dir: C:\
+          tools: tools_ifw,4.1.1,qt.tools.ifw.41 tools_qtcreator,5.0.2-0,qt.tools.qtcreator,qt.tools.
 
-         - name: Install Qt
-           uses: jurplel/install-qt-action@v2
-           with:
-             cached: ${{ steps.cache-qt.outputs.cache-hit }}
-             version: ${{ env.QT_VERSION }}
-             arch: win64_mingw81
-             dir: C:\
-             tools: tools_ifw,4.1.1,qt.tools.ifw.41 tools_qtcreator,5.0.2-0,qt.tools.qtcreator,qt.tools.
+      - name: Add Qt and MinGW to environment variable
+        run: |
+          $QT_VERSION1=$env:QT_VERSION
+          echo QT_PATH="C:\Qt" >> $env:GITHUB_ENV
+          echo MINGW64_BINARY_PATH="C:\msys64\mingw64\bin" >> $env:GITHUB_ENV
 
-         - name: Add Qt and MinGW to environment variable
-           run: |
-             $QT_VERSION1=$env:QT_VERSION
-             echo QT_PATH="C:\Qt" >> $env:GITHUB_ENV
-             echo MINGW64_BINARY_PATH="C:\msys64\mingw64\bin" >> $env:GITHUB_ENV
+      - name: Build trdrop
+        run: |
+          qmake -o Makefile trdrop\trdrop.pro -spec win32-g++ "CONFIG+=qtquickcompiler" "OBJECTS_DIR=C:\build_temp" "MOC_DIR=C:\build_temp"
+          mingw32-make -f Makefile.Release
 
-         - name: Build trdrop
-           run: |
-             qmake -o Makefile trdrop\trdrop.pro -spec win32-g++ "CONFIG+=qtquickcompiler" "OBJECTS_DIR=C:\build_temp" "MOC_DIR=C:\build_temp"
-             mingw32-make -f Makefile.Release
+      - name: Cleanup object files
+        run: |
+          cd release
+          Move-Item -Force *.o, *.c, *.cpp, *.h C:\build_temp
 
-         - name: Cleanup object files
-           run: |
-             cd release
-             Move-Item -Force *.o, *.c, *.cpp, *.h C:\build_temp
+      - name: Prepare trdrop for artifact
+        run: |
+          cd $env:MINGW64_BINARY_PATH
+          copy-item libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, libgomp-1.dll $env:GITHUB_WORKSPACE\release
+          windeployqt --qmldir $env:GITHUB_WORKSPACE $env:GITHUB_WORKSPACE\release
 
-         - name: Prepare trdrop for artifact
-           run: |
-             cd $env:MINGW64_BINARY_PATH
-             copy-item libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, libgomp-1.dll $env:GITHUB_WORKSPACE\release
-             windeployqt --qmldir $env:GITHUB_WORKSPACE $env:GITHUB_WORKSPACE\release
+      - name: Cleanup for packaging
+        run: |
+          cd release
+          Remove-Item -Recurse -Force audio, bearer, iconengines, mediaservice, playlistformats, qmltooling, QtGraphicalEffects, styles, translations, D3Dcompiler_47.dll, opengl32sw.dll, libGLESv2.dll
+    
+      - name: Create release archive
+        run: |
+          cd release
+          7z a -m0=LZMA2 -mx9 ..\trdrop-release-${env:SHORT_SHA}.7z
 
-         - name: Cleanup for packaging
-           run: |
-             cd release
-             Remove-Item -Recurse -Force audio, bearer, iconengines, mediaservice, playlistformats, qmltooling, QtGraphicalEffects, styles, translations, D3Dcompiler_47.dll, opengl32sw.dll, libGLESv2.dll
-        
-         - name: Create release archive
-           run: |
-             cd release
-             7z a -m0=LZMA2 -mx9 ..\trdrop-release-${env:SHORT_SHA}.7z
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: trdrop-release-${{ env.SHORT_SHA }}
+          path: release/*
+          if-no-files-found: error
 
-         - name: Upload artifact
-           uses: actions/upload-artifact@v2
-           with:
-             name: trdrop-release-${{ env.SHORT_SHA }}
-             path: release/*
-             if-no-files-found: error
-
-  #       # - name: Upload Release
-  #       #   env:
-  #       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       #   if: github.event_name != 'pull_request'
-  #       #   run: gh release create $env:SHORT_SHA "trdrop-release-$env:SHORT_SHA.7z" --target $env:GITHUB_SHA -t "Trdrop Release - $env:SHORT_SHA"
+#       # - name: Upload Release
+#       #   env:
+#       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       #   if: github.event_name != 'pull_request'
+#       #   run: gh release create $env:SHORT_SHA "trdrop-release-$env:SHORT_SHA.7z" --target $env:GITHUB_SHA -t "Trdrop Release - $env:SHORT_SHA"
