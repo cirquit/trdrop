@@ -8,10 +8,17 @@ on: [push, pull_request]
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
+     # specific for linuxdeployqt
+     # Todo: fork this and make it work on newer distros.
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Get short SHA and set Qt version
+        run: |
+          echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
+          echo QT_VERSION=5.15.2 >> $GITHUB_ENV
 
       - name: Cache Qt
         id: cache-qt
@@ -19,11 +26,6 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-Cache
-
-      - name: Get short SHA and set Qt version
-        run: |
-          echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
-          echo QT_VERSION=5.15.2 >> $GITHUB_ENV
 
       - name: Install Qt
         id: install-qt
