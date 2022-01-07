@@ -1,15 +1,14 @@
-name: (Windows x64) build, test and publish
+name: (Windows x64) build, test and publish an archive
 
-on: [push, pull_request]
-
-#on: 
-#  push:
-#    branches: [ v2 ]
-
+on: 
+  push:
+    branches: [ v2 ]
+  pull_request:
+    branches: [ v2 ]
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -35,7 +34,7 @@ jobs:
           dir: C:\
           tools: tools_ifw,4.1.1,qt.tools.ifw.41 tools_qtcreator,5.0.2-0,qt.tools.qtcreator,qt.tools.
 
-      - name: Add Qt and MinGW to environment variable
+      - name: Add Qt and MinGW to the environment
         run: |
           $QT_VERSION1=$env:QT_VERSION
           echo QT_PATH="C:\Qt" >> $env:GITHUB_ENV
@@ -46,7 +45,11 @@ jobs:
           qmake.exe -o Makefile trdrop\trdrop.pro -spec win32-g++ "CONFIG+=qtquickcompiler" "OBJECTS_DIR=C:\build_temp" "MOC_DIR=C:\build_temp"
           mingw32-make -f Makefile
 
+      - name: Run tests
+        run: trdrop-tests\release\trdrop-tests.exe
+
       - name: Prepare trdrop for artifact
+        if: startsWith(github.event.head_commit.message, 'Release')
         run: |
           cd $env:MINGW64_BINARY_PATH
           copy-item libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, libgomp-1.dll ${env:GITHUB_WORKSPACE}\trdrop-ui\release
@@ -55,11 +58,9 @@ jobs:
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-tests\release
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-ui\release
 
-      - name: Run tests
-        run: trdrop-tests\release\trdrop-tests.exe
-
+      # TODO: Cleanup release builds. It is very bloated rn.
       - name: Upload artifact
-        uses: actions/upload-artifact@v2 # Todo cleanup release builds. It is very bloated rn.
+        uses: actions/upload-artifact@v2 
         if: startsWith(github.event.head_commit.message, 'Release')
         with:
           name: trdrop-v2-dev-${{ env.SHORT_SHA }}
