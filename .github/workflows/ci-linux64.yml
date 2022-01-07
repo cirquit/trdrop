@@ -2,9 +2,9 @@ name: (Linux x64) build, test and deploy AppImage
 
 on: 
   push:
-    branches: [ v2 ]
+    branches: [ v2-temp ]
   pull_request:
-    branches: [ v2 ]
+    branches: [ v2-temp ]
 
 jobs:
   build-linux:
