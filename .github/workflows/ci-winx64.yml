@@ -59,7 +59,8 @@ jobs:
         run: trdrop-tests\release\trdrop-tests.exe
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2 # Todo cleanup release builds. It is very bloated rn.
+        if: startsWith(github.event.head_commit.message, 'Release')
         with:
           name: trdrop-v2-dev-${{ env.SHORT_SHA }}
           path: |
