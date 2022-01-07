@@ -1,29 +1,31 @@
 name: (Linux x64) build, test and deploy AppImage
 
-on: 
-  push:
-    branches: [ v2-temp ]
-  pull_request:
-    branches: [ v2-temp ]
+on: [push, pull_request]
+
+#on: 
+#  push:
+#    branches: [ v2 ]
 
 jobs:
   build-linux:
     runs-on: ubuntu-18.04
+     # specific for linuxdeployqt
+     # Todo: fork this and make it work on newer distros.
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Get short SHA and set Qt version
+        run: |
+          echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
+          echo QT_VERSION=5.15.2 >> $GITHUB_ENV
 
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-qtcache
-
-      - name: Get short SHA and set Qt version
-        run: |
-          echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
-          echo QT_VERSION=5.15.2 >> $GITHUB_ENV
+          key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-Cache
 
       - name: Install Qt
         id: install-qt
