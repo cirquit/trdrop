@@ -18,7 +18,6 @@ jobs:
         run: |
           echo SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
           echo QT_VERSION=5.15.2 >> $GITHUB_ENV
-          echo FFMPEG_VERSION=4.4.1 >> $GITHUB_ENV
 
       - name: Cache Qt
         id: cache-qt
@@ -39,7 +38,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../ffmpeg
-          key: ${{ runner.os }}-ffmpeg-${{ env.FFMPEG_VERSION }}-cache
+          key: ${{ runner.os }}-ffmpeg-cache
 
       - name: Prepare distribution libraries to compile FFMPEG
         id: prepare-ffmpeg-libraries-from-distribution
