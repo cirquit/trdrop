@@ -59,6 +59,7 @@ jobs:
             libgnutls28-dev \
             libopus-dev \
             libmp3lame-dev \
+            libnuma-dev \
             libsdl2-dev \
             libtool \
             libva-dev \
@@ -126,7 +127,7 @@ jobs:
           cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
           cd ffmpeg
           PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" PKG_CONFIG_PATH="${{ env.FFMPEG_LIB_PATH }}/pkgconfig" ./configure \
-            --prefix="{{ env.FFMPEG_BUILD_PATH }}" \
+            --prefix="${{ env.FFMPEG_BUILD_PATH }}" \
             --pkg-config-flags="--static" \
             --extra-cflags="-I${{ env.FFMPEG_INCLUDE_PATH }}" \
             --extra-ldflags="-L${{ env.FFMPEG_LIB_PATH }}" \
