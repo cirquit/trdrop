@@ -13,17 +13,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get short SHA and set Qt version
+      - name: Get short SHA and setup library versions in environment variables
         run: |
           echo "SHORT_SHA=$($env:GITHUB_SHA.SubString(0,7))" >> $env:GITHUB_ENV
           echo QT_VERSION=5.15.2 >> $env:GITHUB_ENV
+          echo FFMPEG_VERSION=4.4.1 >> $env:GITHUB_ENV
 
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v1
         with:
           path: C:\Qt
-          key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-Cache
+          key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-cache
  
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -34,11 +35,27 @@ jobs:
           dir: C:\
           tools: tools_ifw,4.1.1,qt.tools.ifw.41 tools_qtcreator,5.0.2-0,qt.tools.qtcreator,qt.tools.
 
-      - name: Add Qt and MinGW to the environment
+      - name: Cache FFMPEG
+        id: cache-ffmpeg
+        uses: actions/cache@v1
+        with:
+          path: C:\ffmpeg-source
+          key: ${{ runner.os }}-ffmpeg-${{ env.FFMPEG_VERSION }}-cache
+
+      - name: Download FFMPEG libraries
+        shell: powershell
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          (new-object System.Net.WebClient).DownloadFile( 'https://github.com/GyanD/codexffmpeg/releases/download/4.4.1/ffmpeg-4.4.1-full_build-shared.7z', 'c:\')
+          7z.exe x c:\ffmpeg-4.4.1-full_build-shared.7z "-oc:\ffmpeg-source" -y
+
+      - name: Add Qt, MinGW and FFMPEG to the environment
         run: |
           $QT_VERSION1=$env:QT_VERSION
           echo QT_PATH="C:\Qt" >> $env:GITHUB_ENV
           echo MINGW64_BINARY_PATH="C:\msys64\mingw64\bin" >> $env:GITHUB_ENV
+          echo FFMPEG_SOURCE="C:\ffmpeg-source" >> $env:GITHUB_ENV
+          echo FFMPEG_SOURCE_BIN="C:\ffmpeg-source\bin" >> $env:GITHUB_ENV
 
       - name: Compile
         run: |
@@ -47,15 +64,16 @@ jobs:
 
       - name: Run tests
         id: run-windows-tests
-        shell: cmd
         run: |
           trdrop-tests\release\trdrop-tests.exe
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
-          cd $env:MINGW64_BINARY_PATH
+          cd ${env:MINGW64_BINARY_PATH}
           copy-item libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll, libgomp-1.dll ${env:GITHUB_WORKSPACE}\trdrop-ui\release
+          cd ${env:FFMPEG_SOURCE_BIN}
+          copy-item avcodec-58.dll, avdevice-58.dll, avfilter-7.dll, avformat-58.dll, avutil-56.dll, postproc-55.dll, swresample-3.dll, swscale-5.dll ${env:GITHUB_WORKSPACE}\trdrop-lib\release
           cd ${env:GITHUB_WORKSPACE}
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-lib\release
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-tests\release
