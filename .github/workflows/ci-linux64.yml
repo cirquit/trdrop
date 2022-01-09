@@ -44,6 +44,8 @@ jobs:
       - name: Prepare distribution libraries to compile FFMPEG
         id: prepare-ffmpeg-libraries-from-distribution
         run: |
+          sudo apt update
+          sudo apt list libdav1d-dev
           sudo apt-get -y install \
             autoconf \
             automake \
