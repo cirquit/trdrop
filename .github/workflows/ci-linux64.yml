@@ -42,7 +42,7 @@ jobs:
           key: ${{ runner.os }}-ffmpeg-${{ env.FFMPEG_VERSION }}-cache
 
       - name: Prepare distribution libraries to compile FFMPEG
-        id: compile-ffmpeg-0.1
+        id: prepare-ffmpeg-libraries-from-distribution
         run: |
           sudo apt-get -y install \
             autoconf \
@@ -80,6 +80,7 @@ jobs:
             libdav1d-dev
 
       - name: Setup FFMPEG paths
+        id: setup-ffmpeg-paths
         run: |
           echo FFMPEG_BIN_PATH=/home/runner/work/trdrop/ffmpeg/bin >> $GITHUB_ENV
           echo FFMPEG_INCLUDE_PATH=/home/runner/work/trdrop/ffmpeg/build/include >> $GITHUB_ENV
@@ -92,7 +93,7 @@ jobs:
           echo FFMPEG_SOURCE=/home/runner/work/trdrop/ffmpeg/build >> $GITHUB_ENV
 
       - name: Fetch FFMPEG source
-        id: compile-ffmpeg-0.2
+        id: fetch-ffmpeg-source
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
           cd .. 
@@ -102,7 +103,7 @@ jobs:
           tar xjvf ffmpeg-snapshot.tar.bz2
 
       - name: Compile libsvtav1 - encoder only (checkout 3758f57f7 - 31.12.21)
-        id: compile-ffmpeg-0.3
+        id: compile-libsvtav1
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
           cd {{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
@@ -116,7 +117,7 @@ jobs:
           make install
 
       - name: Compile FFMPEG
-        id: compile-ffmpeg-0.4
+        id: compile-ffmpeg
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
           cd {{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
