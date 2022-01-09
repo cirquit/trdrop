@@ -46,6 +46,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:savoury1/multimedia
           sudo apt update
+          sudo apt list libdav1d-dev
           sudo apt-get -y install \
             autoconf \
             automake \
@@ -100,7 +101,7 @@ jobs:
         run: |
           cd .. 
           mkdir -p ffmpeg/source ffmpeg/build ffmpeg/bin
-          cd {{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
           wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
           tar xjvf ffmpeg-snapshot.tar.bz2
 
@@ -108,30 +109,30 @@ jobs:
         id: compile-libsvtav1
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
-          cd {{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
           git -C SVT-AV1 pull 2> /dev/null || git clone https://gitlab.com/AOMediaCodec/SVT-AV1.git
           cd SVT-AV1
           git checkout 3758f57f7
           mkdir build
           cd build
-          PATH="{{ env.FFMPEG_BIN_PATH }}:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="{{ env.FFMPEG_BUILD_PATH }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_DEC=OFF -DBUILD_SHARED_LIBS=OFF ..
-          PATH="{{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="${{ env.FFMPEG_BUILD_PATH }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_DEC=OFF -DBUILD_SHARED_LIBS=OFF ..
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
           make install
 
       - name: Compile FFMPEG
         id: compile-ffmpeg
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
-          cd {{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
           cd ffmpeg
-          PATH="{{ env.FFMPEG_BIN_PATH }}:$PATH" PKG_CONFIG_PATH="{{ env.FFMPEG_LIB_PATH }}/pkgconfig" ./configure \
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" PKG_CONFIG_PATH="${{ env.FFMPEG_LIB_PATH }}/pkgconfig" ./configure \
             --prefix="{{ env.FFMPEG_BUILD_PATH }}" \
             --pkg-config-flags="--static" \
-            --extra-cflags="-I{{ env.FFMPEG_INCLUDE_PATH }}" \
-            --extra-ldflags="-L{{ env.FFMPEG_LIB_PATH }}" \
+            --extra-cflags="-I${{ env.FFMPEG_INCLUDE_PATH }}" \
+            --extra-ldflags="-L${{ env.FFMPEG_LIB_PATH }}" \
             --extra-libs="-lpthread -lm" \
             --ld="g++" \
-            --bindir="{{ env.FFMPEG_BIN_PATH }}" \
+            --bindir="${{ env.FFMPEG_BIN_PATH }}" \
             --enable-gpl \
             --enable-gnutls \
             --enable-libass \
@@ -146,7 +147,7 @@ jobs:
             --enable-libx264 \
             --enable-libx265 \
             --enable-nonfree
-          PATH="{{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
           make install
 
       - name: Compile trdrop
