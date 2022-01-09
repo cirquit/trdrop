@@ -44,6 +44,7 @@ jobs:
       - name: Prepare distribution libraries to compile FFMPEG
         id: prepare-ffmpeg-libraries-from-distribution
         run: |
+          sudo sed -i 's/azure\.//' /etc/apt/sources.list
           sudo apt update
           sudo apt list libdav1d-dev
           sudo apt-get -y install \
