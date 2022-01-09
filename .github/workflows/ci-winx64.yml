@@ -46,7 +46,10 @@ jobs:
           mingw32-make -f Makefile
 
       - name: Run tests
-        run: trdrop-tests\release\trdrop-tests.exe
+        id: run-windows-tests
+        shell: powershell
+        run: |
+          trdrop-tests\release\trdrop-tests.exe
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
