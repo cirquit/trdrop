@@ -47,7 +47,7 @@ jobs:
 
       - name: Run tests
         id: run-windows-tests
-        shell: powershell
+        shell: cmd
         run: |
           trdrop-tests\release\trdrop-tests.exe
 
