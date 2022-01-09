@@ -165,6 +165,8 @@ jobs:
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
+          sudo add-apt-repository --remove ppa:savoury1/multimedia
+          sudo apt update
           sudo apt install libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
