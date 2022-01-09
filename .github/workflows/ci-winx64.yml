@@ -46,8 +46,9 @@ jobs:
         shell: powershell
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
         run: |
-          (new-object System.Net.WebClient).DownloadFile( 'https://github.com/GyanD/codexffmpeg/releases/download/4.4.1/ffmpeg-4.4.1-full_build-shared.7z', 'c:\')
-          7z.exe x c:\ffmpeg-4.4.1-full_build-shared.7z "-oc:\ffmpeg-source" -y
+          mkdir c:\ffmpeg-archive
+          (new-object System.Net.WebClient).DownloadFile( 'https://github.com/GyanD/codexffmpeg/releases/download/4.4.1/ffmpeg-4.4.1-full_build-shared.7z', 'c:\ffmpeg-archive\ffmpeg-4.4.1-full_build-shared.7z')
+          7z.exe x c:\ffmpeg-archive\ffmpeg-4.4.1-full_build-shared.7z "-oc:\ffmpeg-source" -y
 
       - name: Add Qt, MinGW and FFMPEG to the environment
         run: |
