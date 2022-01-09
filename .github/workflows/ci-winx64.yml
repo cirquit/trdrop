@@ -56,7 +56,7 @@ jobs:
           cd ${env:GITHUB_WORKSPACE}
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-lib\release
           windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-tests\release
-          windeployqt --qmldir trdrop ${env:GITHUB_WORKSPACE}\trdrop-ui\release
+          windeployqt --qmldir trdrop\trdrop-ui\views ${env:GITHUB_WORKSPACE}\trdrop-ui\release
 
       # TODO: Cleanup release builds. It is very bloated rn.
       - name: Upload artifact
