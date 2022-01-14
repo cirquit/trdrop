@@ -152,15 +152,16 @@ jobs:
 
       - name: Compile trdrop
         run: |
-          rm -rf build
-          mkdir -p build/release
-          cd build/release
-          qmake ../../trdrop/trdrop.pro -config release
+          rm -rf shadow-build
+          mkdir -p shadow-build
+          cd shadow-build
+          qmake ../trdrop/trdrop.pro -config release ## TODO debug local build with qmake
           make
 
       - name: Run tests
         run: |
-          ./build/release/trdrop-tests/trdrop-tests
+          cd build/linux/gcc/x64/release/trdrop-tests/
+          LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
@@ -170,7 +171,8 @@ jobs:
           sudo apt install libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          cp build/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
+          cp build/linux/gcc/x64/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
+          cp build/linux/gcc/x64/release/lib* linuxdeployqt-template/usr/lib
           cd linuxdeployqt-template
           ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
 
