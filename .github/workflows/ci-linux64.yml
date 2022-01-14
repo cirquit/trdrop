@@ -171,7 +171,7 @@ jobs:
           sudo apt install libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          cp build/linux/gcc/x64/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
+          cp build/linux/gcc/x64/release/trdrop-ui linuxdeployqt-template/usr/bin
           cp build/linux/gcc/x64/release/lib* linuxdeployqt-template/usr/lib
           cd linuxdeployqt-template
           ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
