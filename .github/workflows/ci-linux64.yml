@@ -160,7 +160,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cd build/linux/gcc/x64/release/trdrop-tests/
+          cd build/linux/gcc/x64/release
           LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
 
       - name: Create AppImage
