@@ -8,12 +8,22 @@ QT += qml quick
 # ----------------
 TEMPLATE = app
 CONFIG += c++14
-
+include(../qmake-target-platform.pri)
+include(../qmake-destination-path.pri)
 # ----------------
 # filepaths
 # ----------------
-INCLUDEPATH += source
 
+DESTDIR = $$PWD/../../build/$$DESTINATION_PATH
+OBJECTS_DIR = $$PWD/build/$$DESTINATION_PATH/.obj
+MOC_DIR = $$PWD/build/$$DESTINATION_PATH/.moc
+RCC_DIR = $$PWD/build/$$DESTINATION_PATH/.qrc
+UI_DIR = $$PWD/build/$$DESTINATION_PATH/.ui
+
+LIBS += -L$$PWD/../../build/$$DESTINATION_PATH -ltrdrop-lib
+
+INCLUDEPATH += source \
+    ../trdrop-lib/source
 SOURCES += \
         source/main.cpp
 

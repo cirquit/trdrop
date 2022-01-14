@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-Cache
+          key: ${{ runner.os }}-Qt-${{ env.QT_VERSION }}-cache
 
       - name: Install Qt
         id: install-qt
@@ -32,26 +32,147 @@ jobs:
         with:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           version: ${{ env.QT_VERSION }} 
-        
-      - name: Compile
+      
+      - name: Cache FFMPEG libraries
+        id: cache-ffmpeg
+        uses: actions/cache@v1
+        with:
+          path: ../ffmpeg
+          key: ${{ runner.os }}-ffmpeg-cache
+
+      - name: Prepare distribution libraries to compile FFMPEG
+        id: prepare-ffmpeg-libraries-from-distribution
         run: |
-          rm -rf build
-          mkdir -p build/release
-          cd build/release
-          qmake ../../trdrop/trdrop.pro -config release
+          sudo add-apt-repository ppa:savoury1/multimedia
+          sudo apt update
+          sudo apt list libdav1d-dev
+          sudo apt-get -y install \
+            autoconf \
+            automake \
+            build-essential \
+            cmake \
+            git-core \
+            libass-dev \
+            libfdk-aac-dev \
+            libfreetype6-dev \
+            libgnutls28-dev \
+            libopus-dev \
+            libmp3lame-dev \
+            libnuma-dev \
+            libsdl2-dev \
+            libtool \
+            libva-dev \
+            libvdpau-dev \
+            libvorbis-dev \
+            libvpx-dev \
+            libxcb1-dev \
+            libxcb-shm0-dev \
+            libxcb-xfixes0-dev \
+            libx264-dev \
+            libx265-dev \
+            meson \
+            nasm \
+            ninja-build \
+            pkg-config \
+            texinfo \
+            wget \
+            yasm \
+            zlib1g-dev \
+            libunistring-dev \
+            libaom-dev \
+            libdav1d-dev
+
+      - name: Setup FFMPEG paths
+        id: setup-ffmpeg-paths
+        run: |
+          echo FFMPEG_BIN_PATH=/home/runner/work/trdrop/ffmpeg/bin >> $GITHUB_ENV
+          echo FFMPEG_INCLUDE_PATH=/home/runner/work/trdrop/ffmpeg/build/include >> $GITHUB_ENV
+          echo FFMPEG_LIB_PATH=/home/runner/work/trdrop/ffmpeg/build/lib >> $GITHUB_ENV
+          echo FFMPEG_BUILD_PATH=/home/runner/work/trdrop/ffmpeg/build >> $GITHUB_ENV
+          echo FFMPEG_ORIGINAL_SOURCE_PATH=/home/runner/work/trdrop/ffmpeg/source >> $GITHUB_ENV
+          #
+          # the actual path which is used to compile the project
+          #
+          echo FFMPEG_SOURCE=/home/runner/work/trdrop/ffmpeg/build >> $GITHUB_ENV
+
+      - name: Fetch FFMPEG source
+        id: fetch-ffmpeg-source
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          cd .. 
+          mkdir -p ffmpeg/source ffmpeg/build ffmpeg/bin
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
+          tar xjvf ffmpeg-snapshot.tar.bz2
+
+      - name: Compile libsvtav1 - encoder only (checkout 3758f57f7 - 31.12.21)
+        id: compile-libsvtav1
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          git -C SVT-AV1 pull 2> /dev/null || git clone https://gitlab.com/AOMediaCodec/SVT-AV1.git
+          cd SVT-AV1
+          git checkout 3758f57f7
+          mkdir build
+          cd build
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="${{ env.FFMPEG_BUILD_PATH }}" -DCMAKE_BUILD_TYPE=Release -DBUILD_DEC=OFF -DBUILD_SHARED_LIBS=OFF ..
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
+          make install
+
+      - name: Compile FFMPEG
+        id: compile-ffmpeg
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          cd ${{ env.FFMPEG_ORIGINAL_SOURCE_PATH }}
+          cd ffmpeg
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" PKG_CONFIG_PATH="${{ env.FFMPEG_LIB_PATH }}/pkgconfig" ./configure \
+            --prefix="${{ env.FFMPEG_BUILD_PATH }}" \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-I${{ env.FFMPEG_INCLUDE_PATH }}" \
+            --extra-ldflags="-L${{ env.FFMPEG_LIB_PATH }}" \
+            --extra-libs="-lpthread -lm" \
+            --ld="g++" \
+            --bindir="${{ env.FFMPEG_BIN_PATH }}" \
+            --enable-gpl \
+            --enable-gnutls \
+            --enable-libass \
+            --enable-libfdk-aac \
+            --enable-libfreetype \
+            --enable-libmp3lame \
+            --enable-libopus \
+            --enable-libsvtav1 \
+            --enable-libdav1d \
+            --enable-libvorbis \
+            --enable-libvpx \
+            --enable-libx264 \
+            --enable-libx265 \
+            --enable-nonfree
+          PATH="${{ env.FFMPEG_BIN_PATH }}:$PATH" make -j 4
+          make install
+
+      - name: Compile trdrop
+        run: |
+          rm -rf shadow-build
+          mkdir -p shadow-build
+          cd shadow-build
+          qmake ../trdrop/trdrop.pro -config release ## TODO debug local build with qmake
           make
 
       - name: Run tests
         run: |
-          ./build/release/trdrop-tests/trdrop-tests
+          cd build/linux/gcc/x64/release
+          LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
+          sudo add-apt-repository --remove ppa:savoury1/multimedia
+          sudo apt update
           sudo apt install libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-bad
           wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-          cp build/release/trdrop-ui/trdrop-ui linuxdeployqt-template/usr/bin
+          cp build/linux/gcc/x64/release/trdrop-ui linuxdeployqt-template/usr/bin
+          cp build/linux/gcc/x64/release/lib* linuxdeployqt-template/usr/lib
           cd linuxdeployqt-template
           ../linuxdeployqt-continuous-x86_64.AppImage usr/share/applications/trdrop.desktop -verbose=1 -appimage -qmldir=${{ env.QML2_IMPORT_PATH }}
 

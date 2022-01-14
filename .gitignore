@@ -51,3 +51,7 @@ local-images
 # C++ build
 
 build*
+
+# Qt build
+
+shadow-build*
