@@ -78,6 +78,7 @@ jobs:
           cd ${env:FFMPEG_SOURCE_BIN}
           copy-item avcodec-58.dll, avdevice-58.dll, avfilter-7.dll, avformat-58.dll, avutil-56.dll, postproc-55.dll, swresample-3.dll, swscale-5.dll ${env:GITHUB_WORKSPACE}\build\windows\gcc\x64\release
           cd ${env:GITHUB_WORKSPACE}
+          rm ${env:GITHUB_WORKSPACE}\build\windows\gcc\x64\release\trdrop-tests.exe
           windeployqt --qmldir trdrop\trdrop-ui\views ${env:GITHUB_WORKSPACE}\build\windows\gcc\x64\release
 
       # TODO: Cleanup release builds. It is very bloated rn.
