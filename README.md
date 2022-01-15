@@ -24,10 +24,8 @@ Hence the name **tr** (short for tear) and a framerate **drop**.
 
 ## How to Run the Program
 
-* [Windows Installer](TODO)
-* [Windows Build Instructions](TODO)
-* [Linux Binary](TODO)
-* [Linux Build Instructions](TODO)
+* [Releases](https://github.com/cirquit/trdrop/releases)
+* [Linux/Windows Build Instructions](BUILD_INSTRUCTIONS.md)
 
 ## Development
 

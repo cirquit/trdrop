@@ -78,7 +78,7 @@ To run the program on linux without actually installing it globally, you need to
 ~/Documents/github-repos/trdrop/build/linux/gcc/x64/debug> LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-ui
 ```
 
-If you want to build from the command line:
+**Build from the command line - Linux** 
 
 ```bash
 trdrop> mkdir shadow-build
@@ -88,6 +88,23 @@ trdrop/shadow-build> make
 ```
 
 Now the build directory should have been created in `trdrop/build/linux/...` similar to the Qt Creator compilation process.
+
+**Build from the command line - Windows**
+
+We use Poweshell, please replace you own paths for the qmake.exe / mingw32-make.exe binaries and set the FFMPEG_SOURCE environment variable if you didn't set it for Windows globally.
+
+```powershell
+trdrop> mkdir shadow-build
+trdrop> cd shadow-build
+trdrop/shadow-build> C:\Qt\5.15.2\mingw81_64\bin\qmake.exe C:\Users\asa\Documents\github-repos\trdrop\trdrop\trdrop.pro -spec win32-g++ "CONFIG+=qtquickcompiler" 
+(...)
+trdrop/shadow-build> $Env:FFMPEG_SOURCE = "C:\Users\asa\Documents\libs\ffmpeg-4.4.1-full_build-shared"
+trdrop/shadow-build> C:/Qt/Tools/mingw810_64/bin/mingw32-make.exe
+(...)
+```
+
+Now the build directory should have been created in `trdrop/build/windows/...` similar to the Qt Creator compilation process.
+
 
 ### Build AppImage (Linux)
 
