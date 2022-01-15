@@ -3,6 +3,11 @@ win32 {
     # counts as MINGW
     win32-g++ {
         CONFIG += COMPILER_GCC
+        !contains(QT_ARCH, x86_64) {
+            QMAKE_TARGET.arch = x86
+        } else {
+            QMAKE_TARGET.arch = x86_64
+        }
     }
     # not used for now
     win32-msvc2017 {
