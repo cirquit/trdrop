@@ -24,11 +24,17 @@ UI_DIR = $$PWD/build/$$DESTINATION_PATH/.ui
 
 LIBS += -L$$PWD/../../build/$$DESTINATION_PATH -ltrdrop-lib
 
-
-INCLUDEPATH += source
+INCLUDEPATH += source \
+    ../trdrop-lib/source
 
 SOURCES += \
-    source/main.cpp
+    source/ffmpeg_tests.cpp \
+    source/main.cpp \
+    source/test_suite.cpp
 
 # HEADERS +=
 message(trdrop tests dir: $${PWD})
+
+HEADERS += \
+    source/ffmpeg_tests.h \
+    source/test_suite.h
