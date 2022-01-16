@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v2
-          name: test-logs-${{ env.SHORT_SHA }}.zip
+          name: test-logs-${{ env.SHORT_SHA }}
           path: build/windows/gcc/x64/release/*.xml
 
       - name: Prepare trdrop for artifact
