@@ -74,7 +74,7 @@ jobs:
       - name: Publish unit test results
         uses: mikepenz/action-junit-report@v2
         if: always()
-        exclude_sources: []
+        exclude_sources: temp
         with:
           report_paths: build/windows/gcc/x64/release/*.xml
 
