@@ -72,12 +72,10 @@ jobs:
           .\trdrop-tests.exe
 
       - name: Publish unit test results
-        uses: dorny/test-reporter@v1
+        uses: mikepenz/action-junit-report@v2
         if: always()
         with:
-          name: trdrop tests
-          path: build/windows/gcc/x64/release/*.xml
-          reporter: java-junit
+          report_paths: build/windows/gcc/x64/release/*.xml
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')

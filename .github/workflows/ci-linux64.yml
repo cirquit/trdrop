@@ -164,12 +164,10 @@ jobs:
           LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
       
       - name: Publish unit test results
-        uses: dorny/test-reporter@v1
+        uses: mikepenz/action-junit-report@v2
         if: always()
         with:
-          name: trdrop tests
-          path: build/linux/gcc/x64/release/*.xml
-          reporter: java-junit
+          report_paths: build/linux/gcc/x64/release/*.xml
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
