@@ -172,6 +172,7 @@ jobs:
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v2
+        with:
           name: test-logs-${{ env.SHORT_SHA }}
           path: build/linux/gcc/x64/release/*.xml
 
