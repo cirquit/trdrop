@@ -162,6 +162,11 @@ jobs:
         run: |
           cd build/linux/gcc/x64/release
           LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
+      
+      - name: Publish unit test results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: build/linux/gcc/x64/release/*.xml
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
