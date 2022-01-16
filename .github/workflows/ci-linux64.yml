@@ -153,10 +153,9 @@ jobs:
       - name: Compile trdrop
         run: |
           rm -rf shadow-build
-          rm -rf build
           mkdir -p shadow-build
           cd shadow-build
-          qmake ../trdrop/trdrop.pro -config release ## TODO debug local build with qmake
+          qmake ../trdrop/trdrop.pro -config release
           make
 
       - name: Run tests
@@ -167,6 +166,7 @@ jobs:
       - name: Publish unit test results
         uses: mikepenz/action-junit-report@v2
         if: always()
+        exclude_sources: []
         with:
           report_paths: build/linux/gcc/x64/release/*.xml
 
