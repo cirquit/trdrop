@@ -165,6 +165,7 @@ jobs:
       
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
         with:
           files: build/linux/gcc/x64/release/*.xml
 
