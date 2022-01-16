@@ -68,13 +68,14 @@ jobs:
       - name: Run tests
         id: run-windows-tests
         run: |
-          build\windows\gcc\x64\release\trdrop-tests.exe
+          cd build\windows\gcc\x64\release
+          .\trdrop-tests.exe
 
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()
         with:
-          files: ${env:GITHUB_WORKSPACE}\build\windows\gcc\x64\release\*.xml
+          files: build\windows\gcc\x64\release\*.xml
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
