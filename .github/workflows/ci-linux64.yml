@@ -168,7 +168,7 @@ jobs:
         if: always()
         with:
           report_paths: build/linux/gcc/x64/release/*.xml
-          exclude_sources: []
+          exclude_sources: shadow-build
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')

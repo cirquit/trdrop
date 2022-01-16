@@ -76,7 +76,7 @@ jobs:
         if: always()
         with:
           report_paths: build/windows/gcc/x64/release/*.xml
-          exclude_sources: []
+          exclude_sources: shadow-build
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
