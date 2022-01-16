@@ -170,6 +170,11 @@ jobs:
           report_paths: build/linux/gcc/x64/release/*.xml
           exclude_sources: shadow-build
 
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v2
+          name: test-logs-${{ env.SHORT_SHA }}.zip
+          path: build/linux/gcc/x64/release/*.xml
+
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |

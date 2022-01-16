@@ -78,6 +78,11 @@ jobs:
           report_paths: build/windows/gcc/x64/release/*.xml
           exclude_sources: shadow-build
 
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v2
+          name: test-logs-${{ env.SHORT_SHA }}.zip
+          path: build/windows/gcc/x64/release/*.xml
+
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
         run: |
