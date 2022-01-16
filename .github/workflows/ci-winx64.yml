@@ -72,10 +72,12 @@ jobs:
           .\trdrop-tests.exe
 
       - name: Publish unit test results
-        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        uses: dorny/test-reporter@v1
         if: always()
         with:
-          files: build\windows\gcc\x64\release\*.xml
+          name: trdrop tests
+          path: build\windows\gcc\x64\release\*.xml
+          reporter: jest-junit
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')
