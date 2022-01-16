@@ -76,8 +76,8 @@ jobs:
         if: always()
         with:
           name: trdrop tests
-          path: build\windows\gcc\x64\release\*.xml
-          reporter: jest-junit
+          path: build/windows/gcc/x64/release/*.xml
+          reporter: java-junit
 
       - name: Prepare trdrop for artifact
         if: startsWith(github.event.head_commit.message, 'Release')

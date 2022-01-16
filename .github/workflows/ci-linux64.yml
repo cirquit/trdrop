@@ -169,7 +169,7 @@ jobs:
         with:
           name: trdrop tests
           path: build/linux/gcc/x64/release/*.xml
-          reporter: jest-junit
+          reporter: java-junit
 
       - name: Create AppImage
         if: startsWith(github.event.head_commit.message, 'Release')
