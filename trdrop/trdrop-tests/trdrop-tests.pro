@@ -33,7 +33,7 @@ SOURCES += \
     source/test_suite.cpp
 
 # HEADERS +=
-message(trdrop tests dir: $${PWD})
+!build_pass:message(trdrop-tests dir: $${PWD})
 
 HEADERS += \
     source/ffmpeg_tests.h \

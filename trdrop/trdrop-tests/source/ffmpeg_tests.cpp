@@ -9,11 +9,11 @@ FFMPEGTests::FFMPEGTests()
 {
 }
 
-void FFMPEGTests::initTestCase()
+void FFMPEGTests::init_test_case()
 {
 }
 
-void FFMPEGTests::cleanupTestCase()
+void FFMPEGTests::cleanup_test_case()
 {
 }
 
@@ -25,18 +25,18 @@ void FFMPEGTests::cleanup()
 {
 }
 
-void FFMPEGTests::instantiating_FFMPEGTests_returnsCorrectly()
+void FFMPEGTests::init_Video_class_without_errors()
 {
-    QCOMPARE(true, false);
+    models::Video video;
+    QCOMPARE(static_cast<bool>(video._format_context), true);
 }
 
-void FFMPEGTests::exampleMath_returnsIncorrectly()
+void FFMPEGTests::open_video_without_errors()
 {
-    QCOMPARE(1 + 1, 3);
-}
-
-void FFMPEGTests::exampleMath_returnsCorrectly()
-{
-    QCOMPARE(1 + 1, 2);
+    models::Video video;
+    QString test_video_directory = QString::fromUtf8(std::getenv("TRDROP_TEST_VIDEO_DIRECTORY"));
+    QString video_01 = "kevin-chili-yuv420p-libx264.mp4";
+    QDir video_01_absolute_path = QDir::cleanPath(test_video_directory + QDir::separator() + video_01);
+    video.open_video(video_01_absolute_path.path());
 }
 }

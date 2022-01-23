@@ -57,6 +57,7 @@ jobs:
           echo MINGW64_BINARY_PATH="C:\msys64\mingw64\bin" >> $env:GITHUB_ENV
           echo FFMPEG_SOURCE="C:\ffmpeg-source\ffmpeg-4.4.1-full_build-shared" >> $env:GITHUB_ENV
           echo FFMPEG_SOURCE_BIN="C:\ffmpeg-source\ffmpeg-4.4.1-full_build-shared\bin" >> $env:GITHUB_ENV
+          echo TRDROP_TEST_VIDEO_DIRECTORY="C:\trdrop\test-videos" >> $env:GITHUB_ENV
 
       - name: Compile
         run: |

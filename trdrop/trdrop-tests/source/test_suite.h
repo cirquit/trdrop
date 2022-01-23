@@ -10,9 +10,9 @@ namespace trdrop {
 class TestSuite : public QObject {
     Q_OBJECT
 public:
-    explicit TestSuite(const QString& _testName = "");
+    explicit TestSuite(const QString& _test_name = "");
     virtual ~TestSuite();
-    QString testName;
-    static std::vector<TestSuite*>& testList();
+    QString test_name;
+    static std::vector<TestSuite*>& test_list();
 };
 }

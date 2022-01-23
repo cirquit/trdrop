@@ -9,7 +9,7 @@ QT -= gui
 TARGET = trdrop-lib
 TEMPLATE = lib
 DEFINES += TRDROPLIB_LIBRARY
-CONFIG += c++14
+CONFIG += c++14 force_debug_info
 include(../qmake-target-platform.pri)
 include(../qmake-destination-path.pri)
 # ----------------
@@ -31,6 +31,8 @@ unix {
     LIBS += -L$(FFMPEG_SOURCE)/lib
 }
 
+!build_pass:message(trdrop-lib dir: $${PWD})
+
 LIBS += -lavcodec \
     -lavdevice \
     -lavformat \
@@ -44,10 +46,11 @@ INCLUDEPATH += source
 
 SOURCES += \
     source/controllers/mastercontroller.cpp \
-    source/models/trdrop_lib.cpp
+    source/models/trdrop_lib.cpp \
+    source/models/video.cpp
 
 HEADERS += \
     source/controllers/mastercontroller.h \
-    source/models/ffmpeg_wrapper.h \
+    source/models/video.h \
     source/trdrop-lib_global.h \
     source/models/trdrop_lib.h

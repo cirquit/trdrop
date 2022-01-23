@@ -3,13 +3,13 @@
 
 namespace trdrop {
 
-TestSuite::TestSuite(const QString& _testName)
+TestSuite::TestSuite(const QString& _test_name)
     : QObject()
-    , testName(_testName)
+    , test_name(_test_name)
 {
-    qDebug() << "Creating test suite from" << testName;
-    testList().push_back(this);
-    qDebug() << testList().size() << "test suite(s) recorded";
+    qDebug() << "Creating test suite from" << test_name;
+    test_list().push_back(this);
+    qDebug() << test_list().size() << "test suite(s) recorded";
     qDebug() << "-------------------------------";
 }
 
@@ -18,7 +18,7 @@ TestSuite::~TestSuite()
     //qDebug() << "Destroying test suite" << testName;
 }
 
-std::vector<TestSuite*>& TestSuite::testList()
+std::vector<TestSuite*>& TestSuite::test_list()
 {
     static std::vector<TestSuite*> instance = std::vector<TestSuite*>();
     return instance;

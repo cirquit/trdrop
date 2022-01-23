@@ -160,6 +160,7 @@ jobs:
 
       - name: Run tests
         run: |
+          echo TRDROP_TEST_VIDEO_DIRECTORY=`pwd`/test-videos >> $env:GITHUB_ENV
           cd build/linux/gcc/x64/release
           LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests
       

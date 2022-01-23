@@ -22,6 +22,8 @@ UI_DIR = $$PWD/build/$$DESTINATION_PATH/.ui
 
 LIBS += -L$$PWD/../../build/$$DESTINATION_PATH -ltrdrop-lib
 
+!build_pass:message(trdrop-ui dir: $${PWD})
+
 INCLUDEPATH += source \
     ../trdrop-lib/source
 SOURCES += \
