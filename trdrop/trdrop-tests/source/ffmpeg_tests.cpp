@@ -37,6 +37,6 @@ void FFMPEGTests::open_video_without_errors()
     QString test_video_directory = QString::fromUtf8(std::getenv("TRDROP_TEST_VIDEO_DIRECTORY"));
     QString video_01 = "kevin-chili-yuv420p-libx264.mp4";
     QDir video_01_absolute_path = QDir::cleanPath(test_video_directory + QDir::separator() + video_01);
-    video.open_video(video_01_absolute_path.path());
+    QCOMPARE(video.open_video(video_01_absolute_path.path()), true);
 }
 }

@@ -22,7 +22,46 @@ MOC_DIR = $$PWD/build/$$DESTINATION_PATH/.moc
 RCC_DIR = $$PWD/build/$$DESTINATION_PATH/.qrc
 UI_DIR = $$PWD/build/$$DESTINATION_PATH/.ui
 
+win32 {
+    INCLUDEPATH += $(FFMPEG_SOURCE)\include
+    LIBS += -L$(FFMPEG_SOURCE)\lib
+}
+
+unix {
+    INCLUDEPATH += $(FFMPEG_SOURCE)/include
+    LIBS += -L$(FFMPEG_SOURCE)/lib
+}
+
 LIBS += -L$$PWD/../../build/$$DESTINATION_PATH -ltrdrop-lib
+
+LIBS += -lavcodec \
+    -lavdevice \
+    -lavformat \
+    -lavfilter \
+    -lswresample \
+    -lswscale \
+    -lavutil \
+    -lpostproc \
+    -lz \
+    -lm \
+    -lgnutls \
+    -lpthread \
+    -lX11 \
+    -lva \
+    -lvdpau \
+    -ldav1d \
+    -lass \
+    -lmp3lame \
+    -lopus \
+    -lx264 \
+    -lx265 \
+    -lvpx \
+    -lvorbisenc \
+    -lvorbis \
+    -lfdk-aac \
+    -lSvtAv1Enc \
+    -lva-drm \
+    -lva-x11
 
 INCLUDEPATH += source \
     ../trdrop-lib/source

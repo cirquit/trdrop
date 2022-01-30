@@ -50,7 +50,7 @@ Please follow [the official guidelines carefully](https://trac.ffmpeg.org/wiki/C
 
 Our current compilation flags are described in the [github actions script for linux](.github/workflows/ci-linux64.yml).
 
-After installing ffmpeg, please set the `FFMPEG_SOURCE` environment variable to point to the `include` and `lib` folders, e.g., `$HOME/Documents/libs/ffmpeg/build`
+After installing ffmpeg, please set the `FFMPEG_SOURCE` environment variable to point to the `include` and `lib` folders, e.g., `$HOME/Documents/libs/ffmpeg/build`.
 
 ### Set up the repository
 
@@ -72,10 +72,16 @@ After installing ffmpeg, please set the `FFMPEG_SOURCE` environment variable to 
 Note that you can only run the programs via the Qt Creator GUI and not when navigating to the command line.
 
 This is because we build our library locally (`trdrop-lib`) and the system does not add it to the general linker path.
-To run the program on linux without actually installing it globally, you need to updated the `LD_LIBRARY_PATH`:
+To run the program on Linux without actually installing it globally, you need to updated the `LD_LIBRARY_PATH`:
 
 ```bash
 ~/Documents/github-repos/trdrop/build/linux/gcc/x64/debug> LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-ui
+```
+
+To run the tests, we need to add the TRDROP_TEST_VIDEO_DIRECTORY environment variable, which points to the `trdrop/test-videos` directory, e.g.,:
+
+```bash
+~/Documents/github-repos/trdrop/build/linux/gcc/x64/debug> TRDROP_TEST_VIDEO_DIRECTORY=~/Documents/github-repos/trdrop/test-videos LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH ./trdrop-tests 
 ```
 
 **Build from the command line - Linux** 

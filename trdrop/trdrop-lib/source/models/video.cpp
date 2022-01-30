@@ -12,22 +12,17 @@ Video::Video(QObject* parent)
     }
 }
 
-void Video::open_video(QString absolute_path)
+bool Video::open_video(QString absolute_path)
 {
-    qDebug() << "Video::open_video: Trying to open path \"" << absolute_path << "\"\n";
-
-    //const char* new_path = "/home/asa/Documents/github-repos/trdrop/test-videos/kevin-chili-yuv420p-libvpx-vp8.mkv";
-    char temp[1000];
     int ret = avformat_open_input(&_format_context, absolute_path.toStdString().c_str(), nullptr, nullptr);
     if (ret != 0) {
-        av_strerror(ret, temp, static_cast<size_t>(1000));
-        qDebug() << temp;
         qDebug()
-            << "Video::open_video: error when opening input \"" << absolute_path << "\": " << ret << '\n';
+            << "Video::open_video: error when opening video:\n"
+            << "  - path:" << absolute_path << "\n"
+            << "  - error code:" << ret << '\n'
+            << "  - ffmpeg code error:" << QString::fromStdString(av_err2string(ret)) << '\n';
     }
-    if (ret == 0) {
-        qDebug() << "File format: " << _format_context->iformat->name << '\n';
-    }
+    return ret == 0;
 }
 
 Video::~Video()

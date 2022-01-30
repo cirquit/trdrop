@@ -40,7 +40,27 @@ LIBS += -lavcodec \
     -lswresample \
     -lswscale \
     -lavutil \
-    -lpostproc
+    -lpostproc \
+    -lz \
+    -lm \
+    -lgnutls \
+    -lpthread \
+    -lX11 \
+    -lva \
+    -lvdpau \
+    -ldav1d \
+    -lass \
+    -lmp3lame \
+    -lopus \
+    -lx264 \
+    -lx265 \
+    -lvpx \
+    -lvorbisenc \
+    -lvorbis \
+    -lfdk-aac \
+    -lSvtAv1Enc \
+    -lva-drm \
+    -lva-x11
 
 INCLUDEPATH += source
 
