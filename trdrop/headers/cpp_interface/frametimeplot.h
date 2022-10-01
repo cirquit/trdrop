@@ -437,7 +437,7 @@ private:
     {
         const double manual_set_max_frametime = _shared_general_options_model->get_frametime_max_ms();
         const double real_max_frametime = _shared_frametime_model->get_max_frametime_bounds();
-        if (manual_set_max_frametime < real_max_frametime) return real_max_frametime;
+        if (manual_set_max_frametime < real_max_frametime)
         return manual_set_max_frametime;
     }
 
