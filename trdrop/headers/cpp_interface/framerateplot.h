@@ -484,7 +484,7 @@ private:
     {
         const double manual_set_max_framerate = _shared_general_options_model->get_framerate_max_fps();
         const double real_max_framerate = _shared_framerate_model->get_max_framerate_bounds();
-        if (manual_set_max_framerate < real_max_framerate) return real_max_framerate;
+        if (manual_set_max_framerate < real_max_framerate)
         return manual_set_max_framerate;
     }
     //! get text offset for shadows below the text
