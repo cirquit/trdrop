@@ -18,7 +18,7 @@ public:
         , _video_index(video_index)
         , _video_count(video_count)
         , _original_video_height(original_video_heigth)
-        , _tear_visibility_count(25)
+        , _tear_visibility_count(1)
         , _rendered_count(0)
     { }
 // methods
