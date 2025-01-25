@@ -16,11 +16,9 @@
 
 ## Binaries
 
-```diff
 - Please create an issue if you encounter problems and search the closed issues for already solved ones.
 
 - If you want to have a specific feature in mind, please attach as much exemplary information as possible (screenshots, mockups)
-```
 
 * [**Issues**](https://github.com/cirquit/trdrop/issues?q=is%3Aopen+is%3Aissue)
 * [**Solved Issues**](https://github.com/cirquit/trdrop/issues?q=is%3Aissue+is%3Aclosed)
