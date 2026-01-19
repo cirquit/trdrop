@@ -4,37 +4,35 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from trdrop.pipeline.storage import VideoResultBuffer
+from trdrop.engine.trdrop import VideoResult
 
 
 def export_json(
-    buffers: list[VideoResultBuffer],
+    results: list[VideoResult],
     path: str | Path,
 ) -> None:
     """
     Export analysis results to JSON.
 
-    TODO: Adapt to new pipeline types.
-    - Accept list of VideoResultBuffer instead of Session
-    - Serialize buffer data to JSON format
+    TODO: Implement JSON export.
 
     Args:
-        buffers: List of result buffers for each video
+        results: List of analysis results
         path: Output file path
     """
-    raise NotImplementedError("export_json not yet adapted to new pipeline types")
+    raise NotImplementedError("export_json not yet implemented")
 
 
-def import_json(path: str | Path) -> list[VideoResultBuffer]:
+def import_json(path: str | Path) -> list[VideoResult]:
     """
     Import analysis results from JSON.
 
-    TODO: Adapt to new pipeline types.
+    TODO: Implement JSON import.
 
     Args:
         path: Input file path
 
     Returns:
-        List of VideoResultBuffer for each video in the session
+        List of VideoResult for each video in the session
     """
-    raise NotImplementedError("import_json not yet adapted to new pipeline types")
+    raise NotImplementedError("import_json not yet implemented")

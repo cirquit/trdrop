@@ -27,7 +27,7 @@ def generate_all() -> None:
                 container_fps=60,
                 content_fps=60,
                 duration_sec=2.0,
-                pattern=PatternType.HORIZONTAL_BANDS,
+                pattern=PatternType.COUNTER,  # Use COUNTER for reliable detection
             ),
         ),
         # 30fps content in 60fps container (50% duplicates)
@@ -37,7 +37,7 @@ def generate_all() -> None:
                 container_fps=60,
                 content_fps=30,
                 duration_sec=2.0,
-                pattern=PatternType.HORIZONTAL_BANDS,
+                pattern=PatternType.COUNTER,
             ),
         ),
         # 24fps content in 60fps container (60% duplicates)
@@ -47,7 +47,7 @@ def generate_all() -> None:
                 container_fps=60,
                 content_fps=24,
                 duration_sec=2.0,
-                pattern=PatternType.HORIZONTAL_BANDS,
+                pattern=PatternType.COUNTER,
             ),
         ),
         # Variable framerate simulation (using noise pattern)
@@ -60,7 +60,7 @@ def generate_all() -> None:
                 pattern=PatternType.NOISE,
             ),
         ),
-        # Video with tears
+        # Video with tears (uses HORIZONTAL_BANDS for tear visibility)
         (
             "with_tears.mp4",
             VideoConfig(
@@ -102,7 +102,7 @@ def generate_all() -> None:
                 container_fps=60,
                 content_fps=30,
                 duration_sec=10.0,
-                pattern=PatternType.HORIZONTAL_BANDS,
+                pattern=PatternType.COUNTER,
             ),
         ),
     ]

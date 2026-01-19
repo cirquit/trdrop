@@ -9,11 +9,18 @@ Each pattern function takes (content_index, height, width, seed) and returns
 an RGB numpy array of shape (height, width, 3) with dtype uint8.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
-from typing import Protocol
+from typing import Callable, TypeAlias
 
 import numpy as np
+
+# Type alias for pattern generator functions
+PatternGenerator: TypeAlias = Callable[
+    [int, int, int, np.random.Generator], np.ndarray
+]
 
 
 class PatternType(Enum):
@@ -43,14 +50,6 @@ class TearInfo:
     row: int  # Row where tear occurs
     top_content_index: int  # Content index of top portion
     bottom_content_index: int  # Content index of bottom portion
-
-
-class PatternGenerator(Protocol):
-    """Protocol for pattern generator functions."""
-
-    def __call__(
-        self, content_index: int, height: int, width: int, rng: np.random.Generator
-    ) -> np.ndarray: ...
 
 
 def generate_solid(

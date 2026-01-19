@@ -3,51 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
 
 import numpy as np
-
-
-class FrameAnalyzer(Protocol):
-    """Protocol for frame analysis implementations."""
-
-    def compare(
-        self,
-        prev: np.ndarray,
-        curr: np.ndarray,
-        threshold: int = 10,
-    ) -> tuple[bool, float]:
-        """
-        Compare two frames for duplicate detection.
-
-        Args:
-            prev: Previous frame (H, W, 3) uint8
-            curr: Current frame (H, W, 3) uint8
-            threshold: Pixel difference threshold (0-255)
-
-        Returns:
-            (is_duplicate, diff_ratio) where diff_ratio is 0.0-1.0
-        """
-        ...
-
-    def detect_tears(
-        self,
-        prev: np.ndarray,
-        curr: np.ndarray,
-        threshold: float = 0.1,
-    ) -> list[int]:
-        """
-        Detect screen tears between frames.
-
-        Args:
-            prev: Previous frame (H, W, 3) uint8
-            curr: Current frame (H, W, 3) uint8
-            threshold: Row difference threshold (0.0-1.0)
-
-        Returns:
-            List of row indices where tears detected
-        """
-        ...
 
 
 @dataclass(slots=True)
