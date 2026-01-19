@@ -1,0 +1,76 @@
+"""Fixed-size ring buffer for O(1) windowed statistics."""
+
+from __future__ import annotations
+
+import numpy as np
+
+
+class RingBuffer:
+    """Fixed-size circular buffer for windowed computations.
+
+    Pre-allocates a numpy array of fixed size. Supports O(1) push
+    and O(1) sum/mean operations via running totals.
+
+    Example:
+        buf = RingBuffer(size=60, dtype=np.float32)
+        buf.push(1.0)
+        buf.push(0.0)
+        print(buf.sum())   # 1.0
+        print(buf.mean())  # 0.5
+    """
+
+    __slots__ = ("_data", "_size", "_head", "_count", "_sum")
+
+    def __init__(self, size: int, dtype: np.dtype | type = np.float64) -> None:
+        if size <= 0:
+            raise ValueError(f"size must be positive, got {size}")
+
+        self._data = np.zeros(size, dtype=dtype)
+        self._size = size
+        self._head = 0
+        self._count = 0
+        self._sum: float = 0.0
+
+    def push(self, value: float) -> None:
+        """Add a value, evicting oldest if full."""
+        if self._count == self._size:
+            # Evict oldest value from running sum
+            self._sum -= float(self._data[self._head])
+        else:
+            self._count += 1
+
+        self._data[self._head] = value
+        self._sum += value
+        self._head = (self._head + 1) % self._size
+
+    def sum(self) -> float:
+        """O(1) sum of values in buffer."""
+        return self._sum
+
+    def mean(self) -> float:
+        """O(1) mean of values in buffer."""
+        if self._count == 0:
+            return 0.0
+        return self._sum / self._count
+
+    def clear(self) -> None:
+        """Reset buffer to empty state."""
+        self._data.fill(0)
+        self._head = 0
+        self._count = 0
+        self._sum = 0.0
+
+    @property
+    def count(self) -> int:
+        """Number of values currently in buffer."""
+        return self._count
+
+    @property
+    def size(self) -> int:
+        """Maximum capacity of buffer."""
+        return self._size
+
+    @property
+    def is_full(self) -> bool:
+        """True if buffer is at capacity."""
+        return self._count == self._size
