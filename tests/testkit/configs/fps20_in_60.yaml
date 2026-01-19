@@ -1,0 +1,9 @@
+container_fps: 60
+content_fps: 20
+duration_sec: 2.0
+width: 640
+height: 480
+pattern: gradient
+codec: libx264
+pixel_format: yuv420p
+seed: 42

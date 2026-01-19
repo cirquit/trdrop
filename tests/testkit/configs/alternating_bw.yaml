@@ -1,0 +1,9 @@
+container_fps: 10
+content_fps: 5
+duration_sec: 1.0
+width: 320
+height: 240
+pattern: checkerboard
+codec: mpeg4
+pixel_format: yuv420p
+seed: 123
