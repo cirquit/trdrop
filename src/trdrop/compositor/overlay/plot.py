@@ -203,6 +203,8 @@ class FrameratePlot(Plot):
         auto_scale: bool = False,
         time_anchor: float = 1.0,
         show_title: bool = True,
+        show_time_indicator: bool = False,
+        show_start_marker: bool = False,
     ) -> None:
         """Initialize framerate plot.
 
@@ -215,6 +217,8 @@ class FrameratePlot(Plot):
             time_anchor: Where current time appears horizontally.
                 0.0 = left edge, 0.5 = center, 1.0 = right edge (default).
             show_title: Whether to display the title above the plot.
+            show_time_indicator: Draw downward arrow at current time position.
+            show_start_marker: Draw small circle at line start.
         """
         super().__init__(style, title)
         self._max_fps = max_fps
@@ -223,6 +227,8 @@ class FrameratePlot(Plot):
         self._auto_scale = auto_scale
         self._time_anchor = max(0.0, min(1.0, time_anchor))
         self._show_title = show_title
+        self._show_time_indicator = show_time_indicator
+        self._show_start_marker = show_start_marker
 
     def _get_effective_max(self, history: RingBuffer) -> float:
         """Get the effective max FPS for scaling.
@@ -279,8 +285,14 @@ class FrameratePlot(Plot):
 
         # Draw line before axes so axes appear on top
         t0 = time.perf_counter()
-        self._draw_line(painter, bounds, history, effective_max)
+        line_points = self._draw_line(painter, bounds, history, effective_max)
         profiler.add_timing("overlay_plot_line", (time.perf_counter() - t0) * 1000)
+
+        # Draw markers after line
+        if line_points and self._show_start_marker:
+            self._draw_start_marker(painter, line_points[0])
+        if line_points and self._show_time_indicator:
+            self._draw_time_indicator(painter, bounds, line_points[-1])
 
         t0 = time.perf_counter()
         self._draw_axes(painter, bounds)
@@ -313,10 +325,13 @@ class FrameratePlot(Plot):
         bounds: QRect,
         history: RingBuffer,
         max_fps: float | None = None,
-    ) -> None:
-        """Draw the framerate line with shadow for contrast."""
+    ) -> list[QPointF]:
+        """Draw the framerate line with shadow for contrast.
+
+        Returns list of points (first=oldest, last=newest) for marker drawing.
+        """
         if len(history) < 2:
-            return
+            return []
 
         if max_fps is None:
             max_fps = self._max_fps
@@ -335,16 +350,19 @@ class FrameratePlot(Plot):
         newest_idx = n - 1
         x_base = anchor_x - newest_idx * x_step
 
-        # Build path
+        # Build path and collect points
         path = QPainterPath()
+        points: list[QPointF] = []
         for i in range(n):
             x = x_base + i * x_step
             y = bounds.bottom() - values[i] * y_scale
             y = max(float(bounds.top()), min(float(bounds.bottom()), y))
+            pt = QPointF(x, y)
+            points.append(pt)
             if i == 0:
-                path.moveTo(QPointF(x, y))
+                path.moveTo(pt)
             else:
-                path.lineTo(QPointF(x, y))
+                path.lineTo(pt)
 
         # Draw shadow
         shadow_pen = QPen(self._style.shadow_color)
@@ -362,72 +380,249 @@ class FrameratePlot(Plot):
         painter.setPen(line_pen)
         painter.drawPath(path)
 
+        return points
+
+    def _draw_start_marker(self, painter: QPainter, point: QPointF) -> None:
+        """Draw a small circle at the start of the line."""
+        radius = self._style.line_width + 1
+        # Shadow
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._style.shadow_color)
+        painter.drawEllipse(point, radius + 1, radius + 1)
+        # Main circle
+        painter.setBrush(self._style.line_color)
+        painter.drawEllipse(point, radius, radius)
+
+    def _draw_time_indicator(
+        self, painter: QPainter, bounds: QRect, point: QPointF
+    ) -> None:
+        """Draw a minimal downward arrow at current time position."""
+        # Small triangle pointing down, above the plot
+        arrow_size = 6
+        tip_y = bounds.top() - 2
+        base_y = tip_y - arrow_size
+
+        path = QPainterPath()
+        path.moveTo(point.x(), tip_y)  # Tip
+        path.lineTo(point.x() - arrow_size // 2, base_y)  # Left
+        path.lineTo(point.x() + arrow_size // 2, base_y)  # Right
+        path.closeSubpath()
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._style.line_color)
+        painter.drawPath(path)
+
 
 class FrametimePlot(Plot):
-    """Plot for frametime history (0 to max_ms)."""
+    """Plot for frametime history (0 to max_ms).
+
+    Shows frametime in milliseconds with optional auto-scaling and
+    current value display next to the title.
+    """
 
     def __init__(
         self,
         style: PlotStyle,
         max_ms: float = 50.0,
-        title: str = "FRAMETIME (ms)",
+        title: str = "FRAMETIME",
+        auto_scale: bool = True,
+        time_anchor: float = 1.0,
+        show_title: bool = True,
+        show_current_value: bool = True,
+        show_time_indicator: bool = False,
+        show_start_marker: bool = False,
     ) -> None:
+        """Initialize frametime plot.
+
+        Args:
+            style: Visual styling for the plot.
+            max_ms: Maximum frametime for Y-axis (or minimum when auto_scale=True).
+            title: Title text above the plot.
+            auto_scale: Dynamically adjust Y-axis based on data.
+            time_anchor: Where current time appears horizontally.
+                0.0 = left edge, 0.5 = center, 1.0 = right edge (default).
+            show_title: Whether to display the title above the plot.
+            show_current_value: Show current frametime value next to title.
+            show_time_indicator: Draw downward arrow at current time position.
+            show_start_marker: Draw small circle at line start.
+        """
         super().__init__(style, title)
         self._max_ms = max_ms
+        self._min_scale = max_ms
+        self._auto_scale = auto_scale
+        self._time_anchor = max(0.0, min(1.0, time_anchor))
+        self._show_title = show_title
+        self._show_current_value = show_current_value
+        self._show_time_indicator = show_time_indicator
+        self._show_start_marker = show_start_marker
+
+    def _get_effective_max(self, history: RingBuffer) -> float:
+        """Get the effective max frametime for scaling."""
+        if not self._auto_scale or len(history) == 0:
+            return self._max_ms
+
+        values = list(history)
+        recent_count = max(len(values) // 10, 10)
+        recent_values = values[-recent_count:]
+
+        max_in_data = max(recent_values) if recent_values else 0
+
+        target = max(max_in_data * 1.2, self._min_scale)
+
+        # Round to nice values for frametime (multiples of 10, 16.67, 33.33, etc.)
+        nice_values = [10, 16.67, 20, 33.33, 40, 50, 66.67, 100, 200, 500, 1000]
+        for nv in nice_values:
+            if nv >= target:
+                return nv
+        return target
 
     def draw(
         self,
         painter: QPainter,
         bounds: QRect,
         history: RingBuffer,
+        *,
+        current_value: float | None = None,
+        override_show_title: bool | None = None,
     ) -> None:
-        """Draw frametime plot."""
+        """Draw frametime plot.
+
+        Args:
+            painter: QPainter to draw with.
+            bounds: Rectangle to draw into.
+            history: Frametime history data (in ms).
+            current_value: Current frametime to display (optional, for title).
+            override_show_title: If set, overrides the instance's show_title setting.
+        """
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        effective_max = self._get_effective_max(history)
 
         self._draw_background(painter, bounds)
         self._draw_grid(painter, bounds)
+        line_points = self._draw_line(painter, bounds, history, effective_max)
 
-        # Draw line before axes so axes appear on top
-        self._draw_line(painter, bounds, history)
+        # Draw markers after line
+        if line_points and self._show_start_marker:
+            self._draw_start_marker(painter, line_points[0])
+        if line_points and self._show_time_indicator:
+            self._draw_time_indicator(painter, bounds, line_points[-1])
 
         self._draw_axes(painter, bounds)
-        self._draw_labels(painter, bounds, 0.0, self._max_ms)
-        self._draw_title(painter, bounds)
+        self._draw_labels_fractional(painter, bounds, 0.0, effective_max)
+
+        show_title = override_show_title if override_show_title is not None else self._show_title
+        if show_title:
+            self._draw_title_with_value(painter, bounds, current_value)
+
+    def _draw_labels_fractional(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        y_min: float,
+        y_max: float,
+    ) -> None:
+        """Draw Y-axis labels with fractional values on the RIGHT side."""
+        if not self._style.show_labels:
+            return
+
+        painter.setFont(self._style.font)
+
+        segments = self._style.grid_segments
+        segment_height = bounds.height() / segments
+        value_step = (y_max - y_min) / segments
+
+        for i in range(segments + 1):
+            y = int(bounds.top() + i * segment_height)
+            value = y_max - i * value_step
+
+            # Format with appropriate precision
+            if value >= 100:
+                label = f"{value:.0f}"
+            elif value >= 10:
+                label = f"{value:.1f}"
+            else:
+                label = f"{value:.2f}"
+
+            # Draw to the RIGHT of plot area (same as FrameratePlot)
+            text_x = bounds.right() + 5
+            text_y = y + 4
+            self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
+
+    def _draw_title_with_value(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        current_value: float | None,
+    ) -> None:
+        """Draw title with optional current value."""
+        if not self._title:
+            return
+
+        title_font = self._style.title_font or self._style.font
+        painter.setFont(title_font)
+
+        # Build title text
+        if self._show_current_value and current_value is not None:
+            if current_value >= 100:
+                title_text = f"{self._title}: {current_value:.1f}ms"
+            else:
+                title_text = f"{self._title}: {current_value:.2f}ms"
+        else:
+            title_text = self._title
+
+        # Position at left (time_anchor for consistency)
+        from PyQt6.QtGui import QFontMetrics
+        metrics = QFontMetrics(title_font)
+        text_width = metrics.horizontalAdvance(title_text)
+
+        anchor_x = bounds.left() + int(bounds.width() * self._time_anchor)
+        x = anchor_x - text_width
+        y = bounds.top() - 8
+
+        self._draw_text_with_shadow(painter, QPoint(x, y), title_text)
 
     def _draw_line(
         self,
         painter: QPainter,
         bounds: QRect,
         history: RingBuffer,
-    ) -> None:
+        max_ms: float | None = None,
+    ) -> list[QPointF]:
         """Draw the frametime line with shadow.
 
-        Uses QPainterPath with floating-point coordinates for smooth antialiasing.
+        Returns list of points (first=oldest, last=newest) for marker drawing.
         """
         if len(history) < 2:
-            return
+            return []
+
+        if max_ms is None:
+            max_ms = self._max_ms
 
         values = list(history)
         n = len(values)
 
         x_step = bounds.width() / max(history.size - 1, 1)
-        y_scale = bounds.height() / self._max_ms
-        x_offset = (history.size - n) * x_step
+        y_scale = bounds.height() / max_ms
 
-        # Build path with floating-point precision for smooth antialiasing
+        # Position so newest data point is at anchor position
+        anchor_x = bounds.left() + bounds.width() * self._time_anchor
+        newest_idx = n - 1
+        x_base = anchor_x - newest_idx * x_step
+
         path = QPainterPath()
-        first_point = True
-
+        points: list[QPointF] = []
         for i in range(n):
-            x = bounds.left() + x_offset + i * x_step
+            x = x_base + i * x_step
             y = bounds.bottom() - values[i] * y_scale
             y = max(float(bounds.top()), min(float(bounds.bottom()), y))
+            pt = QPointF(x, y)
+            points.append(pt)
 
-            if first_point:
-                path.moveTo(QPointF(x, y))
-                first_point = False
+            if i == 0:
+                path.moveTo(pt)
             else:
-                path.lineTo(QPointF(x, y))
+                path.lineTo(pt)
 
         # Shadow line
         shadow_pen = QPen(self._style.shadow_color)
@@ -443,4 +638,36 @@ class FrametimePlot(Plot):
         line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         line_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         painter.setPen(line_pen)
+        painter.drawPath(path)
+
+        return points
+
+    def _draw_start_marker(self, painter: QPainter, point: QPointF) -> None:
+        """Draw a small circle at the start of the line."""
+        radius = self._style.line_width + 1
+        # Shadow
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._style.shadow_color)
+        painter.drawEllipse(point, radius + 1, radius + 1)
+        # Main circle
+        painter.setBrush(self._style.line_color)
+        painter.drawEllipse(point, radius, radius)
+
+    def _draw_time_indicator(
+        self, painter: QPainter, bounds: QRect, point: QPointF
+    ) -> None:
+        """Draw a minimal downward arrow at current time position."""
+        # Small triangle pointing down, above the plot
+        arrow_size = 6
+        tip_y = bounds.top() - 2
+        base_y = tip_y - arrow_size
+
+        path = QPainterPath()
+        path.moveTo(point.x(), tip_y)  # Tip
+        path.lineTo(point.x() - arrow_size // 2, base_y)  # Left
+        path.lineTo(point.x() + arrow_size // 2, base_y)  # Right
+        path.closeSubpath()
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._style.line_color)
         painter.drawPath(path)

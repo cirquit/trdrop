@@ -12,8 +12,7 @@ app = QGuiApplication(sys.argv)
 
 from tests.testkit import PatternType, VideoConfig, VideoGenerator
 from trdrop.analysis.duplicate import DuplicateDetector
-from trdrop.compositor.overlay import FrameratePlot, FPSText
-from trdrop.compositor.overlay.plot import PlotStyle
+from trdrop.compositor.overlay import FrameratePlot, FrametimePlot, FPSText, PlotStyle
 from trdrop.compositor.overlay.text import TextStyle
 from trdrop.compositor.simple import SimpleCompositor
 from trdrop.engine import StreamingEngine
@@ -75,16 +74,35 @@ def main() -> None:
         show_labels=True,
     )
 
+    fps_font = QFont("Arial", 28)
+    fps_font.setWeight(QFont.Weight.Bold)
+
     text_style = TextStyle(
         color=QColor(255, 255, 255),
-        shadow_color=QColor(41, 41, 41),
-        font=QFont("Arial", 28),
+        shadow_color=QColor(0, 0, 0),
+        font=fps_font,
         shadow_offset=2,
     )
 
     # Create overlay elements
     fps_text = FPSText(text_style, prefix="FPS:")
-    framerate_plot = FrameratePlot(plot_style, max_fps=60.0, show_center_line=True)
+    framerate_plot = FrameratePlot(
+        plot_style,
+        max_fps=60.0,
+        show_center_line=True,
+        time_anchor=0.5,
+        show_time_indicator=True,
+        show_start_marker=True,
+    )
+    frametime_plot = FrametimePlot(
+        plot_style,
+        max_ms=50.0,
+        auto_scale=True,
+        show_current_value=True,
+        time_anchor=0.5,
+        show_time_indicator=True,
+        show_start_marker=True,
+    )
 
     # Create compositor with overlays
     compositor = SimpleCompositor(
@@ -94,6 +112,7 @@ def main() -> None:
         output_height=720,
         fps_texts=[fps_text],
         framerate_plots=[framerate_plot],
+        frametime_plots=[frametime_plot],
     )
 
     # Create exporters

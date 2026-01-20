@@ -13,13 +13,9 @@ test-all:
 
 check: lint test
 
-# Run performance benchmarks with profiling
+# Run performance benchmark (single consolidated suite)
 benchmark:
 	TRDROP_PROFILE=benchmark_results.csv uv run pytest tests/benchmarks/ -v -s
-
-# Run scaling analysis only
-benchmark-scaling:
-	TRDROP_PROFILE=scaling_results.csv uv run pytest tests/benchmarks/test_benchmark.py::TestBenchmarkComparison::test_scaling_analysis -v -s
 
 # Generate visual examples for manual confirmation (not part of test suite)
 examples:

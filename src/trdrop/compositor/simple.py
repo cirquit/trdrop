@@ -10,7 +10,7 @@ from PyQt6.QtCore import QPoint, QRect
 from PyQt6.QtGui import QImage, QPainter
 
 from trdrop.compositor.base import Compositor
-from trdrop.compositor.overlay.plot import FrameratePlot
+from trdrop.compositor.overlay.plot import FrameratePlot, FrametimePlot
 from trdrop.compositor.overlay.text import FPSText
 from trdrop.compositor.scaling import ScaleMode, get_scale_mode_info, has_performance_warning
 from trdrop.compositor.types import AggregatedMetrics, CompositorOutput, VideoMetrics
@@ -26,7 +26,8 @@ class _VideoState:
     """Internal state for a single video stream.
 
     Uses O(1) memory ring buffers for windowed statistics.
-    Tracks both unique/duplicate ratio and FPS history for plotting.
+    Tracks FPS, frametime, and their histories for plotting.
+    Provides smoothed values using EMA for stable display.
     """
 
     __slots__ = (
@@ -34,38 +35,127 @@ class _VideoState:
         "_total_duplicates",
         "_unique_window",
         "_fps_history",
+        "_frametime_history",
         "_container_fps",
+        "_smoothed_fps",
+        "_smoothed_frametime",
+        "_ema_alpha",
+        "_last_unique_distance",
     )
 
-    def __init__(self, window_size: int, container_fps: float) -> None:
+    def __init__(
+        self,
+        window_size: int,
+        container_fps: float,
+        ema_alpha: float = 0.1,
+    ) -> None:
         self._total_frames = 0
         self._total_duplicates = 0
         self._container_fps = container_fps
+        self._ema_alpha = ema_alpha
+
         # Window for computing windowed FPS via sum (v1 algorithm)
         # Pre-filled with zeros so FPS = sum(buffer), no extrapolation
         self._unique_window = RingBuffer(size=window_size, dtype=np.float32)
         self._unique_window.prefill(0.0)
+
         # History of windowed FPS values for plotting
         self._fps_history = RingBuffer(size=window_size, dtype=np.float32)
         self._fps_history.prefill(0.0)
+
+        # History of frametime values for plotting (in ms)
+        self._frametime_history = RingBuffer(size=window_size, dtype=np.float32)
+        self._frametime_history.prefill(0.0)
+
+        # Smoothed values for display (EMA)
+        self._smoothed_fps = 0.0
+        self._smoothed_frametime = 0.0
+
+        # Track distance since last unique frame for frametime calculation
+        self._last_unique_distance = 0
 
     def update(self, is_duplicate: bool) -> None:
         self._total_frames += 1
         if is_duplicate:
             self._total_duplicates += 1
+            self._last_unique_distance += 1
+        else:
+            self._last_unique_distance = 0
 
         # Store 1.0 for unique, 0.0 for duplicate
         self._unique_window.push(0.0 if is_duplicate else 1.0)
 
         # Windowed FPS = sum of unique frames in window (v1 algorithm)
-        # Buffer is pre-filled with zeros, so FPS ramps up gradually
-        # without oscillation, converging to true FPS after 1 second
         windowed_fps = self._unique_window.sum()
         self._fps_history.push(windowed_fps)
+
+        # Calculate instantaneous frametime from last unique frame
+        # Frametime = (duplicates + 1) / container_fps * 1000 ms
+        current_frametime = self._calculate_current_frametime()
+        self._frametime_history.push(current_frametime)
+
+        # Update smoothed values using EMA
+        # smoothed = alpha * current + (1 - alpha) * previous
+        if self._total_frames == 1:
+            self._smoothed_fps = windowed_fps
+            self._smoothed_frametime = current_frametime
+        else:
+            self._smoothed_fps = (
+                self._ema_alpha * windowed_fps
+                + (1 - self._ema_alpha) * self._smoothed_fps
+            )
+            if current_frametime > 0:
+                self._smoothed_frametime = (
+                    self._ema_alpha * current_frametime
+                    + (1 - self._ema_alpha) * self._smoothed_frametime
+                )
+
+    def _calculate_current_frametime(self) -> float:
+        """Calculate frametime based on distance to last unique frame.
+
+        Returns frametime in milliseconds. Returns 0 if no unique frames yet.
+        """
+        # Look backward in the unique_window to find how many frames
+        # since the last unique frame
+        window_data = list(self._unique_window)
+        if not window_data:
+            return 0.0
+
+        # Find the most recent unique frame (value == 1.0)
+        frames_since_unique = 0
+        found_unique = False
+
+        for i in range(len(window_data) - 1, -1, -1):
+            if window_data[i] > 0.5:  # unique frame
+                if found_unique:
+                    # Found the previous unique, calculate frametime
+                    break
+                found_unique = True
+            if found_unique:
+                frames_since_unique += 1
+
+        if not found_unique or frames_since_unique == 0:
+            return 0.0
+
+        # Frametime = frames_between_unique / container_fps * 1000
+        return (frames_since_unique / self._container_fps) * 1000.0
 
     def windowed_fps(self) -> float:
         """Windowed FPS = sum of unique frames in window (v1 algorithm)."""
         return self._unique_window.sum()
+
+    def smoothed_fps(self) -> float:
+        """EMA-smoothed FPS for stable display."""
+        return self._smoothed_fps
+
+    def current_frametime(self) -> float:
+        """Current frametime in ms (from history)."""
+        data = list(self._frametime_history)
+        return data[-1] if data else 0.0
+
+    def smoothed_frametime(self) -> float:
+        """EMA-smoothed frametime in ms for stable display."""
+        return self._smoothed_frametime
 
     def total_unique_ratio(self) -> float:
         """Ratio of unique frames since start."""
@@ -77,6 +167,11 @@ class _VideoState:
     def fps_history(self) -> RingBuffer:
         """FPS history for plotting."""
         return self._fps_history
+
+    @property
+    def frametime_history(self) -> RingBuffer:
+        """Frametime history for plotting (in ms)."""
+        return self._frametime_history
 
     @property
     def total_frames(self) -> int:
@@ -95,6 +190,10 @@ class _VideoState:
         self._total_duplicates = 0
         self._unique_window.prefill(0.0)
         self._fps_history.prefill(0.0)
+        self._frametime_history.prefill(0.0)
+        self._smoothed_fps = 0.0
+        self._smoothed_frametime = 0.0
+        self._last_unique_distance = 0
 
 
 class SimpleCompositor(Compositor):
@@ -119,6 +218,7 @@ class SimpleCompositor(Compositor):
         scale_mode: ScaleMode = ScaleMode.CROP,
         fps_texts: list[FPSText] | None = None,
         framerate_plots: list[FrameratePlot] | None = None,
+        frametime_plots: list[FrametimePlot] | None = None,
     ) -> None:
         if video_count != len(video_fps):
             raise ValueError(
@@ -160,6 +260,7 @@ class SimpleCompositor(Compositor):
         # Overlay elements (optional)
         self._fps_texts = fps_texts
         self._framerate_plots = framerate_plots
+        self._frametime_plots = frametime_plots
 
         self._frame_index = 0
 
@@ -194,7 +295,10 @@ class SimpleCompositor(Compositor):
                 VideoMetrics(
                     video_index=i,
                     windowed_fps=windowed_fps,
+                    smoothed_fps=state.smoothed_fps(),
                     average_fps=average_fps,
+                    current_frametime=state.current_frametime(),
+                    smoothed_frametime=state.smoothed_frametime(),
                     total_frames_processed=state.total_frames,
                     total_duplicates=state.total_duplicates,
                     total_unique=state.total_unique,
@@ -210,7 +314,7 @@ class SimpleCompositor(Compositor):
         profiler.add_timing("compositor_compose", (time.perf_counter() - t0) * 1000)
 
         # Draw overlays if configured
-        if self._fps_texts or self._framerate_plots:
+        if self._fps_texts or self._framerate_plots or self._frametime_plots:
             t0 = time.perf_counter()
             self._draw_overlays(video_metrics)
             profiler.add_timing("compositor_overlay", (time.perf_counter() - t0) * 1000)
@@ -391,6 +495,7 @@ class SimpleCompositor(Compositor):
 
             for i, (state, metrics) in enumerate(zip(self._video_states, video_metrics)):
                 video_x = i * video_width
+                is_last = (i == self._video_count - 1)
 
                 # Draw FPS text on every video
                 if self._fps_texts and i < len(self._fps_texts):
@@ -412,11 +517,33 @@ class SimpleCompositor(Compositor):
                     plot_x = video_x + int(video_width * 0.05)
 
                     bounds = QRect(plot_x, plot_y, plot_width, plot_height)
-                    is_last = (i == self._video_count - 1)
                     self._framerate_plots[i].draw(
                         painter, bounds, state.fps_history,
                         override_show_title=is_last,
                     )
+
+                # Draw frametime plot above framerate plot (smaller, 1/4 width, left-aligned)
+                if self._frametime_plots and i < len(self._frametime_plots):
+                    t0 = time.perf_counter()
+                    # Frametime plot: 1/4 width, left-aligned within video slot
+                    # Use absolute pixel sizes that work at FHD (1920x1080) minimum
+                    ft_plot_height = min(int(height * 0.10), 80)  # Max 80px height
+                    ft_plot_width = min(int(video_width * 0.25), 320)  # Max 320px width
+                    # Left-aligned with same margin as framerate plot
+                    ft_plot_x = video_x + int(video_width * 0.05)
+                    # Position above framerate plot with gap for title
+                    framerate_top = height - int(height * 0.20) - int(height * 0.05)
+                    ft_plot_y = framerate_top - ft_plot_height - int(height * 0.06)
+
+                    ft_bounds = QRect(ft_plot_x, ft_plot_y, ft_plot_width, ft_plot_height)
+                    self._frametime_plots[i].draw(
+                        painter,
+                        ft_bounds,
+                        state.frametime_history,
+                        current_value=metrics.smoothed_frametime,
+                        override_show_title=is_last,
+                    )
+                    profiler.add_timing("overlay_frametime_plot", (time.perf_counter() - t0) * 1000)
 
         finally:
             painter.end()

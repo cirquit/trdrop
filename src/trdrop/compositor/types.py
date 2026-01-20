@@ -20,8 +20,17 @@ class VideoMetrics:
     # Windowed FPS estimate (e.g., last 60 frames)
     windowed_fps: float
 
+    # EMA-smoothed FPS for stable display
+    smoothed_fps: float
+
     # Running average FPS since start
     average_fps: float
+
+    # Current frametime in ms (time since last unique frame)
+    current_frametime: float
+
+    # EMA-smoothed frametime for stable display
+    smoothed_frametime: float
 
     # Frame counts
     total_frames_processed: int

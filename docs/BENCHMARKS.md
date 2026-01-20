@@ -5,22 +5,68 @@ This document tracks performance measurements across versions to guide optimizat
 ## How to Run Benchmarks
 
 ```bash
-# Run the demo test with profiling enabled
-TRDROP_PROFILE=examples/demo_profile.csv make test
-
-# Or run specific benchmark
-TRDROP_PROFILE=benchmark.csv uv run pytest tests/test_demo_overlay.py -v
-
-# Run standardized benchmarks (1-4 videos)
-TRDROP_PROFILE=benchmark.csv uv run pytest tests/benchmarks/ -v -s
-
-# Run scaling analysis
-TRDROP_PROFILE=benchmark.csv uv run pytest tests/benchmarks/test_benchmark.py::TestBenchmarkComparison::test_scaling_analysis -v -s
+# Run consolidated benchmark suite (recommended)
+make benchmark
 ```
 
-The profiler outputs:
-- `<name>.csv` - Per-frame timing data
-- `<name>.summary.txt` - Aggregated statistics
+This outputs a summary table with:
+- Per-step timing averages for 1-4 video configurations
+- Scaling analysis (slowdown relative to single video)
+- Async vs sync export comparison with pipeline overlap percentage
+
+The profiler also outputs detailed files:
+- `benchmark_results.csv` - Per-frame timing data
+- `benchmark_results.summary.txt` - Aggregated statistics
+
+---
+
+## Performance Progression
+
+All measurements: 1920x1080 output, 1280x720 sources, 2s @ 60fps.
+
+---
+
+Separate numpy buffer converted to QImage each frame, FIT scaling mode, no frametime plot.
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 20.3 | 49.3 | 1.65 | 8.12 | 31.69 | 1.77 | 5.62 |
+| 2 | 25.3 | 39.6 | 3.09 | 9.69 | 18.30 | 2.51 | 5.43 |
+| 3 | 25.9 | 38.6 | 4.85 | 11.78 | 12.93 | 3.16 | 5.36 |
+| 4 | 25.6 | 39.1 | 5.99 | 13.79 | 10.23 | 3.28 | 5.24 |
+
+---
+
+Separate numpy buffer converted to QImage each frame, CROP scaling mode, no frametime plot.
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 58.6 | 17.1 | 1.38 | 7.61 | 0.14 | 2.51 | 5.16 |
+| 2 | 47.9 | 20.9 | 2.92 | 9.28 | 0.60 | 2.49 | 5.25 |
+| 3 | 34.5 | 29.0 | 5.56 | 13.51 | 0.76 | 3.02 | 5.65 |
+| 4 | 32.3 | 31.0 | 6.12 | 14.43 | 0.96 | 3.47 | 5.58 |
+
+---
+
+Zero-copy QImage buffer (numpy view into QImage), CROP scaling mode, no frametime plot.
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 63.0 | 15.9 | 1.28 | 7.18 | 0.14 | 2.17 | 4.89 |
+| 2 | 46.8 | 21.4 | 2.93 | 9.38 | 0.67 | 2.65 | 5.39 |
+| 3 | 41.8 | 23.9 | 4.21 | 10.27 | 0.78 | 2.99 | 5.31 |
+| 4 | 33.7 | 29.7 | 6.01 | 13.30 | 0.94 | 3.60 | 5.43 |
+
+---
+
+Zero-copy QImage buffer, CROP scaling mode, with frametime plot (current default).
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 59.5 | 16.8 | 1.48 | 7.56 | 0.14 | 2.13 | 5.23 |
+| 2 | 50.2 | 19.9 | 3.07 | 8.41 | 0.61 | 2.43 | 5.09 |
+| 3 | 41.5 | 24.1 | 4.35 | 10.15 | 0.78 | 3.00 | 5.47 |
+| 4 | 34.6 | 28.9 | 6.06 | 12.60 | 1.01 | 3.51 | 5.33 |
 
 ---
 
@@ -297,6 +343,95 @@ read+analysis (8.69ms), so the next frame's compositor must wait.
 **Note:** This is a short test. O(1) memory is the design goal - longer running
 tests are needed to verify no slow leaks. The architecture uses double-buffering
 with buffer reuse, which should provide constant memory usage.
+
+---
+
+### 2025-01-20 - Scale Mode Comparison (CROP vs FIT)
+
+**Configuration:** 1920x1080 output, 1280x720 sources, 2s @ 60fps, full overlays
+
+This comparison shows the performance difference between the optimized CROP mode
+(direct slice assignment) and FIT mode (numpy fancy indexing for scaling).
+
+**FIT Mode (legacy scaling approach):**
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 21.1 | 47.4 | 1.55 | 7.67 | **30.81** | 1.51 | 5.42 |
+| 2 | 26.1 | 38.3 | 3.05 | 9.45 | **17.30** | 2.68 | 5.42 |
+| 3 | 27.5 | 36.4 | 4.16 | 10.54 | **12.70** | 3.17 | 5.38 |
+| 4 | 27.4 | 36.5 | 5.24 | 12.13 | **9.75** | 3.80 | 5.11 |
+
+**CROP Mode (current default):**
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 63.0 | 15.9 | 1.28 | 7.18 | **0.14** | 2.17 | 4.89 |
+| 2 | 46.8 | 21.4 | 2.93 | 9.38 | **0.67** | 2.65 | 5.39 |
+| 3 | 41.8 | 23.9 | 4.21 | 10.27 | **0.78** | 2.99 | 5.31 |
+| 4 | 33.7 | 29.7 | 6.01 | 13.30 | **0.94** | 3.60 | 5.43 |
+
+**CROP vs FIT Speedup:**
+
+| Videos | FIT fps | CROP fps | Speedup |
+|--------|---------|----------|---------|
+| 1 | 21.1 | 63.0 | **2.99x** |
+| 2 | 26.1 | 46.8 | **1.79x** |
+| 3 | 27.5 | 41.8 | **1.52x** |
+| 4 | 27.4 | 33.7 | **1.23x** |
+
+**Key Insight:** Compose time drops from 10-31ms (FIT) to <1ms (CROP). The bottleneck
+shifts from compositor to analysis. FIT actually gets *faster* with more videos because
+each slot requires less downscaling (smaller target area).
+
+---
+
+### 2025-01-20 - Consolidated Benchmark (Full Overlays)
+
+**Configuration:**
+- Output: 1920x1080
+- Sources: 1280x720 each, 2s @ 60fps container
+- Content FPS: varying (60, 30, 24, 20 fps per video)
+- Overlays: FPS text + FrameratePlot + FrametimePlot (all with time indicators)
+- Scale mode: CROP
+
+**Run command:** `make benchmark`
+
+**Multi-Video Scaling Results:**
+
+| Videos | FPS | ms/frame | Read | Analyze | Compose | Overlay | VidExp | CSVExp |
+|--------|-----|----------|------|---------|---------|---------|--------|--------|
+| 1 | 59.5 | 16.8 | 1.48 | 7.56 | 0.14 | 2.13 | 5.23 | 0.03 |
+| 2 | 50.2 | 19.9 | 3.07 | 8.41 | 0.61 | 2.43 | 5.09 | 0.04 |
+| 3 | 41.5 | 24.1 | 4.35 | 10.15 | 0.78 | 3.00 | 5.47 | 0.04 |
+| 4 | 34.6 | 28.9 | 6.06 | 12.60 | 1.01 | 3.51 | 5.33 | 0.04 |
+
+**Scaling (relative to 1 video):**
+
+| Videos | Slowdown |
+|--------|----------|
+| 1 | 1.00x |
+| 2 | 1.18x |
+| 3 | 1.43x |
+| 4 | 1.72x |
+
+**Async Export Comparison (1 video, 3s):**
+
+| Mode | FPS | ms/frame |
+|------|-----|----------|
+| Sync | 62.6 | 15.98 |
+| Async | 78.0 | 12.83 |
+
+- **Speedup:** 1.25x
+- **Pipeline overlap:** 63% of export time (3.16 ms saved per frame)
+
+**Key Observations:**
+
+1. **Analysis remains the bottleneck** at ~7.5ms for single video, scaling to ~12.6ms for 4 videos
+2. **Overlay overhead is ~2ms** per video slot (includes frametime plot now)
+3. **Export is constant** at ~5ms regardless of video count
+4. **Sub-linear scaling maintained** - 4 videos only 1.72x slower, not 4x
+5. **Async export provides 25% speedup** by overlapping export with next frame's read+analysis
 
 ---
 
