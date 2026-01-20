@@ -13,6 +13,7 @@ import pytest
 from PyQt6.QtGui import QColor, QFont, QGuiApplication
 
 from tests.testkit import PatternType, VideoConfig, VideoGenerator
+from trdrop import __engine_version__
 from trdrop.analysis.duplicate import DuplicateDetector
 from trdrop.compositor import ScaleMode
 from trdrop.compositor.overlay import FrameratePlot, FrametimePlot, FPSText, PlotStyle
@@ -178,7 +179,7 @@ class TestBenchmark:
 
         print("\n")
         print("=" * 80)
-        print("TRDROP PIPELINE BENCHMARK")
+        print(f"TRDROP PIPELINE BENCHMARK (engine v{__engine_version__})")
         print("=" * 80)
         print("Config: 1920x1080 output, 1280x720 sources, 2s duration, full overlays")
         print()

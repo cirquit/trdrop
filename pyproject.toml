@@ -6,7 +6,13 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Alexander Erben" }]
-dependencies = ["av>=14.0.0", "numpy>=1.26.0", "PyQt6>=6.6.0", "pyyaml>=6.0.3"]
+dependencies = [
+    "av>=14.0.0",
+    "numba>=0.63.1",
+    "numpy>=1.26.0",
+    "PyQt6>=6.6.0",
+    "pyyaml>=6.0.3",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0", "flake8>=7.0.0", "isort>=5.13.0", "basedpyright>=1.18.0"]

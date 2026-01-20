@@ -26,7 +26,7 @@ All measurements: 1920x1080 output, 1280x720 sources, 2s @ 60fps.
 
 ---
 
-Separate numpy buffer converted to QImage each frame, FIT scaling mode, no frametime plot.
+**v0.1** - Separate numpy buffer converted to QImage each frame, FIT scaling mode, no frametime plot.
 
 | Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
 |--------|-----|-------|------|---------|---------|---------|--------|
@@ -37,7 +37,7 @@ Separate numpy buffer converted to QImage each frame, FIT scaling mode, no frame
 
 ---
 
-Separate numpy buffer converted to QImage each frame, CROP scaling mode, no frametime plot.
+**v0.2** - Separate numpy buffer converted to QImage each frame, CROP scaling mode, no frametime plot.
 
 | Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
 |--------|-----|-------|------|---------|---------|---------|--------|
@@ -48,7 +48,7 @@ Separate numpy buffer converted to QImage each frame, CROP scaling mode, no fram
 
 ---
 
-Zero-copy QImage buffer (numpy view into QImage), CROP scaling mode, no frametime plot.
+**v0.3** - Zero-copy QImage buffer (numpy view into QImage), CROP scaling mode, no frametime plot.
 
 | Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
 |--------|-----|-------|------|---------|---------|---------|--------|
@@ -59,7 +59,7 @@ Zero-copy QImage buffer (numpy view into QImage), CROP scaling mode, no frametim
 
 ---
 
-Zero-copy QImage buffer, CROP scaling mode, with frametime plot (current default).
+**v0.4** - Zero-copy QImage buffer, CROP scaling mode, with frametime plot, full pixel analysis.
 
 | Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
 |--------|-----|-------|------|---------|---------|---------|--------|
@@ -67,6 +67,37 @@ Zero-copy QImage buffer, CROP scaling mode, with frametime plot (current default
 | 2 | 50.2 | 19.9 | 3.07 | 8.41 | 0.61 | 2.43 | 5.09 |
 | 3 | 41.5 | 24.1 | 4.35 | 10.15 | 0.78 | 3.00 | 5.47 |
 | 4 | 34.6 | 28.9 | 6.06 | 12.60 | 1.01 | 3.51 | 5.33 |
+
+---
+
+**v0.5** - Numba JIT + stride 4x4 analysis (current default). Compares every 4th pixel in both dimensions.
+
+| Videos | FPS | ms/fr | Read | Analyze | Compose | Overlay | VidExp |
+|--------|-----|-------|------|---------|---------|---------|--------|
+| 1 | 116.9 | 8.6 | 1.27 | 0.17 | 0.12 | 2.11 | 4.66 |
+| 2 | 88.5 | 11.3 | 2.75 | 0.33 | 0.60 | 2.14 | 5.13 |
+| 3 | 66.5 | 15.0 | 4.29 | 0.48 | 0.72 | 3.59 | 5.50 |
+| 4 | 64.3 | 15.5 | 4.70 | 0.63 | 0.82 | 4.26 | 4.71 |
+
+---
+
+## Analysis Strategy Comparison
+
+Comparison of duplicate detection strategies on 1280x720 frames.
+
+| Strategy | Dup (ms) | Diff (ms) | Total | Speedup | Pixels |
+|----------|----------|-----------|-------|---------|--------|
+| full | 6.87 | 7.14 | 14.01 | 1.0x | 921,600 |
+| stride_2x2 | 1.85 | 1.86 | 3.71 | 3.8x | 230,400 |
+| stride_4x4 | 0.31 | 0.28 | 0.60 | 23.5x | 57,600 |
+| rows_2 | 3.62 | 3.53 | 7.15 | 2.0x | 460,800 |
+| rows_4 | 1.87 | 1.89 | 3.77 | 3.7x | 230,400 |
+| numba_full | 1.14 | 1.13 | 2.27 | 6.2x | 921,600 |
+| **numba_stride_4x4** | **0.08** | **0.08** | **0.15** | **93.7x** | 57,600 |
+| numba_early_exit | 1.13 | 0.23 | 1.36 | 10.3x | 921,600 |
+
+`numba_stride_4x4` is the default. It compares every 4th pixel in both dimensions
+using Numba JIT compilation. Falls back to `stride_4x4` (numpy) if numba unavailable.
 
 ---
 
