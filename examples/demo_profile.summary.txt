@@ -1,0 +1,58 @@
+TRDrop Profiling Summary
+======================================================================
+
+Total frames: 299
+Total time: 7.89s
+Average FPS: 37.9
+
+Per-Stage Timing (ms/frame): mean ± std [min, max]
+----------------------------------------------------------------------
+  Read (decode)               1.064 ±  0.210  [  0.776,    3.386]
+  Read (total)                1.095 ±  0.218  [  0.791,    3.461]
+  Analysis (dup)              6.939 ±  0.832  [  5.162,   10.034]
+  Analysis (total)            7.005 ±  0.835  [  5.219,   10.115]
+  Compositor (compose)       13.692 ±  4.256  [  7.571,   20.048]
+  Compositor (overlay)        1.219 ±  4.518  [  0.623,   78.909]
+  Compositor (total)         14.931 ±  5.951  [  8.257,   86.709]
+  Export Video (convert)      0.415 ±  0.164  [  0.149,    1.445]
+  Export Video (encode)       2.661 ±  1.394  [  1.312,   20.111]
+  Export Video (total)        3.080 ±  1.431  [  1.501,   20.729]
+  Export CSV                  0.032 ±  0.008  [  0.013,    0.059]
+  Frame Total                26.263 ±  6.434  [ 16.793,  100.115]
+
+Compositor Overlay Breakdown (ms/frame): mean ± std
+----------------------------------------------------------------------
+  FPS Text                    0.301 ±  3.980
+  Plot Background             0.063 ±  0.008
+  Plot Grid                   0.232 ±  0.018
+  Plot Axes                   0.023 ±  0.004
+  Plot Line (exact)           0.438 ±  0.294
+  Plot Trail (smoothed)       0.290 ±  0.182
+  Plot Labels                 0.072 ±  0.026
+  Plot Title                  0.031 ±  0.011
+  ────────────────────────────────────────
+  Overlay Total               1.450
+
+Time Distribution (% of measured time):
+----------------------------------------------------------------------
+  Read             4.2%  ██
+  Analysis        26.8%  █████████████
+  Compositor      57.1%  ████████████████████████████
+  Export Video    11.8%  █████
+  Export CSV       0.1%  
+
+Pipeline Overlap Analysis:
+----------------------------------------------------------------------
+  Theoretical sequential time: 7,816.5 ms
+  Actual wall clock time:      7,891.7 ms
+  Time saved by parallelism:   -75.2 ms (-1.0%)
+
+  Stage overlap with previous frame's export:
+    Read overlaps:       0.0%
+    Analysis overlaps:   0.0%
+
+Optimization Opportunities:
+----------------------------------------------------------------------
+
+  Top bottleneck: Compositor (14.9 ms/frame)
+

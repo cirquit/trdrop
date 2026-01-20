@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable
@@ -14,6 +15,8 @@ from trdrop.interfaces.source import FrameSource
 from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
+
+logger = logging.getLogger(__name__)
 
 
 class StreamingEngine:
@@ -69,8 +72,18 @@ class StreamingEngine:
         self._on_frame = on_frame
         self._synchronous = synchronous
 
-        # All sources should have same frame count for lockstep
-        self._total_frames = min(s.total_frames for s in sources)
+        # Terminate at shortest source (all sources must provide frame)
+        frame_counts = [s.total_frames for s in sources]
+        self._total_frames = min(frame_counts)
+
+        # Warn if sources have different lengths
+        if len(set(frame_counts)) > 1:
+            logger.warning(
+                "Video sources have different frame counts: %s. "
+                "Processing will stop at frame %d (shortest source).",
+                frame_counts,
+                self._total_frames,
+            )
 
     def run(self) -> None:
         """Run the streaming pipeline to completion."""

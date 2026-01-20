@@ -23,22 +23,6 @@ def _format_fps_label(value: float) -> str:
     return f"{value:.0f}"
 
 
-def _moving_average(values: list[float], window: int) -> list[float]:
-    """Compute simple moving average for smoothing."""
-    if window <= 1 or len(values) < window:
-        return values
-
-    result: list[float] = []
-    window_sum = sum(values[:window])
-    result.append(window_sum / window)
-
-    for i in range(window, len(values)):
-        window_sum += values[i] - values[i - window]
-        result.append(window_sum / window)
-
-    return result
-
-
 def _nice_max_fps(max_value: float, segments: int = 4) -> float:
     """Round up to a nice value divisible by segments.
 
@@ -171,17 +155,34 @@ class Plot(ABC):
             text_y = y + 4
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
-    def _draw_title(self, painter: QPainter, bounds: QRect) -> None:
-        """Draw title above the plot on the right side."""
+    def _draw_title(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        time_anchor: float = 1.0,
+    ) -> None:
+        """Draw title above the plot, right-aligned at the time anchor position.
+
+        Args:
+            painter: QPainter to draw with
+            bounds: Plot bounds
+            time_anchor: X position as fraction (0.0=left, 1.0=right)
+        """
         if not self._title:
             return
 
         title_font = self._style.title_font or self._style.font
         painter.setFont(title_font)
 
-        # Position: above plot, right-aligned
-        x = bounds.right() - bounds.width() // 10
-        y = bounds.top() - bounds.height() // 10
+        # Calculate text width for right-alignment
+        from PyQt6.QtGui import QFontMetrics
+        metrics = QFontMetrics(title_font)
+        text_width = metrics.horizontalAdvance(self._title)
+
+        # Position: above plot, right-aligned at time_anchor position
+        anchor_x = bounds.left() + int(bounds.width() * time_anchor)
+        x = anchor_x - text_width  # Right-align to anchor
+        y = bounds.top() - 8  # Small gap above plot
 
         self._draw_text_with_shadow(painter, QPoint(x, y), self._title)
 
@@ -200,8 +201,8 @@ class FrameratePlot(Plot):
         show_center_line: bool = True,
         title: str = "FRAMERATE",
         auto_scale: bool = False,
-        show_smoothed: bool = True,
         time_anchor: float = 1.0,
+        show_title: bool = True,
     ) -> None:
         """Initialize framerate plot.
 
@@ -211,17 +212,17 @@ class FrameratePlot(Plot):
             show_center_line: Draw horizontal line at half max FPS.
             title: Title text above the plot.
             auto_scale: Dynamically adjust Y-axis based on data.
-            show_smoothed: Show fading smoothed trail behind exact line.
             time_anchor: Where current time appears horizontally.
                 0.0 = left edge, 0.5 = center, 1.0 = right edge (default).
+            show_title: Whether to display the title above the plot.
         """
         super().__init__(style, title)
         self._max_fps = max_fps
         self._min_scale = max_fps  # Minimum scale when auto_scale is on
         self._show_center_line = show_center_line
         self._auto_scale = auto_scale
-        self._show_smoothed = show_smoothed
         self._time_anchor = max(0.0, min(1.0, time_anchor))
+        self._show_title = show_title
 
     def _get_effective_max(self, history: RingBuffer) -> float:
         """Get the effective max FPS for scaling.
@@ -250,8 +251,17 @@ class FrameratePlot(Plot):
         painter: QPainter,
         bounds: QRect,
         history: RingBuffer,
+        *,
+        override_show_title: bool | None = None,
     ) -> None:
-        """Draw framerate plot."""
+        """Draw framerate plot.
+
+        Args:
+            painter: QPainter to draw with
+            bounds: Rectangle to draw into
+            history: FPS history data
+            override_show_title: If set, overrides the instance's show_title setting
+        """
         profiler = get_profiler()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
@@ -280,8 +290,12 @@ class FrameratePlot(Plot):
         self._draw_labels(painter, bounds, 0.0, effective_max)
         profiler.add_timing("overlay_plot_labels", (time.perf_counter() - t0) * 1000)
 
+        # Determine whether to show title
+        show_title = override_show_title if override_show_title is not None else self._show_title
+
         t0 = time.perf_counter()
-        self._draw_title(painter, bounds)
+        if show_title:
+            self._draw_title(painter, bounds, self._time_anchor)
         profiler.add_timing("overlay_plot_title", (time.perf_counter() - t0) * 1000)
 
     def _draw_center_line(self, painter: QPainter, bounds: QRect) -> None:
@@ -300,12 +314,7 @@ class FrameratePlot(Plot):
         history: RingBuffer,
         max_fps: float | None = None,
     ) -> None:
-        """Draw the framerate line(s) with shadow for contrast.
-
-        Draws a fading smoothed trail behind the exact data line.
-        The smoothed line fades out towards the current time (anchor position),
-        leaving the exact line clearly visible at the front.
-        """
+        """Draw the framerate line with shadow for contrast."""
         if len(history) < 2:
             return
 
@@ -326,106 +335,32 @@ class FrameratePlot(Plot):
         newest_idx = n - 1
         x_base = anchor_x - newest_idx * x_step
 
-        # Draw fading smoothed trail first (behind exact line)
-        if self._show_smoothed and n >= 5:
-            profiler = get_profiler()
-            t0 = time.perf_counter()
-            self._draw_fading_trail(painter, bounds, values, x_step, x_base, y_scale, n)
-            profiler.add_timing("overlay_plot_trail", (time.perf_counter() - t0) * 1000)
-
-        # Build and draw exact data path (on top, fully visible)
-        exact_path = QPainterPath()
+        # Build path
+        path = QPainterPath()
         for i in range(n):
             x = x_base + i * x_step
             y = bounds.bottom() - values[i] * y_scale
             y = max(float(bounds.top()), min(float(bounds.bottom()), y))
             if i == 0:
-                exact_path.moveTo(QPointF(x, y))
+                path.moveTo(QPointF(x, y))
             else:
-                exact_path.lineTo(QPointF(x, y))
+                path.lineTo(QPointF(x, y))
 
-        # Draw exact line with full visibility
+        # Draw shadow
         shadow_pen = QPen(self._style.shadow_color)
         shadow_pen.setWidthF(self._style.line_width + 2.0)
         shadow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         shadow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         painter.setPen(shadow_pen)
-        painter.drawPath(exact_path)
+        painter.drawPath(path)
 
+        # Draw main line
         line_pen = QPen(self._style.line_color)
         line_pen.setWidthF(float(self._style.line_width))
         line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         line_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         painter.setPen(line_pen)
-        painter.drawPath(exact_path)
-
-    def _draw_fading_trail(
-        self,
-        painter: QPainter,
-        bounds: QRect,
-        values: list[float],
-        x_step: float,
-        x_base: float,
-        y_scale: float,
-        n: int,
-    ) -> None:
-        """Draw a smoothed trail that fades towards the current time (anchor)."""
-        # Apply smoothing
-        window = max(3, n // 15)  # ~7% of data points
-        smoothed = _moving_average(values, window)
-
-        if len(smoothed) < 2:
-            return
-
-        # Draw trail in segments with decreasing opacity towards current time
-        num_segments = 8
-        segment_len = max(1, len(smoothed) // num_segments)
-
-        for seg in range(num_segments):
-            start_idx = seg * segment_len
-            end_idx = min(start_idx + segment_len + 1, len(smoothed))
-
-            if end_idx - start_idx < 2:
-                continue
-
-            # Opacity fades from old (high) to new/current (low)
-            # segment 0 = oldest = brightest, segment N = newest = dimmest
-            opacity = int(160 * (1.0 - seg / num_segments))
-            if opacity < 15:
-                continue
-
-            seg_path = QPainterPath()
-            for i in range(start_idx, end_idx):
-                orig_idx = i + window // 2
-                if orig_idx >= n:
-                    break
-                x = x_base + orig_idx * x_step
-                y = bounds.bottom() - smoothed[i] * y_scale
-                y = max(float(bounds.top()), min(float(bounds.bottom()), y))
-                if i == start_idx:
-                    seg_path.moveTo(QPointF(x, y))
-                else:
-                    seg_path.lineTo(QPointF(x, y))
-
-            # Draw segment with faded color
-            trail_color = QColor(self._style.line_color)
-            trail_color.setAlpha(opacity)
-            trail_shadow = QColor(self._style.shadow_color)
-            trail_shadow.setAlpha(opacity // 3)
-
-            shadow_pen = QPen(trail_shadow)
-            shadow_pen.setWidthF(self._style.line_width + 3.0)
-            shadow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-            shadow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-            painter.setPen(shadow_pen)
-            painter.drawPath(seg_path)
-
-            trail_pen = QPen(trail_color)
-            trail_pen.setWidthF(self._style.line_width + 1.0)
-            trail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-            trail_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-            painter.setPen(trail_pen)
-            painter.drawPath(seg_path)
+        painter.drawPath(path)
 
 
 class FrametimePlot(Plot):

@@ -1,4 +1,4 @@
-.PHONY: lint test check testvideos clean-testvideos
+.PHONY: lint test check testvideos clean-testvideos benchmark examples clean-examples
 
 lint:
 	uv run isort --check-only src tests
@@ -6,9 +6,27 @@ lint:
 	uv run basedpyright src tests
 
 test:
+	uv run pytest tests/ --verbose --ignore=tests/benchmarks/
+
+test-all:
 	uv run pytest tests/ --verbose
 
 check: lint test
+
+# Run performance benchmarks with profiling
+benchmark:
+	TRDROP_PROFILE=benchmark_results.csv uv run pytest tests/benchmarks/ -v -s
+
+# Run scaling analysis only
+benchmark-scaling:
+	TRDROP_PROFILE=scaling_results.csv uv run pytest tests/benchmarks/test_benchmark.py::TestBenchmarkComparison::test_scaling_analysis -v -s
+
+# Generate visual examples for manual confirmation (not part of test suite)
+examples:
+	uv run python -m tests.examples.generate_examples
+
+clean-examples:
+	rm -rf examples/generated/
 
 testvideos:
 	uv run python -m tests.generate_test_videos

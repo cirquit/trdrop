@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 
 import numpy as np
@@ -11,11 +12,14 @@ from PyQt6.QtGui import QImage, QPainter
 from trdrop.compositor.base import Compositor
 from trdrop.compositor.overlay.plot import FrameratePlot
 from trdrop.compositor.overlay.text import FPSText
+from trdrop.compositor.scaling import ScaleMode, get_scale_mode_info, has_performance_warning
 from trdrop.compositor.types import AggregatedMetrics, CompositorOutput, VideoMetrics
 from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
 from trdrop.utils.ringbuffer import RingBuffer
+
+logger = logging.getLogger(__name__)
 
 
 class _VideoState:
@@ -96,8 +100,13 @@ class _VideoState:
 class SimpleCompositor(Compositor):
     """Basic compositor with horizontal layout and overlays.
 
-    Layout: Videos arranged horizontally, scaled to fit output dimensions.
+    Layout: Videos arranged horizontally with configurable scaling mode.
     Overlays: FPS text and framerate plots (optional).
+
+    Scale modes:
+        CROP (default): Show center portion, crop excess. Fastest option.
+        FIT: Scale to fit with letterboxing. Preserves aspect ratio.
+        STRETCH: Scale to fill, ignoring aspect ratio.
     """
 
     def __init__(
@@ -107,6 +116,7 @@ class SimpleCompositor(Compositor):
         output_width: int = 1920,
         output_height: int = 1080,
         *,
+        scale_mode: ScaleMode = ScaleMode.CROP,
         fps_texts: list[FPSText] | None = None,
         framerate_plots: list[FrameratePlot] | None = None,
     ) -> None:
@@ -119,6 +129,16 @@ class SimpleCompositor(Compositor):
         self._video_fps = video_fps
         self._output_width = output_width
         self._output_height = output_height
+        self._scale_mode = scale_mode
+
+        # Warn about performance impact of non-CROP modes
+        if has_performance_warning(scale_mode):
+            info = get_scale_mode_info(scale_mode)
+            logger.warning(
+                "Compositor using %s mode: %s",
+                info.label,
+                info.performance_note,
+            )
 
         # Use QImage as backing store, get numpy view into it
         self._qimage = QImage(output_width, output_height, QImage.Format.Format_RGB888)
@@ -217,16 +237,109 @@ class SimpleCompositor(Compositor):
         x_offset = 0
         for i, pair in enumerate(pairs):
             frame = pair.curr.array
-            src_h, src_w = frame.shape[:2]
 
             # Add remainder pixels to last video
             dst_w = video_width + (remainder if i == self._video_count - 1 else 0)
             dst_h = self._output_height
 
-            # Simple nearest-neighbor resize (for stub - replace with proper scaling)
-            self._blit_scaled(frame, x_offset, 0, dst_w, dst_h)
+            # Dispatch based on scale mode
+            if self._scale_mode == ScaleMode.CROP:
+                self._blit_cropped(frame, x_offset, 0, dst_w, dst_h)
+            elif self._scale_mode == ScaleMode.FIT:
+                self._blit_fit(frame, x_offset, 0, dst_w, dst_h)
+            else:  # STRETCH
+                self._blit_stretch(frame, x_offset, 0, dst_w, dst_h)
 
             x_offset += dst_w
+
+    def _blit_cropped(
+        self,
+        src: np.ndarray,
+        dst_x: int,
+        dst_y: int,
+        dst_w: int,
+        dst_h: int,
+    ) -> None:
+        """Blit source to output buffer, cropping and centering (no scaling).
+
+        Fast path: simple slice assignment, no index computation.
+        - If source is larger than slot: center-crop to fit
+        - If source is smaller than slot: center with black borders
+        """
+        src_h, src_w = src.shape[:2]
+
+        # Calculate copy dimensions (minimum of source and destination)
+        copy_h = min(src_h, dst_h)
+        copy_w = min(src_w, dst_w)
+
+        # Source offsets (center crop if source is larger)
+        src_y_start = (src_h - copy_h) // 2
+        src_x_start = (src_w - copy_w) // 2
+
+        # Destination offsets (center if source is smaller)
+        dst_y_start = dst_y + (dst_h - copy_h) // 2
+        dst_x_start = dst_x + (dst_w - copy_w) // 2
+
+        # Clear the slot first if source is smaller (for black borders)
+        if copy_h < dst_h or copy_w < dst_w:
+            self._output_buffer[dst_y:dst_y + dst_h, dst_x:dst_x + dst_w] = 0
+
+        # Direct slice copy - no scaling, no index arrays
+        self._output_buffer[
+            dst_y_start:dst_y_start + copy_h,
+            dst_x_start:dst_x_start + copy_w,
+        ] = src[
+            src_y_start:src_y_start + copy_h,
+            src_x_start:src_x_start + copy_w,
+        ]
+
+    def _blit_fit(
+        self,
+        src: np.ndarray,
+        dst_x: int,
+        dst_y: int,
+        dst_w: int,
+        dst_h: int,
+    ) -> None:
+        """Blit source to output buffer, scaling to fit with letterboxing.
+
+        Preserves aspect ratio. Adds black bars if aspect ratios differ.
+        Uses nearest-neighbor scaling (slow).
+        """
+        src_h, src_w = src.shape[:2]
+
+        # Calculate scale factor to fit while preserving aspect ratio
+        scale_x = dst_w / src_w
+        scale_y = dst_h / src_h
+        scale = min(scale_x, scale_y)
+
+        # Scaled dimensions
+        scaled_w = int(src_w * scale)
+        scaled_h = int(src_h * scale)
+
+        # Center in destination slot
+        offset_x = dst_x + (dst_w - scaled_w) // 2
+        offset_y = dst_y + (dst_h - scaled_h) // 2
+
+        # Clear the slot first (for letterbox bars)
+        self._output_buffer[dst_y:dst_y + dst_h, dst_x:dst_x + dst_w] = 0
+
+        # Scale and blit
+        self._blit_scaled(src, offset_x, offset_y, scaled_w, scaled_h)
+
+    def _blit_stretch(
+        self,
+        src: np.ndarray,
+        dst_x: int,
+        dst_y: int,
+        dst_w: int,
+        dst_h: int,
+    ) -> None:
+        """Blit source to output buffer, stretching to fill (ignores aspect ratio).
+
+        Uses nearest-neighbor scaling (slow).
+        """
+        self._blit_scaled(src, dst_x, dst_y, dst_w, dst_h)
 
     def _blit_scaled(
         self,
@@ -236,7 +349,11 @@ class SimpleCompositor(Compositor):
         dst_w: int,
         dst_h: int,
     ) -> None:
-        """Blit source to output buffer with nearest-neighbor scaling."""
+        """Blit source to output buffer with nearest-neighbor scaling.
+
+        Internal method used by FIT and STRETCH modes. Slow due to
+        index array creation and fancy indexing.
+        """
         src_h, src_w = src.shape[:2]
 
         # Clamp destination bounds
@@ -275,7 +392,7 @@ class SimpleCompositor(Compositor):
             for i, (state, metrics) in enumerate(zip(self._video_states, video_metrics)):
                 video_x = i * video_width
 
-                # Draw FPS text
+                # Draw FPS text on every video
                 if self._fps_texts and i < len(self._fps_texts):
                     t0 = time.perf_counter()
                     text_x = video_x + int(video_width * 0.05)
@@ -287,7 +404,7 @@ class SimpleCompositor(Compositor):
                     )
                     profiler.add_timing("overlay_fps_text", (time.perf_counter() - t0) * 1000)
 
-                # Draw framerate plot
+                # Draw framerate plot (title only on rightmost video)
                 if self._framerate_plots and i < len(self._framerate_plots):
                     plot_height = int(height * 0.20)
                     plot_y = height - plot_height - int(height * 0.05)
@@ -295,7 +412,11 @@ class SimpleCompositor(Compositor):
                     plot_x = video_x + int(video_width * 0.05)
 
                     bounds = QRect(plot_x, plot_y, plot_width, plot_height)
-                    self._framerate_plots[i].draw(painter, bounds, state.fps_history)
+                    is_last = (i == self._video_count - 1)
+                    self._framerate_plots[i].draw(
+                        painter, bounds, state.fps_history,
+                        override_show_title=is_last,
+                    )
 
         finally:
             painter.end()
@@ -309,3 +430,8 @@ class SimpleCompositor(Compositor):
     @property
     def output_shape(self) -> tuple[int, int, int]:
         return (self._output_height, self._output_width, 3)
+
+    @property
+    def scale_mode(self) -> ScaleMode:
+        """Current scale mode for video placement."""
+        return self._scale_mode

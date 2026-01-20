@@ -12,3 +12,11 @@ build/
 
 # Generated test videos
 tests/videos/
+
+# Example outputs and generated videos
+examples/generated/
+examples/*.mp4
+examples/*.csv
+
+# macOS
+.DS_Store

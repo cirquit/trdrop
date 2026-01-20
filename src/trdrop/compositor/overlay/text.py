@@ -3,9 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum, auto
 
 from PyQt6.QtCore import QPoint
-from PyQt6.QtGui import QColor, QFont, QPainter
+from PyQt6.QtGui import QColor, QFont, QFontMetrics, QPainter
+
+
+class TextAlign(Enum):
+    """Text alignment options."""
+
+    LEFT = auto()
+    RIGHT = auto()
+    CENTER = auto()
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,35 +38,52 @@ class FPSText:
         self,
         style: TextStyle,
         prefix: str = "FPS:",
+        align: TextAlign = TextAlign.LEFT,
     ) -> None:
         self._style = style
         self._prefix = prefix
+        self._align = align
 
     def draw(
         self,
         painter: QPainter,
         position: QPoint,
         fps: float,
+        bounds_width: int | None = None,
     ) -> None:
         """Draw FPS text at position.
 
         Args:
             painter: QPainter to draw with
-            position: Top-left position for text
+            position: Anchor position for text (meaning depends on alignment)
             fps: Current FPS value to display
+            bounds_width: Width of bounding area (for right/center alignment)
         """
         text = f"{self._prefix} {fps:.1f}"
 
         painter.setFont(self._style.font)
 
+        # Calculate text width for alignment
+        metrics = QFontMetrics(self._style.font)
+        text_width = metrics.horizontalAdvance(text)
+
+        # Calculate actual x position based on alignment
+        x = position.x()
+        if self._align == TextAlign.RIGHT and bounds_width is not None:
+            x = position.x() + bounds_width - text_width
+        elif self._align == TextAlign.CENTER and bounds_width is not None:
+            x = position.x() + (bounds_width - text_width) // 2
+
+        draw_pos = QPoint(x, position.y())
+
         # Draw shadow
         shadow_pos = QPoint(
-            position.x() + self._style.shadow_offset,
-            position.y() + self._style.shadow_offset,
+            draw_pos.x() + self._style.shadow_offset,
+            draw_pos.y() + self._style.shadow_offset,
         )
         painter.setPen(self._style.shadow_color)
         painter.drawText(shadow_pos, text)
 
         # Draw main text
         painter.setPen(self._style.color)
-        painter.drawText(position, text)
+        painter.drawText(draw_pos, text)
