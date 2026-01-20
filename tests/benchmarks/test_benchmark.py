@@ -20,7 +20,12 @@ from trdrop.compositor.overlay import FPSText, FrameratePlot, FrametimePlot, Plo
 from trdrop.compositor.overlay.text import TextStyle
 from trdrop.compositor.simple import SimpleCompositor
 from trdrop.engine import StreamingEngine
-from trdrop.export import StreamingCSVExporter, StreamingVideoExporter
+from trdrop.export import (
+    StreamingCSVExporter,
+    StreamingVideoExporter,
+    get_best_h264_encoder,
+    is_hardware_encoder,
+)
 from trdrop.profiling.profiler import OverlapStats, Profiler, get_profiler, reset_profiler
 from trdrop.source.sequential import SequentialFrameSource
 from trdrop.video.reader import PyAVReader
@@ -128,7 +133,7 @@ def _run_pipeline(
         compositor=compositor,
         exporters=[
             StreamingVideoExporter(output_video, fps=readers[0].fps,
-                                   codec="libx264", crf=23, preset="ultrafast"),
+                                   codec="auto", crf=23, preset="ultrafast"),
             StreamingCSVExporter(output_csv),
         ],
         synchronous=synchronous,
@@ -180,12 +185,17 @@ class TestBenchmark:
 
     def test_benchmark(self, qapp, tmp_path):
         """Consolidated benchmark: scaling + async comparison."""
+        # Get encoder info
+        encoder = get_best_h264_encoder()
+        hw_tag = "HW" if is_hardware_encoder(encoder) else "SW"
+
         print("\n")
         print("=" * 70)
         print(f"TRDROP BENCHMARK (engine v{__engine_version__})")
         print("=" * 70)
         print(f"Config: {OUTPUT_RES[0]}x{OUTPUT_RES[1]} output, "
               f"{SOURCE_RES[0]}x{SOURCE_RES[1]} sources, {DURATION_SEC}s")
+        print(f"Encoder: {encoder} ({hw_tag})")
         print()
 
         # === Multi-video scaling ===

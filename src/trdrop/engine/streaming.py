@@ -10,6 +10,7 @@ from typing import Callable
 from trdrop.compositor.base import Compositor
 from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
+from trdrop.export.streaming_video import StreamingVideoExporter
 from trdrop.interfaces.mappable import Mappable
 from trdrop.interfaces.source import FrameSource
 from trdrop.profiling import get_profiler
@@ -95,6 +96,13 @@ class StreamingEngine:
         for exporter in self._exporters:
             exporter.open()
 
+        # Capture encoder info for profiling
+        for exporter in self._exporters:
+            if isinstance(exporter, StreamingVideoExporter):
+                hw_tag = "HW" if exporter.is_hardware_encoder else "SW"
+                profiler.set_metadata("Video Encoder", f"{exporter.codec} ({hw_tag})")
+                break
+
         try:
             self._run_loop()
         finally:
@@ -114,13 +122,10 @@ class StreamingEngine:
             for frame_idx in range(self._total_frames - 1):  # -1 because pairs
                 profiler.start_frame(frame_idx)
 
-                # 1. Pull frame pairs from all sources
+                # 1. Pull frame pairs from all sources (parallel)
                 t0 = time.perf_counter()
-                pairs: list[FramePair] = []
-                try:
-                    for it in source_iters:
-                        pairs.append(next(it))
-                except StopIteration:
+                pairs = self._read_parallel(pool, source_iters)
+                if pairs is None:
                     break
                 profiler.add_timing("read_total", (time.perf_counter() - t0) * 1000)
                 profiler.mark_timestamp("read_end")
@@ -167,6 +172,29 @@ class StreamingEngine:
         # Close sources
         for source in self._sources:
             source.close()
+
+    def _read_parallel(
+        self,
+        pool: ThreadPoolExecutor,
+        source_iters: list,
+    ) -> list[FramePair] | None:
+        """Read frame pairs from all sources in parallel."""
+        if len(source_iters) == 1:
+            # Single source: no need for thread overhead
+            try:
+                return [next(source_iters[0])]
+            except StopIteration:
+                return None
+
+        # Multiple sources: read in parallel
+        futures: list[Future[FramePair]] = []
+        for it in source_iters:
+            futures.append(pool.submit(next, it))
+
+        try:
+            return [f.result() for f in futures]
+        except StopIteration:
+            return None
 
     def _analyze_parallel(
         self,

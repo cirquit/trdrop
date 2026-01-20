@@ -139,6 +139,9 @@ class NullProfiler:
     def add_timing(self, stage: str, duration_ms: float) -> None:
         pass
 
+    def set_metadata(self, key: str, value: str) -> None:
+        pass
+
 
 class Profiler:
     """Performance profiler that tracks per-frame pipeline timing.
@@ -163,6 +166,7 @@ class Profiler:
         self._run_start: float = 0.0
         self._run_end: float = 0.0
         self._frame_start: float = 0.0
+        self._metadata: dict[str, str] = {}
 
     @property
     def enabled(self) -> bool:
@@ -177,10 +181,15 @@ class Profiler:
         """Get current frame profile for async timestamp recording."""
         return self._current_frame
 
+    def set_metadata(self, key: str, value: str) -> None:
+        """Set metadata to include in summary output."""
+        self._metadata[key] = value
+
     def start_run(self) -> None:
         """Mark start of processing run."""
         self._run_start = time.perf_counter()
         self._frames = []
+        self._metadata = {}
 
     def end_run(self) -> None:
         """Mark end of processing run and write CSV."""
@@ -409,6 +418,13 @@ class Profiler:
         with open(summary_path, "w") as f:
             f.write("TRDrop Profiling Summary\n")
             f.write("=" * 70 + "\n\n")
+
+            # Include metadata if present
+            if self._metadata:
+                for key, value in self._metadata.items():
+                    f.write(f"{key}: {value}\n")
+                f.write("\n")
+
             f.write(f"Total frames: {n}\n")
             f.write(f"Total time: {total_time:.2f}s\n")
             f.write(f"Average FPS: {n / total_time:.1f}\n\n")

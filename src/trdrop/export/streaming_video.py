@@ -12,6 +12,34 @@ from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
 from trdrop.profiling import get_profiler
 
+# Hardware encoder preference order (fastest/best quality first)
+_HW_ENCODER_PRIORITY = [
+    "h264_videotoolbox",  # macOS (Apple Silicon / Intel GPU)
+    "h264_nvenc",         # NVIDIA (Windows/Linux)
+    "h264_amf",           # AMD (Windows)
+    "h264_qsv",           # Intel QuickSync (Windows/Linux)
+    "h264_vaapi",         # Linux VAAPI
+]
+
+_SOFTWARE_ENCODER = "libx264"
+
+
+def get_best_h264_encoder() -> str:
+    """Return best available h264 encoder.
+
+    Tries hardware encoders in order of preference, falls back to libx264.
+    """
+    available = set(av.codecs_available)
+    for enc in _HW_ENCODER_PRIORITY:
+        if enc in available:
+            return enc
+    return _SOFTWARE_ENCODER
+
+
+def is_hardware_encoder(codec: str) -> bool:
+    """Check if codec is a hardware encoder."""
+    return codec in _HW_ENCODER_PRIORITY
+
 
 class StreamingVideoExporter(StreamingExporter):
     """Encodes composited frames to video file.
@@ -24,17 +52,38 @@ class StreamingVideoExporter(StreamingExporter):
         path: Path | str,
         fps: float,
         *,
-        codec: str = "libx264",
+        codec: str = "auto",
         pix_fmt: str = "yuv420p",
         crf: int = 23,
         preset: str = "medium",
+        quality: int = 65,
     ) -> None:
+        """Initialize video exporter.
+
+        Args:
+            path: Output file path.
+            fps: Output framerate.
+            codec: Video codec. Use "auto" for automatic hardware detection,
+                or specify directly (libx264, h264_videotoolbox, h264_nvenc, etc.)
+            pix_fmt: Pixel format (default yuv420p).
+            crf: Quality for libx264 (0-51, lower=better, default 23).
+            preset: Speed preset for libx264 (ultrafast to veryslow, default medium).
+            quality: Quality for hardware encoders (0-100, higher=better, default 65).
+        """
         self._path = Path(path)
         self._fps = fps
-        self._codec = codec
         self._pix_fmt = pix_fmt
         self._crf = crf
         self._preset = preset
+        self._quality = quality
+
+        # Resolve "auto" to best available encoder
+        if codec == "auto":
+            self._codec = get_best_h264_encoder()
+        else:
+            self._codec = codec
+
+        self._is_hw = is_hardware_encoder(self._codec)
 
         self._container: av.OutputContainer | None = None  # type: ignore[name-defined]
         self._stream: av.VideoStream | None = None  # type: ignore[name-defined]
@@ -64,10 +113,17 @@ class StreamingVideoExporter(StreamingExporter):
             stream.width = width
             stream.height = height
             stream.pix_fmt = self._pix_fmt
-            stream.options = {  # type: ignore[assignment]
-                "crf": str(self._crf),
-                "preset": self._preset,
-            }
+
+            # Set encoder options (different for HW vs SW encoders)
+            if self._is_hw:
+                # Hardware encoders use quality-based settings
+                stream.options = {"q:v": str(self._quality)}  # type: ignore[assignment]
+            else:
+                # Software encoder (libx264) uses CRF and preset
+                stream.options = {  # type: ignore[assignment]
+                    "crf": str(self._crf),
+                    "preset": self._preset,
+                }
             self._stream = stream
 
         # Create PyAV frame from numpy array
@@ -98,3 +154,13 @@ class StreamingVideoExporter(StreamingExporter):
     @property
     def path(self) -> Path:
         return self._path
+
+    @property
+    def codec(self) -> str:
+        """Return the codec being used."""
+        return self._codec
+
+    @property
+    def is_hardware_encoder(self) -> bool:
+        """Return True if using hardware encoding."""
+        return self._is_hw

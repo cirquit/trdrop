@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from PyQt6.QtCore import QPoint, QPointF, QRect, Qt
-from PyQt6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
+from PyQt6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen, QPixmap
 
 from trdrop.profiling import get_profiler
 from trdrop.utils.ringbuffer import RingBuffer
@@ -93,11 +93,19 @@ class PlotSeries:
 
 
 class Plot(ABC):
-    """Base class for stateless plot renderers."""
+    """Base class for plot renderers with static element caching.
+
+    Static elements (background, grid, axes, labels) are rendered once to a
+    cached pixmap and reused each frame. Only the dynamic line is redrawn.
+    """
 
     def __init__(self, style: PlotStyle, title: str = "") -> None:
         self._style = style
         self._title = title
+        # Static element cache
+        self._static_cache: QPixmap | None = None
+        self._cached_bounds: QRect | None = None
+        self._cached_scale: float = 0.0  # y_max used when cache was built
 
     @abstractmethod
     def draw(
@@ -107,6 +115,21 @@ class Plot(ABC):
         history: RingBuffer,
     ) -> None:
         """Draw plot into bounds using history data."""
+
+    def _needs_cache_rebuild(self, bounds: QRect, y_max: float) -> bool:
+        """Check if static cache needs to be rebuilt."""
+        if self._static_cache is None:
+            return True
+        if self._cached_bounds != bounds:
+            return True
+        if self._cached_scale != y_max:
+            return True
+        return False
+
+    def _draw_static_cache(self, painter: QPainter, bounds: QRect) -> None:
+        """Blit the static cache to the painter."""
+        if self._static_cache is not None:
+            painter.drawPixmap(bounds.topLeft(), self._static_cache)
 
     def _draw_background(self, painter: QPainter, bounds: QRect) -> None:
         """Draw semi-transparent background."""
@@ -309,20 +332,16 @@ class FrameratePlot(Plot):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         effective_max = self._get_effective_max(history)
+        show_title = override_show_title if override_show_title is not None else self._show_title
 
+        # Build or use static element cache
         t0 = time.perf_counter()
-        self._draw_background(painter, bounds)
+        if self._needs_cache_rebuild(bounds, effective_max):
+            self._build_framerate_cache(bounds, effective_max, show_title)
+        self._draw_static_cache(painter, bounds)
         profiler.add_timing("overlay_plot_background", (time.perf_counter() - t0) * 1000)
 
-        t0 = time.perf_counter()
-        self._draw_grid(painter, bounds)
-        if self._show_center_line:
-            self._draw_center_line(painter, bounds)
-        self._draw_anchor_line(painter, bounds)
-        profiler.add_timing("overlay_plot_grid", (time.perf_counter() - t0) * 1000)
-
-        # Draw line before axes so axes appear on top
-        # Use clipping to prevent line from drawing outside bounds
+        # Draw dynamic line (clipped to bounds)
         t0 = time.perf_counter()
         painter.save()
         painter.setClipRect(bounds)
@@ -331,26 +350,41 @@ class FrameratePlot(Plot):
         profiler.add_timing("overlay_plot_line", (time.perf_counter() - t0) * 1000)
 
         # Draw markers after line (outside clip region so they can extend beyond)
+        t0 = time.perf_counter()
         if line_points and self._show_start_marker:
             self._draw_start_marker(painter, line_points[0])
         if line_points and self._show_time_indicator:
             self._draw_time_indicator(painter, bounds, line_points[-1])
+        profiler.add_timing("overlay_plot_markers", (time.perf_counter() - t0) * 1000)
 
-        t0 = time.perf_counter()
-        self._draw_axes(painter, bounds)
-        profiler.add_timing("overlay_plot_axes", (time.perf_counter() - t0) * 1000)
+    def _build_framerate_cache(
+        self, bounds: QRect, effective_max: float, show_title: bool
+    ) -> None:
+        """Build static cache for framerate plot."""
+        # Create pixmap with transparent background
+        self._static_cache = QPixmap(bounds.size())
+        self._static_cache.fill(QColor(0, 0, 0, 0))
 
-        t0 = time.perf_counter()
-        self._draw_labels(painter, bounds, 0.0, effective_max, self._time_anchor)
-        profiler.add_timing("overlay_plot_labels", (time.perf_counter() - t0) * 1000)
+        cache_painter = QPainter(self._static_cache)
+        cache_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Determine whether to show title
-        show_title = override_show_title if override_show_title is not None else self._show_title
+        # Draw to local coordinates (0,0 based)
+        local_bounds = QRect(0, 0, bounds.width(), bounds.height())
 
-        t0 = time.perf_counter()
+        self._draw_background(cache_painter, local_bounds)
+        self._draw_grid(cache_painter, local_bounds)
+        if self._show_center_line:
+            self._draw_center_line(cache_painter, local_bounds)
+        self._draw_anchor_line(cache_painter, local_bounds)
+        self._draw_axes(cache_painter, local_bounds)
+        self._draw_labels(cache_painter, local_bounds, 0.0, effective_max, self._time_anchor)
         if show_title:
-            self._draw_title(painter, bounds, self._time_anchor)
-        profiler.add_timing("overlay_plot_title", (time.perf_counter() - t0) * 1000)
+            self._draw_title(cache_painter, local_bounds, self._time_anchor)
+
+        cache_painter.end()
+
+        self._cached_bounds = QRect(bounds)
+        self._cached_scale = effective_max
 
     def _draw_center_line(self, painter: QPainter, bounds: QRect) -> None:
         """Draw horizontal center line at half max FPS."""
@@ -683,11 +717,14 @@ class FrametimePlot(Plot):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         effective_max = self._get_effective_max(history)
+        show_title = override_show_title if override_show_title is not None else self._show_title
 
-        self._draw_background(painter, bounds)
-        self._draw_grid(painter, bounds)
+        # Build or use static element cache (excludes title since it has dynamic value)
+        if self._needs_cache_rebuild(bounds, effective_max):
+            self._build_frametime_cache(bounds, effective_max)
+        self._draw_static_cache(painter, bounds)
 
-        # Draw line with clipping to prevent drawing outside bounds
+        # Draw dynamic line (clipped to bounds)
         painter.save()
         painter.setClipRect(bounds)
         line_points = self._draw_line(painter, bounds, history, effective_max)
@@ -699,12 +736,29 @@ class FrametimePlot(Plot):
         if line_points and self._show_time_indicator:
             self._draw_time_indicator(painter, bounds, line_points[-1])
 
-        self._draw_axes(painter, bounds)
-        self._draw_labels_fractional(painter, bounds, 0.0, effective_max)
-
-        show_title = override_show_title if override_show_title is not None else self._show_title
+        # Title drawn each frame since it has dynamic current_value
         if show_title:
             self._draw_title_with_value(painter, bounds, current_value)
+
+    def _build_frametime_cache(self, bounds: QRect, effective_max: float) -> None:
+        """Build static cache for frametime plot (excludes dynamic title)."""
+        self._static_cache = QPixmap(bounds.size())
+        self._static_cache.fill(QColor(0, 0, 0, 0))
+
+        cache_painter = QPainter(self._static_cache)
+        cache_painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        local_bounds = QRect(0, 0, bounds.width(), bounds.height())
+
+        self._draw_background(cache_painter, local_bounds)
+        self._draw_grid(cache_painter, local_bounds)
+        self._draw_axes(cache_painter, local_bounds)
+        self._draw_labels_fractional(cache_painter, local_bounds, 0.0, effective_max)
+
+        cache_painter.end()
+
+        self._cached_bounds = QRect(bounds)
+        self._cached_scale = effective_max
 
     def _draw_labels_fractional(
         self,
