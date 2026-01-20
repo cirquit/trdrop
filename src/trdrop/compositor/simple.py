@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+import time
+
 import numpy as np
+from PyQt6.QtCore import QPoint, QRect
+from PyQt6.QtGui import QImage, QPainter
 
 from trdrop.compositor.base import Compositor
+from trdrop.compositor.overlay.plot import FrameratePlot
+from trdrop.compositor.overlay.text import FPSText
 from trdrop.compositor.types import AggregatedMetrics, CompositorOutput, VideoMetrics
+from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
 from trdrop.utils.ringbuffer import RingBuffer
@@ -14,33 +21,58 @@ from trdrop.utils.ringbuffer import RingBuffer
 class _VideoState:
     """Internal state for a single video stream.
 
-    Uses O(1) memory ring buffer for windowed statistics.
-    Stores 1.0 for unique frames, 0.0 for duplicates.
+    Uses O(1) memory ring buffers for windowed statistics.
+    Tracks both unique/duplicate ratio and FPS history for plotting.
     """
 
-    __slots__ = ("_total_frames", "_total_duplicates", "_window")
+    __slots__ = (
+        "_total_frames",
+        "_total_duplicates",
+        "_unique_window",
+        "_fps_history",
+        "_container_fps",
+    )
 
-    def __init__(self, window_size: int) -> None:
+    def __init__(self, window_size: int, container_fps: float) -> None:
         self._total_frames = 0
         self._total_duplicates = 0
-        self._window = RingBuffer(size=window_size, dtype=np.float32)
+        self._container_fps = container_fps
+        # Window for computing windowed FPS via sum (v1 algorithm)
+        # Pre-filled with zeros so FPS = sum(buffer), no extrapolation
+        self._unique_window = RingBuffer(size=window_size, dtype=np.float32)
+        self._unique_window.prefill(0.0)
+        # History of windowed FPS values for plotting
+        self._fps_history = RingBuffer(size=window_size, dtype=np.float32)
+        self._fps_history.prefill(0.0)
 
     def update(self, is_duplicate: bool) -> None:
         self._total_frames += 1
         if is_duplicate:
             self._total_duplicates += 1
-        # Store 1.0 for unique, 0.0 for duplicate
-        self._window.push(0.0 if is_duplicate else 1.0)
 
-    def windowed_unique_ratio(self) -> float:
-        """Ratio of unique frames in the window."""
-        return self._window.mean()
+        # Store 1.0 for unique, 0.0 for duplicate
+        self._unique_window.push(0.0 if is_duplicate else 1.0)
+
+        # Windowed FPS = sum of unique frames in window (v1 algorithm)
+        # Buffer is pre-filled with zeros, so FPS ramps up gradually
+        # without oscillation, converging to true FPS after 1 second
+        windowed_fps = self._unique_window.sum()
+        self._fps_history.push(windowed_fps)
+
+    def windowed_fps(self) -> float:
+        """Windowed FPS = sum of unique frames in window (v1 algorithm)."""
+        return self._unique_window.sum()
 
     def total_unique_ratio(self) -> float:
         """Ratio of unique frames since start."""
         if self._total_frames == 0:
             return 1.0
         return (self._total_frames - self._total_duplicates) / self._total_frames
+
+    @property
+    def fps_history(self) -> RingBuffer:
+        """FPS history for plotting."""
+        return self._fps_history
 
     @property
     def total_frames(self) -> int:
@@ -57,14 +89,15 @@ class _VideoState:
     def reset(self) -> None:
         self._total_frames = 0
         self._total_duplicates = 0
-        self._window.clear()
+        self._unique_window.prefill(0.0)
+        self._fps_history.prefill(0.0)
 
 
 class SimpleCompositor(Compositor):
-    """Basic compositor with horizontal layout and text overlays.
+    """Basic compositor with horizontal layout and overlays.
 
     Layout: Videos arranged horizontally, scaled to fit output dimensions.
-    Overlays: FPS counter per video (stub - no actual text rendering yet).
+    Overlays: FPS text and framerate plots (optional).
     """
 
     def __init__(
@@ -74,7 +107,8 @@ class SimpleCompositor(Compositor):
         output_width: int = 1920,
         output_height: int = 1080,
         *,
-        window_size: int = 60,
+        fps_texts: list[FPSText] | None = None,
+        framerate_plots: list[FrameratePlot] | None = None,
     ) -> None:
         if video_count != len(video_fps):
             raise ValueError(
@@ -86,15 +120,26 @@ class SimpleCompositor(Compositor):
         self._output_width = output_width
         self._output_height = output_height
 
-        # Pre-allocate output buffer
-        self._output_buffer = np.zeros(
-            (output_height, output_width, 3), dtype=np.uint8
+        # Use QImage as backing store, get numpy view into it
+        self._qimage = QImage(output_width, output_height, QImage.Format.Format_RGB888)
+        self._qimage.fill(0)
+
+        # Create numpy view into QImage's buffer (zero-copy)
+        ptr = self._qimage.bits()
+        ptr.setsize(output_height * output_width * 3)
+        self._output_buffer = np.frombuffer(ptr, dtype=np.uint8).reshape(
+            (output_height, output_width, 3)
         )
 
-        # Per-video state
+        # Per-video state: window_size = ~1 second of frames for each video
         self._video_states = [
-            _VideoState(window_size=window_size) for _ in range(video_count)
+            _VideoState(window_size=round(video_fps[i]), container_fps=video_fps[i])
+            for i in range(video_count)
         ]
+
+        # Overlay elements (optional)
+        self._fps_texts = fps_texts
+        self._framerate_plots = framerate_plots
 
         self._frame_index = 0
 
@@ -122,7 +167,7 @@ class SimpleCompositor(Compositor):
             state.update(is_dup)
 
             container_fps = self._video_fps[i]
-            windowed_fps = container_fps * state.windowed_unique_ratio()
+            windowed_fps = state.windowed_fps()
             average_fps = container_fps * state.total_unique_ratio()
 
             video_metrics.append(
@@ -139,9 +184,16 @@ class SimpleCompositor(Compositor):
             )
 
         # Compose frame (simple horizontal layout)
+        profiler = get_profiler()
+        t0 = time.perf_counter()
         self._compose_horizontal(pairs)
+        profiler.add_timing("compositor_compose", (time.perf_counter() - t0) * 1000)
 
-        # TODO: Render text overlays (requires font rendering)
+        # Draw overlays if configured
+        if self._fps_texts or self._framerate_plots:
+            t0 = time.perf_counter()
+            self._draw_overlays(video_metrics)
+            profiler.add_timing("compositor_overlay", (time.perf_counter() - t0) * 1000)
 
         aggregated = AggregatedMetrics(
             frame_index=self._frame_index,
@@ -184,26 +236,69 @@ class SimpleCompositor(Compositor):
         dst_w: int,
         dst_h: int,
     ) -> None:
-        """Blit source to output buffer with scaling."""
+        """Blit source to output buffer with nearest-neighbor scaling."""
         src_h, src_w = src.shape[:2]
 
-        # Calculate scaling factors
-        scale_x = src_w / dst_w
-        scale_y = src_h / dst_h
-
-        # Generate destination coordinates
+        # Clamp destination bounds
         dst_y_end = min(dst_y + dst_h, self._output_height)
         dst_x_end = min(dst_x + dst_w, self._output_width)
+        actual_h = dst_y_end - dst_y
+        actual_w = dst_x_end - dst_x
 
-        for y in range(dst_y, dst_y_end):
-            src_y = int((y - dst_y) * scale_y)
-            src_y = min(src_y, src_h - 1)
+        if actual_h <= 0 or actual_w <= 0:
+            return
 
-            for x in range(dst_x, dst_x_end):
-                src_x = int((x - dst_x) * scale_x)
-                src_x = min(src_x, src_w - 1)
+        # Create index arrays for nearest-neighbor sampling (vectorized)
+        y_indices = np.minimum(
+            (np.arange(actual_h) * src_h // dst_h).astype(np.intp),
+            src_h - 1,
+        )
+        x_indices = np.minimum(
+            (np.arange(actual_w) * src_w // dst_w).astype(np.intp),
+            src_w - 1,
+        )
 
-                self._output_buffer[y, x] = src[src_y, src_x]
+        # Use fancy indexing to sample and assign in one operation
+        self._output_buffer[dst_y:dst_y_end, dst_x:dst_x_end] = src[
+            y_indices[:, np.newaxis], x_indices
+        ]
+
+    def _draw_overlays(self, video_metrics: list[VideoMetrics]) -> None:
+        """Draw FPS text and plots using QPainter directly to QImage buffer."""
+        profiler = get_profiler()
+        height, width = self._output_height, self._output_width
+        painter = QPainter(self._qimage)
+
+        try:
+            video_width = width // self._video_count
+
+            for i, (state, metrics) in enumerate(zip(self._video_states, video_metrics)):
+                video_x = i * video_width
+
+                # Draw FPS text
+                if self._fps_texts and i < len(self._fps_texts):
+                    t0 = time.perf_counter()
+                    text_x = video_x + int(video_width * 0.05)
+                    text_y = int(height * 0.10)
+                    self._fps_texts[i].draw(
+                        painter,
+                        QPoint(text_x, text_y),
+                        metrics.windowed_fps,
+                    )
+                    profiler.add_timing("overlay_fps_text", (time.perf_counter() - t0) * 1000)
+
+                # Draw framerate plot
+                if self._framerate_plots and i < len(self._framerate_plots):
+                    plot_height = int(height * 0.20)
+                    plot_y = height - plot_height - int(height * 0.05)
+                    plot_width = video_width - int(video_width * 0.10)
+                    plot_x = video_x + int(video_width * 0.05)
+
+                    bounds = QRect(plot_x, plot_y, plot_width, plot_height)
+                    self._framerate_plots[i].draw(painter, bounds, state.fps_history)
+
+        finally:
+            painter.end()
 
     def reset(self) -> None:
         for state in self._video_states:

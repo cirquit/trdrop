@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any, Iterator
 
 import numpy as np
 
 from trdrop.interfaces.video import VideoReader
+from trdrop.profiling import get_profiler
 
 
 class PyAVReader(VideoReader):
@@ -67,12 +69,17 @@ class PyAVReader(VideoReader):
             self._frame_iter = self._container.decode(video=0)
 
         assert self._frame_iter is not None
+        profiler = get_profiler()
         try:
+            # Time the decode operation
+            t0 = time.perf_counter()
             frame = next(self._frame_iter)
             self._current_frame += 1
             # Copy frame data to output buffer
             arr = frame.to_ndarray(format="rgb24")
             np.copyto(out, arr)
+            t1 = time.perf_counter()
+            profiler.add_timing("read_decode", (t1 - t0) * 1000)
             return True
         except StopIteration:
             return False

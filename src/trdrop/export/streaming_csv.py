@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import csv
+import time
 from pathlib import Path
 from typing import TextIO
 
 from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
+from trdrop.profiling import get_profiler
 
 
 class StreamingCSVExporter(StreamingExporter):
@@ -48,6 +50,9 @@ class StreamingCSVExporter(StreamingExporter):
         if self._writer is None or self._file is None:
             raise RuntimeError("Exporter not opened")
 
+        profiler = get_profiler()
+        t0 = time.perf_counter()
+
         for vm in output.metrics.videos:
             self._writer.writerow([
                 output.metrics.frame_index,
@@ -61,6 +66,8 @@ class StreamingCSVExporter(StreamingExporter):
                 vm.total_unique,
             ])
         self._file.flush()
+
+        profiler.add_timing("export_csv", (time.perf_counter() - t0) * 1000)
 
     def close(self) -> None:
         if self._file is not None:

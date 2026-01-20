@@ -18,9 +18,7 @@ from typing import Callable, TypeAlias
 import numpy as np
 
 # Type alias for pattern generator functions
-PatternGenerator: TypeAlias = Callable[
-    [int, int, int, np.random.Generator], np.ndarray
-]
+PatternGenerator: TypeAlias = Callable[[int, int, int, np.random.Generator], np.ndarray]
 
 
 class PatternType(Enum):
@@ -31,6 +29,7 @@ class PatternType(Enum):
     GRADIENT = "gradient"  # Horizontal gradient, shifts each content frame
     COUNTER = "counter"  # Binary counter pattern (machine-verifiable)
     NOISE = "noise"  # Deterministic noise based on content index
+    NUMBER = "number"  # Large centered frame number (human-readable)
 
     # Motion patterns (for complex difference detection)
     SWIRL = "swirl"  # Rotating swirl pattern
@@ -125,6 +124,58 @@ def generate_noise(
     return local_rng.integers(0, 256, size=(height, width, 3), dtype=np.uint8)
 
 
+# 5x7 bitmap font for digits 0-9
+_DIGIT_FONT: dict[str, list[int]] = {
+    "0": [0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E],
+    "1": [0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E],
+    "2": [0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F],
+    "3": [0x1F, 0x02, 0x04, 0x02, 0x01, 0x11, 0x0E],
+    "4": [0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02],
+    "5": [0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E],
+    "6": [0x06, 0x08, 0x10, 0x1E, 0x11, 0x11, 0x0E],
+    "7": [0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08],
+    "8": [0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E],
+    "9": [0x0E, 0x11, 0x11, 0x0F, 0x01, 0x02, 0x0C],
+}
+
+
+def generate_number(
+    content_index: int, height: int, width: int, rng: np.random.Generator
+) -> np.ndarray:
+    """Large centered frame number - easy to read for visual inspection."""
+    img = np.zeros((height, width, 3), dtype=np.uint8)
+    img[:, :] = [40, 40, 40]  # Dark gray background
+
+    text = str(content_index)
+    char_width, char_height = 5, 7
+    scale = max(1, min(height // 14, width // (len(text) * 10)))
+    spacing = scale
+
+    total_width = len(text) * char_width * scale + (len(text) - 1) * spacing
+    total_height = char_height * scale
+
+    start_x = (width - total_width) // 2
+    start_y = (height - total_height) // 2
+
+    for i, char in enumerate(text):
+        if char not in _DIGIT_FONT:
+            continue
+        bitmap = _DIGIT_FONT[char]
+        char_x = start_x + i * (char_width * scale + spacing)
+
+        for row, bits in enumerate(bitmap):
+            for col in range(char_width):
+                if (bits >> (char_width - 1 - col)) & 1:
+                    y1 = start_y + row * scale
+                    y2 = y1 + scale
+                    x1 = char_x + col * scale
+                    x2 = x1 + scale
+                    if 0 <= y1 < height and 0 <= x1 < width:
+                        img[y1 : min(y2, height), x1 : min(x2, width)] = [255, 255, 255]
+
+    return img
+
+
 def generate_swirl(
     content_index: int, height: int, width: int, rng: np.random.Generator
 ) -> np.ndarray:
@@ -171,7 +222,9 @@ def generate_blocks(
 
             # Determine block color based on content_index and change frequency
             block_content = content_index // change_freq
-            block_rng = np.random.default_rng(local_rng.integers(0, 2**31) + block_content)
+            block_rng = np.random.default_rng(
+                local_rng.integers(0, 2**31) + block_content
+            )
 
             color = block_rng.integers(50, 256, size=3, dtype=np.uint8)
 
@@ -244,7 +297,14 @@ def generate_horizontal_bands(
         hue = ((band + content_index * 0.1) * 0.125) % 1.0
         i = int(hue * 6)
         f = hue * 6 - i
-        colors = [(1, f, 0), (1 - f, 1, 0), (0, 1, f), (0, 1 - f, 1), (f, 0, 1), (1, 0, 1 - f)]
+        colors = [
+            (1, f, 0),
+            (1 - f, 1, 0),
+            (0, 1, f),
+            (0, 1 - f, 1),
+            (f, 0, 1),
+            (1, 0, 1 - f),
+        ]
         r, g, b = colors[i % 6]
 
         img[y1:y2, :] = [int(r * 200 + 55), int(g * 200 + 55), int(b * 200 + 55)]
@@ -258,6 +318,7 @@ PATTERN_GENERATORS: dict[PatternType, PatternGenerator] = {
     PatternType.GRADIENT: generate_gradient,
     PatternType.COUNTER: generate_counter,
     PatternType.NOISE: generate_noise,
+    PatternType.NUMBER: generate_number,
     PatternType.SWIRL: generate_swirl,
     PatternType.BLOCKS: generate_blocks,
     PatternType.CHECKERBOARD: generate_checkerboard,
@@ -265,28 +326,3 @@ PATTERN_GENERATORS: dict[PatternType, PatternGenerator] = {
     PatternType.HORIZONTAL_BANDS: generate_horizontal_bands,
     # TEAR_SIMULATION is handled specially in the generator
 }
-
-
-def embed_content_index(img: np.ndarray, content_index: int) -> None:
-    """Embed content index as a small visual marker (bottom-right, in-place)."""
-    h, w = img.shape[:2]
-
-    box_size = min(20, h // 10, w // 10)
-    margin = max(2, min(5, w // 100))
-
-    if box_size < 4 or margin < 1:
-        return  # Too small to embed
-
-    # Encode index as grayscale (wraps at 256)
-    val = content_index % 256
-    y1, y2 = h - margin - box_size, h - margin
-    x1, x2 = w - margin - box_size, w - margin
-
-    img[y1:y2, x1:x2] = [val, val, val]
-
-    # White border
-    if y1 > 0 and x1 > 0:
-        img[y1 - 1, x1 - 1 : x2 + 1] = [255, 255, 255]
-        img[y2, x1 - 1 : x2 + 1] = [255, 255, 255]
-        img[y1 - 1 : y2 + 1, x1 - 1] = [255, 255, 255]
-        img[y1 - 1 : y2 + 1, x2] = [255, 255, 255]

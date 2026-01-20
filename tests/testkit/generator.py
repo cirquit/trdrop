@@ -14,7 +14,6 @@ from tests.testkit.patterns import (
     PATTERN_GENERATORS,
     PatternType,
     TearInfo,
-    embed_content_index,
     generate_horizontal_bands,
 )
 
@@ -66,7 +65,6 @@ class VideoGenerator:
         else:
             raise ValueError(f"Unknown pattern type: {pattern}")
 
-        embed_content_index(img, content_index)
         return img
 
     def _apply_tear(
@@ -129,7 +127,9 @@ class VideoGenerator:
             )
         return VideoGroundTruth(config=self._config, frames=frames)
 
-    def write(self, path: str | Path, embed_ground_truth: bool = True) -> VideoGroundTruth:
+    def write(
+        self, path: str | Path, embed_ground_truth: bool = True
+    ) -> VideoGroundTruth:
         """Write the test video to a file. Returns ground truth."""
         import av
         from av.video import VideoStream

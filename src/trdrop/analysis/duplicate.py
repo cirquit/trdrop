@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import time
+
 from trdrop.analysis.core import NumpyAnalyzer
 from trdrop.interfaces.mappable import Mappable
+from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
 
@@ -26,10 +29,13 @@ class DuplicateDetector(Mappable[FramePair, FrameMetrics]):
         )
 
     def map(self, input: FramePair) -> FrameMetrics:
+        profiler = get_profiler()
+        t0 = time.perf_counter()
         is_dup, diff = self._analyzer.compare(
             input.prev.array,
             input.curr.array,
         )
+        profiler.add_timing("analysis_duplicate", (time.perf_counter() - t0) * 1000)
         return FrameMetrics(
             frame_index=input.frame_index,
             is_duplicate=is_dup,

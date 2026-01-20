@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable
 
 from trdrop.compositor.base import Compositor
+from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
 from trdrop.interfaces.mappable import Mappable
 from trdrop.interfaces.source import FrameSource
+from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
 
@@ -44,6 +47,7 @@ class StreamingEngine:
         *,
         analyzer_workers: int | None = None,
         on_frame: Callable[[int, int], None] | None = None,
+        synchronous: bool = False,
     ) -> None:
         """
         Args:
@@ -63,12 +67,16 @@ class StreamingEngine:
         self._exporters = exporters
         self._analyzer_workers = analyzer_workers
         self._on_frame = on_frame
+        self._synchronous = synchronous
 
         # All sources should have same frame count for lockstep
         self._total_frames = min(s.total_frames for s in sources)
 
     def run(self) -> None:
         """Run the streaming pipeline to completion."""
+        profiler = get_profiler()
+        profiler.start_run()
+
         # Open all exporters
         for exporter in self._exporters:
             exporter.open()
@@ -80,37 +88,59 @@ class StreamingEngine:
             for exporter in self._exporters:
                 exporter.close()
 
+            profiler.end_run()
+
     def _run_loop(self) -> None:
         """Main processing loop."""
         source_iters = [iter(s) for s in self._sources]
         export_future: Future[None] | None = None
+        profiler = get_profiler()
 
         with ThreadPoolExecutor(max_workers=self._analyzer_workers) as pool:
             for frame_idx in range(self._total_frames - 1):  # -1 because pairs
+                profiler.start_frame(frame_idx)
+
                 # 1. Pull frame pairs from all sources
+                t0 = time.perf_counter()
                 pairs: list[FramePair] = []
                 try:
                     for it in source_iters:
                         pairs.append(next(it))
                 except StopIteration:
                     break
+                profiler.add_timing("read_total", (time.perf_counter() - t0) * 1000)
+                profiler.mark_timestamp("read_end")
 
                 # 2. Analyze all videos in parallel
+                t0 = time.perf_counter()
                 results = self._analyze_parallel(pool, pairs)
+                profiler.add_timing("analysis_total", (time.perf_counter() - t0) * 1000)
+                profiler.mark_timestamp("analysis_end")
 
                 # 3. Wait for previous export (protects compositor buffer)
                 if export_future is not None:
                     export_future.result()
 
                 # 4. Compositor processes
+                t0 = time.perf_counter()
                 output = self._compositor.process(pairs, results)
+                profiler.add_timing("compositor_total", (time.perf_counter() - t0) * 1000)
+                profiler.mark_timestamp("compositor_end")
 
                 # 5. Release source buffers
                 for pair in pairs:
                     pair.release()
 
-                # 6. Submit export async
-                export_future = pool.submit(self._export_frame, output)
+                # 6. Export (sync or async)
+                if self._synchronous:
+                    self._export_frame(output)
+                    profiler.mark_timestamp("export_end")
+                else:
+                    export_future = pool.submit(self._export_frame, output)
+                    # Note: In async mode, export_end won't be accurate for overlap
+                    # calculation since export runs in parallel with next frame
+
+                profiler.end_frame()
 
                 # Progress callback
                 if self._on_frame is not None:

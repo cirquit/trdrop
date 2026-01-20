@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import time
 from fractions import Fraction
 from pathlib import Path
 
 import av
-import numpy as np
 
 from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
+from trdrop.profiling import get_profiler
 
 
 class StreamingVideoExporter(StreamingExporter):
@@ -49,6 +50,9 @@ class StreamingVideoExporter(StreamingExporter):
         if self._container is None:
             raise RuntimeError("Exporter not opened")
 
+        profiler = get_profiler()
+        t_start = time.perf_counter()
+
         frame_data = output.frame
         height, width = frame_data.shape[:2]
 
@@ -66,13 +70,18 @@ class StreamingVideoExporter(StreamingExporter):
             }
 
         # Create PyAV frame from numpy array
+        t0 = time.perf_counter()
         frame = av.VideoFrame.from_ndarray(frame_data, format="rgb24")
         frame.pts = self._frame_count
+        profiler.add_timing("export_video_convert", (time.perf_counter() - t0) * 1000)
 
         # Encode and write
+        t0 = time.perf_counter()
         for packet in self._stream.encode(frame):
             self._container.mux(packet)
+        profiler.add_timing("export_video_encode", (time.perf_counter() - t0) * 1000)
 
+        profiler.add_timing("export_video_total", (time.perf_counter() - t_start) * 1000)
         self._frame_count += 1
 
     def close(self) -> None:
