@@ -62,7 +62,7 @@ def qapp() -> QGuiApplication:
     app = QGuiApplication.instance()
     if app is None:
         app = QGuiApplication(sys.argv)
-    return app
+    return app  # type: ignore[return-value]
 
 
 class TestVaryingFPS:
@@ -94,16 +94,16 @@ class TestVaryingFPS:
         # Segments: (duration_sec, content_fps) - shorter duration
         # 0.5 second each: 30 → 60 → 120
         segments = [
-            (0.5, 30),
-            (0.5, 60),
-            (0.5, 120),
+            (0.5, 30.0),
+            (0.5, 60.0),
+            (0.5, 120.0),
         ]
 
         frame_pattern = generate_varying_fps_pattern(container_fps, segments)
         total_duration = sum(d for d, _ in segments)
 
         print(f"\nGenerating {total_duration}s test video at {container_fps}fps container...")
-        print(f"  Segments: 30→60→120 fps")
+        print("  Segments: 30→60→120 fps")
         print(f"  Total frames: {len(frame_pattern)}")
 
         config = VideoConfig(
@@ -222,7 +222,7 @@ class TestVaryingFPS:
         fps_at_120 = float(rows[119]["windowed_fps"])
         fps_at_end = float(rows[-1]["windowed_fps"])
 
-        print(f"\n  FPS measurements:")
+        print("\n  FPS measurements:")
         print(f"    At frame 60 (30fps segment): {fps_at_60:.1f}")
         print(f"    At frame 120 (60fps segment): {fps_at_120:.1f}")
         print(f"    At end (120fps segment): {fps_at_end:.1f}")

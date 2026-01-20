@@ -172,6 +172,11 @@ class Profiler:
     def output_path(self) -> Path:
         return self._output_path
 
+    @property
+    def current_frame(self) -> FrameProfile | None:
+        """Get current frame profile for async timestamp recording."""
+        return self._current_frame
+
     def start_run(self) -> None:
         """Mark start of processing run."""
         self._run_start = time.perf_counter()
@@ -307,7 +312,9 @@ class Profiler:
 
                 prev_export_start = prev.compositor_end_ts
                 prev_export_end = prev.export_end_ts
-                curr_analysis_start = curr.read_end_ts if curr.read_end_ts > 0 else curr.frame_start_ts
+                curr_analysis_start = (
+                    curr.read_end_ts if curr.read_end_ts > 0 else curr.frame_start_ts
+                )
                 curr_analysis_end = curr.analysis_end_ts
 
                 if prev_export_end > curr_analysis_start:
@@ -317,7 +324,9 @@ class Profiler:
                         analysis_overlap_total += (overlap_end - overlap_start) * 1000
 
         read_overlap_pct = (read_overlap_total / read_total * 100) if read_total > 0 else 0
-        analysis_overlap_pct = (analysis_overlap_total / analysis_total * 100) if analysis_total > 0 else 0
+        analysis_overlap_pct = (
+            (analysis_overlap_total / analysis_total * 100) if analysis_total > 0 else 0
+        )
 
         return OverlapStats(
             theoretical_sequential_ms=theoretical,
@@ -484,7 +493,10 @@ class Profiler:
             f.write("-" * 70 + "\n")
             f.write(f"  Theoretical sequential time: {overlap.theoretical_sequential_ms:,.1f} ms\n")
             f.write(f"  Actual wall clock time:      {overlap.actual_wall_ms:,.1f} ms\n")
-            f.write(f"  Time saved by parallelism:   {overlap.overlap_ms:,.1f} ms ({overlap.overlap_pct:.1f}%)\n")
+            f.write(
+                f"  Time saved by parallelism:   {overlap.overlap_ms:,.1f} ms "
+                f"({overlap.overlap_pct:.1f}%)\n"
+            )
             f.write("\n")
             f.write("  Stage overlap with previous frame's export:\n")
             f.write(f"    Read overlaps:     {overlap.read_during_prev_export_pct:5.1f}%\n")
@@ -501,11 +513,14 @@ class Profiler:
                 (stats["read_total"].mean_ms, "Read", "read_total"),
                 (stats["analysis_total"].mean_ms, "Analysis", "analysis_total"),
                 (stats["compositor_total"].mean_ms, "Compositor", "compositor_total"),
-                (stats["export_video_total"].mean_ms, "Export Video", "export_video_total"),
+                (stats["export_video_total"].mean_ms, "Export Video", "export_video"),
             ]
             bottlenecks.sort(reverse=True)
 
-            f.write(f"\n  Top bottleneck: {bottlenecks[0][1]} ({bottlenecks[0][0]:.1f} ms/frame)\n\n")
+            f.write(
+                f"\n  Top bottleneck: {bottlenecks[0][1]} "
+                f"({bottlenecks[0][0]:.1f} ms/frame)\n\n"
+            )
 
             # Compositor-specific recommendations
             comp_overlay = stats["compositor_overlay"].mean_ms
@@ -513,7 +528,10 @@ class Profiler:
 
             if comp_overlay > comp_compose:
                 f.write("  Compositor Analysis:\n")
-                f.write(f"    Overlay rendering ({comp_overlay:.1f}ms) > Composition ({comp_compose:.1f}ms)\n")
+                f.write(
+                    f"    Overlay rendering ({comp_overlay:.1f}ms) > "
+                    f"Composition ({comp_compose:.1f}ms)\n"
+                )
                 f.write("    Consider:\n")
 
                 # Check which overlay component is slowest

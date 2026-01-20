@@ -19,7 +19,7 @@ from PyQt6.QtGui import QGuiApplication
 
 from tests.testkit import PatternType, VideoConfig, VideoGenerator
 from trdrop.compositor import ScaleMode, SimpleCompositor
-from trdrop.types.frames import FramePair, FrameView
+from trdrop.types.frames import FramePair, FrameView, NoopRelease
 from trdrop.types.metrics import FrameMetrics
 
 
@@ -59,7 +59,7 @@ class TestScalingModesCROP:
                 dtype=np.uint8,
             )
             view = FrameView(_data=frame_data, index=0, pts=0)
-            pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+            pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
             pairs.append(pair)
             results.append(FrameMetrics(frame_index=0, is_duplicate=False, diff_ratio=0.0))
 
@@ -96,7 +96,7 @@ class TestScalingModesCROP:
             frame_data[:, 2 * source_width // 3:, 2] = 255  # Right: blue
 
             view = FrameView(_data=frame_data, index=0, pts=0)
-            pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+            pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
             pairs.append(pair)
             results.append(FrameMetrics(frame_index=0, is_duplicate=False, diff_ratio=0.0))
 
@@ -124,7 +124,7 @@ class TestScalingModesCROP:
 
         frame_data = np.full((source_height, source_width, 3), 255, dtype=np.uint8)
         view = FrameView(_data=frame_data, index=0, pts=0)
-        pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+        pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
 
         output = compositor.process([pair], [FrameMetrics(frame_index=0)])
 
@@ -174,7 +174,7 @@ class TestScalingModesCROP:
         )
 
         engine = StreamingEngine(
-            sources=sources,
+            sources=sources,  # type: ignore[arg-type]
             analyzers=[DuplicateDetector()],
             compositor=compositor,
             exporters=[exporter],
@@ -226,7 +226,7 @@ class TestScalingModesFitStretch:
                 dtype=np.uint8,
             )
             view = FrameView(_data=frame_data, index=0, pts=0)
-            pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+            pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
             pairs.append(pair)
             results.append(FrameMetrics(frame_index=0, is_duplicate=False, diff_ratio=0.0))
 
@@ -251,7 +251,7 @@ class TestScalingModesFitStretch:
 
         frame_data = np.full((source_height, source_width, 3), (100, 150, 200), dtype=np.uint8)
         view = FrameView(_data=frame_data, index=0, pts=0)
-        pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+        pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
 
         output = compositor.process([pair], [FrameMetrics(frame_index=0)])
         assert output.frame[output_height // 2, output_width // 2, 0] > 0
@@ -273,7 +273,7 @@ class TestScalingModesFitStretch:
 
         frame_data = np.full((source_height, source_width, 3), (100, 150, 200), dtype=np.uint8)
         view = FrameView(_data=frame_data, index=0, pts=0)
-        pair = FramePair(prev=view, curr=view, _on_release=lambda: None)
+        pair = FramePair(prev=view, curr=view, _on_release=NoopRelease())
 
         output = compositor.process([pair], [FrameMetrics(frame_index=0)])
 
@@ -329,7 +329,7 @@ class TestScalingModesFitStretch:
         )
 
         engine = StreamingEngine(
-            sources=sources,
+            sources=sources,  # type: ignore[arg-type]
             analyzers=[DuplicateDetector()],
             compositor=compositor,
             exporters=[exporter],

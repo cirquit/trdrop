@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import time
 from pathlib import Path
-from typing import TextIO
+from typing import Any, TextIO
 
 from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
@@ -28,7 +28,7 @@ class StreamingCSVExporter(StreamingExporter):
     def __init__(self, path: Path | str) -> None:
         self._path = Path(path)
         self._file: TextIO | None = None
-        self._writer: csv.writer | None = None
+        self._writer: Any = None
 
     def open(self) -> None:
         self._file = self._path.open("w", newline="")

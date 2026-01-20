@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from trdrop.compositor.types import AggregatedMetrics, CompositorOutput
+from trdrop.compositor.types import CompositorOutput
 
 
 class StreamingExporter(ABC):

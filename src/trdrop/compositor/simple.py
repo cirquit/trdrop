@@ -10,7 +10,8 @@ from PyQt6.QtCore import QPoint, QRect
 from PyQt6.QtGui import QImage, QPainter
 
 from trdrop.compositor.base import Compositor
-from trdrop.compositor.overlay.plot import FrameratePlot, FrametimePlot
+from trdrop.compositor.overlay.colors import get_video_color
+from trdrop.compositor.overlay.plot import FrameratePlot, FrametimePlot, PlotSeries
 from trdrop.compositor.overlay.text import FPSText
 from trdrop.compositor.scaling import ScaleMode, get_scale_mode_info, has_performance_warning
 from trdrop.compositor.types import AggregatedMetrics, CompositorOutput, VideoMetrics
@@ -219,6 +220,8 @@ class SimpleCompositor(Compositor):
         fps_texts: list[FPSText] | None = None,
         framerate_plots: list[FrameratePlot] | None = None,
         frametime_plots: list[FrametimePlot] | None = None,
+        framerate_combined: bool = True,
+        frametime_combined: bool = False,
     ) -> None:
         if video_count != len(video_fps):
             raise ValueError(
@@ -246,10 +249,12 @@ class SimpleCompositor(Compositor):
 
         # Create numpy view into QImage's buffer (zero-copy)
         ptr = self._qimage.bits()
+        assert ptr is not None, "QImage.bits() returned None"
         ptr.setsize(output_height * output_width * 3)
-        self._output_buffer = np.frombuffer(ptr, dtype=np.uint8).reshape(
-            (output_height, output_width, 3)
-        )
+        self._output_buffer: np.ndarray = np.frombuffer(
+            ptr.asarray(output_height * output_width * 3),  # type: ignore[arg-type]
+            dtype=np.uint8,
+        ).reshape((output_height, output_width, 3))
 
         # Per-video state: window_size = ~1 second of frames for each video
         self._video_states = [
@@ -261,6 +266,8 @@ class SimpleCompositor(Compositor):
         self._fps_texts = fps_texts
         self._framerate_plots = framerate_plots
         self._frametime_plots = frametime_plots
+        self._framerate_combined = framerate_combined
+        self._frametime_combined = frametime_combined
 
         self._frame_index = 0
 
@@ -493,11 +500,10 @@ class SimpleCompositor(Compositor):
         try:
             video_width = width // self._video_count
 
+            # Draw per-video FPS text
             for i, (state, metrics) in enumerate(zip(self._video_states, video_metrics)):
                 video_x = i * video_width
-                is_last = (i == self._video_count - 1)
 
-                # Draw FPS text on every video
                 if self._fps_texts and i < len(self._fps_texts):
                     t0 = time.perf_counter()
                     text_x = video_x + int(video_width * 0.05)
@@ -509,44 +515,149 @@ class SimpleCompositor(Compositor):
                     )
                     profiler.add_timing("overlay_fps_text", (time.perf_counter() - t0) * 1000)
 
-                # Draw framerate plot (title only on rightmost video)
-                if self._framerate_plots and i < len(self._framerate_plots):
-                    plot_height = int(height * 0.20)
-                    plot_y = height - plot_height - int(height * 0.05)
-                    plot_width = video_width - int(video_width * 0.10)
-                    plot_x = video_x + int(video_width * 0.05)
+            # Draw framerate plot(s)
+            if self._framerate_plots:
+                t0 = time.perf_counter()
+                if self._framerate_combined:
+                    # Combined: single plot spanning full width with all series
+                    self._draw_framerate_combined(painter, width, height)
+                else:
+                    # Separate: one plot per video
+                    self._draw_framerate_separate(painter, video_width, height)
+                profiler.add_timing("overlay_framerate_plot", (time.perf_counter() - t0) * 1000)
 
-                    bounds = QRect(plot_x, plot_y, plot_width, plot_height)
-                    self._framerate_plots[i].draw(
-                        painter, bounds, state.fps_history,
-                        override_show_title=is_last,
-                    )
-
-                # Draw frametime plot above framerate plot (smaller, 1/4 width, left-aligned)
-                if self._frametime_plots and i < len(self._frametime_plots):
-                    t0 = time.perf_counter()
-                    # Frametime plot: 1/4 width, left-aligned within video slot
-                    # Use absolute pixel sizes that work at FHD (1920x1080) minimum
-                    ft_plot_height = min(int(height * 0.10), 80)  # Max 80px height
-                    ft_plot_width = min(int(video_width * 0.25), 320)  # Max 320px width
-                    # Left-aligned with same margin as framerate plot
-                    ft_plot_x = video_x + int(video_width * 0.05)
-                    # Position above framerate plot with gap for title
-                    framerate_top = height - int(height * 0.20) - int(height * 0.05)
-                    ft_plot_y = framerate_top - ft_plot_height - int(height * 0.06)
-
-                    ft_bounds = QRect(ft_plot_x, ft_plot_y, ft_plot_width, ft_plot_height)
-                    self._frametime_plots[i].draw(
-                        painter,
-                        ft_bounds,
-                        state.frametime_history,
-                        current_value=metrics.smoothed_frametime,
-                        override_show_title=is_last,
-                    )
-                    profiler.add_timing("overlay_frametime_plot", (time.perf_counter() - t0) * 1000)
+            # Draw frametime plot(s)
+            if self._frametime_plots:
+                t0 = time.perf_counter()
+                if self._frametime_combined:
+                    # Combined: single plot with all series
+                    self._draw_frametime_combined(painter, video_width, height, video_metrics)
+                else:
+                    # Separate: one plot per video
+                    self._draw_frametime_separate(painter, video_width, height, video_metrics)
+                profiler.add_timing("overlay_frametime_plot", (time.perf_counter() - t0) * 1000)
 
         finally:
             painter.end()
+
+    def _draw_framerate_combined(
+        self, painter: QPainter, width: int, height: int
+    ) -> None:
+        """Draw a single combined framerate plot with all video series."""
+        if not self._framerate_plots:
+            return
+
+        plot = self._framerate_plots[0]
+        plot_height = int(height * 0.20)
+        plot_y = height - plot_height - int(height * 0.05)
+        plot_width = width - int(width * 0.05)  # Span most of width
+        plot_x = int(width * 0.025)
+
+        bounds = QRect(plot_x, plot_y, plot_width, plot_height)
+
+        # Build series list with distinct colors per video
+        series_list = [
+            PlotSeries(
+                history=state.fps_history,
+                color=get_video_color(i),
+            )
+            for i, state in enumerate(self._video_states)
+        ]
+
+        plot.draw_combined(painter, bounds, series_list, override_show_title=True)
+
+    def _draw_framerate_separate(
+        self, painter: QPainter, video_width: int, height: int
+    ) -> None:
+        """Draw separate framerate plots for each video."""
+        if not self._framerate_plots:
+            return
+
+        for i, state in enumerate(self._video_states):
+            if i >= len(self._framerate_plots):
+                break
+
+            video_x = i * video_width
+            is_last = (i == self._video_count - 1)
+
+            plot_height = int(height * 0.20)
+            plot_y = height - plot_height - int(height * 0.05)
+            plot_w = video_width - int(video_width * 0.10)
+            plot_x = video_x + int(video_width * 0.05)
+
+            bounds = QRect(plot_x, plot_y, plot_w, plot_height)
+            self._framerate_plots[i].draw(
+                painter, bounds, state.fps_history,
+                override_show_title=is_last,
+            )
+
+    def _draw_frametime_combined(
+        self,
+        painter: QPainter,
+        video_width: int,
+        height: int,
+        video_metrics: list[VideoMetrics],
+    ) -> None:
+        """Draw a single combined frametime plot with all video series."""
+        if not self._frametime_plots:
+            return
+
+        plot = self._frametime_plots[0]
+        ft_plot_height = min(int(height * 0.10), 80)
+        ft_plot_width = min(int(video_width * 0.25), 320)
+        ft_plot_x = int(self._output_width * 0.025)
+        framerate_top = height - int(height * 0.20) - int(height * 0.05)
+        ft_plot_y = framerate_top - ft_plot_height - int(height * 0.06)
+
+        ft_bounds = QRect(ft_plot_x, ft_plot_y, ft_plot_width, ft_plot_height)
+
+        series_list = [
+            PlotSeries(
+                history=state.frametime_history,
+                color=get_video_color(i),
+            )
+            for i, state in enumerate(self._video_states)
+        ]
+
+        current_values = [m.smoothed_frametime for m in video_metrics]
+        plot.draw_combined(
+            painter, ft_bounds, series_list,
+            current_values=current_values,
+            override_show_title=True,
+        )
+
+    def _draw_frametime_separate(
+        self,
+        painter: QPainter,
+        video_width: int,
+        height: int,
+        video_metrics: list[VideoMetrics],
+    ) -> None:
+        """Draw separate frametime plots for each video."""
+        if not self._frametime_plots:
+            return
+
+        for i, (state, metrics) in enumerate(zip(self._video_states, video_metrics)):
+            if i >= len(self._frametime_plots):
+                break
+
+            video_x = i * video_width
+
+            ft_plot_height = min(int(height * 0.10), 80)
+            ft_plot_width = min(int(video_width * 0.25), 320)
+            ft_plot_x = video_x + int(video_width * 0.05)
+            framerate_top = height - int(height * 0.20) - int(height * 0.05)
+            ft_plot_y = framerate_top - ft_plot_height - int(height * 0.06)
+
+            ft_bounds = QRect(ft_plot_x, ft_plot_y, ft_plot_width, ft_plot_height)
+            # Always show title with current value for frametime (unlike framerate)
+            self._frametime_plots[i].draw(
+                painter,
+                ft_bounds,
+                state.frametime_history,
+                current_value=metrics.smoothed_frametime,
+                override_show_title=True,
+            )
 
     def reset(self) -> None:
         for state in self._video_states:

@@ -19,7 +19,12 @@ from PyQt6.QtGui import QColor, QFont, QGuiApplication  # noqa: E402
 from tests.testkit import PatternType, VideoConfig, VideoGenerator  # noqa: E402
 from trdrop.analysis.duplicate import DuplicateDetector  # noqa: E402
 from trdrop.compositor import ScaleMode, SimpleCompositor  # noqa: E402
-from trdrop.compositor.overlay import FrameratePlot, FrametimePlot, FPSText  # noqa: E402
+from trdrop.compositor.overlay import (  # noqa: E402
+    FPSText,
+    FrameratePlot,
+    FrametimePlot,
+    get_video_color,
+)
 from trdrop.compositor.overlay.plot import PlotStyle  # noqa: E402
 from trdrop.compositor.overlay.text import TextStyle  # noqa: E402
 from trdrop.engine import StreamingEngine  # noqa: E402
@@ -37,12 +42,22 @@ SOURCE_CONFIGS = [
     {"content_fps": 20, "label": "20fps"},    # Low framerate
 ]
 
-# Example configurations - CROP mode only (FIT/STRETCH are optional)
+# Example configurations
+# For multi-video, we generate both combined and separate plot modes
 EXAMPLES = [
-    {"name": "single", "video_count": 1},
-    {"name": "dual", "video_count": 2},
-    {"name": "triple", "video_count": 3},
-    {"name": "quad", "video_count": 4},
+    {"name": "single", "video_count": 1, "framerate_combined": True},
+    # Single with right-edge time anchor (time flows left-to-right, newest at right)
+    {"name": "single_rightedge", "video_count": 1, "framerate_combined": True,
+     "time_anchor": 1.0},
+    # Dual videos - both modes
+    {"name": "dual_combined", "video_count": 2, "framerate_combined": True},
+    {"name": "dual_separate", "video_count": 2, "framerate_combined": False},
+    # Triple videos - both modes
+    {"name": "triple_combined", "video_count": 3, "framerate_combined": True},
+    {"name": "triple_separate", "video_count": 3, "framerate_combined": False},
+    # Quad videos - both modes
+    {"name": "quad_combined", "video_count": 4, "framerate_combined": True},
+    {"name": "quad_separate", "video_count": 4, "framerate_combined": False},
 ]
 
 
@@ -100,38 +115,99 @@ def generate_sources(output_dir: Path) -> list[Path]:
 
 
 def generate_example(cfg: dict, sources: list[Path]) -> Path:
-    """Generate one example with CROP mode."""
+    """Generate one example with specified plot modes."""
     name = cfg["name"]
     n = cfg["video_count"]
+    framerate_combined = cfg.get("framerate_combined", True)
+    frametime_combined = cfg.get("frametime_combined", False)
+    time_anchor = cfg.get("time_anchor", 0.5)  # Default: center
 
-    print(f"\n{name}: {n} video(s)")
+    mode_str = "combined" if framerate_combined else "separate"
+    anchor_str = f", anchor={time_anchor}" if time_anchor != 0.5 else ""
+    print(f"\n{name}: {n} video(s), framerate={mode_str}{anchor_str}")
 
     readers = [PyAVReader(sources[i % len(sources)]) for i in range(n)]
     plot_style, text_style = create_styles()
 
-    # Create overlays with centered time, indicators, and markers
-    fps_texts = [FPSText(text_style, prefix="FPS:") for _ in range(n)]
-    framerate_plots = [
-        FrameratePlot(
-            plot_style,
-            max_fps=60.0,
-            time_anchor=0.5,
-            show_time_indicator=True,
-            show_start_marker=True,
+    # Create FPS text overlays with distinct colors per video
+    fps_texts = [
+        FPSText(
+            TextStyle(
+                color=get_video_color(i),
+                shadow_color=text_style.shadow_color,
+                font=text_style.font,
+                shadow_offset=text_style.shadow_offset,
+            ),
+            prefix="FPS:",
         )
-        for _ in range(n)
+        for i in range(n)
     ]
+
+    # Create framerate plots based on mode
+    if framerate_combined:
+        # Single plot for combined mode (colors come from get_video_color in compositor)
+        framerate_plots = [
+            FrameratePlot(
+                plot_style,
+                max_fps=60.0,
+                auto_scale=True,
+                time_anchor=time_anchor,
+                show_time_indicator=True,
+                show_start_marker=True,
+            )
+        ]
+    else:
+        # Separate plots per video with distinct colors
+        framerate_plots = [
+            FrameratePlot(
+                PlotStyle(
+                    line_color=get_video_color(i),
+                    background_color=plot_style.background_color,
+                    axis_color=plot_style.axis_color,
+                    grid_color=plot_style.grid_color,
+                    text_color=plot_style.text_color,
+                    shadow_color=plot_style.shadow_color,
+                    font=plot_style.font,
+                    title_font=plot_style.title_font,
+                    line_width=plot_style.line_width,
+                    shadow_offset=plot_style.shadow_offset,
+                    show_grid=plot_style.show_grid,
+                    show_labels=plot_style.show_labels,
+                ),
+                max_fps=60.0,
+                auto_scale=True,
+                time_anchor=time_anchor,
+                show_time_indicator=True,
+                show_start_marker=True,
+            )
+            for i in range(n)
+        ]
+
+    # Frametime plots - always separate per video with distinct colors
     frametime_plots = [
         FrametimePlot(
-            plot_style,
+            PlotStyle(
+                line_color=get_video_color(i),
+                background_color=plot_style.background_color,
+                axis_color=plot_style.axis_color,
+                grid_color=plot_style.grid_color,
+                text_color=plot_style.text_color,
+                shadow_color=plot_style.shadow_color,
+                font=plot_style.font,
+                title_font=plot_style.title_font,
+                line_width=plot_style.line_width,
+                shadow_offset=plot_style.shadow_offset,
+                show_grid=plot_style.show_grid,
+                show_labels=plot_style.show_labels,
+            ),
             max_ms=50.0,
             auto_scale=True,
             show_current_value=True,
-            time_anchor=0.5,
-            show_time_indicator=True,
-            show_start_marker=True,
+            time_anchor=1.0,  # Frametime at right edge
+            show_time_indicator=False,
+            show_start_marker=False,
         )
-        for _ in range(n)
+        for i in range(n)
     ]
 
     compositor = SimpleCompositor(
@@ -143,6 +219,8 @@ def generate_example(cfg: dict, sources: list[Path]) -> Path:
         fps_texts=fps_texts,
         framerate_plots=framerate_plots,
         frametime_plots=frametime_plots,
+        framerate_combined=framerate_combined,
+        frametime_combined=frametime_combined,
     )
 
     output_path = OUTPUT_DIR / f"{name}.mp4"

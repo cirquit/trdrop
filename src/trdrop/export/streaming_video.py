@@ -6,7 +6,7 @@ import time
 from fractions import Fraction
 from pathlib import Path
 
-import av
+import av  # type: ignore[import-untyped]
 
 from trdrop.compositor.types import CompositorOutput
 from trdrop.export.base import StreamingExporter
@@ -36,8 +36,8 @@ class StreamingVideoExporter(StreamingExporter):
         self._crf = crf
         self._preset = preset
 
-        self._container: av.container.OutputContainer | None = None
-        self._stream: av.video.stream.VideoStream | None = None
+        self._container: av.OutputContainer | None = None  # type: ignore[name-defined]
+        self._stream: av.VideoStream | None = None  # type: ignore[name-defined]
         self._frame_count = 0
 
     def open(self) -> None:
@@ -60,14 +60,15 @@ class StreamingVideoExporter(StreamingExporter):
         if self._stream is None:
             # PyAV requires Fraction for rate
             fps_frac = Fraction(self._fps).limit_denominator(10000)
-            self._stream = self._container.add_stream(self._codec, rate=fps_frac)
-            self._stream.width = width
-            self._stream.height = height
-            self._stream.pix_fmt = self._pix_fmt
-            self._stream.options = {
+            stream = self._container.add_stream(self._codec, rate=fps_frac)
+            stream.width = width
+            stream.height = height
+            stream.pix_fmt = self._pix_fmt
+            stream.options = {  # type: ignore[assignment]
                 "crf": str(self._crf),
                 "preset": self._preset,
             }
+            self._stream = stream
 
         # Create PyAV frame from numpy array
         t0 = time.perf_counter()
@@ -77,7 +78,7 @@ class StreamingVideoExporter(StreamingExporter):
 
         # Encode and write
         t0 = time.perf_counter()
-        for packet in self._stream.encode(frame):
+        for packet in self._stream.encode(frame):  # type: ignore[union-attr]
             self._container.mux(packet)
         profiler.add_timing("export_video_encode", (time.perf_counter() - t0) * 1000)
 

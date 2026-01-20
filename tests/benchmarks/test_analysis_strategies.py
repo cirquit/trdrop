@@ -8,7 +8,6 @@ from __future__ import annotations
 import time
 
 import numpy as np
-import pytest
 
 from trdrop.analysis.strategies import get_all_strategies
 
@@ -75,6 +74,7 @@ class TestAnalysisStrategies:
                 strategy.compare(frame_a, frame_diff, 10, 0.01)
 
             # Benchmark duplicates
+            is_dup = False
             t0 = time.perf_counter()
             for _ in range(n_iterations):
                 is_dup, ratio = strategy.compare(frame_a, frame_same, 10, 0.01)

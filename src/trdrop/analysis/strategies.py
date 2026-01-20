@@ -28,6 +28,8 @@ _LUMA_B: float = 0.114
 class CompareStrategy(Protocol):
     """Protocol for comparison strategies."""
 
+    name: str
+
     def compare(
         self,
         prev: np.ndarray,

@@ -13,7 +13,7 @@ from PyQt6.QtGui import QColor, QFont, QGuiApplication
 
 from tests.testkit import PatternType, VideoConfig, VideoGenerator
 from trdrop.analysis.duplicate import DuplicateDetector
-from trdrop.compositor.overlay import FrameratePlot, FrametimePlot, FPSText, PlotStyle
+from trdrop.compositor.overlay import FPSText, FrameratePlot, FrametimePlot, PlotStyle
 from trdrop.compositor.overlay.text import TextStyle
 from trdrop.compositor.simple import SimpleCompositor
 from trdrop.source.sequential import SequentialFrameSource
@@ -26,11 +26,11 @@ def qapp() -> QGuiApplication:
     app = QGuiApplication.instance()
     if app is None:
         app = QGuiApplication(sys.argv)
-    return app
+    return app  # type: ignore[return-value]
 
 
 @pytest.fixture(scope="module")
-def test_video(tmp_path_factory, qapp) -> PyAVReader:
+def test_video(tmp_path_factory, qapp):  # type: ignore[misc]
     """Create a short test video for overlay tests."""
     tmp_path = tmp_path_factory.mktemp("overlay_test")
     video_path = tmp_path / "test.mp4"
@@ -109,9 +109,15 @@ class TestOverlayRendering:
                 video_fps=[v.fps for v in videos[:video_count]],
                 output_width=1920,
                 output_height=1080,
-                fps_texts=[FPSText(text_style, prefix="FPS:") for _ in range(video_count)],
-                framerate_plots=[FrameratePlot(plot_style, max_fps=60.0) for _ in range(video_count)],
-                frametime_plots=[FrametimePlot(plot_style, max_ms=50.0) for _ in range(video_count)],
+                fps_texts=[
+                    FPSText(text_style, prefix="FPS:") for _ in range(video_count)
+                ],
+                framerate_plots=[
+                    FrameratePlot(plot_style, max_fps=60.0) for _ in range(video_count)
+                ],
+                frametime_plots=[
+                    FrametimePlot(plot_style, max_ms=50.0) for _ in range(video_count)
+                ],
             )
 
             sources = [SequentialFrameSource(videos[i]) for i in range(video_count)]
@@ -226,6 +232,8 @@ class TestOverlayRendering:
 
         # Process through both compositors simultaneously
         source = SequentialFrameSource(test_video)
+        output_no_plot = None
+        output_with_plot = None
         for i, pair in enumerate(source):
             if i >= 30:
                 pair.release()
@@ -235,6 +243,8 @@ class TestOverlayRendering:
             output_with_plot = compositor_with_plot.process([pair], [result])
             pair.release()
 
+        assert output_no_plot is not None
+        assert output_with_plot is not None
         frame_no_plot = output_no_plot.frame
         frame_with_plot = output_with_plot.frame
 
@@ -267,6 +277,8 @@ class TestOverlayRendering:
         )
 
         source = SequentialFrameSource(test_video)
+        output_fps_only = None
+        output_with_both = None
         for i, pair in enumerate(source):
             if i >= 30:
                 pair.release()
@@ -276,6 +288,8 @@ class TestOverlayRendering:
             output_with_both = compositor_with_both.process([pair], [result])
             pair.release()
 
+        assert output_fps_only is not None
+        assert output_with_both is not None
         frame_fps_only = output_fps_only.frame
         frame_with_both = output_with_both.frame
 

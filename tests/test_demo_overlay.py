@@ -24,16 +24,16 @@ def print_progress(current: int, total: int, width: int = 40) -> None:
         sys.stdout.write("\n")
 
 
-from tests.testkit import PatternType, VideoConfig, VideoGenerator
-from trdrop.analysis.duplicate import DuplicateDetector
-from trdrop.compositor.overlay import FPSText, FrameratePlot
-from trdrop.compositor.overlay.plot import PlotStyle
-from trdrop.compositor.overlay.text import TextStyle
-from trdrop.compositor.simple import SimpleCompositor
-from trdrop.engine import StreamingEngine
-from trdrop.export import StreamingCSVExporter, StreamingVideoExporter
-from trdrop.source.sequential import SequentialFrameSource
-from trdrop.video.reader import PyAVReader
+from tests.testkit import PatternType, VideoConfig, VideoGenerator  # noqa: E402
+from trdrop.analysis.duplicate import DuplicateDetector  # noqa: E402
+from trdrop.compositor.overlay import FPSText, FrameratePlot  # noqa: E402
+from trdrop.compositor.overlay.plot import PlotStyle  # noqa: E402
+from trdrop.compositor.overlay.text import TextStyle  # noqa: E402
+from trdrop.compositor.simple import SimpleCompositor  # noqa: E402
+from trdrop.engine import StreamingEngine  # noqa: E402
+from trdrop.export import StreamingCSVExporter, StreamingVideoExporter  # noqa: E402
+from trdrop.source.sequential import SequentialFrameSource  # noqa: E402
+from trdrop.video.reader import PyAVReader  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -42,7 +42,7 @@ def qapp() -> QGuiApplication:
     app = QGuiApplication.instance()
     if app is None:
         app = QGuiApplication(sys.argv)
-    return app
+    return app  # type: ignore[return-value]
 
 
 class TestDemoOverlay:

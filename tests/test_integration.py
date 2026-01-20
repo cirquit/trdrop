@@ -64,7 +64,7 @@ class TestEndToEndPipeline:
             assert any("# detected_fps: 30" in line for line in lines)
 
             # Check data rows (skip comments and header)
-            data_lines = [l for l in lines if not l.startswith("#")]
+            data_lines = [line for line in lines if not line.startswith("#")]
             reader_csv = csv.DictReader(data_lines)
             rows = list(reader_csv)
             assert len(rows) == 59  # 60 frames - 1 (first frame not compared)
@@ -117,9 +117,18 @@ class TestEndToEndPipeline:
     def test_multiple_videos_export(self) -> None:
         """Export multiple video results to single JSON."""
         configs = [
-            VideoConfig(container_fps=60, content_fps=60, duration_sec=0.5, pattern=PatternType.COUNTER),
-            VideoConfig(container_fps=60, content_fps=30, duration_sec=0.5, pattern=PatternType.COUNTER),
-            VideoConfig(container_fps=60, content_fps=20, duration_sec=0.5, pattern=PatternType.COUNTER),
+            VideoConfig(
+                container_fps=60, content_fps=60,
+                duration_sec=0.5, pattern=PatternType.COUNTER,
+            ),
+            VideoConfig(
+                container_fps=60, content_fps=30,
+                duration_sec=0.5, pattern=PatternType.COUNTER,
+            ),
+            VideoConfig(
+                container_fps=60, content_fps=20,
+                duration_sec=0.5, pattern=PatternType.COUNTER,
+            ),
         ]
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -208,7 +217,7 @@ class TestCSVExport:
 
             with csv_path.open() as f:
                 reader_csv = csv.DictReader(
-                    [l for l in f.readlines() if not l.startswith("#")]
+                    [line for line in f.readlines() if not line.startswith("#")]
                 )
                 rows = list(reader_csv)
 

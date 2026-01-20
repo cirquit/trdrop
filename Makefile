@@ -1,4 +1,4 @@
-.PHONY: lint test check testvideos clean-testvideos benchmark examples clean-examples
+.PHONY: lint test check testvideos clean-testvideos benchmark examples clean-examples clean
 
 lint:
 	uv run isort --check-only src tests
@@ -29,3 +29,13 @@ testvideos:
 
 clean-testvideos:
 	rm -rf tests/videos
+
+# Clean all generated artifacts
+clean: clean-examples clean-testvideos
+	rm -rf benchmark_results.csv benchmark_results.summary.txt
+	rm -rf trdrop_profile.csv trdrop_profile.summary.txt
+	rm -rf .pytest_cache
+	rm -rf .coverage htmlcov
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true

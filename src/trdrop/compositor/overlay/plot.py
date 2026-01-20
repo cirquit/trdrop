@@ -44,6 +44,25 @@ def _nice_max_fps(max_value: float, segments: int = 4) -> float:
     return float(k_units * 1000 * segments)
 
 
+def _nice_max_ms(max_value: float, segments: int = 4) -> float:
+    """Round up to a nice ms value divisible by segments.
+
+    Returns values like 16.67, 33.33, 50, 100, 200, etc.
+    """
+    if max_value <= 0:
+        return float(segments)
+
+    # Nice bases for frametime (prefer common refresh rate frametimes)
+    nice_values = [16.67, 20, 25, 33.33, 40, 50, 66.67, 80, 100, 125, 150, 200, 250, 500, 1000]
+
+    for v in nice_values:
+        if v >= max_value:
+            return v
+
+    # For very large values, round up to nearest 100ms
+    return float(((int(max_value) // 100) + 1) * 100)
+
+
 @dataclass(frozen=True, slots=True)
 class PlotStyle:
     """Visual styling for a plot."""
@@ -61,6 +80,16 @@ class PlotStyle:
     show_grid: bool = True
     show_labels: bool = True
     grid_segments: int = 4
+    show_shadow: bool = True  # Draw shadow behind line/text for contrast
+
+
+@dataclass(slots=True)
+class PlotSeries:
+    """A single data series for multi-series plots."""
+
+    history: RingBuffer
+    color: QColor
+    label: str = ""
 
 
 class Plot(ABC):
@@ -134,8 +163,9 @@ class Plot(ABC):
         bounds: QRect,
         y_min: float,
         y_max: float,
+        time_anchor: float = 1.0,
     ) -> None:
-        """Draw Y-axis labels on the RIGHT side of the plot."""
+        """Draw Y-axis labels at the time anchor position."""
         if not self._style.show_labels:
             return
 
@@ -145,13 +175,18 @@ class Plot(ABC):
         segment_height = bounds.height() / segments
         value_step = (y_max - y_min) / segments
 
+        # Position labels at the anchor point (where "now" is displayed)
+        # Use (width - 1) for Qt rect semantics
+        plot_width = bounds.width() - 1
+        anchor_x = bounds.left() + int(plot_width * time_anchor)
+
         for i in range(segments + 1):
             y = int(bounds.top() + i * segment_height)
             value = y_max - i * value_step
             label = _format_fps_label(value)
 
-            # Draw to the RIGHT of plot area
-            text_x = bounds.right() + 5
+            # Draw to the right of the anchor position
+            text_x = anchor_x + 5
             text_y = y + 4
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
@@ -180,7 +215,9 @@ class Plot(ABC):
         text_width = metrics.horizontalAdvance(self._title)
 
         # Position: above plot, right-aligned at time_anchor position
-        anchor_x = bounds.left() + int(bounds.width() * time_anchor)
+        # Use (width - 1) for Qt rect semantics
+        plot_width = bounds.width() - 1
+        anchor_x = bounds.left() + int(plot_width * time_anchor)
         x = anchor_x - text_width  # Right-align to anchor
         y = bounds.top() - 8  # Small gap above plot
 
@@ -247,7 +284,7 @@ class FrameratePlot(Plot):
         max_in_data = max(recent_values)
 
         # Use at least the minimum scale
-        target = max(max_in_data * 1.1, self._min_scale)  # 10% headroom
+        target = max(max_in_data * 1.25, self._min_scale)  # 25% headroom
 
         # Round to nice value
         return _nice_max_fps(target, self._style.grid_segments)
@@ -281,14 +318,19 @@ class FrameratePlot(Plot):
         self._draw_grid(painter, bounds)
         if self._show_center_line:
             self._draw_center_line(painter, bounds)
+        self._draw_anchor_line(painter, bounds)
         profiler.add_timing("overlay_plot_grid", (time.perf_counter() - t0) * 1000)
 
         # Draw line before axes so axes appear on top
+        # Use clipping to prevent line from drawing outside bounds
         t0 = time.perf_counter()
+        painter.save()
+        painter.setClipRect(bounds)
         line_points = self._draw_line(painter, bounds, history, effective_max)
+        painter.restore()
         profiler.add_timing("overlay_plot_line", (time.perf_counter() - t0) * 1000)
 
-        # Draw markers after line
+        # Draw markers after line (outside clip region so they can extend beyond)
         if line_points and self._show_start_marker:
             self._draw_start_marker(painter, line_points[0])
         if line_points and self._show_time_indicator:
@@ -299,7 +341,7 @@ class FrameratePlot(Plot):
         profiler.add_timing("overlay_plot_axes", (time.perf_counter() - t0) * 1000)
 
         t0 = time.perf_counter()
-        self._draw_labels(painter, bounds, 0.0, effective_max)
+        self._draw_labels(painter, bounds, 0.0, effective_max, self._time_anchor)
         profiler.add_timing("overlay_plot_labels", (time.perf_counter() - t0) * 1000)
 
         # Determine whether to show title
@@ -319,6 +361,22 @@ class FrameratePlot(Plot):
         center_y = bounds.top() + bounds.height() // 2
         painter.drawLine(bounds.left(), center_y, bounds.right(), center_y)
 
+    def _draw_anchor_line(self, painter: QPainter, bounds: QRect) -> None:
+        """Draw vertical line at the time anchor position (where 'now' is)."""
+        if self._time_anchor >= 0.99:
+            # Skip if anchor is at far right (would overlap with axis)
+            return
+
+        pen = QPen(self._style.line_color)
+        pen.setWidth(1)
+        pen.setStyle(Qt.PenStyle.DashLine)
+        painter.setPen(pen)
+
+        # Use (width - 1) for Qt rect semantics
+        plot_width = bounds.width() - 1
+        anchor_x = bounds.left() + int(plot_width * self._time_anchor)
+        painter.drawLine(anchor_x, bounds.top(), anchor_x, bounds.bottom())
+
     def _draw_line(
         self,
         painter: QPainter,
@@ -326,9 +384,13 @@ class FrameratePlot(Plot):
         history: RingBuffer,
         max_fps: float | None = None,
     ) -> list[QPointF]:
-        """Draw the framerate line with shadow for contrast.
+        """Draw the framerate line with optional shadow for contrast.
 
         Returns list of points (first=oldest, last=newest) for marker drawing.
+
+        Performance note: Shadow is drawn without antialiasing for speed.
+        The main line is drawn with AA for quality. This hybrid approach
+        provides ~2x speedup vs full AA on both passes.
         """
         if len(history) < 2:
             return []
@@ -342,11 +404,14 @@ class FrameratePlot(Plot):
         # Calculate positioning based on time_anchor
         # time_anchor=1.0: current time at right edge (default)
         # time_anchor=0.5: current time at center
-        x_step = bounds.width() / max(history.size - 1, 1)
+        # Note: Use (width - 1) to account for Qt rect semantics where
+        # right() = left() + width() - 1
+        plot_width = bounds.width() - 1
+        x_step = plot_width / max(history.size - 1, 1)
         y_scale = bounds.height() / max_fps
 
         # Position so newest data point is at anchor position
-        anchor_x = bounds.left() + bounds.width() * self._time_anchor
+        anchor_x = bounds.left() + plot_width * self._time_anchor
         newest_idx = n - 1
         x_base = anchor_x - newest_idx * x_step
 
@@ -364,15 +429,18 @@ class FrameratePlot(Plot):
             else:
                 path.lineTo(pt)
 
-        # Draw shadow
-        shadow_pen = QPen(self._style.shadow_color)
-        shadow_pen.setWidthF(self._style.line_width + 2.0)
-        shadow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        shadow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        painter.setPen(shadow_pen)
-        painter.drawPath(path)
+        # Draw shadow (without AA for performance - shadow is just for contrast)
+        if self._style.show_shadow:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            shadow_pen = QPen(self._style.shadow_color)
+            shadow_pen.setWidthF(self._style.line_width + 2.0)
+            shadow_pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+            shadow_pen.setJoinStyle(Qt.PenJoinStyle.BevelJoin)
+            painter.setPen(shadow_pen)
+            painter.drawPath(path)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
-        # Draw main line
+        # Draw main line (with AA for quality)
         line_pen = QPen(self._style.line_color)
         line_pen.setWidthF(float(self._style.line_width))
         line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
@@ -384,7 +452,7 @@ class FrameratePlot(Plot):
 
     def _draw_start_marker(self, painter: QPainter, point: QPointF) -> None:
         """Draw a small circle at the start of the line."""
-        radius = self._style.line_width + 1
+        radius = self._style.line_width + 2
         # Shadow
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._style.shadow_color)
@@ -392,14 +460,16 @@ class FrameratePlot(Plot):
         # Main circle
         painter.setBrush(self._style.line_color)
         painter.drawEllipse(point, radius, radius)
+        # Reset brush to prevent filling subsequent paths
+        painter.setBrush(Qt.BrushStyle.NoBrush)
 
     def _draw_time_indicator(
         self, painter: QPainter, bounds: QRect, point: QPointF
     ) -> None:
-        """Draw a minimal downward arrow at current time position."""
-        # Small triangle pointing down, above the plot
-        arrow_size = 6
-        tip_y = bounds.top() - 2
+        """Draw a downward arrow at current time position."""
+        # Larger triangle pointing down, above the plot
+        arrow_size = 12
+        tip_y = bounds.top() - 3
         base_y = tip_y - arrow_size
 
         path = QPainterPath()
@@ -411,6 +481,122 @@ class FrameratePlot(Plot):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._style.line_color)
         painter.drawPath(path)
+        # Reset brush to prevent filling subsequent paths
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+    def _draw_line_with_color(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        history: RingBuffer,
+        color: QColor,
+        max_fps: float,
+    ) -> list[QPointF]:
+        """Draw a line with a specific color (for combined mode).
+
+        Similar to _draw_line but uses the provided color instead of style.line_color.
+        """
+        if len(history) < 2:
+            return []
+
+        values = list(history)
+        n = len(values)
+
+        plot_width = bounds.width() - 1
+        x_step = plot_width / max(history.size - 1, 1)
+        y_scale = bounds.height() / max_fps
+
+        anchor_x = bounds.left() + plot_width * self._time_anchor
+        newest_idx = n - 1
+        x_base = anchor_x - newest_idx * x_step
+
+        path = QPainterPath()
+        points: list[QPointF] = []
+        for i in range(n):
+            x = x_base + i * x_step
+            y = bounds.bottom() - values[i] * y_scale
+            y = max(float(bounds.top()), min(float(bounds.bottom()), y))
+            pt = QPointF(x, y)
+            points.append(pt)
+            if i == 0:
+                path.moveTo(pt)
+            else:
+                path.lineTo(pt)
+
+        # Draw shadow
+        if self._style.show_shadow:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            shadow_pen = QPen(self._style.shadow_color)
+            shadow_pen.setWidthF(self._style.line_width + 2.0)
+            shadow_pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+            shadow_pen.setJoinStyle(Qt.PenJoinStyle.BevelJoin)
+            painter.setPen(shadow_pen)
+            painter.drawPath(path)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        # Draw main line with specified color
+        line_pen = QPen(color)
+        line_pen.setWidthF(float(self._style.line_width))
+        line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        line_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(line_pen)
+        painter.drawPath(path)
+
+        return points
+
+    def draw_combined(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        series_list: list[PlotSeries],
+        *,
+        override_show_title: bool | None = None,
+    ) -> None:
+        """Draw multiple data series on a single plot (combined mode).
+
+        Args:
+            painter: QPainter to draw with
+            bounds: Rectangle to draw into
+            series_list: List of PlotSeries (history + color for each video)
+            override_show_title: If set, overrides the instance's show_title setting
+        """
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Compute effective max across all series
+        all_values: list[float] = []
+        for s in series_list:
+            if len(s.history) > 0:
+                all_values.extend(list(s.history))
+
+        if self._auto_scale and all_values:
+            # Use recent values for scale
+            recent_count = max(len(all_values) // 10, 10)
+            recent_values = all_values[-recent_count:]
+            max_in_data = max(recent_values)
+            target = max(max_in_data * 1.25, self._min_scale)
+            effective_max = _nice_max_fps(target, self._style.grid_segments)
+        else:
+            effective_max = self._max_fps
+
+        self._draw_background(painter, bounds)
+        self._draw_grid(painter, bounds)
+        if self._show_center_line:
+            self._draw_center_line(painter, bounds)
+        self._draw_anchor_line(painter, bounds)
+
+        # Draw each series with its color (clipped to bounds)
+        painter.save()
+        painter.setClipRect(bounds)
+        for s in series_list:
+            self._draw_line_with_color(painter, bounds, s.history, s.color, effective_max)
+        painter.restore()
+
+        self._draw_axes(painter, bounds)
+        self._draw_labels(painter, bounds, 0.0, effective_max, self._time_anchor)
+
+        show_title = override_show_title if override_show_title is not None else self._show_title
+        if show_title:
+            self._draw_title(painter, bounds, self._time_anchor)
 
 
 class FrametimePlot(Plot):
@@ -467,7 +653,7 @@ class FrametimePlot(Plot):
 
         max_in_data = max(recent_values) if recent_values else 0
 
-        target = max(max_in_data * 1.2, self._min_scale)
+        target = max(max_in_data * 1.25, self._min_scale)
 
         # Round to nice values for frametime (multiples of 10, 16.67, 33.33, etc.)
         nice_values = [10, 16.67, 20, 33.33, 40, 50, 66.67, 100, 200, 500, 1000]
@@ -500,9 +686,14 @@ class FrametimePlot(Plot):
 
         self._draw_background(painter, bounds)
         self._draw_grid(painter, bounds)
-        line_points = self._draw_line(painter, bounds, history, effective_max)
 
-        # Draw markers after line
+        # Draw line with clipping to prevent drawing outside bounds
+        painter.save()
+        painter.setClipRect(bounds)
+        line_points = self._draw_line(painter, bounds, history, effective_max)
+        painter.restore()
+
+        # Draw markers after line (outside clip region)
         if line_points and self._show_start_marker:
             self._draw_start_marker(painter, line_points[0])
         if line_points and self._show_time_indicator:
@@ -576,7 +767,9 @@ class FrametimePlot(Plot):
         metrics = QFontMetrics(title_font)
         text_width = metrics.horizontalAdvance(title_text)
 
-        anchor_x = bounds.left() + int(bounds.width() * self._time_anchor)
+        # Use (width - 1) for Qt rect semantics
+        plot_width = bounds.width() - 1
+        anchor_x = bounds.left() + int(plot_width * self._time_anchor)
         x = anchor_x - text_width
         y = bounds.top() - 8
 
@@ -589,9 +782,12 @@ class FrametimePlot(Plot):
         history: RingBuffer,
         max_ms: float | None = None,
     ) -> list[QPointF]:
-        """Draw the frametime line with shadow.
+        """Draw the frametime line with optional shadow.
 
         Returns list of points (first=oldest, last=newest) for marker drawing.
+
+        Performance note: Shadow is drawn without antialiasing for speed.
+        The main line is drawn with AA for quality.
         """
         if len(history) < 2:
             return []
@@ -602,11 +798,13 @@ class FrametimePlot(Plot):
         values = list(history)
         n = len(values)
 
-        x_step = bounds.width() / max(history.size - 1, 1)
+        # Use (width - 1) for Qt rect semantics
+        plot_width = bounds.width() - 1
+        x_step = plot_width / max(history.size - 1, 1)
         y_scale = bounds.height() / max_ms
 
         # Position so newest data point is at anchor position
-        anchor_x = bounds.left() + bounds.width() * self._time_anchor
+        anchor_x = bounds.left() + plot_width * self._time_anchor
         newest_idx = n - 1
         x_base = anchor_x - newest_idx * x_step
 
@@ -624,15 +822,18 @@ class FrametimePlot(Plot):
             else:
                 path.lineTo(pt)
 
-        # Shadow line
-        shadow_pen = QPen(self._style.shadow_color)
-        shadow_pen.setWidthF(self._style.line_width + 2.0)
-        shadow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        shadow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        painter.setPen(shadow_pen)
-        painter.drawPath(path)
+        # Shadow line (without AA for performance)
+        if self._style.show_shadow:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            shadow_pen = QPen(self._style.shadow_color)
+            shadow_pen.setWidthF(self._style.line_width + 2.0)
+            shadow_pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+            shadow_pen.setJoinStyle(Qt.PenJoinStyle.BevelJoin)
+            painter.setPen(shadow_pen)
+            painter.drawPath(path)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
-        # Main line
+        # Main line (with AA for quality)
         line_pen = QPen(self._style.line_color)
         line_pen.setWidthF(float(self._style.line_width))
         line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
@@ -644,7 +845,7 @@ class FrametimePlot(Plot):
 
     def _draw_start_marker(self, painter: QPainter, point: QPointF) -> None:
         """Draw a small circle at the start of the line."""
-        radius = self._style.line_width + 1
+        radius = self._style.line_width + 2
         # Shadow
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._style.shadow_color)
@@ -652,14 +853,16 @@ class FrametimePlot(Plot):
         # Main circle
         painter.setBrush(self._style.line_color)
         painter.drawEllipse(point, radius, radius)
+        # Reset brush to prevent filling subsequent paths
+        painter.setBrush(Qt.BrushStyle.NoBrush)
 
     def _draw_time_indicator(
         self, painter: QPainter, bounds: QRect, point: QPointF
     ) -> None:
-        """Draw a minimal downward arrow at current time position."""
-        # Small triangle pointing down, above the plot
-        arrow_size = 6
-        tip_y = bounds.top() - 2
+        """Draw a downward arrow at current time position."""
+        # Larger triangle pointing down, above the plot
+        arrow_size = 12
+        tip_y = bounds.top() - 3
         base_y = tip_y - arrow_size
 
         path = QPainterPath()
@@ -671,3 +874,114 @@ class FrametimePlot(Plot):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._style.line_color)
         painter.drawPath(path)
+        # Reset brush to prevent filling subsequent paths
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+    def _draw_line_with_color(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        history: RingBuffer,
+        color: QColor,
+        max_ms: float,
+    ) -> list[QPointF]:
+        """Draw a line with a specific color (for combined mode)."""
+        if len(history) < 2:
+            return []
+
+        values = list(history)
+        n = len(values)
+
+        plot_width = bounds.width() - 1
+        x_step = plot_width / max(history.size - 1, 1)
+        y_scale = bounds.height() / max_ms
+
+        anchor_x = bounds.left() + plot_width * self._time_anchor
+        newest_idx = n - 1
+        x_base = anchor_x - newest_idx * x_step
+
+        path = QPainterPath()
+        points: list[QPointF] = []
+        for i in range(n):
+            x = x_base + i * x_step
+            y = bounds.bottom() - values[i] * y_scale
+            y = max(float(bounds.top()), min(float(bounds.bottom()), y))
+            pt = QPointF(x, y)
+            points.append(pt)
+            if i == 0:
+                path.moveTo(pt)
+            else:
+                path.lineTo(pt)
+
+        # Shadow
+        if self._style.show_shadow:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            shadow_pen = QPen(self._style.shadow_color)
+            shadow_pen.setWidthF(self._style.line_width + 2.0)
+            shadow_pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+            shadow_pen.setJoinStyle(Qt.PenJoinStyle.BevelJoin)
+            painter.setPen(shadow_pen)
+            painter.drawPath(path)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        # Main line with specified color
+        line_pen = QPen(color)
+        line_pen.setWidthF(float(self._style.line_width))
+        line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        line_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(line_pen)
+        painter.drawPath(path)
+
+        return points
+
+    def draw_combined(
+        self,
+        painter: QPainter,
+        bounds: QRect,
+        series_list: list[PlotSeries],
+        *,
+        current_values: list[float] | None = None,
+        override_show_title: bool | None = None,
+    ) -> None:
+        """Draw multiple data series on a single plot (combined mode).
+
+        Args:
+            painter: QPainter to draw with
+            bounds: Rectangle to draw into
+            series_list: List of PlotSeries (history + color for each video)
+            current_values: Current frametime values for display (optional)
+            override_show_title: If set, overrides the instance's show_title setting
+        """
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Compute effective max across all series
+        all_values: list[float] = []
+        for s in series_list:
+            if len(s.history) > 0:
+                all_values.extend(list(s.history))
+
+        if self._auto_scale and all_values:
+            max_in_data = max(all_values)
+            target = max(max_in_data * 1.25, self._min_scale)
+            effective_max = _nice_max_ms(target, self._style.grid_segments)
+        else:
+            effective_max = self._max_ms
+
+        self._draw_background(painter, bounds)
+        self._draw_grid(painter, bounds)
+
+        # Draw each series with its color (clipped to bounds)
+        painter.save()
+        painter.setClipRect(bounds)
+        for s in series_list:
+            self._draw_line_with_color(painter, bounds, s.history, s.color, effective_max)
+        painter.restore()
+
+        self._draw_axes(painter, bounds)
+        self._draw_labels_fractional(painter, bounds, 0.0, effective_max)
+
+        show_title = override_show_title if override_show_title is not None else self._show_title
+        if show_title:
+            # For combined mode, show first current value if available
+            current_value = current_values[0] if current_values else None
+            self._draw_title_with_value(painter, bounds, current_value)

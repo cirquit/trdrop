@@ -13,6 +13,7 @@ from trdrop.export.base import StreamingExporter
 from trdrop.interfaces.mappable import Mappable
 from trdrop.interfaces.source import FrameSource
 from trdrop.profiling import get_profiler
+from trdrop.profiling.profiler import FrameProfile
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
 
@@ -145,13 +146,13 @@ class StreamingEngine:
                     pair.release()
 
                 # 6. Export (sync or async)
+                # Capture frame profile ref for async timestamp recording
+                current_profile = getattr(profiler, 'current_frame', None)
                 if self._synchronous:
-                    self._export_frame(output)
+                    self._export_frame(output, current_profile)
                     profiler.mark_timestamp("export_end")
                 else:
-                    export_future = pool.submit(self._export_frame, output)
-                    # Note: In async mode, export_end won't be accurate for overlap
-                    # calculation since export runs in parallel with next frame
+                    export_future = pool.submit(self._export_frame, output, current_profile)
 
                 profiler.end_frame()
 
@@ -194,7 +195,12 @@ class StreamingEngine:
 
         return result
 
-    def _export_frame(self, output: CompositorOutput) -> None:
+    def _export_frame(
+        self, output: CompositorOutput, frame_profile: FrameProfile | None = None
+    ) -> None:
         """Write frame to all exporters."""
         for exporter in self._exporters:
             exporter.write_frame(output)
+        # Record export end timestamp for async overlap calculation
+        if frame_profile is not None:
+            frame_profile.export_end_ts = time.perf_counter()

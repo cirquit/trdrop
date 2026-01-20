@@ -12,7 +12,13 @@ app = QGuiApplication(sys.argv)
 
 from tests.testkit import PatternType, VideoConfig, VideoGenerator
 from trdrop.analysis.duplicate import DuplicateDetector
-from trdrop.compositor.overlay import FrameratePlot, FrametimePlot, FPSText, PlotStyle
+from trdrop.compositor.overlay import (
+    FrameratePlot,
+    FrametimePlot,
+    FPSText,
+    PlotStyle,
+    get_video_color,
+)
 from trdrop.compositor.overlay.text import TextStyle
 from trdrop.compositor.simple import SimpleCompositor
 from trdrop.engine import StreamingEngine
@@ -61,7 +67,7 @@ def main() -> None:
     title_font.setWeight(QFont.Weight.Bold)
 
     plot_style = PlotStyle(
-        line_color=QColor(100, 255, 100),
+        line_color=get_video_color(0),
         background_color=QColor(0, 0, 0, 180),
         axis_color=QColor(236, 236, 236),
         grid_color=QColor(255, 255, 255, 100),
@@ -78,7 +84,7 @@ def main() -> None:
     fps_font.setWeight(QFont.Weight.Bold)
 
     text_style = TextStyle(
-        color=QColor(255, 255, 255),
+        color=get_video_color(0),
         shadow_color=QColor(0, 0, 0),
         font=fps_font,
         shadow_offset=2,
@@ -90,6 +96,7 @@ def main() -> None:
         plot_style,
         max_fps=60.0,
         show_center_line=True,
+        auto_scale=True,
         time_anchor=0.5,
         show_time_indicator=True,
         show_start_marker=True,
@@ -99,9 +106,9 @@ def main() -> None:
         max_ms=50.0,
         auto_scale=True,
         show_current_value=True,
-        time_anchor=0.5,
-        show_time_indicator=True,
-        show_start_marker=True,
+        time_anchor=1.0,  # Frametime plot stays at right edge
+        show_time_indicator=False,  # No indicator for frametime
+        show_start_marker=False,
     )
 
     # Create compositor with overlays
