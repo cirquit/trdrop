@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from trdrop.utils.ringbuffer import RingBuffer
+from trdrop.utils.ringbuffer import RingBuffer, RingBufferSnapshot
 
-__all__ = ["RingBuffer"]
+__all__ = ["RingBuffer", "RingBufferSnapshot"]

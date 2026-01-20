@@ -2,9 +2,22 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Iterator
 
 import numpy as np
+
+
+@dataclass(frozen=True, slots=True)
+class RingBufferSnapshot:
+    """Immutable snapshot of RingBuffer state for seek/restore."""
+
+    data: bytes  # Numpy array as bytes
+    dtype: str   # Numpy dtype string
+    size: int
+    head: int
+    count: int
+    sum: float
 
 
 class RingBuffer:
@@ -129,3 +142,44 @@ class RingBuffer:
             # Full: offset from _head (oldest)
             actual_idx = (self._head + index) % self._size
             return float(self._data[actual_idx])
+
+    def snapshot(self) -> RingBufferSnapshot:
+        """Create an immutable snapshot of the current state.
+
+        Used for seeking in interactive mode - capture state at frame N,
+        restore later when seeking back to frame N.
+        """
+        return RingBufferSnapshot(
+            data=self._data.tobytes(),
+            dtype=str(self._data.dtype),
+            size=self._size,
+            head=self._head,
+            count=self._count,
+            sum=self._sum,
+        )
+
+    def restore(self, snapshot: RingBufferSnapshot) -> None:
+        """Restore state from a snapshot.
+
+        Args:
+            snapshot: Previously captured snapshot
+
+        Raises:
+            ValueError: If snapshot size doesn't match buffer size
+        """
+        if snapshot.size != self._size:
+            raise ValueError(
+                f"Snapshot size {snapshot.size} doesn't match buffer size {self._size}"
+            )
+
+        self._data = np.frombuffer(snapshot.data, dtype=snapshot.dtype).copy()
+        self._head = snapshot.head
+        self._count = snapshot.count
+        self._sum = snapshot.sum
+
+    @classmethod
+    def from_snapshot(cls, snapshot: RingBufferSnapshot) -> "RingBuffer":
+        """Create a new RingBuffer from a snapshot."""
+        buf = cls(size=snapshot.size, dtype=np.dtype(snapshot.dtype))
+        buf.restore(snapshot)
+        return buf

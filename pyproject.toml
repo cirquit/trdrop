@@ -37,3 +37,6 @@ typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "gui: marks tests as GUI/interactive engine tests (deselect with '-m \"not gui\"')",
+]

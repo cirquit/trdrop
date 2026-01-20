@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+from dataclasses import dataclass
 
 import numpy as np
 from PyQt6.QtCore import QPoint, QRect
@@ -18,9 +19,29 @@ from trdrop.compositor.types import AggregatedMetrics, CompositorOutput, VideoMe
 from trdrop.profiling import get_profiler
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
-from trdrop.utils.ringbuffer import RingBuffer
+from trdrop.utils.ringbuffer import RingBuffer, RingBufferSnapshot
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, slots=True)
+class VideoStateSnapshot:
+    """Immutable snapshot of video stream state for seek/restore.
+
+    Captures all state needed to restore a _VideoState to a specific
+    point in time, enabling frame-accurate seeking in interactive mode.
+    """
+
+    total_frames: int
+    total_duplicates: int
+    unique_window: RingBufferSnapshot
+    fps_history: RingBufferSnapshot
+    frametime_history: RingBufferSnapshot
+    smoothed_fps: float
+    smoothed_frametime: float
+    last_unique_distance: int
+    container_fps: float
+    ema_alpha: float
 
 
 class _VideoState:
@@ -195,6 +216,47 @@ class _VideoState:
         self._smoothed_fps = 0.0
         self._smoothed_frametime = 0.0
         self._last_unique_distance = 0
+
+    def snapshot(self) -> VideoStateSnapshot:
+        """Create an immutable snapshot of the current state.
+
+        Used for seeking in interactive mode - capture state at frame N,
+        restore later when seeking back to frame N.
+        """
+        return VideoStateSnapshot(
+            total_frames=self._total_frames,
+            total_duplicates=self._total_duplicates,
+            unique_window=self._unique_window.snapshot(),
+            fps_history=self._fps_history.snapshot(),
+            frametime_history=self._frametime_history.snapshot(),
+            smoothed_fps=self._smoothed_fps,
+            smoothed_frametime=self._smoothed_frametime,
+            last_unique_distance=self._last_unique_distance,
+            container_fps=self._container_fps,
+            ema_alpha=self._ema_alpha,
+        )
+
+    def restore(self, snapshot: VideoStateSnapshot) -> None:
+        """Restore state from a snapshot."""
+        self._total_frames = snapshot.total_frames
+        self._total_duplicates = snapshot.total_duplicates
+        self._unique_window.restore(snapshot.unique_window)
+        self._fps_history.restore(snapshot.fps_history)
+        self._frametime_history.restore(snapshot.frametime_history)
+        self._smoothed_fps = snapshot.smoothed_fps
+        self._smoothed_frametime = snapshot.smoothed_frametime
+        self._last_unique_distance = snapshot.last_unique_distance
+
+    @classmethod
+    def from_snapshot(cls, snapshot: VideoStateSnapshot) -> "_VideoState":
+        """Create a new _VideoState from a snapshot."""
+        state = cls(
+            window_size=snapshot.unique_window.size,
+            container_fps=snapshot.container_fps,
+            ema_alpha=snapshot.ema_alpha,
+        )
+        state.restore(snapshot)
+        return state
 
 
 class SimpleCompositor(Compositor):
