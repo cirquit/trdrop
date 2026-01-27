@@ -18,7 +18,7 @@ import time
 import numpy as np
 import pytest
 from numba import jit
-from PyQt6.QtCore import QPointF, QRect, Qt
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import (
     QColor,
     QGuiApplication,
@@ -26,10 +26,7 @@ from PyQt6.QtGui import (
     QPainter,
     QPainterPath,
     QPen,
-    QPolygonF,
 )
-
-from trdrop.utils.ringbuffer import RingBuffer
 
 
 @pytest.fixture(scope="module")
@@ -166,8 +163,10 @@ def _draw_polyline_wu(img: np.ndarray, xs: np.ndarray, ys: np.ndarray,
 
 
 @jit(nopython=True, cache=True)
-def _draw_thick_line_bresenham(img: np.ndarray, x0: int, y0: int, x1: int, y1: int,
-                                r: int, g: int, b: int, thickness: int) -> None:
+def _draw_thick_line_bresenham(
+    img: np.ndarray, x0: int, y0: int, x1: int, y1: int,
+    r: int, g: int, b: int, thickness: int
+) -> None:
     """Draw thick line using Bresenham with perpendicular expansion."""
     h, w = img.shape[:2]
     half = thickness // 2

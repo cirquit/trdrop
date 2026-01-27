@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from trdrop.compositor.base import Compositor
 from trdrop.compositor.types import CompositorOutput
@@ -17,6 +17,9 @@ from trdrop.profiling import get_profiler
 from trdrop.profiling.profiler import FrameProfile
 from trdrop.types.frames import FramePair
 from trdrop.types.metrics import FrameMetrics
+
+if TYPE_CHECKING:
+    from trdrop.config import FrameLayout, PresetConfig
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +89,21 @@ class StreamingEngine:
                 frame_counts,
                 self._total_frames,
             )
+
+    @property
+    def layout(self) -> FrameLayout | None:
+        """Frame layout from compositor, if available."""
+        return getattr(self._compositor, 'layout', None)
+
+    @property
+    def config(self) -> PresetConfig | None:
+        """Config from compositor, if available."""
+        return getattr(self._compositor, 'config', None)
+
+    @property
+    def total_frames(self) -> int:
+        """Total number of frames to process."""
+        return self._total_frames
 
     def run(self) -> None:
         """Run the streaming pipeline to completion."""

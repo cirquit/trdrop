@@ -198,7 +198,7 @@ class TestAAVisual:
 
         draw_polyline_wu(img_np, xs, ys, 255, 100, 200)
 
-        qimg = QImage(img_np.data, width, height, width * 4,
+        qimg = QImage(img_np.tobytes(), width, height, width * 4,
                       QImage.Format.Format_RGBA8888)
         qimg.save(str(output_dir / "aa_3_numba_wu_1px.png"))
 
@@ -211,7 +211,7 @@ class TestAAVisual:
 
         draw_polyline_wu_thick(img_np, xs, ys, 255, 100, 200, 3)
 
-        qimg = QImage(img_np.data, width, height, width * 4,
+        qimg = QImage(img_np.tobytes(), width, height, width * 4,
                       QImage.Format.Format_RGBA8888)
         qimg.save(str(output_dir / "aa_4_numba_wu_thick.png"))
 
@@ -233,8 +233,6 @@ class TestAAVisual:
 
         for i, label in enumerate(labels):
             y_offset = i * (height + 5) + 15
-            # Load and draw the image
-            img_path = output_dir / f"aa_{i+1}_*.png"
             # Draw label
             p.setPen(QColor(200, 200, 200))
             p.drawText(10, y_offset - 2, label)

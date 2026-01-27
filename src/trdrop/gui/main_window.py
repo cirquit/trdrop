@@ -8,94 +8,170 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QKeySequence
 from PyQt6.QtWidgets import (
     QFileDialog,
+    QFrame,
     QHBoxLayout,
+    QLabel,
     QMainWindow,
     QMessageBox,
-    QProgressBar,
-    QSlider,
-    QSplitter,
-    QStatusBar,
-    QToolBar,
+    QPushButton,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
-from trdrop.gui.widgets.fps_plot import FPSPlotWidget
-from trdrop.gui.widgets.video_viewport import VideoViewport
+from trdrop.engine import EngineState, InteractiveEngine
+from trdrop.gui.widgets.state_indicator import StateIndicator
 
 
 class MainWindow(QMainWindow):
-    """Main application window."""
+    """Main application window with InteractiveEngine integration."""
 
     def __init__(self) -> None:
         super().__init__()
 
-        # TODO: Replace with ProcessingPipeline and PreviewSystem
-        self._video_paths: list[Path] = []
-        self._current_frame = 0
-        self._max_frames = 0
+        # Engine
+        self._engine = InteractiveEngine(self)
+        self._engine.state_changed.connect(self._on_state_changed)
+        self._engine.progress.connect(self._on_progress)
+        self._engine.error.connect(self._on_error)
+
+        # Video paths (before loading into engine)
+        self._pending_videos: list[Path] = []
 
         self._setup_ui()
         self._setup_menu()
-        self._setup_toolbar()
-        self._setup_shortcuts()
+        self._update_controls()
 
         self.setAcceptDrops(True)
 
     def _setup_ui(self) -> None:
         """Setup the main UI layout."""
         self.setWindowTitle("TRDrop v2")
-        self.setMinimumSize(800, 600)
-        self.resize(1280, 720)
+        self.setMinimumSize(600, 400)
+        self.resize(800, 500)
 
         # Central widget
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
-        # Main splitter (video viewports / plot)
-        splitter = QSplitter(Qt.Orientation.Vertical)
-        layout.addWidget(splitter, stretch=1)
+        # Control bar (below menu)
+        self._control_bar = self._create_control_bar()
+        layout.addWidget(self._control_bar)
 
-        # Video viewports container
-        self._viewport_container = QWidget()
-        self._viewport_layout = QHBoxLayout(self._viewport_container)
-        self._viewport_layout.setContentsMargins(0, 0, 0, 0)
-        splitter.addWidget(self._viewport_container)
+        # Separator line
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        separator.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(separator)
 
-        # Viewports (initially empty)
-        self._viewports: list[VideoViewport] = []
+        # Main content area
+        content = QWidget()
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(16, 16, 16, 16)
 
-        # FPS Plot
-        self._fps_plot = FPSPlotWidget()
-        splitter.addWidget(self._fps_plot)
+        # Video list display
+        self._video_list_label = QLabel(
+            "No videos loaded.\nDrag and drop video files or use + to add."
+        )
+        self._video_list_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._video_list_label.setStyleSheet("color: #888; font-size: 14px;")
+        content_layout.addWidget(self._video_list_label, stretch=1)
 
-        # Set splitter sizes (70% viewports, 30% plot)
-        splitter.setSizes([700, 300])
+        # Progress display
+        self._progress_label = QLabel("")
+        self._progress_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._progress_label.setStyleSheet("font-size: 13px;")
+        content_layout.addWidget(self._progress_label)
 
-        # Timeline slider
-        timeline_widget = QWidget()
-        timeline_layout = QHBoxLayout(timeline_widget)
-        timeline_layout.setContentsMargins(5, 0, 5, 5)
+        layout.addWidget(content, stretch=1)
 
-        self._timeline = QSlider(Qt.Orientation.Horizontal)
-        self._timeline.setMinimum(0)
-        self._timeline.setMaximum(0)
-        self._timeline.valueChanged.connect(self._on_timeline_changed)
-        timeline_layout.addWidget(self._timeline)
+    def _create_control_bar(self) -> QWidget:
+        """Create the control bar with state, video controls, and seek."""
+        bar = QWidget()
+        bar.setStyleSheet("background-color: #f5f5f5;")
+        layout = QHBoxLayout(bar)
+        layout.setContentsMargins(8, 6, 8, 6)
+        layout.setSpacing(12)
 
-        layout.addWidget(timeline_widget)
+        # State indicator
+        self._state_indicator = StateIndicator()
+        layout.addWidget(self._state_indicator)
 
-        # Status bar
-        self._status = QStatusBar()
-        self.setStatusBar(self._status)
+        # Separator
+        layout.addWidget(self._create_separator())
 
-        self._progress = QProgressBar()
-        self._progress.setMaximumWidth(200)
-        self._progress.hide()
-        self._status.addPermanentWidget(self._progress)
+        # Video controls
+        video_label = QLabel("Videos:")
+        video_label.setStyleSheet("font-size: 12px; color: #666;")
+        layout.addWidget(video_label)
 
-        self._update_status()
+        self._add_btn = QPushButton("+")
+        self._add_btn.setFixedSize(28, 28)
+        self._add_btn.setToolTip("Add video")
+        self._add_btn.clicked.connect(self._on_add_video)
+        layout.addWidget(self._add_btn)
+
+        self._remove_btn = QPushButton("-")
+        self._remove_btn.setFixedSize(28, 28)
+        self._remove_btn.setToolTip("Remove last video")
+        self._remove_btn.clicked.connect(self._on_remove_video)
+        layout.addWidget(self._remove_btn)
+
+        self._video_count_label = QLabel("0")
+        self._video_count_label.setStyleSheet("font-weight: bold; min-width: 20px;")
+        layout.addWidget(self._video_count_label)
+
+        # Separator
+        layout.addWidget(self._create_separator())
+
+        # Processing controls
+        self._start_btn = QPushButton("Start")
+        self._start_btn.setToolTip("Start processing")
+        self._start_btn.clicked.connect(self._on_start)
+        layout.addWidget(self._start_btn)
+
+        self._pause_btn = QPushButton("Pause")
+        self._pause_btn.setToolTip("Pause processing")
+        self._pause_btn.clicked.connect(self._on_pause)
+        layout.addWidget(self._pause_btn)
+
+        self._reset_btn = QPushButton("Reset")
+        self._reset_btn.setToolTip("Reset engine")
+        self._reset_btn.clicked.connect(self._on_reset)
+        layout.addWidget(self._reset_btn)
+
+        # Separator
+        layout.addWidget(self._create_separator())
+
+        # Seek controls
+        seek_label = QLabel("Seek:")
+        seek_label.setStyleSheet("font-size: 12px; color: #666;")
+        layout.addWidget(seek_label)
+
+        self._seek_spinbox = QSpinBox()
+        self._seek_spinbox.setMinimum(0)
+        self._seek_spinbox.setMaximum(0)
+        self._seek_spinbox.setFixedWidth(80)
+        layout.addWidget(self._seek_spinbox)
+
+        self._seek_btn = QPushButton("Seek")
+        self._seek_btn.setToolTip("Seek to frame")
+        self._seek_btn.clicked.connect(self._on_seek)
+        layout.addWidget(self._seek_btn)
+
+        layout.addStretch()
+
+        return bar
+
+    def _create_separator(self) -> QFrame:
+        """Create a vertical separator line."""
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.VLine)
+        sep.setFrameShadow(QFrame.Shadow.Sunken)
+        return sep
 
     def _setup_menu(self) -> None:
         """Setup menu bar."""
@@ -106,20 +182,10 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("&File")
         assert file_menu is not None
 
-        open_action = QAction("&Open Video...", self)
+        open_action = QAction("&Add Video...", self)
         open_action.setShortcut(QKeySequence.StandardKey.Open)
-        open_action.triggered.connect(self._on_open)
+        open_action.triggered.connect(self._on_add_video)
         file_menu.addAction(open_action)
-
-        file_menu.addSeparator()
-
-        export_csv = QAction("Export &CSV...", self)
-        export_csv.triggered.connect(self._on_export_csv)
-        file_menu.addAction(export_csv)
-
-        export_json = QAction("Export &JSON...", self)
-        export_json.triggered.connect(self._on_export_json)
-        file_menu.addAction(export_json)
 
         file_menu.addSeparator()
 
@@ -127,13 +193,6 @@ class MainWindow(QMainWindow):
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
-
-        # View menu
-        view_menu = menubar.addMenu("&View")
-        assert view_menu is not None
-
-        # Export menu
-        menubar.addMenu("&Export")
 
         # Help menu
         help_menu = menubar.addMenu("&Help")
@@ -143,83 +202,170 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
 
-    def _setup_toolbar(self) -> None:
-        """Setup toolbar."""
-        toolbar = QToolBar("Main")
-        self.addToolBar(toolbar)
+    def _update_controls(self) -> None:
+        """Update control states based on engine state."""
+        state = self._engine.state
+        video_count = len(self._pending_videos)
 
-        # Analysis action
-        self._analyze_action = QAction("Analyze", self)
-        self._analyze_action.triggered.connect(self._on_analyze)
-        self._analyze_action.setEnabled(False)
-        toolbar.addAction(self._analyze_action)
+        # Video controls
+        can_modify_videos = state == EngineState.IDLE
+        self._add_btn.setEnabled(can_modify_videos and video_count < 4)
+        self._remove_btn.setEnabled(can_modify_videos and video_count > 0)
+        self._video_count_label.setText(str(video_count))
 
-    def _setup_shortcuts(self) -> None:
-        """Setup keyboard shortcuts."""
-        pass  # TODO: Implement keyboard navigation
+        # Processing controls
+        self._start_btn.setEnabled(state == EngineState.READY)
+        self._pause_btn.setEnabled(state == EngineState.PROCESSING)
+        self._pause_btn.setText("Resume" if state == EngineState.PAUSED else "Pause")
+        if state == EngineState.PAUSED:
+            self._pause_btn.setEnabled(True)
+        self._reset_btn.setEnabled(state != EngineState.IDLE)
 
-    def _update_status(self) -> None:
-        """Update status bar text."""
-        if len(self._video_paths) == 0:
-            self._status.showMessage("Drop video files here to begin")
+        # Seek controls
+        can_seek = state in (EngineState.PAUSED, EngineState.COMPLETED)
+        self._seek_spinbox.setEnabled(can_seek)
+        self._seek_btn.setEnabled(can_seek)
+        if can_seek:
+            self._seek_spinbox.setMaximum(max(0, self._engine.processed_frames - 1))
+
+        # Update video list display
+        self._update_video_list()
+
+    def _update_video_list(self) -> None:
+        """Update the video list display."""
+        if not self._pending_videos:
+            self._video_list_label.setText(
+                "No videos loaded.\nDrag and drop video files or use + to add."
+            )
+            self._video_list_label.setStyleSheet("color: #888; font-size: 14px;")
         else:
-            frame = self._current_frame
-            total = self._max_frames
-            videos = len(self._video_paths)
-            self._status.showMessage(f"Frame {frame + 1}/{total} | {videos} video(s)")
+            lines = ["Loaded videos:"]
+            for i, path in enumerate(self._pending_videos, 1):
+                lines.append(f"  {i}. {path.name}")
+            self._video_list_label.setText("\n".join(lines))
+            self._video_list_label.setStyleSheet("color: #333; font-size: 13px;")
 
-    def _add_video(self, path: Path) -> None:
-        """Add a video to the session."""
-        # TODO: Integrate with ProcessingPipeline and PreviewSystem
-        try:
-            index = len(self._video_paths)
-            self._video_paths.append(path)
+    # === Event Handlers ===
 
-            # Create viewport
-            viewport = VideoViewport(index)
-            self._viewports.append(viewport)
-            self._viewport_layout.addWidget(viewport)
+    def _on_state_changed(self, state: EngineState) -> None:
+        """Handle engine state change."""
+        self._state_indicator.set_state(state)
+        self._update_controls()
 
-            # TODO: Get actual frame count from video reader
-            # For now, enable analyze button
-            self._analyze_action.setEnabled(True)
+    def _on_progress(self, current: int, total: int) -> None:
+        """Handle processing progress update."""
+        pct = (current / total * 100) if total > 0 else 0
+        self._progress_label.setText(f"Processing: {current}/{total} frames ({pct:.1f}%)")
+        self._state_indicator.set_state(
+            EngineState.PROCESSING,
+            f"Processing {current}/{total}"
+        )
 
-            self._update_status()
+    def _on_error(self, message: str) -> None:
+        """Handle engine error."""
+        QMessageBox.critical(self, "Processing Error", message)
+        self._state_indicator.set_state(EngineState.ERROR, message)
 
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Failed to open video: {e}")
+    def _on_add_video(self) -> None:
+        """Add a video file."""
+        if len(self._pending_videos) >= 4:
+            QMessageBox.warning(self, "Limit Reached", "Maximum 4 videos supported.")
+            return
 
-    def _on_open(self) -> None:
-        """Handle File > Open."""
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "Open Video",
+            "Add Video",
             "",
-            "Video Files (*.mp4 *.mkv *.avi *.mov);;All Files (*)",
+            "Video Files (*.mp4 *.mkv *.avi *.mov *.webm);;All Files (*)",
         )
         if path:
             self._add_video(Path(path))
 
-    def _on_analyze(self) -> None:
-        """Run analysis on all videos."""
-        # TODO: Integrate with ProcessingPipeline
-        self._progress.show()
-        self._progress.setValue(0)
+    def _add_video(self, path: Path) -> None:
+        """Add a video to the pending list."""
+        if not path.exists():
+            QMessageBox.warning(self, "File Not Found", f"File not found: {path}")
+            return
+
+        if len(self._pending_videos) >= 4:
+            return
+
+        self._pending_videos.append(path)
+        self._update_controls()
+
+        # If we have videos and engine is IDLE, load them
+        if self._engine.state == EngineState.IDLE and self._pending_videos:
+            self._load_videos()
+
+    def _on_remove_video(self) -> None:
+        """Remove the last video."""
+        if self._pending_videos and self._engine.state == EngineState.IDLE:
+            self._pending_videos.pop()
+            self._update_controls()
+
+            # Reload if we still have videos
+            if self._pending_videos:
+                self._load_videos()
+
+    def _load_videos(self) -> None:
+        """Load pending videos into the engine."""
+        if not self._pending_videos:
+            return
 
         try:
-            # TODO: Run ProcessingPipeline and update FPS plot
-            pass
-        finally:
-            self._progress.hide()
-            self._update_status()
+            result = self._engine.load(list(self._pending_videos))
+            self._seek_spinbox.setMaximum(result.total_frames - 1)
+            self._progress_label.setText(
+                f"Loaded {result.video_count} video(s), {result.total_frames} frames"
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Load Error", str(e))
+            self._pending_videos.clear()
+            self._update_controls()
 
-    def _on_export_csv(self) -> None:
-        """Export analysis to CSV."""
-        pass  # TODO: Integrate with new Exporter protocol
+    def _on_start(self) -> None:
+        """Start processing."""
+        try:
+            self._engine.start()
+        except Exception as e:
+            QMessageBox.critical(self, "Start Error", str(e))
 
-    def _on_export_json(self) -> None:
-        """Export session to JSON."""
-        pass  # TODO: Integrate with new Exporter protocol
+    def _on_pause(self) -> None:
+        """Pause or resume processing."""
+        try:
+            if self._engine.state == EngineState.PROCESSING:
+                self._engine.pause()
+            elif self._engine.state == EngineState.PAUSED:
+                self._engine.resume()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))
+
+    def _on_reset(self) -> None:
+        """Reset the engine."""
+        self._engine.reset()
+        self._pending_videos.clear()
+        self._progress_label.setText("")
+        self._update_controls()
+
+    def _on_seek(self) -> None:
+        """Seek to the specified frame."""
+        frame_idx = self._seek_spinbox.value()
+        try:
+            result = self._engine.seek(frame_idx)
+            # Display seek result info
+            metrics_info = []
+            for i, m in enumerate(result.metrics):
+                dup = "dup" if m.is_duplicate else "unique"
+                metrics_info.append(f"V{i+1}: {dup}")
+
+            fps_info = [f"{fps:.1f}" for fps in result.fps_values]
+
+            self._progress_label.setText(
+                f"Frame {frame_idx}: {', '.join(metrics_info)} | "
+                f"FPS: {', '.join(fps_info)}"
+            )
+        except Exception as e:
+            QMessageBox.warning(self, "Seek Error", str(e))
 
     def _on_about(self) -> None:
         """Show about dialog."""
@@ -231,13 +377,7 @@ class MainWindow(QMainWindow):
             "Drop video files to analyze their real framerate.",
         )
 
-    def _on_timeline_changed(self, value: int) -> None:
-        """Handle timeline slider change."""
-        # TODO: Integrate with PreviewSystem.seek_to()
-        self._current_frame = value
-        self._update_status()
-
-    # Drag and drop support
+    # === Drag and Drop ===
 
     def dragEnterEvent(self, a0: QDragEnterEvent | None) -> None:
         """Accept video file drops."""
@@ -257,8 +397,13 @@ class MainWindow(QMainWindow):
         if mime is None:
             return
 
+        video_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm"}
         for url in mime.urls():
             path = Path(url.toLocalFile())
-            video_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm"}
             if path.suffix.lower() in video_exts:
                 self._add_video(path)
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        """Clean up on close."""
+        self._engine.reset()
+        super().closeEvent(event)
