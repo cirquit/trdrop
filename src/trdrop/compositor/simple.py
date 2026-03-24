@@ -873,6 +873,13 @@ class SimpleCompositor(Compositor):
                 override_show_title=True,
             )
 
+    def snapshot_video_states(self) -> tuple[VideoStateSnapshot, ...]:
+        """Return immutable snapshots of per-video state.
+
+        Useful for interactive engine seek buffers.
+        """
+        return tuple(state.snapshot() for state in self._video_states)
+
     def reset(self) -> None:
         for state in self._video_states:
             state.reset()

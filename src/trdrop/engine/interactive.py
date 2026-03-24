@@ -15,6 +15,8 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 from trdrop.analysis.duplicate import DuplicateDetector
 from trdrop.compositor.simple import SimpleCompositor, _VideoState
+from trdrop.compositor.types import CompositorOutput
+from trdrop.config import PresetConfig
 from trdrop.engine.buffer import ProcessingBuffer
 from trdrop.engine.protocol import EngineState, SeekResult
 from trdrop.export.streaming_csv import StreamingCSVExporter
@@ -82,6 +84,7 @@ class InteractiveEngine(QObject):
         self._analyzer = DuplicateDetector()
         self._compositor: SimpleCompositor | None = None
         self._buffer: ProcessingBuffer | None = None
+        self._last_output_frame: np.ndarray | None = None
 
         # Export (optional)
         self._video_exporter: StreamingVideoExporter | None = None
@@ -123,6 +126,7 @@ class InteractiveEngine(QObject):
         video_paths: list[Path | str],
         output_video: Path | str | None = None,
         output_csv: Path | str | None = None,
+        config: PresetConfig | None = None,
     ) -> LoadResult:
         """Load videos and configure exports.
 
@@ -130,6 +134,7 @@ class InteractiveEngine(QObject):
             video_paths: 1-4 video file paths
             output_video: Optional output video path
             output_csv: Optional output CSV path
+            config: Optional overlay preset config (default: PresetConfig())
 
         Returns:
             LoadResult with video information
@@ -171,11 +176,21 @@ class InteractiveEngine(QObject):
                 self._total_frames,
             )
 
-        # Initialize video states for compositor
+        # Initialize video states for seek/restore
         self._video_states = [
-            _VideoState(window_size=60, container_fps=r.fps)
+            _VideoState(window_size=round(r.fps), container_fps=r.fps)
             for r in self._readers
         ]
+
+        # Initialize compositor output
+        self._compositor = SimpleCompositor(
+            video_count=len(paths),
+            video_fps=[r.fps for r in self._readers],
+            output_width=self._readers[0].width,
+            output_height=self._readers[0].height,
+            config=config if config is not None else PresetConfig(),
+        )
+        self._last_output_frame = None
 
         # Initialize buffer
         self._buffer = ProcessingBuffer(video_count=len(paths))
@@ -362,6 +377,7 @@ class InteractiveEngine(QObject):
         self._total_frames = 0
         self._current_frame = 0
         self._error_message = None
+        self._last_output_frame = None
 
         # Reset events
         self._pause_event.set()
@@ -376,6 +392,13 @@ class InteractiveEngine(QObject):
         if self._state != new_state:
             self._state = new_state
             self.state_changed.emit(new_state)
+
+    def _export_output(self, output: CompositorOutput) -> None:
+        """Export compositor output to configured exporters."""
+        if self._video_exporter is not None:
+            self._video_exporter.write_frame(output)
+        if self._csv_exporter is not None:
+            self._csv_exporter.write_frame(output)
 
     def _processing_loop(self) -> None:
         """Main processing loop (runs in background thread)."""
@@ -406,7 +429,7 @@ class InteractiveEngine(QObject):
 
                 # Analyze each video
                 metrics_list: list[FrameMetrics] = []
-                for i, pair in enumerate(pairs):
+                for pair in pairs:
                     result = self._analyzer.map(pair)
                     metrics = FrameMetrics(
                         frame_index=frame_idx,
@@ -415,8 +438,13 @@ class InteractiveEngine(QObject):
                     )
                     metrics_list.append(metrics)
 
-                    # Update video state (is_duplicate is always set by DuplicateDetector)
-                    self._video_states[i].update(result.is_duplicate or False)
+                # Build composited output (also computes aggregated metrics)
+                video_snapshots = tuple(s.snapshot() for s in self._video_states)
+                if self._compositor is not None:
+                    output = self._compositor.process(pairs, metrics_list)
+                    self._last_output_frame = output.frame.copy()
+                    self._export_output(output)
+                    video_snapshots = self._compositor.snapshot_video_states()
 
                 # Release frame pairs to allow buffer reuse
                 for pair in pairs:
@@ -424,15 +452,11 @@ class InteractiveEngine(QObject):
 
                 # Store snapshot
                 if self._buffer is not None:
-                    video_snapshots = tuple(s.snapshot() for s in self._video_states)
                     self._buffer.append(
                         frame_idx=frame_idx,
                         metrics=tuple(metrics_list),
                         video_states=video_snapshots,
                     )
-
-                # Export if configured
-                # TODO: Integrate compositor for video export
 
                 # Update progress
                 self._current_frame = frame_idx

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from PyQt6.QtCore import Qt
@@ -19,6 +20,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from trdrop.config import PresetConfig, load_preset, save_preset
 from trdrop.engine import EngineState, InteractiveEngine
 from trdrop.gui.widgets.state_indicator import StateIndicator
 
@@ -37,6 +39,12 @@ class MainWindow(QMainWindow):
 
         # Video paths (before loading into engine)
         self._pending_videos: list[Path] = []
+
+        # Optional export paths
+        self._output_csv_path: Path | None = None
+        self._output_video_path: Path | None = None
+        self._processing_start_time: float | None = None
+        self._preset_config: PresetConfig = PresetConfig()
 
         self._setup_ui()
         self._setup_menu()
@@ -127,6 +135,29 @@ class MainWindow(QMainWindow):
         # Separator
         layout.addWidget(self._create_separator())
 
+        # Export controls
+        self._csv_btn = QPushButton("CSV…")
+        self._csv_btn.setToolTip("Choose CSV export path")
+        self._csv_btn.clicked.connect(self._on_pick_csv)
+        layout.addWidget(self._csv_btn)
+
+        self._video_btn = QPushButton("Video…")
+        self._video_btn.setToolTip("Choose video export path")
+        self._video_btn.clicked.connect(self._on_pick_video_export)
+        layout.addWidget(self._video_btn)
+
+        # Separator
+        layout.addWidget(self._create_separator())
+
+        # Config button
+        self._config_btn = QPushButton("Config…")
+        self._config_btn.setToolTip("Load or save overlay preset (YAML)")
+        self._config_btn.clicked.connect(self._on_config)
+        layout.addWidget(self._config_btn)
+
+        # Separator
+        layout.addWidget(self._create_separator())
+
         # Processing controls
         self._start_btn = QPushButton("Start")
         self._start_btn.setToolTip("Start processing")
@@ -207,10 +238,13 @@ class MainWindow(QMainWindow):
         state = self._engine.state
         video_count = len(self._pending_videos)
 
-        # Video controls
+        # Video/export controls
         can_modify_videos = state == EngineState.IDLE
         self._add_btn.setEnabled(can_modify_videos and video_count < 4)
         self._remove_btn.setEnabled(can_modify_videos and video_count > 0)
+        self._csv_btn.setEnabled(can_modify_videos)
+        self._video_btn.setEnabled(can_modify_videos)
+        self._config_btn.setEnabled(can_modify_videos)
         self._video_count_label.setText(str(video_count))
 
         # Processing controls
@@ -255,7 +289,29 @@ class MainWindow(QMainWindow):
     def _on_progress(self, current: int, total: int) -> None:
         """Handle processing progress update."""
         pct = (current / total * 100) if total > 0 else 0
-        self._progress_label.setText(f"Processing: {current}/{total} frames ({pct:.1f}%)")
+        # Calculate ETA
+        eta_text = ""
+        if self._processing_start_time is not None and current > 0:
+            elapsed = time.time() - self._processing_start_time
+            rate = current / elapsed  # frames per second
+            remaining = (total - current) / rate if rate > 0 else 0
+            if remaining < 60:
+                eta_text = f" | ETA: {remaining:.0f}s"
+            elif remaining < 3600:
+                eta_text = f" | ETA: {remaining / 60:.1f}min"
+            else:
+                eta_text = f" | ETA: {remaining / 3600:.1f}h"
+            eta_text += f" ({rate:.0f} fps)"
+        # Export destinations
+        exports = []
+        if self._output_csv_path is not None:
+            exports.append(f"CSV: {self._output_csv_path.name}")
+        if self._output_video_path is not None:
+            exports.append(f"Video: {self._output_video_path.name}")
+        export_text = f" | Export: {', '.join(exports)}" if exports else ""
+        self._progress_label.setText(
+            f"Processing: {current}/{total} ({pct:.1f}%){eta_text}{export_text}"
+        )
         self._state_indicator.set_state(
             EngineState.PROCESSING,
             f"Processing {current}/{total}"
@@ -313,19 +369,117 @@ class MainWindow(QMainWindow):
             return
 
         try:
-            result = self._engine.load(list(self._pending_videos))
+            result = self._engine.load(
+                list(self._pending_videos),
+                output_video=self._output_video_path,
+                output_csv=self._output_csv_path,
+                config=self._preset_config,
+            )
             self._seek_spinbox.setMaximum(result.total_frames - 1)
+            exports = []
+            if self._output_csv_path is not None:
+                exports.append(f"CSV: {self._output_csv_path.name}")
+            if self._output_video_path is not None:
+                exports.append(f"Video: {self._output_video_path.name}")
+            export_text = f" | Exports: {', '.join(exports)}" if exports else ""
             self._progress_label.setText(
-                f"Loaded {result.video_count} video(s), {result.total_frames} frames"
+                f"Loaded {result.video_count} video(s), {result.total_frames} frames{export_text}"
             )
         except Exception as e:
             QMessageBox.critical(self, "Load Error", str(e))
             self._pending_videos.clear()
             self._update_controls()
 
+    def _on_pick_csv(self) -> None:
+        """Pick CSV export path (optional)."""
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Choose CSV Export Path",
+            "trdrop_metrics.csv",
+            "CSV Files (*.csv)",
+        )
+        if path:
+            p = Path(path)
+            if p.suffix.lower() != ".csv":
+                p = p.with_suffix(".csv")
+            self._output_csv_path = p
+            self._csv_btn.setText(f"CSV✓ ({p.name})")
+            self._csv_btn.setToolTip(str(p))
+            # Reload engine if videos already loaded so exporter gets configured
+            if self._pending_videos and self._engine.state != EngineState.IDLE:
+                self._engine.reset()
+                self._load_videos()
+
+    def _on_pick_video_export(self) -> None:
+        """Pick video export path (optional)."""
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Choose Video Export Path",
+            "trdrop_output.mp4",
+            "Video Files (*.mp4)",
+        )
+        if path:
+            p = Path(path)
+            if p.suffix.lower() != ".mp4":
+                p = p.with_suffix(".mp4")
+            self._output_video_path = p
+            self._video_btn.setText(f"Video✓ ({p.name})")
+            self._video_btn.setToolTip(str(p))
+            # Reload engine if videos already loaded so exporter gets configured
+            if self._pending_videos and self._engine.state != EngineState.IDLE:
+                self._engine.reset()
+                self._load_videos()
+
+    def _on_config(self) -> None:
+        """Load or save overlay config preset."""
+        choice = QMessageBox.question(
+            self,
+            "Config Preset",
+            "Load an existing preset?\n\n"
+            "Yes = Load YAML preset\n"
+            "No = Save default preset as template",
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+            | QMessageBox.StandardButton.Cancel,
+        )
+        if choice == QMessageBox.StandardButton.Yes:
+            path, _ = QFileDialog.getOpenFileName(
+                self, "Load Config Preset", "", "YAML Files (*.yaml *.yml)"
+            )
+            if path:
+                try:
+                    self._preset_config = load_preset(path)
+                    self._config_btn.setText(f"Config✓ ({Path(path).name})")
+                    self._config_btn.setToolTip(str(path))
+                    # Reload engine if videos already loaded
+                    if self._pending_videos and self._engine.state != EngineState.IDLE:
+                        self._engine.reset()
+                        self._load_videos()
+                except Exception as e:
+                    QMessageBox.critical(self, "Config Error", str(e))
+        elif choice == QMessageBox.StandardButton.No:
+            path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save Default Config",
+                "trdrop_preset.yaml",
+                "YAML Files (*.yaml)",
+            )
+            if path:
+                try:
+                    save_preset(self._preset_config, path)
+                    QMessageBox.information(
+                        self,
+                        "Config Saved",
+                        f"Default preset saved to:\n{path}\n\n"
+                        "Edit this file to customize overlays, then load it back.",
+                    )
+                except Exception as e:
+                    QMessageBox.critical(self, "Save Error", str(e))
+
     def _on_start(self) -> None:
         """Start processing."""
         try:
+            self._processing_start_time = time.time()
             self._engine.start()
         except Exception as e:
             QMessageBox.critical(self, "Start Error", str(e))
@@ -344,6 +498,16 @@ class MainWindow(QMainWindow):
         """Reset the engine."""
         self._engine.reset()
         self._pending_videos.clear()
+        self._output_csv_path = None
+        self._output_video_path = None
+        self._processing_start_time = None
+        self._preset_config = PresetConfig()
+        self._csv_btn.setText("CSV…")
+        self._csv_btn.setToolTip("Choose CSV export path")
+        self._video_btn.setText("Video…")
+        self._video_btn.setToolTip("Choose video export path")
+        self._config_btn.setText("Config…")
+        self._config_btn.setToolTip("Load or save overlay preset (YAML)")
         self._progress_label.setText("")
         self._update_controls()
 

@@ -20,3 +20,5 @@ examples/*.csv
 
 # macOS
 .DS_Store
+*.mp4
+*.csv
