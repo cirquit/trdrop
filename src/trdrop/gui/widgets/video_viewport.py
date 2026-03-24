@@ -27,7 +27,7 @@ class VideoViewport(QWidget):
         # Video display area (placeholder for now)
         self._display = QLabel()
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._display.setStyleSheet("background-color: #1a1a1a; color: #666;")
+        self._display.setStyleSheet("background-color: palette(base);")
         self._display.setText(f"Video {self._video_index + 1}")
         self._display.setMinimumSize(320, 180)
         layout.addWidget(self._display, stretch=1)
@@ -35,7 +35,7 @@ class VideoViewport(QWidget):
         # Info label
         self._info = QLabel()
         self._info.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._info.setStyleSheet("color: #888; font-size: 11px;")
+        self._info.setStyleSheet("font-size: 11px;")
         self._update_info()
         layout.addWidget(self._info)
 

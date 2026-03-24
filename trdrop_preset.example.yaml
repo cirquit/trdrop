@@ -1,0 +1,123 @@
+processing:
+  duplicate_threshold: 0.02
+  window_size: 60
+rendering:
+  layout:
+    mode: grid
+    spacing: 0.0
+  fps_plot:
+    position:
+      x: 0.05
+      y: 0.74
+      ref: global
+    size:
+      width: 0.9
+      height: 0.22
+      ref: global
+    visible: true
+    style: filled
+    background_color:
+    - 0
+    - 0
+    - 0
+    - 128
+    grid_color:
+    - 128
+    - 128
+    - 128
+    - 64
+    line_width: 4.0
+    label_font_size: 36
+    show_grid: true
+  frametime_plot:
+    position:
+      x: 0.05
+      y: 0.7
+      ref: global
+    size:
+      width: 0.9
+      height: 0.12
+      ref: global
+    visible: false
+    style: line
+    background_color:
+    - 0
+    - 0
+    - 0
+    - 128
+    grid_color:
+    - 128
+    - 128
+    - 128
+    - 64
+    line_width: 3.0
+    label_font_size: 32
+    show_grid: true
+  font_family: monospace
+  video_colors:
+  - - 52
+    - 199
+    - 89
+    - 230
+  - - 0
+    - 122
+    - 255
+    - 230
+  - - 255
+    - 149
+    - 0
+    - 230
+  - - 255
+    - 59
+    - 48
+    - 230
+videos:
+  0:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:0
+      anchor: top_left
+      visible: true
+      font_size: 0.048
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:0
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    visible: true
+export:
+  resolution:
+  - 1920
+  - 1080
+  codec: h264
+  bitrate: auto
+  fps: null

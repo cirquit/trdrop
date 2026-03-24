@@ -13,7 +13,15 @@ from trdrop.export.base import StreamingExporter
 from trdrop.profiling import get_profiler
 
 # Hardware encoder preference order (fastest/best quality first)
-_HW_ENCODER_PRIORITY = [
+_HW_HEVC_PRIORITY = [
+    "hevc_videotoolbox",  # macOS (Apple Silicon / Intel GPU)
+    "hevc_nvenc",         # NVIDIA (Windows/Linux)
+    "hevc_amf",           # AMD (Windows)
+    "hevc_qsv",           # Intel QuickSync (Windows/Linux)
+    "hevc_vaapi",         # Linux VAAPI
+]
+
+_HW_H264_PRIORITY = [
     "h264_videotoolbox",  # macOS (Apple Silicon / Intel GPU)
     "h264_nvenc",         # NVIDIA (Windows/Linux)
     "h264_amf",           # AMD (Windows)
@@ -21,24 +29,32 @@ _HW_ENCODER_PRIORITY = [
     "h264_vaapi",         # Linux VAAPI
 ]
 
-_SOFTWARE_ENCODER = "libx264"
+_HW_ALL = set(_HW_HEVC_PRIORITY + _HW_H264_PRIORITY)
+
+_SOFTWARE_HEVC = "libx265"
+_SOFTWARE_H264 = "libx264"
 
 
-def get_best_h264_encoder() -> str:
-    """Return best available h264 encoder.
+def get_best_encoder() -> str:
+    """Return best available encoder, preferring HEVC over H264.
 
-    Tries hardware encoders in order of preference, falls back to libx264.
+    Tries HEVC hardware → H264 hardware → libx265 → libx264.
     """
     available = set(av.codecs_available)
-    for enc in _HW_ENCODER_PRIORITY:
+    for enc in _HW_HEVC_PRIORITY:
         if enc in available:
             return enc
-    return _SOFTWARE_ENCODER
+    for enc in _HW_H264_PRIORITY:
+        if enc in available:
+            return enc
+    if _SOFTWARE_HEVC in available:
+        return _SOFTWARE_HEVC
+    return _SOFTWARE_H264
 
 
 def is_hardware_encoder(codec: str) -> bool:
     """Check if codec is a hardware encoder."""
-    return codec in _HW_ENCODER_PRIORITY
+    return codec in _HW_ALL
 
 
 class StreamingVideoExporter(StreamingExporter):
@@ -79,7 +95,7 @@ class StreamingVideoExporter(StreamingExporter):
 
         # Resolve "auto" to best available encoder
         if codec == "auto":
-            self._codec = get_best_h264_encoder()
+            self._codec = get_best_encoder()
         else:
             self._codec = codec
 
@@ -118,8 +134,14 @@ class StreamingVideoExporter(StreamingExporter):
             if self._is_hw:
                 # Hardware encoders use quality-based settings
                 stream.options = {"q:v": str(self._quality)}  # type: ignore[assignment]
+            elif self._codec == "libx265":
+                stream.options = {  # type: ignore[assignment]
+                    "crf": str(self._crf),
+                    "preset": self._preset,
+                    "x265-params": "log-level=error",
+                }
             else:
-                # Software encoder (libx264) uses CRF and preset
+                # libx264
                 stream.options = {  # type: ignore[assignment]
                     "crf": str(self._crf),
                     "preset": self._preset,

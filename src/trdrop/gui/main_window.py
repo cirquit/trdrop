@@ -5,8 +5,9 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QKeySequence
+from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QImage, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -16,6 +17,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSpinBox,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -36,6 +38,7 @@ class MainWindow(QMainWindow):
         self._engine.state_changed.connect(self._on_state_changed)
         self._engine.progress.connect(self._on_progress)
         self._engine.error.connect(self._on_error)
+        self._engine.frame_ready.connect(self._on_frame_ready)
 
         # Video paths (before loading into engine)
         self._pending_videos: list[Path] = []
@@ -55,8 +58,8 @@ class MainWindow(QMainWindow):
     def _setup_ui(self) -> None:
         """Setup the main UI layout."""
         self.setWindowTitle("TRDrop v2")
-        self.setMinimumSize(600, 400)
-        self.resize(800, 500)
+        self.setMinimumSize(800, 500)
+        self.resize(1024, 700)
 
         # Central widget
         central = QWidget()
@@ -80,13 +83,25 @@ class MainWindow(QMainWindow):
         content_layout = QVBoxLayout(content)
         content_layout.setContentsMargins(16, 16, 16, 16)
 
-        # Video list display
+        # Stacked widget: page 0 = text placeholder, page 1 = preview
+        self._content_stack = QStackedWidget()
+
+        # Page 0: Video list text
         self._video_list_label = QLabel(
             "No videos loaded.\nDrag and drop video files or use + to add."
         )
         self._video_list_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._video_list_label.setStyleSheet("color: #888; font-size: 14px;")
-        content_layout.addWidget(self._video_list_label, stretch=1)
+        self._video_list_label.setStyleSheet("font-size: 14px;")
+        self._content_stack.addWidget(self._video_list_label)
+
+        # Page 1: Preview display
+        self._preview_label = QLabel()
+        self._preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._preview_label.setStyleSheet("background-color: black;")
+        self._preview_label.setMinimumSize(320, 180)
+        self._content_stack.addWidget(self._preview_label)
+
+        content_layout.addWidget(self._content_stack, stretch=1)
 
         # Progress display
         self._progress_label = QLabel("")
@@ -99,7 +114,7 @@ class MainWindow(QMainWindow):
     def _create_control_bar(self) -> QWidget:
         """Create the control bar with state, video controls, and seek."""
         bar = QWidget()
-        bar.setStyleSheet("background-color: #f5f5f5;")
+        bar.setAutoFillBackground(True)
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(8, 6, 8, 6)
         layout.setSpacing(12)
@@ -113,7 +128,7 @@ class MainWindow(QMainWindow):
 
         # Video controls
         video_label = QLabel("Videos:")
-        video_label.setStyleSheet("font-size: 12px; color: #666;")
+        video_label.setStyleSheet("font-size: 12px;")
         layout.addWidget(video_label)
 
         self._add_btn = QPushButton("+")
@@ -179,7 +194,7 @@ class MainWindow(QMainWindow):
 
         # Seek controls
         seek_label = QLabel("Seek:")
-        seek_label.setStyleSheet("font-size: 12px; color: #666;")
+        seek_label.setStyleSheet("font-size: 12px;")
         layout.addWidget(seek_label)
 
         self._seek_spinbox = QSpinBox()
@@ -239,7 +254,7 @@ class MainWindow(QMainWindow):
         video_count = len(self._pending_videos)
 
         # Video/export controls
-        can_modify_videos = state == EngineState.IDLE
+        can_modify_videos = state in (EngineState.IDLE, EngineState.READY)
         self._add_btn.setEnabled(can_modify_videos and video_count < 4)
         self._remove_btn.setEnabled(can_modify_videos and video_count > 0)
         self._csv_btn.setEnabled(can_modify_videos)
@@ -271,13 +286,15 @@ class MainWindow(QMainWindow):
             self._video_list_label.setText(
                 "No videos loaded.\nDrag and drop video files or use + to add."
             )
-            self._video_list_label.setStyleSheet("color: #888; font-size: 14px;")
+            self._video_list_label.setEnabled(False)
+            self._video_list_label.setStyleSheet("font-size: 14px;")
         else:
             lines = ["Loaded videos:"]
             for i, path in enumerate(self._pending_videos, 1):
                 lines.append(f"  {i}. {path.name}")
             self._video_list_label.setText("\n".join(lines))
-            self._video_list_label.setStyleSheet("color: #333; font-size: 13px;")
+            self._video_list_label.setEnabled(True)
+            self._video_list_label.setStyleSheet("font-size: 13px;")
 
     # === Event Handlers ===
 
@@ -285,6 +302,9 @@ class MainWindow(QMainWindow):
         """Handle engine state change."""
         self._state_indicator.set_state(state)
         self._update_controls()
+        # Switch to text view when idle
+        if state == EngineState.IDLE:
+            self._content_stack.setCurrentIndex(0)
 
     def _on_progress(self, current: int, total: int) -> None:
         """Handle processing progress update."""
@@ -322,19 +342,42 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, "Processing Error", message)
         self._state_indicator.set_state(EngineState.ERROR, message)
 
+    def _on_frame_ready(self, frame: object) -> None:
+        """Handle live preview frame from processing thread."""
+        if not isinstance(frame, np.ndarray):
+            return
+        self._show_frame(frame)
+
+    def _show_frame(self, frame: np.ndarray) -> None:
+        """Display a composited frame in the preview area."""
+        h, w = frame.shape[:2]
+        bytes_per_line = 3 * w
+        image = QImage(frame.tobytes(), w, h, bytes_per_line, QImage.Format.Format_RGB888)
+        pixmap = QPixmap.fromImage(image)
+        # Scale to fit preview label while preserving aspect ratio
+        label_size = self._preview_label.size()
+        scaled = pixmap.scaled(
+            label_size, Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        self._preview_label.setPixmap(scaled)
+        self._content_stack.setCurrentIndex(1)
+
     def _on_add_video(self) -> None:
-        """Add a video file."""
+        """Add video file(s)."""
         if len(self._pending_videos) >= 4:
             QMessageBox.warning(self, "Limit Reached", "Maximum 4 videos supported.")
             return
 
-        path, _ = QFileDialog.getOpenFileName(
+        paths, _ = QFileDialog.getOpenFileNames(
             self,
-            "Add Video",
+            "Add Video(s)",
             "",
             "Video Files (*.mp4 *.mkv *.avi *.mov *.webm);;All Files (*)",
         )
-        if path:
+        for path in paths:
+            if len(self._pending_videos) >= 4:
+                break
             self._add_video(Path(path))
 
     def _add_video(self, path: Path) -> None:
@@ -349,14 +392,20 @@ class MainWindow(QMainWindow):
         self._pending_videos.append(path)
         self._update_controls()
 
-        # If we have videos and engine is IDLE, load them
-        if self._engine.state == EngineState.IDLE and self._pending_videos:
+        # Load/reload engine with current video list
+        if self._pending_videos:
+            if self._engine.state != EngineState.IDLE:
+                self._engine.reset()
             self._load_videos()
 
     def _on_remove_video(self) -> None:
         """Remove the last video."""
-        if self._pending_videos and self._engine.state == EngineState.IDLE:
+        if self._pending_videos and self._engine.state in (EngineState.IDLE, EngineState.READY):
             self._pending_videos.pop()
+
+            if self._engine.state != EngineState.IDLE:
+                self._engine.reset()
+
             self._update_controls()
 
             # Reload if we still have videos
@@ -509,6 +558,8 @@ class MainWindow(QMainWindow):
         self._config_btn.setText("Config…")
         self._config_btn.setToolTip("Load or save overlay preset (YAML)")
         self._progress_label.setText("")
+        self._preview_label.clear()
+        self._content_stack.setCurrentIndex(0)
         self._update_controls()
 
     def _on_seek(self) -> None:
@@ -516,6 +567,10 @@ class MainWindow(QMainWindow):
         frame_idx = self._seek_spinbox.value()
         try:
             result = self._engine.seek(frame_idx)
+            # Display composited frame if available
+            if result.composited_frame is not None:
+                self._show_frame(result.composited_frame)
+
             # Display seek result info
             metrics_info = []
             for i, m in enumerate(result.metrics):

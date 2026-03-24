@@ -7,8 +7,8 @@ import time
 from dataclasses import dataclass
 
 import numpy as np
-from PyQt6.QtCore import QPoint, QRect
-from PyQt6.QtGui import QColor, QFont, QImage, QPainter
+from PyQt6.QtCore import QPoint, QPointF, QRect, Qt
+from PyQt6.QtGui import QColor, QFont, QImage, QPainter, QPainterPath, QPen
 
 from trdrop.compositor.base import Compositor
 from trdrop.compositor.overlay.colors import get_video_color
@@ -292,6 +292,7 @@ class SimpleCompositor(Compositor):
         frametime_plots: list[FrametimePlot] | None = None,
         framerate_combined: bool = True,
         frametime_combined: bool = False,
+        video_names: list[str] | None = None,
     ) -> None:
         if video_count != len(video_fps):
             raise ValueError(
@@ -368,6 +369,7 @@ class SimpleCompositor(Compositor):
             self._frametime_plots = self._create_frametime_plots_from_config()
 
         self._frame_index = 0
+        self._video_names = video_names or []
 
     def _create_fps_texts_from_config(self) -> list[FPSText]:
         """Create FPS text overlays from config."""
@@ -721,6 +723,10 @@ class SimpleCompositor(Compositor):
                             "overlay_fps_text", (time.perf_counter() - t0) * 1000
                         )
 
+            # Draw video file names in top-right of each video region
+            if self._video_names:
+                self._draw_video_names(painter)
+
             # Draw framerate plot(s)
             if self._framerate_plots:
                 t0 = time.perf_counter()
@@ -745,6 +751,51 @@ class SimpleCompositor(Compositor):
 
         finally:
             painter.end()
+
+    def _draw_video_names(self, painter: QPainter) -> None:
+        """Draw file names in the top-right corner of each video region."""
+        painter.save()
+
+        font_size = max(10, int(self._output_height * 0.018))
+        font = QFont(self._config.rendering.font_family, font_size)
+        font.setBold(True)
+        painter.setFont(font)
+
+        from PyQt6.QtGui import QFontMetrics
+        fm = QFontMetrics(font)
+        padding = font_size // 2
+
+        for i, name in enumerate(self._video_names):
+            if i >= self._video_count:
+                break
+            region = self._layout.get_region(i)
+            # Region pixel bounds
+            rx = int(region.x * self._output_width)
+            ry = int(region.y * self._output_height)
+            rw = int(region.width * self._output_width)
+
+            text_w = fm.horizontalAdvance(name)
+            x = rx + rw - text_w - padding
+            y = ry + fm.ascent() + padding
+
+            color = get_video_color(i)
+
+            # Black outline
+            path = QPainterPath()
+            path.addText(QPointF(x, y), font, name)
+            outline_pen = QPen(QColor(0, 0, 0, 200))
+            outline_pen.setWidthF(max(2.0, font_size / 8.0))
+            outline_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            painter.setPen(outline_pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawPath(path)
+
+            # Fill with video color
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(color)
+            painter.drawPath(path)
+
+        painter.restore()
 
     def _draw_framerate_combined(self, painter: QPainter) -> None:
         """Draw a single combined framerate plot with all video series."""
@@ -879,6 +930,11 @@ class SimpleCompositor(Compositor):
         Useful for interactive engine seek buffers.
         """
         return tuple(state.snapshot() for state in self._video_states)
+
+    def restore_video_states(self, snapshots: tuple[VideoStateSnapshot, ...]) -> None:
+        """Restore per-video state from snapshots (inverse of snapshot)."""
+        for i, snap in enumerate(snapshots):
+            self._video_states[i].restore(snap)
 
     def reset(self) -> None:
         for state in self._video_states:

@@ -242,11 +242,11 @@ class FpsTextConfig:
     """Configuration for FPS text overlay."""
 
     position: Position = field(
-        default_factory=lambda: Position(0.05, 0.05, GlobalRef())
+        default_factory=lambda: Position(0.03, 0.08, GlobalRef())
     )
     anchor: Anchor = Anchor.TOP_LEFT
     visible: bool = True
-    font_size: float = 0.03  # Relative to reference frame height
+    font_size: float = 0.048  # Relative to reference frame height
     font_family: str = "monospace"
     color: tuple[int, int, int, int] = (255, 255, 255, 230)  # RGBA
     shadow: bool = True
@@ -292,7 +292,7 @@ class FpsPlotConfig:
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
     line_width: float = 2.0
-    label_font_size: int = 20
+    label_font_size: int = 36
     show_grid: bool = True
 
 
@@ -311,7 +311,7 @@ class FrametimePlotConfig:
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
     line_width: float = 2.0
-    label_font_size: int = 20
+    label_font_size: int = 32
     show_grid: bool = True
 
 
@@ -337,19 +337,15 @@ class VideoOverlayConfig:
 
     def update_refs(self, video_index: int, layout: FrameLayout) -> VideoOverlayConfig:
         """
-        Return a copy with all positions converted to reference this video.
+        Return a copy with all positions set to reference the given video.
 
-        Args:
-            video_index: The video index to reference
-            layout: Frame layout for coordinate translation
-
-        Returns:
-            New VideoOverlayConfig with updated references
+        Keeps the same local coordinates but changes the reference frame
+        so the overlay appears in the correct video region.
         """
         ref = VideoRef(video_index)
         return VideoOverlayConfig(
             fps_text=FpsTextConfig(
-                position=self.fps_text.position.with_ref(ref, layout),
+                position=Position(self.fps_text.position.x, self.fps_text.position.y, ref),
                 anchor=self.fps_text.anchor,
                 visible=self.fps_text.visible,
                 font_size=self.fps_text.font_size,
@@ -359,7 +355,7 @@ class VideoOverlayConfig:
                 shadow_color=self.fps_text.shadow_color,
             ),
             frametime_text=FrametimeTextConfig(
-                position=self.frametime_text.position.with_ref(ref, layout),
+                position=Position(self.frametime_text.position.x, self.frametime_text.position.y, ref),
                 anchor=self.frametime_text.anchor,
                 visible=self.frametime_text.visible,
                 font_size=self.frametime_text.font_size,
@@ -435,7 +431,7 @@ class ExportConfig:
     resolution: tuple[int, int] = (1920, 1080)
     codec: VideoCodec = VideoCodec.H264
     bitrate: str = "auto"  # "auto" or specific like "10M"
-    fps: float | None = None  # None = use source fps
+    fps: float | None = None  # Output fps; None or outside 10-120 = use source fps
 
 
 # =============================================================================

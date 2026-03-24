@@ -22,3 +22,6 @@ examples/*.csv
 .DS_Store
 *.mp4
 *.csv
+
+# User preset (use trdrop_preset.example.yaml as template)
+trdrop_preset.yaml

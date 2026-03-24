@@ -169,16 +169,32 @@ class Plot(ABC):
         pos: QPoint,
         text: str,
     ) -> None:
-        """Draw text with shadow for contrast."""
-        offset = self._style.shadow_offset
+        """Draw text with black outline for contrast (like DF-style overlays)."""
+        painter.save()
 
-        # Shadow
-        painter.setPen(self._style.shadow_color)
-        painter.drawText(pos.x() + offset, pos.y() + offset, text)
+        font = painter.font()
+        font.setBold(True)
+        painter.setFont(font)
 
-        # Main text
-        painter.setPen(self._style.text_color)
-        painter.drawText(pos.x(), pos.y(), text)
+        # Build text path for outline
+        path = QPainterPath()
+        path.addText(QPointF(pos.x(), pos.y()), font, text)
+
+        # Draw black outline
+        outline_width = max(2.0, font.pointSize() / 8.0)
+        outline_pen = QPen(self._style.shadow_color)
+        outline_pen.setWidthF(outline_width)
+        outline_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(outline_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawPath(path)
+
+        # Fill with text color
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._style.text_color)
+        painter.drawPath(path)
+
+        painter.restore()
 
     def _draw_labels(
         self,
@@ -209,8 +225,11 @@ class Plot(ABC):
             label = _format_fps_label(value)
 
             # Draw to the right of the anchor position
-            text_x = anchor_x + 5
-            text_y = y + 4
+            font_size = self._style.font.pointSize()
+            pad_x = max(8, font_size // 2)
+            pad_y = font_size // 3
+            text_x = anchor_x + pad_x
+            text_y = y + pad_y
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
     def _draw_title(
@@ -242,7 +261,8 @@ class Plot(ABC):
         plot_width = bounds.width() - 1
         anchor_x = bounds.left() + int(plot_width * time_anchor)
         x = anchor_x - text_width  # Right-align to anchor
-        y = bounds.top() - 8  # Small gap above plot
+        font_size = title_font.pointSize()
+        y = bounds.top() - max(8, font_size // 2)  # Gap scales with font
 
         self._draw_text_with_shadow(painter, QPoint(x, y), self._title)
 
@@ -790,8 +810,11 @@ class FrametimePlot(Plot):
                 label = f"{value:.2f}"
 
             # Draw to the RIGHT of plot area (same as FrameratePlot)
-            text_x = bounds.right() + 5
-            text_y = y + 4
+            font_size = self._style.font.pointSize()
+            pad_x = max(8, font_size // 2)
+            pad_y = font_size // 3
+            text_x = bounds.right() + pad_x
+            text_y = y + pad_y
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
     def _draw_title_with_value(

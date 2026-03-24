@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,6 +23,7 @@ from trdrop.engine.protocol import EngineState, SeekResult
 from trdrop.export.streaming_csv import StreamingCSVExporter
 from trdrop.export.streaming_video import StreamingVideoExporter
 from trdrop.source.sequential import SequentialFrameSource
+from trdrop.types.frames import FramePair, FrameView
 from trdrop.types.metrics import FrameMetrics
 from trdrop.video.reader import PyAVReader
 
@@ -67,6 +69,7 @@ class InteractiveEngine(QObject):
     state_changed = pyqtSignal(EngineState)
     progress = pyqtSignal(int, int)  # current_frame, total_frames
     error = pyqtSignal(str)
+    frame_ready = pyqtSignal(object)  # np.ndarray (composited RGB frame)
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -99,6 +102,7 @@ class InteractiveEngine(QObject):
         # Frame tracking
         self._total_frames = 0
         self._current_frame = 0
+        self._last_frame_emit_time = 0.0
 
     # === Properties ===
 
@@ -183,12 +187,14 @@ class InteractiveEngine(QObject):
         ]
 
         # Initialize compositor output
+        video_names = [p.stem for p in paths]
         self._compositor = SimpleCompositor(
             video_count=len(paths),
             video_fps=[r.fps for r in self._readers],
             output_width=self._readers[0].width,
             output_height=self._readers[0].height,
             config=config if config is not None else PresetConfig(),
+            video_names=video_names,
         )
         self._last_output_frame = None
 
@@ -197,9 +203,14 @@ class InteractiveEngine(QObject):
 
         # Setup exporters if requested
         if output_video:
+            # Determine output fps: use config if valid, else source fps
+            cfg = config if config is not None else PresetConfig()
+            output_fps = self._readers[0].fps
+            if cfg.export.fps is not None and 10 <= cfg.export.fps <= 120:
+                output_fps = cfg.export.fps
             self._video_exporter = StreamingVideoExporter(
                 Path(output_video),
-                fps=self._readers[0].fps,
+                fps=output_fps,
             )
 
         if output_csv:
@@ -326,6 +337,28 @@ class InteractiveEngine(QObject):
         fps_histories = tuple(list(s.fps_history) for s in self._video_states)
         frametime_histories = tuple(list(s.frametime_history) for s in self._video_states)
 
+        # Render composited frame through compositor if available
+        composited_frame: np.ndarray | None = None
+        if self._compositor is not None:
+            # Save current compositor state
+            saved_states = self._compositor.snapshot_video_states()
+            # Restore compositor to the seek frame's state
+            self._compositor.restore_video_states(snapshot.video_states)
+            # Build FramePairs from raw arrays
+            pairs: list[FramePair] = []
+            for i in range(len(frames)):
+                prev_view = FrameView(
+                    _data=prev_frames[i], index=max(0, frame_idx - 1), pts=0,
+                )
+                curr_view = FrameView(
+                    _data=frames[i], index=frame_idx, pts=0,
+                )
+                pairs.append(FramePair(prev=prev_view, curr=curr_view))
+            output = self._compositor.process(pairs, list(snapshot.metrics))
+            composited_frame = output.frame.copy()
+            # Restore compositor to previous state
+            self._compositor.restore_video_states(saved_states)
+
         return SeekResult(
             frame_idx=frame_idx,
             frames=tuple(frames),
@@ -335,6 +368,7 @@ class InteractiveEngine(QObject):
             frametime_values=tuple(s.smoothed_frametime() for s in self._video_states),
             fps_histories=fps_histories,
             frametime_histories=frametime_histories,
+            composited_frame=composited_frame,
         )
 
     def reset(self) -> None:
@@ -378,6 +412,7 @@ class InteractiveEngine(QObject):
         self._current_frame = 0
         self._error_message = None
         self._last_output_frame = None
+        self._last_frame_emit_time = 0.0
 
         # Reset events
         self._pause_event.set()
@@ -445,6 +480,12 @@ class InteractiveEngine(QObject):
                     self._last_output_frame = output.frame.copy()
                     self._export_output(output)
                     video_snapshots = self._compositor.snapshot_video_states()
+
+                    # Emit frame for live preview (~30fps throttle)
+                    now = time.monotonic()
+                    if now - self._last_frame_emit_time >= 0.033:
+                        self.frame_ready.emit(self._last_output_frame)
+                        self._last_frame_emit_time = now
 
                 # Release frame pairs to allow buffer reuse
                 for pair in pairs:
