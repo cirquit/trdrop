@@ -292,6 +292,7 @@ class FpsPlotConfig:
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
     line_width: float = 2.0
+    label_font_size: int = 20
     show_grid: bool = True
 
 
@@ -310,6 +311,7 @@ class FrametimePlotConfig:
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
     line_width: float = 2.0
+    label_font_size: int = 20
     show_grid: bool = True
 
 
