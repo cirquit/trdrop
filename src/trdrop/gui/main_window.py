@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QImage, QKeySequence, QPixmap
+from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QIcon, QImage, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -37,6 +37,12 @@ class MainWindow(QMainWindow):
 
         # Engine
         self._engine = InteractiveEngine(self)
+        
+        # Icon
+        icon_path = Path(__file__).resolve().parent.parent.parent.parent / "trdrop.ico"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+        
         self._engine.state_changed.connect(self._on_state_changed)
         self._engine.progress.connect(self._on_progress)
         self._engine.error.connect(self._on_error)
