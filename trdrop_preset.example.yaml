@@ -26,8 +26,8 @@ rendering:
     - 128
     - 128
     - 64
-    line_width: 4.0
-    label_font_size: 36
+    line_width: 3.0
+    label_font_size: 48
     show_grid: true
   frametime_plot:
     position:
@@ -50,8 +50,8 @@ rendering:
     - 128
     - 128
     - 64
-    line_width: 3.0
-    label_font_size: 32
+    line_width: 2.0
+    label_font_size: 42
     show_grid: true
   font_family: monospace
   video_colors:
@@ -80,7 +80,7 @@ videos:
         ref: video:0
       anchor: top_left
       visible: true
-      font_size: 0.048
+      font_size: 0.035
       font_family: monospace
       color:
       - 255
@@ -114,10 +114,136 @@ videos:
       - 0
       - 180
     visible: true
+  1:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:1
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:1
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    visible: true
+  2:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:2
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:2
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    visible: true
+  3:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:3
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:3
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color:
+      - 255
+      - 255
+      - 255
+      - 230
+      shadow: true
+      shadow_color:
+      - 0
+      - 0
+      - 0
+      - 180
+    visible: true
 export:
   resolution:
   - 1920
   - 1080
   codec: h264
   bitrate: auto
-  fps: null
+  fps: 60
