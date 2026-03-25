@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ctypes
 import sys
-from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
 
@@ -28,11 +27,11 @@ class TRDropApp:
             my_app_id = "TheAutomatic.TRDrop.v2"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
 
-        icon_name = "trdrop_mac.png" if sys.platform == "darwin" else "trdrop.ico"
-        icon_path = Path(__file__).resolve().parent.parent.parent.parent / icon_name
-        if icon_path.exists():
+        from trdrop.utils.frozen import icon_path
+        _icon = icon_path()
+        if _icon is not None:
             from PyQt6.QtGui import QIcon
-            self._app.setWindowIcon(QIcon(str(icon_path)))
+            self._app.setWindowIcon(QIcon(str(_icon)))
 
         self._window = MainWindow()
 

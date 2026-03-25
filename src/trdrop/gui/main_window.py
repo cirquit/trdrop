@@ -39,11 +39,10 @@ class MainWindow(QMainWindow):
         self._engine = InteractiveEngine(self)
 
         # Icon
-        import sys
-        icon_name = "trdrop_mac.png" if sys.platform == "darwin" else "trdrop.ico"
-        icon_path = Path(__file__).resolve().parent.parent.parent.parent / icon_name
-        if icon_path.exists():
-            self.setWindowIcon(QIcon(str(icon_path)))
+        from trdrop.utils.frozen import icon_path
+        _icon = icon_path()
+        if _icon is not None:
+            self.setWindowIcon(QIcon(str(_icon)))
 
         self._engine.state_changed.connect(self._on_state_changed)
         self._engine.progress.connect(self._on_progress)

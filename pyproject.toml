@@ -40,3 +40,8 @@ testpaths = ["tests"]
 markers = [
     "gui: marks tests as GUI/interactive engine tests (deselect with '-m \"not gui\"')",
 ]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.19.0",
+]
