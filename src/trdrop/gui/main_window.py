@@ -39,7 +39,9 @@ class MainWindow(QMainWindow):
         self._engine = InteractiveEngine(self)
         
         # Icon
-        icon_path = Path(__file__).resolve().parent.parent.parent.parent / "trdrop.ico"
+        import sys
+        icon_name = "trdrop_mac.png" if sys.platform == "darwin" else "trdrop.ico"
+        icon_path = Path(__file__).resolve().parent.parent.parent.parent / icon_name
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
         
