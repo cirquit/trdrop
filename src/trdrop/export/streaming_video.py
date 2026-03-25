@@ -130,6 +130,11 @@ class StreamingVideoExporter(StreamingExporter):
             stream.height = height
             stream.pix_fmt = self._pix_fmt
 
+            # Mark output as BT.709 SDR so players don't misinterpret tonemapped content
+            stream.codec_context.color_primaries = 1   # BT.709
+            stream.codec_context.color_trc = 1         # BT.709
+            stream.codec_context.colorspace = 1        # BT.709
+
             # Set encoder options (different for HW vs SW encoders)
             if self._is_hw:
                 # Hardware encoders use quality-based settings
