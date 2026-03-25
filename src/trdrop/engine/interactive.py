@@ -246,6 +246,9 @@ class InteractiveEngine(QObject):
         if self._csv_exporter:
             self._csv_exporter.open()
 
+        from trdrop.profiling import get_profiler
+        get_profiler().start_run()
+
         # Start processing thread
         self._processing_thread = threading.Thread(
             target=self._processing_loop,
@@ -437,8 +440,14 @@ class InteractiveEngine(QObject):
 
     def _processing_loop(self) -> None:
         """Main processing loop (runs in background thread)."""
+        from concurrent.futures import ThreadPoolExecutor, Future
         try:
             source_iters = [iter(s) for s in self._sources]
+            from trdrop.profiling import get_profiler
+            profiler = get_profiler()
+
+            pool = ThreadPoolExecutor(max_workers=1)
+            export_future: Future[None] | None = None
 
             for frame_idx in range(self._total_frames):
                 # Check for stop
@@ -449,6 +458,9 @@ class InteractiveEngine(QObject):
                 self._pause_event.wait()
                 if self._stop_event.is_set():
                     break
+
+                profiler.start_frame(frame_idx)
+                t0_read = time.perf_counter()
 
                 # Read frame pairs from all sources
                 pairs = []
@@ -462,6 +474,10 @@ class InteractiveEngine(QObject):
                 if len(pairs) != len(self._sources):
                     break  # Source exhausted
 
+                profiler.add_timing("read_total", (time.perf_counter() - t0_read) * 1000)
+                profiler.mark_timestamp("read_end")
+                t0_analysis = time.perf_counter()
+
                 # Analyze each video
                 metrics_list: list[FrameMetrics] = []
                 for pair in pairs:
@@ -473,12 +489,31 @@ class InteractiveEngine(QObject):
                     )
                     metrics_list.append(metrics)
 
+                profiler.add_timing("analysis_total", (time.perf_counter() - t0_analysis) * 1000)
+                profiler.mark_timestamp("analysis_end")
+
                 # Build composited output (also computes aggregated metrics)
                 video_snapshots = tuple(s.snapshot() for s in self._video_states)
                 if self._compositor is not None:
+                    # Wait for previous export to finish to protect compositor buffer
+                    if export_future is not None:
+                        export_future.result()
+
+                    t0_comp = time.perf_counter()
                     output = self._compositor.process(pairs, metrics_list)
+                    profiler.add_timing("compositor_total", (time.perf_counter() - t0_comp) * 1000)
+                    profiler.mark_timestamp("compositor_end")
                     self._last_output_frame = output.frame.copy()
-                    self._export_output(output)
+                    
+                    current_profile = getattr(profiler, 'current_frame', None)
+                    
+                    def _do_export(out, prof):
+                        self._export_output(out)
+                        if prof is not None:
+                            prof.export_end_ts = time.perf_counter()
+
+                    export_future = pool.submit(_do_export, output, current_profile)
+
                     video_snapshots = self._compositor.snapshot_video_states()
 
                     # Emit frame for live preview (~30fps throttle)
@@ -503,6 +538,13 @@ class InteractiveEngine(QObject):
                 self._current_frame = frame_idx
                 self.progress.emit(frame_idx + 1, self._total_frames)
 
+                profiler.end_frame()
+
+            # Wait for last export
+            if export_future is not None:
+                export_future.result()
+            pool.shutdown(wait=True)
+
             # Processing complete
             if not self._stop_event.is_set():
                 self._set_state(EngineState.COMPLETED)
@@ -526,3 +568,6 @@ class InteractiveEngine(QObject):
                     self._csv_exporter.close()
                 except Exception:
                     pass
+
+            from trdrop.profiling import get_profiler
+            get_profiler().end_run()

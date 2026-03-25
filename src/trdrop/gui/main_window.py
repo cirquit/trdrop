@@ -20,11 +20,13 @@ from PyQt6.QtWidgets import (
     QStackedWidget,
     QVBoxLayout,
     QWidget,
+    QCheckBox,
 )
 
 from trdrop.config import PresetConfig, load_preset, save_preset
 from trdrop.engine import EngineState, InteractiveEngine
 from trdrop.gui.widgets.state_indicator import StateIndicator
+from trdrop.profiling.profiler import reset_profiler
 
 
 class MainWindow(QMainWindow):
@@ -174,6 +176,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(self._create_separator())
 
         # Processing controls
+        self._profile_cb = QCheckBox("Profile")
+        self._profile_cb.setToolTip("Generate profiling CSV and summary on completion")
+        layout.addWidget(self._profile_cb)
+
         self._start_btn = QPushButton("Start")
         self._start_btn.setToolTip("Start processing")
         self._start_btn.clicked.connect(self._on_start)
@@ -260,6 +266,7 @@ class MainWindow(QMainWindow):
         self._csv_btn.setEnabled(can_modify_videos)
         self._video_btn.setEnabled(can_modify_videos)
         self._config_btn.setEnabled(can_modify_videos)
+        self._profile_cb.setEnabled(can_modify_videos)
         self._video_count_label.setText(str(video_count))
 
         # Processing controls
@@ -528,6 +535,13 @@ class MainWindow(QMainWindow):
     def _on_start(self) -> None:
         """Start processing."""
         try:
+            import os
+            if self._profile_cb.isChecked():
+                os.environ["TRDROP_PROFILE"] = "1"
+            else:
+                os.environ["TRDROP_PROFILE"] = ""
+            reset_profiler()
+
             self._processing_start_time = time.time()
             self._engine.start()
         except Exception as e:

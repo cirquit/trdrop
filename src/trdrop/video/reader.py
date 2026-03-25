@@ -21,6 +21,7 @@ class PyAVReader(VideoReader):
         self._path = Path(path)
         self._container: Any = av.open(str(path))
         self._stream: Any = self._container.streams.video[0]
+        self._stream.thread_type = "AUTO"
 
         self._fps = float(self._stream.average_rate or self._stream.base_rate or 30)
         self._width: int = self._stream.width
