@@ -35,6 +35,28 @@ _SOFTWARE_HEVC = "libx265"
 _SOFTWARE_H264 = "libx264"
 
 
+_OPEN_ENCODER_CACHE: dict[str, bool] = {}
+
+
+def _can_open_encoder(name: str) -> bool:
+    """Test if an encoder can actually be constructed and opened on this hardware."""
+    if name in _OPEN_ENCODER_CACHE:
+        return _OPEN_ENCODER_CACHE[name]
+        
+    try:
+        codec = av.Codec(name, "w")
+        if not codec:
+            _OPEN_ENCODER_CACHE[name] = False
+            return False
+        ctx = codec.create()
+        ctx.open()
+        _OPEN_ENCODER_CACHE[name] = True
+        return True
+    except Exception:
+        _OPEN_ENCODER_CACHE[name] = False
+        return False
+
+
 def get_best_encoder() -> str:
     """Return best available encoder, preferring HEVC over H264.
 
@@ -42,12 +64,12 @@ def get_best_encoder() -> str:
     """
     available = set(av.codecs_available)
     for enc in _HW_HEVC_PRIORITY:
-        if enc in available:
+        if enc in available and _can_open_encoder(enc):
             return enc
     for enc in _HW_H264_PRIORITY:
-        if enc in available:
+        if enc in available and _can_open_encoder(enc):
             return enc
-    if _SOFTWARE_HEVC in available:
+    if _SOFTWARE_HEVC in available and _can_open_encoder(_SOFTWARE_HEVC):
         return _SOFTWARE_HEVC
     return _SOFTWARE_H264
 
