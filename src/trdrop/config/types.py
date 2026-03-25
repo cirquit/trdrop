@@ -355,7 +355,9 @@ class VideoOverlayConfig:
                 shadow_color=self.fps_text.shadow_color,
             ),
             frametime_text=FrametimeTextConfig(
-                position=Position(self.frametime_text.position.x, self.frametime_text.position.y, ref),
+                position=Position(
+                    self.frametime_text.position.x, self.frametime_text.position.y, ref
+                ),
                 anchor=self.frametime_text.anchor,
                 visible=self.frametime_text.visible,
                 font_size=self.frametime_text.font_size,

@@ -9,6 +9,7 @@ import numpy as np
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QIcon, QImage, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
@@ -20,7 +21,6 @@ from PyQt6.QtWidgets import (
     QStackedWidget,
     QVBoxLayout,
     QWidget,
-    QCheckBox,
 )
 
 from trdrop.config import PresetConfig, load_preset, save_preset
@@ -37,14 +37,14 @@ class MainWindow(QMainWindow):
 
         # Engine
         self._engine = InteractiveEngine(self)
-        
+
         # Icon
         import sys
         icon_name = "trdrop_mac.png" if sys.platform == "darwin" else "trdrop.ico"
         icon_path = Path(__file__).resolve().parent.parent.parent.parent / icon_name
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
-        
+
         self._engine.state_changed.connect(self._on_state_changed)
         self._engine.progress.connect(self._on_progress)
         self._engine.error.connect(self._on_error)
@@ -179,6 +179,24 @@ class MainWindow(QMainWindow):
         self._config_btn.setToolTip("Load or save overlay preset (YAML)")
         self._config_btn.clicked.connect(self._on_config)
         layout.addWidget(self._config_btn)
+
+        # Separator
+        layout.addWidget(self._create_separator())
+
+        # Duplicate Threshold
+        thresh_label = QLabel("Dup Thresh:")
+        thresh_label.setStyleSheet("font-size: 12px;")
+        layout.addWidget(thresh_label)
+
+        from PyQt6.QtWidgets import QDoubleSpinBox
+        self._thresh_spinbox = QDoubleSpinBox()
+        self._thresh_spinbox.setRange(0.001, 0.100)
+        self._thresh_spinbox.setSingleStep(0.005)
+        self._thresh_spinbox.setDecimals(3)
+        self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
+        self._thresh_spinbox.setToolTip("Duplicate Threshold (e.g. 0.02 = 2% pixels changed)")
+        self._thresh_spinbox.valueChanged.connect(self._on_thresh_changed)
+        layout.addWidget(self._thresh_spinbox)
 
         # Separator
         layout.addWidget(self._create_separator())
@@ -513,6 +531,10 @@ class MainWindow(QMainWindow):
             if path:
                 try:
                     self._preset_config = load_preset(path)
+                    self._thresh_spinbox.blockSignals(True)
+                    self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
+                    self._thresh_spinbox.blockSignals(False)
+                    self._engine.set_duplicate_threshold(self._preset_config.processing.duplicate_threshold)
                     self._config_btn.setText(f"Config✓ ({Path(path).name})")
                     self._config_btn.setToolTip(str(path))
                     # Reload engine if videos already loaded
@@ -539,6 +561,11 @@ class MainWindow(QMainWindow):
                     )
                 except Exception as e:
                     QMessageBox.critical(self, "Save Error", str(e))
+
+    def _on_thresh_changed(self, value: float) -> None:
+        """Update duplicate threshold in config and engine."""
+        self._preset_config.processing.duplicate_threshold = value
+        self._engine.set_duplicate_threshold(value)
 
     def _on_start(self) -> None:
         """Start processing."""
@@ -573,6 +600,9 @@ class MainWindow(QMainWindow):
         self._output_video_path = None
         self._processing_start_time = None
         self._preset_config = PresetConfig()
+        self._thresh_spinbox.blockSignals(True)
+        self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
+        self._thresh_spinbox.blockSignals(False)
         self._csv_btn.setText("CSV…")
         self._csv_btn.setToolTip("Choose CSV export path")
         self._video_btn.setText("Video…")

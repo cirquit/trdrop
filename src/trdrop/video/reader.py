@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 from typing import Any, Iterator
-
-import logging
 
 import numpy as np
 
@@ -184,7 +183,11 @@ class PyAVReader(VideoReader):
             if is_hdr:
                 _ensure_pq_lut3d()
                 self._hdr_tonemap = True
-                logger.info("HDR detected (trc=%s, pix_fmt=%s). Tonemapping to SDR enabled.", trc_val, pix_fmt)
+                logger.info(
+                    "HDR detected (trc=%s, pix_fmt=%s). Tonemapping to SDR enabled.",
+                    trc_val,
+                    pix_fmt
+                )
 
         assert self._frame_iter is not None
         profiler = get_profiler()

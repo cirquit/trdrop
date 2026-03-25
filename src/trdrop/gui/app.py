@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 import ctypes
+import sys
 from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication

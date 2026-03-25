@@ -198,6 +198,10 @@ class InteractiveEngine(QObject):
         )
         self._last_output_frame = None
 
+        # Fix analyzer threshold to match config
+        cfg = config if config is not None else PresetConfig()
+        self._analyzer = DuplicateDetector(duplicate_threshold=cfg.processing.duplicate_threshold)
+
         # Initialize buffer
         self._buffer = ProcessingBuffer(video_count=len(paths))
 
@@ -431,6 +435,10 @@ class InteractiveEngine(QObject):
             self._state = new_state
             self.state_changed.emit(new_state)
 
+    def set_duplicate_threshold(self, threshold: float) -> None:
+        """Update duplicate threshold for analysis."""
+        self._analyzer = DuplicateDetector(duplicate_threshold=threshold)
+
     def _export_output(self, output: CompositorOutput) -> None:
         """Export compositor output to configured exporters."""
         if self._video_exporter is not None:
@@ -440,7 +448,7 @@ class InteractiveEngine(QObject):
 
     def _processing_loop(self) -> None:
         """Main processing loop (runs in background thread)."""
-        from concurrent.futures import ThreadPoolExecutor, Future
+        from concurrent.futures import Future, ThreadPoolExecutor
         try:
             source_iters = [iter(s) for s in self._sources]
             from trdrop.profiling import get_profiler
@@ -504,9 +512,9 @@ class InteractiveEngine(QObject):
                     profiler.add_timing("compositor_total", (time.perf_counter() - t0_comp) * 1000)
                     profiler.mark_timestamp("compositor_end")
                     self._last_output_frame = output.frame.copy()
-                    
+
                     current_profile = getattr(profiler, 'current_frame', None)
-                    
+
                     def _do_export(out, prof):
                         self._export_output(out)
                         if prof is not None:

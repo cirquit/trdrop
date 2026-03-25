@@ -25,3 +25,13 @@ examples/*.csv
 
 # User preset (use trdrop_preset.example.yaml as template)
 trdrop_preset.yaml
+
+# AI and planning files
+trdrop_profile.summary.txt
+implementation_plan.md
+task.md
+walkthrough.md
+.cursorrules
+.claude/
+
+!uv.lock
