@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller spec for TRDrop single-file EXE."""
 
+import platform
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 # Only collect numba runtime submodules, skip tests/cuda tests
@@ -106,6 +107,8 @@ a.datas = [
 
 pyz = PYZ(a.pure)
 
+_icon_file = "trdrop.ico" if platform.system() == "Windows" else "trdrop.icns"
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -113,7 +116,7 @@ exe = EXE(
     a.datas,
     [],
     name="TRDrop",
-    icon="trdrop.ico",
+    icon=_icon_file,
     console=False,
     windowed=True,
 )
