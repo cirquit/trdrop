@@ -371,6 +371,13 @@ class SimpleCompositor(Compositor):
         self._frame_index = 0
         self._video_names = video_names or []
 
+    @staticmethod
+    def _make_pixel_font(family: str, pixel_size: int) -> QFont:
+        """Create a QFont with pixel size (DPI-independent)."""
+        font = QFont(family)
+        font.setPixelSize(pixel_size)
+        return font
+
     def _create_fps_texts_from_config(self) -> list[FPSText]:
         """Create FPS text overlays from config."""
         fps_texts: list[FPSText] = []
@@ -387,7 +394,8 @@ class SimpleCompositor(Compositor):
                 font_size_px = int(
                     video_cfg.fps_text.font_size * self._output_height
                 )
-                font = QFont(video_cfg.fps_text.font_family, font_size_px)
+                font = QFont(video_cfg.fps_text.font_family)
+                font.setPixelSize(font_size_px)
                 font.setWeight(QFont.Weight.Bold)
 
                 style = TextStyle(
@@ -422,7 +430,7 @@ class SimpleCompositor(Compositor):
             grid_color=grid_color,
             text_color=QColor(255, 255, 255),
             shadow_color=QColor(0, 0, 0),
-            font=QFont(self._config.rendering.font_family, cfg.label_font_size),
+            font=self._make_pixel_font(self._config.rendering.font_family, cfg.label_font_size),
             line_width=int(cfg.line_width),
             show_grid=cfg.show_grid,
         )
@@ -457,7 +465,7 @@ class SimpleCompositor(Compositor):
             grid_color=grid_color,
             text_color=QColor(255, 255, 255),
             shadow_color=QColor(0, 0, 0),
-            font=QFont(self._config.rendering.font_family, cfg.label_font_size),
+            font=self._make_pixel_font(self._config.rendering.font_family, cfg.label_font_size),
             line_width=int(cfg.line_width),
             show_grid=cfg.show_grid,
         )
@@ -757,7 +765,8 @@ class SimpleCompositor(Compositor):
         painter.save()
 
         font_size = max(10, int(self._output_height * 0.018))
-        font = QFont(self._config.rendering.font_family, font_size)
+        font = QFont(self._config.rendering.font_family)
+        font.setPixelSize(font_size)
         font.setBold(True)
         painter.setFont(font)
 

@@ -13,6 +13,12 @@ from trdrop.profiling import get_profiler
 from trdrop.utils.ringbuffer import RingBuffer
 
 
+def _font_px(font: QFont) -> int:
+    """Get font size in pixels, whether set via pixelSize or pointSize."""
+    ps = font.pixelSize()
+    return ps if ps > 0 else max(1, font.pointSize())
+
+
 def _format_fps_label(value: float) -> str:
     """Format FPS value for display, using K suffix for thousands."""
     if value >= 1000:
@@ -181,7 +187,7 @@ class Plot(ABC):
         path.addText(QPointF(pos.x(), pos.y()), font, text)
 
         # Draw black outline
-        outline_width = max(2.0, font.pointSize() / 8.0)
+        outline_width = max(2.0, _font_px(font) / 8.0)
         outline_pen = QPen(self._style.shadow_color)
         outline_pen.setWidthF(outline_width)
         outline_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
@@ -225,7 +231,7 @@ class Plot(ABC):
             label = _format_fps_label(value)
 
             # Draw to the right of the anchor position
-            font_size = self._style.font.pointSize()
+            font_size = _font_px(self._style.font)
             pad_x = max(8, font_size // 2)
             pad_y = font_size // 3
             text_x = anchor_x + pad_x
@@ -261,7 +267,7 @@ class Plot(ABC):
         plot_width = bounds.width() - 1
         anchor_x = bounds.left() + int(plot_width * time_anchor)
         x = anchor_x - text_width  # Right-align to anchor
-        font_size = title_font.pointSize()
+        font_size = _font_px(title_font)
         y = bounds.top() - max(8, font_size // 2)  # Gap scales with font
 
         self._draw_text_with_shadow(painter, QPoint(x, y), self._title)
@@ -810,7 +816,7 @@ class FrametimePlot(Plot):
                 label = f"{value:.2f}"
 
             # Draw to the RIGHT of plot area (same as FrameratePlot)
-            font_size = self._style.font.pointSize()
+            font_size = _font_px(self._style.font)
             pad_x = max(8, font_size // 2)
             pad_y = font_size // 3
             text_x = bounds.right() + pad_x

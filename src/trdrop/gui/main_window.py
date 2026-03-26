@@ -105,6 +105,16 @@ QSpinBox, QDoubleSpinBox, QLineEdit {
     border-radius: 4px;
     padding: 2px 4px;
 }
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 20px;
+}
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 20px;
+}
 QPushButton#profile_label {
     background-color: transparent;
     border: none;

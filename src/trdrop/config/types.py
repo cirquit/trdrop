@@ -246,7 +246,7 @@ class FpsTextConfig:
     )
     anchor: Anchor = Anchor.TOP_LEFT
     visible: bool = True
-    font_size: float = 0.048  # Relative to reference frame height
+    font_size: float = 0.035  # Relative to reference frame height
     font_family: str = "monospace"
     color: tuple[int, int, int, int] = (255, 255, 255, 230)  # RGBA
     shadow: bool = True
@@ -258,11 +258,11 @@ class FrametimeTextConfig:
     """Configuration for frametime text overlay."""
 
     position: Position = field(
-        default_factory=lambda: Position(0.05, 0.10, GlobalRef())
+        default_factory=lambda: Position(0.03, 0.11, GlobalRef())
     )
     anchor: Anchor = Anchor.TOP_LEFT
-    visible: bool = True
-    font_size: float = 0.025
+    visible: bool = False
+    font_size: float = 0.04
     font_family: str = "monospace"
     color: tuple[int, int, int, int] = (255, 255, 255, 230)
     shadow: bool = True
@@ -282,17 +282,17 @@ class FpsPlotConfig:
     """Configuration for FPS plot overlay (global, spans all videos)."""
 
     position: Position = field(
-        default_factory=lambda: Position(0.05, 0.85, GlobalRef())
+        default_factory=lambda: Position(0.05, 0.74, GlobalRef())
     )
     size: Size = field(
-        default_factory=lambda: Size(0.9, 0.12, GlobalRef())
+        default_factory=lambda: Size(0.9, 0.22, GlobalRef())
     )
     visible: bool = True
     style: PlotStyle = PlotStyle.FILLED
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
-    line_width: float = 2.0
-    label_font_size: int = 36
+    line_width: float = 3.0
+    label_font_size: int = 48
     show_grid: bool = True
 
 
@@ -311,7 +311,7 @@ class FrametimePlotConfig:
     background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
     grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
     line_width: float = 2.0
-    label_font_size: int = 32
+    label_font_size: int = 42
     show_grid: bool = True
 
 
@@ -433,7 +433,7 @@ class ExportConfig:
     resolution: tuple[int, int] = (1920, 1080)
     codec: VideoCodec = VideoCodec.H264
     bitrate: str = "auto"  # "auto" or specific like "10M"
-    fps: float | None = None  # Output fps; None or outside 10-120 = use source fps
+    fps: float | None = 60  # Output fps; None or outside 10-120 = use source fps
 
 
 # =============================================================================
