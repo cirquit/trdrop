@@ -55,8 +55,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests (skip GUI-marked tests in headless CI)
-        run: uv run pytest tests/ -v --tb=short -m "not gui"
+      - name: Run tests (headless-safe)
+        run: >-
+          uv run pytest tests/ -v --tb=short
+          -m "not gui"
+          --ignore=tests/test_gui_engine.py
 
   all-checks-pass:
     name: All Checks Pass
