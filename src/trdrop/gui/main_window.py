@@ -7,9 +7,10 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction, QDragEnterEvent, QDropEvent, QIcon, QImage, QKeySequence, QPixmap
+from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QIcon, QImage, QKeySequence, QPixmap, QShortcut
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QDoubleSpinBox,
     QFileDialog,
     QFrame,
     QHBoxLayout,
@@ -28,12 +29,77 @@ from trdrop.engine import EngineState, InteractiveEngine
 from trdrop.gui.widgets.state_indicator import StateIndicator
 from trdrop.profiling.profiler import reset_profiler
 
+FLUENT_STYLE = """
+QMainWindow {
+    background-color: #f3f3f3;
+}
+QFrame#sidebar, QFrame#bottom_bar {
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+QLabel {
+    color: #1c1c1c;
+    font-size: 13px;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+QPushButton {
+    background-color: #ffffff;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: #1c1c1c;
+    font-size: 13px;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+QPushButton:hover {
+    background-color: #f5f5f5;
+}
+QPushButton:pressed {
+    background-color: #ebebeb;
+    color: #666666;
+}
+QPushButton:disabled {
+    background-color: #f9f9f9;
+    color: #a0a0a0;
+    border: 1px solid #e0e0e0;
+}
+QPushButton#primary_btn {
+    background-color: #0060df;
+    color: white;
+    border: 1px solid #0050ba;
+    font-weight: bold;
+}
+QPushButton#primary_btn:hover {
+    background-color: #0050ba;
+}
+QPushButton#primary_btn:pressed {
+    background-color: #004095;
+    color: #e0e0e0;
+}
+QPushButton#primary_btn:disabled {
+    background-color: #8cb6f5;
+    border: 1px solid #8cb6f5;
+    color: #ffffff;
+}
+QSpinBox, QDoubleSpinBox {
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    min-height: 24px;
+}
+QCheckBox {
+    font-size: 13px;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+"""
+
 
 class MainWindow(QMainWindow):
     """Main application window with InteractiveEngine integration."""
 
     def __init__(self) -> None:
         super().__init__()
+        self._lang = "en"
+        self._ignore_frames = False
 
         # Engine
         self._engine = InteractiveEngine(self)
@@ -59,225 +125,390 @@ class MainWindow(QMainWindow):
         self._preset_config: PresetConfig = PresetConfig()
 
         self._setup_ui()
-        self._setup_menu()
+        self._setup_shortcuts()
         self._update_controls()
+        self._retranslate_ui()
 
         self.setAcceptDrops(True)
+
+    # ================================================================
+    # UI Setup
+    # ================================================================
 
     def _setup_ui(self) -> None:
         """Setup the main UI layout."""
         self.setWindowTitle("TRDrop v2")
-        self.setMinimumSize(800, 500)
-        self.resize(1024, 700)
+        self.setMinimumSize(850, 600)
+        self.resize(1100, 750)
+        self.setStyleSheet(FLUENT_STYLE)
+
+        # Hide the default empty menu bar
+        mb = self.menuBar()
+        if mb is not None:
+            mb.setVisible(False)
 
         # Central widget
         central = QWidget()
         self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
+        main_layout = QHBoxLayout(central)
+        main_layout.setSpacing(16)
+        main_layout.setContentsMargins(16, 16, 16, 16)
 
-        # Control bar (below menu)
-        self._control_bar = self._create_control_bar()
-        layout.addWidget(self._control_bar)
+        # 1. Left Sidebar
+        self._sidebar = self._create_sidebar()
+        main_layout.addWidget(self._sidebar)
 
-        # Separator line
-        separator = QFrame()
-        separator.setFrameShape(QFrame.Shape.HLine)
-        separator.setFrameShadow(QFrame.Shadow.Sunken)
-        layout.addWidget(separator)
-
-        # Main content area
-        content = QWidget()
-        content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(16, 16, 16, 16)
+        # 2. Right Content Area (Preview + Bottom Control Bar)
+        right_container = QWidget()
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setSpacing(16)
+        right_layout.setContentsMargins(0, 0, 0, 0)
 
         # Stacked widget: page 0 = text placeholder, page 1 = preview
         self._content_stack = QStackedWidget()
+        self._content_stack.setStyleSheet(
+            "background-color: #000000; border-radius: 8px;"
+        )
 
         # Page 0: Video list text
         self._video_list_label = QLabel(
             "No videos loaded.\nDrag and drop video files or use + to add."
         )
         self._video_list_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._video_list_label.setStyleSheet("font-size: 14px;")
+        self._video_list_label.setStyleSheet(
+            "font-size: 15px; color: #666666; "
+            "background-color: #ffffff; border-radius: 8px;"
+        )
         self._content_stack.addWidget(self._video_list_label)
 
         # Page 1: Preview display
         self._preview_label = QLabel()
         self._preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._preview_label.setStyleSheet("background-color: black;")
-        self._preview_label.setMinimumSize(320, 180)
+        self._preview_label.setStyleSheet(
+            "background-color: #000000; border-radius: 8px;"
+        )
+        self._preview_label.setMinimumSize(480, 270)
         self._content_stack.addWidget(self._preview_label)
 
-        content_layout.addWidget(self._content_stack, stretch=1)
+        right_layout.addWidget(self._content_stack, stretch=1)
 
-        # Progress display
-        self._progress_label = QLabel("")
-        self._progress_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._progress_label.setStyleSheet("font-size: 13px;")
-        content_layout.addWidget(self._progress_label)
+        # Bottom Control Bar
+        self._bottom_bar = self._create_bottom_bar()
+        right_layout.addWidget(self._bottom_bar)
 
-        layout.addWidget(content, stretch=1)
+        main_layout.addWidget(right_container, stretch=1)
 
-    def _create_control_bar(self) -> QWidget:
-        """Create the control bar with state, video controls, and seek."""
-        bar = QWidget()
-        bar.setAutoFillBackground(True)
-        layout = QHBoxLayout(bar)
-        layout.setContentsMargins(8, 6, 8, 6)
-        layout.setSpacing(12)
+    def _create_sidebar(self) -> QFrame:
+        """Create the left sidebar with video input and settings."""
+        sidebar = QFrame()
+        sidebar.setObjectName("sidebar")
+        sidebar.setFixedWidth(280)
 
-        # State indicator
-        self._state_indicator = StateIndicator()
-        layout.addWidget(self._state_indicator)
+        layout = QVBoxLayout(sidebar)
+        layout.setContentsMargins(16, 20, 16, 20)
+        layout.setSpacing(20)
 
-        # Separator
-        layout.addWidget(self._create_separator())
+        # --- Section: Videos ---
+        video_sec = QVBoxLayout()
+        video_sec.setSpacing(10)
+        self._v_title = QLabel("Input Videos")
+        self._v_title.setStyleSheet("font-weight: bold; font-size: 14px;")
+        video_sec.addWidget(self._v_title)
 
-        # Video controls
-        video_label = QLabel("Videos:")
-        video_label.setStyleSheet("font-size: 12px;")
-        layout.addWidget(video_label)
-
-        self._add_btn = QPushButton("+")
-        self._add_btn.setFixedSize(28, 28)
+        btn_layout = QHBoxLayout()
+        self._add_btn = QPushButton("+ Add Video")
         self._add_btn.setToolTip("Add video")
         self._add_btn.clicked.connect(self._on_add_video)
-        layout.addWidget(self._add_btn)
+        btn_layout.addWidget(self._add_btn)
 
-        self._remove_btn = QPushButton("-")
-        self._remove_btn.setFixedSize(28, 28)
+        self._remove_btn = QPushButton("- Remove")
         self._remove_btn.setToolTip("Remove last video")
         self._remove_btn.clicked.connect(self._on_remove_video)
-        layout.addWidget(self._remove_btn)
+        btn_layout.addWidget(self._remove_btn)
+        video_sec.addLayout(btn_layout)
 
-        self._video_count_label = QLabel("0")
-        self._video_count_label.setStyleSheet("font-weight: bold; min-width: 20px;")
-        layout.addWidget(self._video_count_label)
 
-        # Separator
-        layout.addWidget(self._create_separator())
 
-        # Export controls
-        self._csv_btn = QPushButton("CSV…")
-        self._csv_btn.setToolTip("Choose CSV export path")
-        self._csv_btn.clicked.connect(self._on_pick_csv)
-        layout.addWidget(self._csv_btn)
+        layout.addLayout(video_sec)
+        layout.addWidget(self._create_separator(horizontal=True))
 
-        self._video_btn = QPushButton("Video…")
-        self._video_btn.setToolTip("Choose video export path")
-        self._video_btn.clicked.connect(self._on_pick_video_export)
-        layout.addWidget(self._video_btn)
+        # --- Section: Parameters ---
+        param_sec = QVBoxLayout()
+        param_sec.setSpacing(10)
+        self._p_title = QLabel("Parameters")
+        self._p_title.setStyleSheet("font-weight: bold; font-size: 14px;")
+        param_sec.addWidget(self._p_title)
 
-        # Separator
-        layout.addWidget(self._create_separator())
 
-        # Config button
-        self._config_btn = QPushButton("Config…")
-        self._config_btn.setToolTip("Load or save overlay preset (YAML)")
-        self._config_btn.clicked.connect(self._on_config)
-        layout.addWidget(self._config_btn)
-
-        # Separator
-        layout.addWidget(self._create_separator())
-
-        # Duplicate Threshold
-        thresh_label = QLabel("Dup Thresh:")
-        thresh_label.setStyleSheet("font-size: 12px;")
-        layout.addWidget(thresh_label)
-
-        from PyQt6.QtWidgets import QDoubleSpinBox
+        thresh_layout = QHBoxLayout()
+        self._thresh_label = QLabel("Duplicate Threshold:")
+        thresh_layout.addWidget(self._thresh_label)
         self._thresh_spinbox = QDoubleSpinBox()
         self._thresh_spinbox.setRange(0.001, 0.100)
         self._thresh_spinbox.setSingleStep(0.005)
         self._thresh_spinbox.setDecimals(3)
-        self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
-        self._thresh_spinbox.setToolTip("Duplicate Threshold (e.g. 0.02 = 2% pixels changed)")
+        self._thresh_spinbox.setValue(
+            self._preset_config.processing.duplicate_threshold
+        )
+        self._thresh_spinbox.setToolTip(
+            "Duplicate Threshold (e.g. 0.02 = 2% pixels changed)"
+        )
         self._thresh_spinbox.valueChanged.connect(self._on_thresh_changed)
-        layout.addWidget(self._thresh_spinbox)
+        thresh_layout.addWidget(self._thresh_spinbox)
+        param_sec.addLayout(thresh_layout)
 
-        # Separator
-        layout.addWidget(self._create_separator())
+        self._profile_cb = QCheckBox("Generate Profile CSV")
+        self._profile_cb.setToolTip(
+            "Generate profiling CSV and summary on completion"
+        )
+        param_sec.addWidget(self._profile_cb)
 
-        # Processing controls
-        self._profile_cb = QCheckBox("Profile")
-        self._profile_cb.setToolTip("Generate profiling CSV and summary on completion")
-        layout.addWidget(self._profile_cb)
+        layout.addLayout(param_sec)
+        layout.addWidget(self._create_separator(horizontal=True))
 
-        self._start_btn = QPushButton("Start")
+        # --- Section: Exports & Config ---
+        export_sec = QVBoxLayout()
+        export_sec.setSpacing(10)
+        self._e_title = QLabel("Exports & Config")
+        self._e_title.setStyleSheet("font-weight: bold; font-size: 14px;")
+        export_sec.addWidget(self._e_title)
+
+        self._csv_btn = QPushButton("📄 Select CSV Output")
+        self._csv_btn.setToolTip("Choose CSV export path")
+        self._csv_btn.clicked.connect(self._on_pick_csv)
+        export_sec.addWidget(self._csv_btn)
+
+        self._video_btn = QPushButton("🎥 Select Video Output")
+        self._video_btn.setToolTip("Choose video export path")
+        self._video_btn.clicked.connect(self._on_pick_video_export)
+        export_sec.addWidget(self._video_btn)
+
+        self._config_btn = QPushButton("⚙️ Preset Config (.yaml)")
+        self._config_btn.setToolTip("Load or save overlay preset (YAML)")
+        self._config_btn.clicked.connect(self._on_config)
+        export_sec.addWidget(self._config_btn)
+
+        layout.addLayout(export_sec)
+
+        layout.addStretch()
+
+        # Bottom row: About + Language toggle
+        bottom_row = QHBoxLayout()
+        bottom_row.setSpacing(8)
+
+        self._about_btn = QPushButton("ℹ️ About TRDrop")
+        self._about_btn.setStyleSheet(
+            "background-color: transparent; border: none; "
+            "color: #888888; font-size: 12px; text-align: left;"
+        )
+        self._about_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._about_btn.clicked.connect(self._on_about)
+        bottom_row.addWidget(self._about_btn)
+
+        bottom_row.addStretch()
+
+        self._lang_btn = QPushButton("🌐")
+        self._lang_btn.setFixedSize(32, 32)
+        self._lang_btn.setStyleSheet(
+            "background-color: transparent; border: none; "
+            "font-size: 18px; padding: 0px;"
+        )
+        self._lang_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._lang_btn.setToolTip("Switch language / 切换语言")
+        self._lang_btn.clicked.connect(self._toggle_language)
+        bottom_row.addWidget(self._lang_btn)
+
+        layout.addLayout(bottom_row)
+
+        return sidebar
+
+    def _create_bottom_bar(self) -> QFrame:
+        """Create the bottom bar with execution controls."""
+        bar = QFrame()
+        bar.setObjectName("bottom_bar")
+        bar.setFixedHeight(80)
+
+        layout = QHBoxLayout(bar)
+        layout.setContentsMargins(20, 10, 20, 10)
+        layout.setSpacing(20)
+
+        # Left: Progress and State Indicator
+        left_layout = QVBoxLayout()
+        left_layout.setSpacing(4)
+        left_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
+        self._state_indicator = StateIndicator()
+        self._state_indicator.set_translator(self._t)
+        left_layout.addWidget(self._state_indicator)
+
+        self._progress_label = QLabel("")
+        self._progress_label.setStyleSheet("font-size: 12px; color: #555;")
+        self._progress_label.setMinimumWidth(320)
+        left_layout.addWidget(self._progress_label)
+
+        layout.addLayout(left_layout, stretch=1)
+
+        # Center: Playback controls
+        center_layout = QHBoxLayout()
+        center_layout.setSpacing(16)
+        center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self._start_btn = QPushButton("▶ Start")
+        self._start_btn.setObjectName("primary_btn")
+        self._start_btn.setFixedHeight(36)
         self._start_btn.setToolTip("Start processing")
         self._start_btn.clicked.connect(self._on_start)
-        layout.addWidget(self._start_btn)
+        center_layout.addWidget(self._start_btn)
 
-        self._pause_btn = QPushButton("Pause")
+        self._pause_btn = QPushButton("⏸ Pause")
+        self._pause_btn.setFixedHeight(36)
         self._pause_btn.setToolTip("Pause processing")
         self._pause_btn.clicked.connect(self._on_pause)
-        layout.addWidget(self._pause_btn)
+        center_layout.addWidget(self._pause_btn)
 
-        self._reset_btn = QPushButton("Reset")
+        self._reset_btn = QPushButton("⏹ Reset")
+        self._reset_btn.setFixedHeight(36)
         self._reset_btn.setToolTip("Reset engine")
         self._reset_btn.clicked.connect(self._on_reset)
-        layout.addWidget(self._reset_btn)
+        center_layout.addWidget(self._reset_btn)
 
-        # Separator
-        layout.addWidget(self._create_separator())
+        layout.addLayout(center_layout)
 
-        # Seek controls
-        seek_label = QLabel("Seek:")
-        seek_label.setStyleSheet("font-size: 12px;")
-        layout.addWidget(seek_label)
+        # Right: Seek controls
+        right_layout = QHBoxLayout()
+        right_layout.setSpacing(8)
+        right_layout.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+
+        self._seek_label_title = QLabel("Seek Frame:")
+        right_layout.addWidget(self._seek_label_title)
 
         self._seek_spinbox = QSpinBox()
         self._seek_spinbox.setMinimum(0)
         self._seek_spinbox.setMaximum(0)
         self._seek_spinbox.setFixedWidth(80)
-        layout.addWidget(self._seek_spinbox)
+        right_layout.addWidget(self._seek_spinbox)
 
-        self._seek_btn = QPushButton("Seek")
+        self._seek_btn = QPushButton("Go")
+        self._seek_btn.setFixedWidth(60)
         self._seek_btn.setToolTip("Seek to frame")
         self._seek_btn.clicked.connect(self._on_seek)
-        layout.addWidget(self._seek_btn)
+        right_layout.addWidget(self._seek_btn)
 
-        layout.addStretch()
+        layout.addLayout(right_layout, stretch=1)
 
         return bar
 
-    def _create_separator(self) -> QFrame:
-        """Create a vertical separator line."""
+    def _create_separator(self, horizontal: bool = False) -> QFrame:
+        """Create a separator line."""
         sep = QFrame()
-        sep.setFrameShape(QFrame.Shape.VLine)
-        sep.setFrameShadow(QFrame.Shadow.Sunken)
+        if horizontal:
+            sep.setFrameShape(QFrame.Shape.HLine)
+            sep.setFixedHeight(1)
+            sep.setStyleSheet("background-color: #d1d1d1; border: none;")
+        else:
+            sep.setFrameShape(QFrame.Shape.VLine)
+            sep.setFixedWidth(1)
+            sep.setStyleSheet("background-color: #d1d1d1; border: none;")
         return sep
 
-    def _setup_menu(self) -> None:
-        """Setup menu bar."""
-        menubar = self.menuBar()
-        assert menubar is not None
+    def _setup_shortcuts(self) -> None:
+        """Setup keyboard shortcuts (replacing removed menu bar)."""
+        sc_open = QShortcut(QKeySequence.StandardKey.Open, self)
+        sc_open.activated.connect(self._on_add_video)
 
-        # File menu
-        file_menu = menubar.addMenu("&File")
-        assert file_menu is not None
+        sc_quit = QShortcut(QKeySequence.StandardKey.Quit, self)
+        sc_quit.activated.connect(self.close)
 
-        open_action = QAction("&Add Video...", self)
-        open_action.setShortcut(QKeySequence.StandardKey.Open)
-        open_action.triggered.connect(self._on_add_video)
-        file_menu.addAction(open_action)
+    # ================================================================
+    # Localization
+    # ================================================================
 
-        file_menu.addSeparator()
+    def _t(self, en_text: str, zh_text: str) -> str:
+        """Return text based on current language."""
+        return zh_text if self._lang == "zh" else en_text
 
-        quit_action = QAction("&Quit", self)
-        quit_action.setShortcut(QKeySequence.StandardKey.Quit)
-        quit_action.triggered.connect(self.close)
-        file_menu.addAction(quit_action)
+    def _toggle_language(self) -> None:
+        """Toggle between English and Chinese."""
+        self._lang = "zh" if self._lang == "en" else "en"
+        self._retranslate_ui()
 
-        # Help menu
-        help_menu = menubar.addMenu("&Help")
-        assert help_menu is not None
+    def _retranslate_ui(self) -> None:
+        """Update all translatable text based on current language."""
+        if not self._pending_videos:
+            self._video_list_label.setText(
+                self._t(
+                    "No videos loaded.\nDrag and drop video files or use + to add.",
+                    "尚未加载视频。\n拖入视频文件或点击 + 添加。",
+                )
+            )
 
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self._on_about)
-        help_menu.addAction(about_action)
+        self._v_title.setText(self._t("Input Videos", "视频源"))
+        self._add_btn.setText(self._t("+ Add Video", "+ 添加视频"))
+        self._add_btn.setToolTip(self._t("Add video", "添加视频文件"))
+        self._remove_btn.setText(self._t("- Remove", "- 移除视频"))
+        self._remove_btn.setToolTip(
+            self._t("Remove last video", "移除最后一个视频")
+        )
+        self._p_title.setText(self._t("Parameters", "分析参数"))
+        # lang_btn is icon-only, no text to update
+        self._thresh_label.setText(
+            self._t("Duplicate Threshold:", "重复帧阈值:")
+        )
+        self._profile_cb.setText(
+            self._t("Generate Profile CSV", "生成性能报告")
+        )
+        self._e_title.setText(
+            self._t("Exports & Config", "导出与预设")
+        )
+        self._about_btn.setText(
+            self._t("ℹ️ About TRDrop", "ℹ️ 关于 TRDrop")
+        )
+
+        if self._output_csv_path:
+            n = self._output_csv_path.name
+            self._csv_btn.setText(
+                self._t(f"📄 CSV✓ ({n})", f"📄 CSV已选 ({n})")
+            )
+        else:
+            self._csv_btn.setText(
+                self._t("📄 Select CSV Output", "📄 选择 CSV 导出路径")
+            )
+
+        if self._output_video_path:
+            n = self._output_video_path.name
+            self._video_btn.setText(
+                self._t(f"🎥 Video✓ ({n})", f"🎥 视频已选 ({n})")
+            )
+        else:
+            self._video_btn.setText(
+                self._t("🎥 Select Video Output", "🎥 选择视频导出路径")
+            )
+
+        self._config_btn.setText(
+            self._t("⚙️ Preset Config (.yaml)", "⚙️ 预设配置 (.yaml)")
+        )
+
+        self._start_btn.setText(self._t("▶ Start", "▶ 开始"))
+        state = self._engine.state
+        if state == EngineState.PAUSED:
+            self._pause_btn.setText(self._t("▶ Resume", "▶ 继续"))
+        else:
+            self._pause_btn.setText(self._t("⏸ Pause", "⏸ 暂停"))
+        self._reset_btn.setText(self._t("⏹ Reset", "⏹ 重置"))
+
+        self._seek_label_title.setText(
+            self._t("Seek Frame:", "跳转到帧:")
+        )
+        self._seek_btn.setText(self._t("Go", "跳转"))
+
+        self._state_indicator.retranslate()
+        self._update_video_list()
+
+    # ================================================================
+    # State Management
+    # ================================================================
 
     def _update_controls(self) -> None:
         """Update control states based on engine state."""
@@ -292,12 +523,16 @@ class MainWindow(QMainWindow):
         self._video_btn.setEnabled(can_modify_videos)
         self._config_btn.setEnabled(can_modify_videos)
         self._profile_cb.setEnabled(can_modify_videos)
-        self._video_count_label.setText(str(video_count))
+
 
         # Processing controls
         self._start_btn.setEnabled(state == EngineState.READY)
         self._pause_btn.setEnabled(state == EngineState.PROCESSING)
-        self._pause_btn.setText("Resume" if state == EngineState.PAUSED else "Pause")
+        self._pause_btn.setText(
+            self._t("▶ Resume", "▶ 继续")
+            if state == EngineState.PAUSED
+            else self._t("⏸ Pause", "⏸ 暂停")
+        )
         if state == EngineState.PAUSED:
             self._pause_btn.setEnabled(True)
         self._reset_btn.setEnabled(state != EngineState.IDLE)
@@ -307,7 +542,9 @@ class MainWindow(QMainWindow):
         self._seek_spinbox.setEnabled(can_seek)
         self._seek_btn.setEnabled(can_seek)
         if can_seek:
-            self._seek_spinbox.setMaximum(max(0, self._engine.processed_frames - 1))
+            self._seek_spinbox.setMaximum(
+                max(0, self._engine.processed_frames - 1)
+            )
 
         # Update video list display
         self._update_video_list()
@@ -316,19 +553,22 @@ class MainWindow(QMainWindow):
         """Update the video list display."""
         if not self._pending_videos:
             self._video_list_label.setText(
-                "No videos loaded.\nDrag and drop video files or use + to add."
+                self._t(
+                    "No videos loaded.\nDrag and drop video files or use + to add.",
+                    "尚未加载视频。\n拖入视频文件或点击 + 添加。",
+                )
             )
             self._video_list_label.setEnabled(False)
-            self._video_list_label.setStyleSheet("font-size: 14px;")
         else:
-            lines = ["Loaded videos:"]
+            lines = [self._t("Loaded videos:", "已加载:")]
             for i, path in enumerate(self._pending_videos, 1):
                 lines.append(f"  {i}. {path.name}")
             self._video_list_label.setText("\n".join(lines))
             self._video_list_label.setEnabled(True)
-            self._video_list_label.setStyleSheet("font-size: 13px;")
 
-    # === Event Handlers ===
+    # ================================================================
+    # Event Handlers
+    # ================================================================
 
     def _on_state_changed(self, state: EngineState) -> None:
         """Handle engine state change."""
@@ -362,11 +602,17 @@ class MainWindow(QMainWindow):
             exports.append(f"Video: {self._output_video_path.name}")
         export_text = f" | Export: {', '.join(exports)}" if exports else ""
         self._progress_label.setText(
-            f"Processing: {current}/{total} ({pct:.1f}%){eta_text}{export_text}"
+            self._t(
+                f"Processing: {current}/{total} ({pct:.1f}%){eta_text}{export_text}",
+                f"处理进度: {current}/{total} ({pct:.1f}%){eta_text}{export_text}",
+            )
         )
         self._state_indicator.set_state(
             EngineState.PROCESSING,
-            f"Processing {current}/{total}"
+            self._t(
+                f"Processing {current}/{total}",
+                f"处理中 {current}/{total}",
+            ),
         )
 
     def _on_error(self, message: str) -> None:
@@ -376,6 +622,8 @@ class MainWindow(QMainWindow):
 
     def _on_frame_ready(self, frame: object) -> None:
         """Handle live preview frame from processing thread."""
+        if self._ignore_frames:
+            return
         if not isinstance(frame, np.ndarray):
             return
         self._show_frame(frame)
@@ -384,7 +632,10 @@ class MainWindow(QMainWindow):
         """Display a composited frame in the preview area."""
         h, w = frame.shape[:2]
         bytes_per_line = 3 * w
-        image = QImage(frame.tobytes(), w, h, bytes_per_line, QImage.Format.Format_RGB888)
+        image = QImage(
+            frame.tobytes(), w, h, bytes_per_line,
+            QImage.Format.Format_RGB888,
+        )
         pixmap = QPixmap.fromImage(image)
         # Scale to fit preview label while preserving aspect ratio
         label_size = self._preview_label.size()
@@ -398,7 +649,9 @@ class MainWindow(QMainWindow):
     def _on_add_video(self) -> None:
         """Add video file(s)."""
         if len(self._pending_videos) >= 4:
-            QMessageBox.warning(self, "Limit Reached", "Maximum 4 videos supported.")
+            QMessageBox.warning(
+                self, "Limit Reached", "Maximum 4 videos supported."
+            )
             return
 
         paths, _ = QFileDialog.getOpenFileNames(
@@ -415,7 +668,9 @@ class MainWindow(QMainWindow):
     def _add_video(self, path: Path) -> None:
         """Add a video to the pending list."""
         if not path.exists():
-            QMessageBox.warning(self, "File Not Found", f"File not found: {path}")
+            QMessageBox.warning(
+                self, "File Not Found", f"File not found: {path}"
+            )
             return
 
         if len(self._pending_videos) >= 4:
@@ -432,7 +687,9 @@ class MainWindow(QMainWindow):
 
     def _on_remove_video(self) -> None:
         """Remove the last video."""
-        if self._pending_videos and self._engine.state in (EngineState.IDLE, EngineState.READY):
+        if self._pending_videos and self._engine.state in (
+            EngineState.IDLE, EngineState.READY
+        ):
             self._pending_videos.pop()
 
             if self._engine.state != EngineState.IDLE:
@@ -462,9 +719,16 @@ class MainWindow(QMainWindow):
                 exports.append(f"CSV: {self._output_csv_path.name}")
             if self._output_video_path is not None:
                 exports.append(f"Video: {self._output_video_path.name}")
-            export_text = f" | Exports: {', '.join(exports)}" if exports else ""
+            export_text = (
+                f" | Exports: {', '.join(exports)}" if exports else ""
+            )
             self._progress_label.setText(
-                f"Loaded {result.video_count} video(s), {result.total_frames} frames{export_text}"
+                self._t(
+                    f"Loaded {result.video_count} video(s), "
+                    f"{result.total_frames} frames{export_text}",
+                    f"成功加载 {result.video_count} 个视频, "
+                    f"共 {result.total_frames} 帧{export_text}",
+                )
             )
         except Exception as e:
             QMessageBox.critical(self, "Load Error", str(e))
@@ -484,9 +748,9 @@ class MainWindow(QMainWindow):
             if p.suffix.lower() != ".csv":
                 p = p.with_suffix(".csv")
             self._output_csv_path = p
-            self._csv_btn.setText(f"CSV✓ ({p.name})")
+            self._retranslate_ui()
             self._csv_btn.setToolTip(str(p))
-            # Reload engine if videos already loaded so exporter gets configured
+            # Reload engine if videos already loaded
             if self._pending_videos and self._engine.state != EngineState.IDLE:
                 self._engine.reset()
                 self._load_videos()
@@ -504,9 +768,9 @@ class MainWindow(QMainWindow):
             if p.suffix.lower() != ".mp4":
                 p = p.with_suffix(".mp4")
             self._output_video_path = p
-            self._video_btn.setText(f"Video✓ ({p.name})")
+            self._retranslate_ui()
             self._video_btn.setToolTip(str(p))
-            # Reload engine if videos already loaded so exporter gets configured
+            # Reload engine if videos already loaded
             if self._pending_videos and self._engine.state != EngineState.IDLE:
                 self._engine.reset()
                 self._load_videos()
@@ -525,19 +789,27 @@ class MainWindow(QMainWindow):
         )
         if choice == QMessageBox.StandardButton.Yes:
             path, _ = QFileDialog.getOpenFileName(
-                self, "Load Config Preset", "", "YAML Files (*.yaml *.yml)"
+                self, "Load Config Preset", "",
+                "YAML Files (*.yaml *.yml)",
             )
             if path:
                 try:
                     self._preset_config = load_preset(path)
                     self._thresh_spinbox.blockSignals(True)
-                    self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
+                    self._thresh_spinbox.setValue(
+                        self._preset_config.processing.duplicate_threshold
+                    )
                     self._thresh_spinbox.blockSignals(False)
-                    self._engine.set_duplicate_threshold(self._preset_config.processing.duplicate_threshold)
-                    self._config_btn.setText(f"Config✓ ({Path(path).name})")
+                    self._engine.set_duplicate_threshold(
+                        self._preset_config.processing.duplicate_threshold
+                    )
+                    self._retranslate_ui()
                     self._config_btn.setToolTip(str(path))
                     # Reload engine if videos already loaded
-                    if self._pending_videos and self._engine.state != EngineState.IDLE:
+                    if (
+                        self._pending_videos
+                        and self._engine.state != EngineState.IDLE
+                    ):
                         self._engine.reset()
                         self._load_videos()
                 except Exception as e:
@@ -556,7 +828,8 @@ class MainWindow(QMainWindow):
                         self,
                         "Config Saved",
                         f"Default preset saved to:\n{path}\n\n"
-                        "Edit this file to customize overlays, then load it back.",
+                        "Edit this file to customize overlays, "
+                        "then load it back.",
                     )
                 except Exception as e:
                     QMessageBox.critical(self, "Save Error", str(e))
@@ -576,6 +849,7 @@ class MainWindow(QMainWindow):
                 os.environ["TRDROP_PROFILE"] = ""
             reset_profiler()
 
+            self._ignore_frames = False
             self._processing_start_time = time.time()
             self._engine.start()
         except Exception as e:
@@ -593,6 +867,7 @@ class MainWindow(QMainWindow):
 
     def _on_reset(self) -> None:
         """Reset the engine."""
+        self._ignore_frames = True
         self._engine.reset()
         self._pending_videos.clear()
         self._output_csv_path = None
@@ -600,14 +875,11 @@ class MainWindow(QMainWindow):
         self._processing_start_time = None
         self._preset_config = PresetConfig()
         self._thresh_spinbox.blockSignals(True)
-        self._thresh_spinbox.setValue(self._preset_config.processing.duplicate_threshold)
+        self._thresh_spinbox.setValue(
+            self._preset_config.processing.duplicate_threshold
+        )
         self._thresh_spinbox.blockSignals(False)
-        self._csv_btn.setText("CSV…")
-        self._csv_btn.setToolTip("Choose CSV export path")
-        self._video_btn.setText("Video…")
-        self._video_btn.setToolTip("Choose video export path")
-        self._config_btn.setText("Config…")
-        self._config_btn.setToolTip("Load or save overlay preset (YAML)")
+        self._retranslate_ui()
         self._progress_label.setText("")
         self._preview_label.clear()
         self._content_stack.setCurrentIndex(0)
@@ -631,8 +903,12 @@ class MainWindow(QMainWindow):
             fps_info = [f"{fps:.1f}" for fps in result.fps_values]
 
             self._progress_label.setText(
-                f"Frame {frame_idx}: {', '.join(metrics_info)} | "
-                f"FPS: {', '.join(fps_info)}"
+                self._t(
+                    f"Frame {frame_idx}: {', '.join(metrics_info)} | "
+                    f"FPS: {', '.join(fps_info)}",
+                    f"第 {frame_idx} 帧: {', '.join(metrics_info)} | "
+                    f"帧率: {', '.join(fps_info)}",
+                )
             )
         except Exception as e:
             QMessageBox.warning(self, "Seek Error", str(e))
@@ -647,7 +923,9 @@ class MainWindow(QMainWindow):
             "Drop video files to analyze their real framerate.",
         )
 
-    # === Drag and Drop ===
+    # ================================================================
+    # Drag and Drop
+    # ================================================================
 
     def dragEnterEvent(self, a0: QDragEnterEvent | None) -> None:
         """Accept video file drops."""
