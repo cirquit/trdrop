@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.so
+*.exe
 .venv/
 *.egg-info/
 dist/

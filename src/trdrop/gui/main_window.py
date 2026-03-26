@@ -644,17 +644,10 @@ class MainWindow(QMainWindow):
             else:
                 eta_text = f" | ETA: {remaining / 3600:.1f}h"
             eta_text += f" ({rate:.0f} fps)"
-        # Export destinations
-        exports = []
-        if self._output_csv_path is not None:
-            exports.append(f"CSV: {self._output_csv_path.name}")
-        if self._output_video_path is not None:
-            exports.append(f"Video: {self._output_video_path.name}")
-        export_text = f" | Export: {', '.join(exports)}" if exports else ""
         self._progress_label.setText(
             self._t(
-                f"Processing: {current}/{total} ({pct:.1f}%){eta_text}{export_text}",
-                f"处理进度: {current}/{total} ({pct:.1f}%){eta_text}{export_text}",
+                f"Processing: {current}/{total} ({pct:.1f}%){eta_text}",
+                f"处理进度: {current}/{total} ({pct:.1f}%){eta_text}",
             )
         )
         self._state_indicator.set_state(
@@ -764,20 +757,12 @@ class MainWindow(QMainWindow):
                 config=self._preset_config,
             )
             self._seek_spinbox.setMaximum(result.total_frames - 1)
-            exports = []
-            if self._output_csv_path is not None:
-                exports.append(f"CSV: {self._output_csv_path.name}")
-            if self._output_video_path is not None:
-                exports.append(f"Video: {self._output_video_path.name}")
-            export_text = (
-                f" | Exports: {', '.join(exports)}" if exports else ""
-            )
             self._progress_label.setText(
                 self._t(
                     f"Loaded {result.video_count} video(s), "
-                    f"{result.total_frames} frames{export_text}",
+                    f"{result.total_frames} frames",
                     f"成功加载 {result.video_count} 个视频, "
-                    f"共 {result.total_frames} 帧{export_text}",
+                    f"共 {result.total_frames} 帧",
                 )
             )
         except Exception as e:
