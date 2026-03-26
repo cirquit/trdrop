@@ -170,7 +170,8 @@ class InteractiveEngine(QObject):
 
         # Determine total frames (minimum across all videos)
         frame_counts = [r.total_frames for r in self._readers]
-        self._total_frames = min(frame_counts) - 1  # -1 because we need pairs
+        min_frames = min(frame_counts)
+        self._total_frames = max(0, min_frames - 1)  # -1 because we need pairs, 0 if unknown
 
         if len(set(frame_counts)) > 1:
             logger.warning(
@@ -450,6 +451,7 @@ class InteractiveEngine(QObject):
         """Main processing loop (runs in background thread)."""
         from concurrent.futures import Future, ThreadPoolExecutor
         try:
+            import itertools
             source_iters = [iter(s) for s in self._sources]
             from trdrop.profiling import get_profiler
             profiler = get_profiler()
@@ -457,7 +459,10 @@ class InteractiveEngine(QObject):
             pool = ThreadPoolExecutor(max_workers=1)
             export_future: Future[None] | None = None
 
-            for frame_idx in range(self._total_frames):
+            # Process until StopIteration if total_frames is 0/unknown, otherwise use range
+            frame_iterator = range(self._total_frames) if self._total_frames > 0 else itertools.count()
+
+            for frame_idx in frame_iterator:
                 # Check for stop
                 if self._stop_event.is_set():
                     break
