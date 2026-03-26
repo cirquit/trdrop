@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     name: Build (${{ matrix.os }})
@@ -48,10 +51,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p out
-          cp dist/TRDrop out/TRDrop-macos-universal
-          chmod +x out/TRDrop-macos-universal
-          cd out
-          zip -9 TRDrop-macos-universal.zip TRDrop-macos-universal
+          cp dist/TRDrop TRDrop-macos-universal
+          chmod +x TRDrop-macos-universal
+          zip -9 out/TRDrop-macos-universal.zip TRDrop-macos-universal
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -74,6 +76,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
-          generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            ## TRDrop v2.1 更新说明
+
+            ### 主要功能更新
+            - 新增 YAML 配置预设加载，配置管理更灵活。
+            - GUI 新增 Duplicate Threshold（重复帧阈值）可调。
+            - 新增实时预览与 seek 渲染能力，交互体验更完整。
+            - 导出链路引入异步运行与性能分析（profiling）集成。
+            - 新增 FPS/frametime 图表标签字号可配置。
+            - 重写 HDR→SDR 转换流程（含 3D LUT），并补充 5 阶段 SDR tonemapping 管线。
+            - 修复硬件编码器探测，避免部分 AMD 设备崩溃。
+            - 增强视频流兼容性（含缺失 total_frames 元数据的 MKV）。
+            - 多视频处理、暗色模式、中文文案与界面布局完成一轮整体打磨。
+
+            ### macOS 使用说明（本次仅提供 ZIP 包）
+            1. 下载 `TRDrop-macos-universal.zip` 并解压。
+            2. 终端进入解压目录后执行：
+               `chmod +x TRDrop-macos-universal`
+            3. 启动：
+               `./TRDrop-macos-universal`
+            4. 若被 Gatekeeper 拦截：右键应用选择“打开”，或在「系统设置 → 隐私与安全性」点击“仍要打开”。
