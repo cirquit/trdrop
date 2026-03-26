@@ -82,13 +82,32 @@ QPushButton#primary_btn:disabled {
     border: 1px solid #8cb6f5;
     color: #ffffff;
 }
-QSpinBox, QDoubleSpinBox {
+QSpinBox, QDoubleSpinBox, QLineEdit {
     font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
     min-height: 24px;
+    background-color: #ffffff;
+    color: #1c1c1c;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+    padding: 2px 4px;
 }
-QCheckBox {
-    font-size: 13px;
-    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+QPushButton#profile_label {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    text-align: left;
+    color: #1c1c1c;
+}
+QPushButton#profile_label:hover {
+    background-color: transparent;
+}
+QPushButton#profile_label:pressed {
+    background-color: transparent;
+    color: #666666;
+}
+QPushButton#profile_label:disabled {
+    background-color: transparent;
+    color: #a0a0a0;
 }
 """
 
@@ -271,11 +290,28 @@ class MainWindow(QMainWindow):
         thresh_layout.addWidget(self._thresh_spinbox)
         param_sec.addLayout(thresh_layout)
 
-        self._profile_cb = QCheckBox("Generate Profile CSV")
+        cb_layout = QHBoxLayout()
+        cb_layout.setContentsMargins(0, 0, 0, 0)
+        cb_layout.setSpacing(6)
+        
+        self._profile_cb = QCheckBox()
         self._profile_cb.setToolTip(
             "Generate profiling CSV and summary on completion"
         )
-        param_sec.addWidget(self._profile_cb)
+        
+        self._profile_label = QPushButton("Generate Profile")
+        self._profile_label.setObjectName("profile_label")
+        self._profile_label.setToolTip(
+            "Generate profiling CSV and summary on completion"
+        )
+        self._profile_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._profile_label.clicked.connect(self._profile_cb.toggle)
+        
+        cb_layout.addWidget(self._profile_cb)
+        cb_layout.addWidget(self._profile_label)
+        cb_layout.addStretch()
+        
+        param_sec.addLayout(cb_layout)
 
         layout.addLayout(param_sec)
         layout.addWidget(self._create_separator(horizontal=True))
@@ -459,8 +495,8 @@ class MainWindow(QMainWindow):
         self._thresh_label.setText(
             self._t("Duplicate Threshold:", "重复帧阈值:")
         )
-        self._profile_cb.setText(
-            self._t("Generate Profile CSV", "生成性能报告")
+        self._profile_label.setText(
+            self._t("Generate Profile", "生成性能报告")
         )
         self._e_title.setText(
             self._t("Exports & Config", "导出与预设")
@@ -526,6 +562,7 @@ class MainWindow(QMainWindow):
         self._video_btn.setEnabled(can_modify_videos)
         self._config_btn.setEnabled(can_modify_videos)
         self._profile_cb.setEnabled(can_modify_videos)
+        self._profile_label.setEnabled(can_modify_videos)
 
 
         # Processing controls

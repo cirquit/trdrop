@@ -1,6 +1,6 @@
 [project]
 name = "trdrop"
-version = "2.0.0-dev"
+version = "2.1.0"
 description = "Video framerate and frametime analysis tool"
 readme = "README.md"
 requires-python = ">=3.11"
