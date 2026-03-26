@@ -12,70 +12,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
-  create-release:
-    name: Create/Update Release Notes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create or update GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          cat > RELEASE_NOTES.md <<'EOF'
-          ## TRDrop v2.1 Release Notes
-
-          ### Major updates
-          - Added YAML preset loading for more flexible configuration management.
-          - Added Duplicate Threshold control in GUI.
-          - Added real-time preview and seek rendering.
-          - Integrated async export flow and profiling output.
-          - Added configurable label font size for FPS/frametime plots.
-          - Reworked HDR→SDR pipeline (including 3D LUT) and added a 5-stage SDR tonemapping flow.
-          - Improved hardware encoder probing to avoid crashes on some AMD setups.
-          - Improved compatibility for streams missing `total_frames` metadata (e.g. some MKV files).
-          - Polished multi-video flow, dark mode behavior, UI layout, and i18n details.
-
-          ### macOS usage (ZIP-only in this release)
-          1. Download and extract `TRDrop-macos-universal.zip`.
-          2. In Terminal, run:
-             `chmod +x TRDrop-macos-universal`
-          3. Start the app:
-             `./TRDrop-macos-universal`
-          4. If blocked by Gatekeeper, right-click → Open, or allow it in Privacy & Security.
-
-          ---
-
-          ## TRDrop v2.1 更新说明
-
-          ### 主要功能更新
-          - 新增 YAML 配置预设加载，配置管理更灵活。
-          - GUI 新增 Duplicate Threshold（重复帧阈值）可调。
-          - 新增实时预览与 seek 渲染能力，交互体验更完整。
-          - 导出链路引入异步运行与性能分析（profiling）集成。
-          - 新增 FPS/frametime 图表标签字号可配置。
-          - 重写 HDR→SDR 转换流程（含 3D LUT），并补充 5 阶段 SDR tonemapping 管线。
-          - 修复硬件编码器探测，避免部分 AMD 设备崩溃。
-          - 增强视频流兼容性（含缺失 total_frames 元数据的 MKV）。
-          - 多视频处理、暗色模式、中文文案与界面布局完成一轮整体打磨。
-
-          ### macOS 使用说明（本次仅提供 ZIP 包）
-          1. 下载 `TRDrop-macos-universal.zip` 并解压。
-          2. 终端进入解压目录后执行：
-             `chmod +x TRDrop-macos-universal`
-          3. 启动：
-             `./TRDrop-macos-universal`
-          4. 若被 Gatekeeper 拦截：右键应用选择“打开”，或在「系统设置 → 隐私与安全性」点击“仍要打开”。
-          EOF
-
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --notes-file RELEASE_NOTES.md
-          else
-            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
-          fi
-
-  build:
+  build-and-release:
     name: Build (${{ matrix.os }})
-    needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -116,10 +54,62 @@ jobs:
           chmod +x TRDrop-macos-universal
           zip -9 out/TRDrop-macos-universal.zip TRDrop-macos-universal
 
-      - name: Upload assets directly to release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          gh release upload "$TAG" out/* --clobber
+      - name: Upload Windows asset + release notes
+        if: runner.os == 'Windows'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/TRDrop-windows-x64.exe
+          draft: false
+          prerelease: false
+          body: |
+            ## TRDrop v2.1 Release Notes
+
+            ### Major updates
+            - Added YAML preset loading for more flexible configuration management.
+            - Added Duplicate Threshold control in GUI.
+            - Added real-time preview and seek rendering.
+            - Integrated async export flow and profiling output.
+            - Added configurable label font size for FPS/frametime plots.
+            - Reworked HDR→SDR pipeline (including 3D LUT) and added a 5-stage SDR tonemapping flow.
+            - Improved hardware encoder probing to avoid crashes on some AMD setups.
+            - Improved compatibility for streams missing `total_frames` metadata (e.g. some MKV files).
+            - Polished multi-video flow, dark mode behavior, UI layout, and i18n details.
+
+            ### macOS usage (ZIP-only in this release)
+            1. Download and extract `TRDrop-macos-universal.zip`.
+            2. In Terminal, run:
+               `chmod +x TRDrop-macos-universal`
+            3. Start the app:
+               `./TRDrop-macos-universal`
+            4. If blocked by Gatekeeper, right-click → Open, or allow it in Privacy & Security.
+
+            ---
+
+            ## TRDrop v2.1 更新说明
+
+            ### 主要功能更新
+            - 新增 YAML 配置预设加载，配置管理更灵活。
+            - GUI 新增 Duplicate Threshold（重复帧阈值）可调。
+            - 新增实时预览与 seek 渲染能力，交互体验更完整。
+            - 导出链路引入异步运行与性能分析（profiling）集成。
+            - 新增 FPS/frametime 图表标签字号可配置。
+            - 重写 HDR→SDR 转换流程（含 3D LUT），并补充 5 阶段 SDR tonemapping 管线。
+            - 修复硬件编码器探测，避免部分 AMD 设备崩溃。
+            - 增强视频流兼容性（含缺失 total_frames 元数据的 MKV）。
+            - 多视频处理、暗色模式、中文文案与界面布局完成一轮整体打磨。
+
+            ### macOS 使用说明（本次仅提供 ZIP 包）
+            1. 下载 `TRDrop-macos-universal.zip` 并解压。
+            2. 终端进入解压目录后执行：
+               `chmod +x TRDrop-macos-universal`
+            3. 启动：
+               `./TRDrop-macos-universal`
+            4. 若被 Gatekeeper 拦截：右键应用选择“打开”，或在「系统设置 → 隐私与安全性」点击“仍要打开”。
+
+      - name: Upload macOS asset
+        if: runner.os == 'macOS'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/TRDrop-macos-universal.zip
+          draft: false
+          prerelease: false
