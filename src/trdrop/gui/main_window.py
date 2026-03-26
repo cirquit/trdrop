@@ -41,7 +41,7 @@ QFrame#sidebar, QFrame#bottom_bar {
 QLabel {
     color: #1c1c1c;
     font-size: 13px;
-    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 QPushButton {
     background-color: #ffffff;
@@ -50,7 +50,7 @@ QPushButton {
     padding: 6px 14px;
     color: #1c1c1c;
     font-size: 13px;
-    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 QPushButton:hover {
     background-color: #f5f5f5;
@@ -83,12 +83,12 @@ QPushButton#primary_btn:disabled {
     color: #ffffff;
 }
 QSpinBox, QDoubleSpinBox {
-    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
     min-height: 24px;
 }
 QCheckBox {
     font-size: 13px;
-    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 """
 
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
 
     def _setup_ui(self) -> None:
         """Setup the main UI layout."""
-        self.setWindowTitle("TRDrop v2")
+        self.setWindowTitle("TRDrop v2.1")
         self.setMinimumSize(850, 600)
         self.resize(1100, 750)
         self.setStyleSheet(FLUENT_STYLE)
@@ -151,18 +151,32 @@ class MainWindow(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QHBoxLayout(central)
-        main_layout.setSpacing(16)
+        main_layout.setSpacing(20)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
         # 1. Left Sidebar
         self._sidebar = self._create_sidebar()
         main_layout.addWidget(self._sidebar)
 
-        # 2. Right Content Area (Preview + Bottom Control Bar)
+        # 2. Right Content Area (Status + Preview + Bottom Control Bar)
         right_container = QWidget()
         right_layout = QVBoxLayout(right_container)
-        right_layout.setSpacing(16)
+        right_layout.setSpacing(10)
         right_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Top Status Row
+        status_row = QHBoxLayout()
+        status_row.setContentsMargins(4, 8, 4, 4)
+        self._state_indicator = StateIndicator()
+        self._state_indicator.set_translator(self._t)
+        status_row.addWidget(self._state_indicator)
+
+        status_row.addStretch()
+
+        self._progress_label = QLabel("")
+        self._progress_label.setStyleSheet("font-size: 13px; color: #555; font-weight: 500;")
+        status_row.addWidget(self._progress_label)
+        right_layout.addLayout(status_row)
 
         # Stacked widget: page 0 = text placeholder, page 1 = preview
         self._content_stack = QStackedWidget()
@@ -330,23 +344,7 @@ class MainWindow(QMainWindow):
 
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(20, 10, 20, 10)
-        layout.setSpacing(20)
-
-        # Left: Progress and State Indicator
-        left_layout = QVBoxLayout()
-        left_layout.setSpacing(4)
-        left_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-
-        self._state_indicator = StateIndicator()
-        self._state_indicator.set_translator(self._t)
-        left_layout.addWidget(self._state_indicator)
-
-        self._progress_label = QLabel("")
-        self._progress_label.setStyleSheet("font-size: 12px; color: #555;")
-        self._progress_label.setMinimumWidth(320)
-        left_layout.addWidget(self._progress_label)
-
-        layout.addLayout(left_layout, stretch=1)
+        layout.setSpacing(24)
 
         # Center: Playback controls
         center_layout = QHBoxLayout()
@@ -355,24 +353,29 @@ class MainWindow(QMainWindow):
 
         self._start_btn = QPushButton("▶ Start")
         self._start_btn.setObjectName("primary_btn")
-        self._start_btn.setFixedHeight(36)
+        self._start_btn.setFixedHeight(42)
+        self._start_btn.setFixedWidth(110)
         self._start_btn.setToolTip("Start processing")
         self._start_btn.clicked.connect(self._on_start)
         center_layout.addWidget(self._start_btn)
 
         self._pause_btn = QPushButton("⏸ Pause")
-        self._pause_btn.setFixedHeight(36)
+        self._pause_btn.setFixedHeight(42)
+        self._pause_btn.setFixedWidth(110)
         self._pause_btn.setToolTip("Pause processing")
         self._pause_btn.clicked.connect(self._on_pause)
         center_layout.addWidget(self._pause_btn)
 
         self._reset_btn = QPushButton("⏹ Reset")
-        self._reset_btn.setFixedHeight(36)
+        self._reset_btn.setFixedHeight(42)
+        self._reset_btn.setFixedWidth(110)
         self._reset_btn.setToolTip("Reset engine")
         self._reset_btn.clicked.connect(self._on_reset)
         center_layout.addWidget(self._reset_btn)
 
+        layout.addStretch(1)
         layout.addLayout(center_layout)
+        layout.addStretch(1)
 
         # Right: Seek controls
         right_layout = QHBoxLayout()
@@ -918,7 +921,7 @@ class MainWindow(QMainWindow):
         QMessageBox.about(
             self,
             "About TRDrop",
-            "TRDrop v2.0.0\n\n"
+            "TRDrop v2.1\n\n"
             "Video framerate and frametime analysis tool.\n\n"
             "Drop video files to analyze their real framerate.",
         )
