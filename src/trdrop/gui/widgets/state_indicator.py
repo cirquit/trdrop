@@ -118,4 +118,3 @@ class StateIndicator(QWidget):
         en = STATE_MESSAGES_EN.get(self._state, str(self._state))
         zh = STATE_MESSAGES_ZH.get(self._state, en)
         self._label.setText(self._tr(en, zh))
-

@@ -459,8 +459,13 @@ class InteractiveEngine(QObject):
             pool = ThreadPoolExecutor(max_workers=1)
             export_future: Future[None] | None = None
 
-            # Process until StopIteration if total_frames is 0/unknown, otherwise use range
-            frame_iterator = range(self._total_frames) if self._total_frames > 0 else itertools.count()
+            # Process until StopIteration if total_frames is 0/unknown,
+            # otherwise use range.
+            frame_iterator = (
+                range(self._total_frames)
+                if self._total_frames > 0
+                else itertools.count()
+            )
 
             for frame_idx in frame_iterator:
                 # Check for stop

@@ -42,7 +42,7 @@ def _can_open_encoder(name: str) -> bool:
     """Test if an encoder can actually be constructed and opened on this hardware."""
     if name in _OPEN_ENCODER_CACHE:
         return _OPEN_ENCODER_CACHE[name]
-        
+
     try:
         codec = av.Codec(name, "w")
         if not codec:

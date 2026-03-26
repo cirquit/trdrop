@@ -7,7 +7,15 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QIcon, QImage, QKeySequence, QPixmap, QShortcut
+from PyQt6.QtGui import (
+    QDragEnterEvent,
+    QDropEvent,
+    QIcon,
+    QImage,
+    QKeySequence,
+    QPixmap,
+    QShortcut,
+)
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
@@ -41,7 +49,9 @@ QFrame#sidebar, QFrame#bottom_bar {
 QLabel {
     color: #1c1c1c;
     font-size: 13px;
-    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI",
+                 "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei",
+                 "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 QPushButton {
     background-color: #ffffff;
@@ -50,7 +60,9 @@ QPushButton {
     padding: 6px 14px;
     color: #1c1c1c;
     font-size: 13px;
-    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI",
+                 "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei",
+                 "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 QPushButton:hover {
     background-color: #f5f5f5;
@@ -83,7 +95,9 @@ QPushButton#primary_btn:disabled {
     color: #ffffff;
 }
 QSpinBox, QDoubleSpinBox, QLineEdit {
-    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Segoe UI Variable Text", "Segoe UI",
+                 "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei",
+                 "Source Han Sans SC", "Noto Sans SC", sans-serif;
     min-height: 24px;
     background-color: #ffffff;
     color: #1c1c1c;
@@ -260,8 +274,6 @@ class MainWindow(QMainWindow):
         btn_layout.addWidget(self._remove_btn)
         video_sec.addLayout(btn_layout)
 
-
-
         layout.addLayout(video_sec)
         layout.addWidget(self._create_separator(horizontal=True))
 
@@ -271,7 +283,6 @@ class MainWindow(QMainWindow):
         self._p_title = QLabel("Parameters")
         self._p_title.setStyleSheet("font-weight: bold; font-size: 14px;")
         param_sec.addWidget(self._p_title)
-
 
         thresh_layout = QHBoxLayout()
         self._thresh_label = QLabel("Duplicate Threshold:")
@@ -293,12 +304,12 @@ class MainWindow(QMainWindow):
         cb_layout = QHBoxLayout()
         cb_layout.setContentsMargins(0, 0, 0, 0)
         cb_layout.setSpacing(6)
-        
+
         self._profile_cb = QCheckBox()
         self._profile_cb.setToolTip(
             "Generate profiling CSV and summary on completion"
         )
-        
+
         self._profile_label = QPushButton("Generate Profile")
         self._profile_label.setObjectName("profile_label")
         self._profile_label.setToolTip(
@@ -306,11 +317,11 @@ class MainWindow(QMainWindow):
         )
         self._profile_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self._profile_label.clicked.connect(self._profile_cb.toggle)
-        
+
         cb_layout.addWidget(self._profile_cb)
         cb_layout.addWidget(self._profile_label)
         cb_layout.addStretch()
-        
+
         param_sec.addLayout(cb_layout)
 
         layout.addLayout(param_sec)
@@ -563,7 +574,6 @@ class MainWindow(QMainWindow):
         self._config_btn.setEnabled(can_modify_videos)
         self._profile_cb.setEnabled(can_modify_videos)
         self._profile_label.setEnabled(can_modify_videos)
-
 
         # Processing controls
         self._start_btn.setEnabled(state == EngineState.READY)
