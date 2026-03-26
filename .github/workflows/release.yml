@@ -16,6 +16,9 @@ jobs:
     name: Ensure Release + Notes
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Prepare release notes
         run: |
           cat > RELEASE_NOTES.md <<'EOF'
@@ -69,10 +72,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file RELEASE_NOTES.md
           else
-            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file RELEASE_NOTES.md
           fi
 
   build-and-upload:
@@ -124,4 +127,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release upload "$TAG" out/* --clobber
+          gh release upload "$TAG" out/* --repo "$GITHUB_REPOSITORY" --clobber
