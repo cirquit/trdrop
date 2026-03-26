@@ -31,6 +31,8 @@ jobs:
           - Improved hardware encoder probing to avoid crashes on some AMD setups.
           - Improved compatibility for streams missing `total_frames` metadata (e.g. some MKV files).
           - Polished multi-video flow, dark mode behavior, UI layout, and i18n details.
+          - Fixed duplicate output filename display in the main UI (export target remains shown on output buttons).
+          - Improved Windows DPI consistency for overlay/fonts, fixed spinbox click-area interaction, and synced default preset values with the example YAML.
 
           ### macOS usage (ZIP-only in this release)
           1. Download and extract `TRDrop-macos-universal.zip`.
@@ -54,6 +56,8 @@ jobs:
           - 修复硬件编码器探测，避免部分 AMD 设备崩溃。
           - 增强视频流兼容性（含缺失 total_frames 元数据的 MKV）。
           - 多视频处理、暗色模式、中文文案与界面布局完成一轮整体打磨。
+          - 修复主界面导出文件名重复显示（输出目标仍在导出按钮上显示）。
+          - 优化 Windows 高 DPI 下字体/叠加文本一致性，修复 SpinBox 点击热区问题，并将默认预设值与示例 YAML 对齐。
 
           ### macOS 使用说明（本次仅提供 ZIP 包）
           1. 下载 `TRDrop-macos-universal.zip` 并解压。
