@@ -430,7 +430,7 @@ class SimpleCompositor(Compositor):
             grid_color=grid_color,
             text_color=QColor(255, 255, 255),
             shadow_color=QColor(0, 0, 0),
-            font=self._make_pixel_font(self._config.rendering.font_family, cfg.label_font_size),
+            font=self._make_pixel_font(self._config.rendering.font_family, int(cfg.label_font_size * self._output_height)),
             line_width=int(cfg.line_width),
             show_grid=cfg.show_grid,
         )
@@ -465,7 +465,7 @@ class SimpleCompositor(Compositor):
             grid_color=grid_color,
             text_color=QColor(255, 255, 255),
             shadow_color=QColor(0, 0, 0),
-            font=self._make_pixel_font(self._config.rendering.font_family, cfg.label_font_size),
+            font=self._make_pixel_font(self._config.rendering.font_family, int(cfg.label_font_size * self._output_height)),
             line_width=int(cfg.line_width),
             show_grid=cfg.show_grid,
         )

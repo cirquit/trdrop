@@ -63,8 +63,8 @@ rendering:
     # Line thickness in pixels
     line_width: 3.0
 
-    # Font size for axis labels and FPS values (in pixels)
-    label_font_size: 48
+    # Font size for axis labels and FPS values (fraction of output height, e.g. 0.044 = 4.4%)
+    label_font_size: 0.044
 
     # Show horizontal grid lines at target FPS intervals
     show_grid: true
@@ -85,7 +85,7 @@ rendering:
     background_color: [0, 0, 0, 128]
     grid_color: [128, 128, 128, 64]
     line_width: 2.0
-    label_font_size: 42
+    label_font_size: 0.039
     show_grid: true
 
   # Font used for all text overlays
