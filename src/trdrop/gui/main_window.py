@@ -334,6 +334,33 @@ class MainWindow(QMainWindow):
 
         param_sec.addLayout(cb_layout)
 
+        frametime_layout = QHBoxLayout()
+        frametime_layout.setContentsMargins(0, 0, 0, 0)
+        frametime_layout.setSpacing(6)
+
+        self._frametime_cb = QCheckBox()
+        self._frametime_cb.setChecked(
+            self._preset_config.rendering.frametime_plot.visible
+        )
+        self._frametime_cb.setToolTip(
+            "Show frametime plot overlay in preview/exported video"
+        )
+        self._frametime_cb.toggled.connect(self._on_frametime_toggled)
+
+        self._frametime_label = QPushButton("Generate Frametime")
+        self._frametime_label.setObjectName("profile_label")
+        self._frametime_label.setToolTip(
+            "Show frametime plot overlay in preview/exported video"
+        )
+        self._frametime_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._frametime_label.clicked.connect(self._frametime_cb.toggle)
+
+        frametime_layout.addWidget(self._frametime_cb)
+        frametime_layout.addWidget(self._frametime_label)
+        frametime_layout.addStretch()
+
+        param_sec.addLayout(frametime_layout)
+
         layout.addLayout(param_sec)
         layout.addWidget(self._create_separator(horizontal=True))
 
@@ -519,6 +546,9 @@ class MainWindow(QMainWindow):
         self._profile_label.setText(
             self._t("Generate Profile", "生成性能报告")
         )
+        self._frametime_label.setText(
+            self._t("Generate Frametime", "生成 Frametime 图")
+        )
         self._e_title.setText(
             self._t("Exports & Config", "导出与预设")
         )
@@ -584,6 +614,8 @@ class MainWindow(QMainWindow):
         self._config_btn.setEnabled(can_modify_videos)
         self._profile_cb.setEnabled(can_modify_videos)
         self._profile_label.setEnabled(can_modify_videos)
+        self._frametime_cb.setEnabled(can_modify_videos)
+        self._frametime_label.setEnabled(can_modify_videos)
 
         # Processing controls
         self._start_btn.setEnabled(state == EngineState.READY)
@@ -845,6 +877,11 @@ class MainWindow(QMainWindow):
                         self._preset_config.processing.duplicate_threshold
                     )
                     self._thresh_spinbox.blockSignals(False)
+                    self._frametime_cb.blockSignals(True)
+                    self._frametime_cb.setChecked(
+                        self._preset_config.rendering.frametime_plot.visible
+                    )
+                    self._frametime_cb.blockSignals(False)
                     self._engine.set_duplicate_threshold(
                         self._preset_config.processing.duplicate_threshold
                     )
@@ -883,6 +920,14 @@ class MainWindow(QMainWindow):
         """Update duplicate threshold in config and engine."""
         self._preset_config.processing.duplicate_threshold = value
         self._engine.set_duplicate_threshold(value)
+
+    def _on_frametime_toggled(self, checked: bool) -> None:
+        """Update frametime plot visibility in config and loaded engine."""
+        self._preset_config.rendering.frametime_plot.visible = checked
+
+        if self._pending_videos and self._engine.state != EngineState.IDLE:
+            self._engine.reset()
+            self._load_videos()
 
     def _on_start(self) -> None:
         """Start processing."""
@@ -924,6 +969,11 @@ class MainWindow(QMainWindow):
             self._preset_config.processing.duplicate_threshold
         )
         self._thresh_spinbox.blockSignals(False)
+        self._frametime_cb.blockSignals(True)
+        self._frametime_cb.setChecked(
+            self._preset_config.rendering.frametime_plot.visible
+        )
+        self._frametime_cb.blockSignals(False)
         self._retranslate_ui()
         self._progress_label.setText("")
         self._preview_label.clear()

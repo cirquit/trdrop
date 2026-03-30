@@ -42,29 +42,29 @@ rendering:
   # --- FPS plot (shown across the bottom of the output) ---
   fps_plot:
     position:
-      x: 0.05        # left edge
-      y: 0.74        # vertical position (0=top, 1=bottom)
+      x: 0.025       # left edge
+      y: 0.83        # vertical position (0=top, 1=bottom)
       ref: global    # relative to entire output frame
     size:
-      width: 0.9     # 90% of output width
-      height: 0.22   # 22% of output height
+      width: 0.955   # 95.5% of output width
+      height: 0.15   # 15% of output height
       ref: global
     visible: true    # set to false to hide the FPS plot
 
     # Plot drawing style: "filled" (area chart), "line" (line chart), or "bar"
-    style: filled
+    style: line
 
-    # Semi-transparent background behind the plot [R, G, B, A]
-    background_color: [0, 0, 0, 128]
+    # Subtle background behind the plot [R, G, B, A]
+    background_color: [0, 0, 0, 24]
 
     # Grid line color [R, G, B, A]
-    grid_color: [128, 128, 128, 64]
+    grid_color: [255, 255, 255, 108]
 
     # Line thickness in pixels
-    line_width: 3.0
+    line_width: 4.0
 
-    # Font size for axis labels and FPS values (fraction of output height, e.g. 0.044 = 4.4%)
-    label_font_size: 0.044
+    # Font size for axis labels and FPS values (fraction of output height)
+    label_font_size: 0.018
 
     # Show horizontal grid lines at target FPS intervals
     show_grid: true
@@ -72,20 +72,20 @@ rendering:
   # --- Frametime plot (optional, hidden by default) ---
   frametime_plot:
     position:
-      x: 0.05
-      y: 0.7
+      x: 0.025
+      y: 0.69
       ref: global
     size:
-      width: 0.9
-      height: 0.12
+      width: 0.18
+      height: 0.10
       ref: global
     visible: false   # set to true to show frametime plot
 
     style: line
-    background_color: [0, 0, 0, 128]
-    grid_color: [128, 128, 128, 64]
-    line_width: 2.0
-    label_font_size: 0.039
+    background_color: [0, 0, 0, 18]
+    grid_color: [255, 255, 255, 108]
+    line_width: 3.0
+    label_font_size: 0.016
     show_grid: true
 
   # Font used for all text overlays

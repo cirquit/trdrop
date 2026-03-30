@@ -282,17 +282,17 @@ class FpsPlotConfig:
     """Configuration for FPS plot overlay (global, spans all videos)."""
 
     position: Position = field(
-        default_factory=lambda: Position(0.05, 0.74, GlobalRef())
+        default_factory=lambda: Position(0.025, 0.83, GlobalRef())
     )
     size: Size = field(
-        default_factory=lambda: Size(0.9, 0.22, GlobalRef())
+        default_factory=lambda: Size(0.955, 0.15, GlobalRef())
     )
     visible: bool = True
-    style: PlotStyle = PlotStyle.FILLED
-    background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
-    grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
-    line_width: float = 3.0
-    label_font_size: float = 0.044  # Relative to output height
+    style: PlotStyle = PlotStyle.LINE
+    background_color: tuple[int, int, int, int] = (0, 0, 0, 24)
+    grid_color: tuple[int, int, int, int] = (255, 255, 255, 108)
+    line_width: float = 4.0
+    label_font_size: float = 0.018  # Relative to output height
     show_grid: bool = True
 
 
@@ -301,17 +301,17 @@ class FrametimePlotConfig:
     """Configuration for frametime plot overlay (global)."""
 
     position: Position = field(
-        default_factory=lambda: Position(0.05, 0.70, GlobalRef())
+        default_factory=lambda: Position(0.025, 0.69, GlobalRef())
     )
     size: Size = field(
-        default_factory=lambda: Size(0.9, 0.12, GlobalRef())
+        default_factory=lambda: Size(0.18, 0.10, GlobalRef())
     )
     visible: bool = False  # Off by default
     style: PlotStyle = PlotStyle.LINE
-    background_color: tuple[int, int, int, int] = (0, 0, 0, 128)
-    grid_color: tuple[int, int, int, int] = (128, 128, 128, 64)
-    line_width: float = 2.0
-    label_font_size: float = 0.039  # Relative to output height
+    background_color: tuple[int, int, int, int] = (0, 0, 0, 18)
+    grid_color: tuple[int, int, int, int] = (255, 255, 255, 108)
+    line_width: float = 3.0
+    label_font_size: float = 0.016  # Relative to output height
     show_grid: bool = True
 
 

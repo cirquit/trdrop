@@ -142,16 +142,13 @@ class Plot(ABC):
         painter.fillRect(bounds, self._style.background_color)
 
     def _draw_axes(self, painter: QPainter, bounds: QRect) -> None:
-        """Draw X and Y axes with shadow."""
+        """Draw a full rectangular plot frame."""
         pen = QPen(self._style.axis_color)
-        pen.setWidth(2)
+        pen.setWidth(max(2, self._style.line_width - 1))
         pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)
         painter.setPen(pen)
-
-        # Y axis (left edge)
-        painter.drawLine(bounds.left(), bounds.top(), bounds.left(), bounds.bottom())
-        # X axis (bottom edge)
-        painter.drawLine(bounds.left(), bounds.bottom(), bounds.right(), bounds.bottom())
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.drawRect(bounds.adjusted(0, 0, -1, -1))
 
     def _draw_grid(self, painter: QPainter, bounds: QRect) -> None:
         """Draw horizontal grid lines."""
@@ -159,7 +156,7 @@ class Plot(ABC):
             return
 
         pen = QPen(self._style.grid_color)
-        pen.setWidth(1)
+        pen.setWidth(max(1, self._style.line_width - 2))
         painter.setPen(pen)
 
         segments = self._style.grid_segments
@@ -234,7 +231,15 @@ class Plot(ABC):
             font_size = _font_px(self._style.font)
             pad_x = max(8, font_size // 2)
             pad_y = font_size // 3
-            text_x = anchor_x + pad_x
+            from PyQt6.QtGui import QFontMetrics
+            metrics = QFontMetrics(self._style.font)
+            text_width = metrics.horizontalAdvance(label)
+            text_x = self._fit_text_x(
+                bounds,
+                text_width,
+                anchor_x + pad_x,
+                padding=pad_x,
+            )
             text_y = y + pad_y
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
@@ -266,11 +271,31 @@ class Plot(ABC):
         # Use (width - 1) for Qt rect semantics
         plot_width = bounds.width() - 1
         anchor_x = bounds.left() + int(plot_width * time_anchor)
-        x = anchor_x - text_width  # Right-align to anchor
         font_size = _font_px(title_font)
+        x = self._fit_text_x(
+            bounds,
+            text_width,
+            anchor_x - text_width,
+            padding=max(8, font_size // 2),
+        )
         y = bounds.top() - max(8, font_size // 2)  # Gap scales with font
 
         self._draw_text_with_shadow(painter, QPoint(x, y), self._title)
+
+    def _fit_text_x(
+        self,
+        bounds: QRect,
+        text_width: int,
+        desired_x: int,
+        *,
+        padding: int = 0,
+    ) -> int:
+        """Clamp text X position so the full string stays within bounds."""
+        min_x = bounds.left() + padding
+        max_x = bounds.right() - text_width - padding
+        if max_x < min_x:
+            return min_x
+        return max(min_x, min(desired_x, max_x))
 
 
 class FrameratePlot(Plot):
@@ -415,7 +440,7 @@ class FrameratePlot(Plot):
     def _draw_center_line(self, painter: QPainter, bounds: QRect) -> None:
         """Draw horizontal center line at half max FPS."""
         pen = QPen(self._style.grid_color)
-        pen.setWidth(1)
+        pen.setWidth(max(1, self._style.line_width - 2))
         painter.setPen(pen)
 
         center_y = bounds.top() + bounds.height() // 2
@@ -428,7 +453,7 @@ class FrameratePlot(Plot):
             return
 
         pen = QPen(self._style.line_color)
-        pen.setWidth(1)
+        pen.setWidth(max(1, self._style.line_width - 2))
         pen.setStyle(Qt.PenStyle.DashLine)
         painter.setPen(pen)
 
@@ -819,7 +844,15 @@ class FrametimePlot(Plot):
             font_size = _font_px(self._style.font)
             pad_x = max(8, font_size // 2)
             pad_y = font_size // 3
-            text_x = bounds.right() + pad_x
+            from PyQt6.QtGui import QFontMetrics
+            metrics = QFontMetrics(self._style.font)
+            text_width = metrics.horizontalAdvance(label)
+            text_x = self._fit_text_x(
+                bounds,
+                text_width,
+                bounds.right() - text_width - pad_x,
+                padding=pad_x,
+            )
             text_y = y + pad_y
             self._draw_text_with_shadow(painter, QPoint(text_x, text_y), label)
 
@@ -853,8 +886,14 @@ class FrametimePlot(Plot):
         # Use (width - 1) for Qt rect semantics
         plot_width = bounds.width() - 1
         anchor_x = bounds.left() + int(plot_width * self._time_anchor)
-        x = anchor_x - text_width
-        y = bounds.top() - 8
+        font_size = _font_px(title_font)
+        x = self._fit_text_x(
+            bounds,
+            text_width,
+            anchor_x - text_width,
+            padding=max(8, font_size // 2),
+        )
+        y = bounds.top() - max(8, font_size // 2)
 
         self._draw_text_with_shadow(painter, QPoint(x, y), title_text)
 
