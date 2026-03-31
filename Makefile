@@ -1,4 +1,4 @@
-.PHONY: lint test check testvideos clean-testvideos benchmark examples clean-examples clean
+.PHONY: lint test test-gui check testvideos clean-testvideos benchmark examples clean-examples clean
 
 lint:
 	uv run isort --check-only src tests
@@ -6,7 +6,10 @@ lint:
 	uv run basedpyright src tests
 
 test:
-	uv run pytest tests/ --verbose --ignore=tests/benchmarks/
+	uv run pytest tests/ --verbose -m "not gui" --ignore=tests/benchmarks/
+
+test-gui:
+	uv run pytest tests/ --verbose -m "gui"
 
 test-all:
 	uv run pytest tests/ --verbose
