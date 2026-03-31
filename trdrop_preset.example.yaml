@@ -69,7 +69,7 @@ rendering:
     # Show horizontal grid lines at target FPS intervals
     show_grid: true
 
-  # --- Frametime plot (optional, hidden by default) ---
+  # --- Frametime plot ---
   frametime_plot:
     position:
       x: 0.025
@@ -79,7 +79,7 @@ rendering:
       width: 0.18
       height: 0.10
       ref: global
-    visible: false   # set to true to show frametime plot
+    visible: true
 
     style: line
     background_color: [0, 0, 0, 18]

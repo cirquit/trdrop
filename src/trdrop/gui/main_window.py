@@ -316,6 +316,7 @@ class MainWindow(QMainWindow):
         cb_layout.setSpacing(6)
 
         self._profile_cb = QCheckBox()
+        self._profile_cb.setChecked(True)
         self._profile_cb.setToolTip(
             "Generate profiling CSV and summary on completion"
         )

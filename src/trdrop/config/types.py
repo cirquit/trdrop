@@ -306,7 +306,7 @@ class FrametimePlotConfig:
     size: Size = field(
         default_factory=lambda: Size(0.18, 0.10, GlobalRef())
     )
-    visible: bool = False  # Off by default
+    visible: bool = True
     style: PlotStyle = PlotStyle.LINE
     background_color: tuple[int, int, int, int] = (0, 0, 0, 18)
     grid_color: tuple[int, int, int, int] = (255, 255, 255, 108)

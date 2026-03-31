@@ -381,11 +381,16 @@ class SimpleCompositor(Compositor):
         return font
 
     def _plot_font_px(self, relative_size: float) -> int:
-        """Scale plot fonts to the visible video region when using separate overlays."""
-        base_height = self._output_height
-        if self._video_count > 1:
-            _, _, _, base_height = self._video_pixel_bounds(0)
-        return max(10, int(relative_size * base_height))
+        """Scale plot fonts against the full output frame for stable readability."""
+        return max(10, int(relative_size * self._output_height))
+
+    @staticmethod
+    def _frametime_label_size(relative_size: float, video_count: int) -> float:
+        """Reduce frametime label size in dense 3/4-up layouts to avoid clipping."""
+        if video_count < 3:
+            return relative_size
+        reduced_size = max(relative_size * 0.72, 0.011)
+        return min(relative_size, reduced_size)
 
     def _make_plot_style(
         self,
@@ -396,10 +401,12 @@ class SimpleCompositor(Compositor):
         label_size: float,
         line_width: float,
         show_grid: bool,
+        title_size: float | None = None,
     ) -> OverlayPlotStyle:
         """Build a plot style tuned for HUD-like overlays."""
         font_px = self._plot_font_px(label_size)
-        title_px = max(font_px + 2, int(font_px * 1.18))
+        title_base_px = self._plot_font_px(title_size) if title_size is not None else font_px
+        title_px = max(title_base_px + 2, int(title_base_px * 1.18))
         return OverlayPlotStyle(
             line_color=line_color,
             background_color=background_color,
@@ -463,7 +470,7 @@ class SimpleCompositor(Compositor):
                 background_color=bg_color,
                 grid_color=grid_color,
                 label_size=cfg.label_font_size,
-                line_width=cfg.line_width,
+                line_width=cfg.line_width + 1.0,
                 show_grid=cfg.show_grid,
             )
             plots.append(
@@ -495,14 +502,16 @@ class SimpleCompositor(Compositor):
 
         plot_count = 1 if self._video_count == 1 else self._video_count
         plots: list[FrametimePlot] = []
+        label_size = self._frametime_label_size(cfg.label_font_size, self._video_count)
         for i in range(plot_count):
             style = self._make_plot_style(
                 line_color=get_video_color(i),
                 background_color=bg_color,
                 grid_color=grid_color,
-                label_size=cfg.label_font_size,
+                label_size=label_size,
                 line_width=cfg.line_width,
                 show_grid=cfg.show_grid,
+                title_size=cfg.label_font_size,
             )
             plots.append(
                 FrametimePlot(
@@ -510,7 +519,7 @@ class SimpleCompositor(Compositor):
                     max_ms=50.0,
                     title="FRAME-TIME (MS)",
                     auto_scale=True,
-                    time_anchor=0.0,
+                    time_anchor=1.0,
                     show_current_value=False,
                     show_time_indicator=False,
                     show_start_marker=False,
@@ -894,19 +903,25 @@ class SimpleCompositor(Compositor):
 
     def _frametime_plot_bounds(self, index: int) -> QRect:
         """Compute per-video frametime plot bounds as a compact box at lower-left."""
-        if self._framerate_combined and self._video_count > 1 and self._framerate_plots:
-            return self._combined_frametime_strip_bounds(index)
-
         video_px, video_py, video_pw, video_ph = self._video_pixel_bounds(index)
+        video_bounds = QRect(video_px, video_py, video_pw, video_ph)
         fr_bounds = self._framerate_plot_bounds(index)
 
         left_margin = max(12, int(video_pw * 0.03))
         gap = max(10, int(video_ph * 0.028))
         top_margin = max(10, int(video_ph * 0.02))
         plot_w = max(160, min(int(video_pw * 0.32), 380))
-        plot_h = max(64, min(int(video_ph * 0.11), 120))
+        plot_h = max(84, min(int(video_ph * 0.15), 132))
         plot_x = video_px + left_margin
-        plot_y = fr_bounds.top() - gap - plot_h
+
+        obstruction_top = fr_bounds.top()
+        if self._framerate_combined and self._framerate_plots:
+            combined_fr_bounds = self._combined_framerate_plot_bounds()
+            if combined_fr_bounds.intersects(video_bounds):
+                obstruction_top = min(obstruction_top, combined_fr_bounds.top())
+                gap = max(gap, max(12, int(self._output_height * 0.02)))
+
+        plot_y = obstruction_top - gap - plot_h
 
         min_y = video_py + top_margin
         if plot_y < min_y:

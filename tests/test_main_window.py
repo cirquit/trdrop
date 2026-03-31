@@ -21,12 +21,21 @@ def qapp() -> QApplication:
     return app
 
 
-def test_frametime_checkbox_defaults_to_hidden(qapp: QApplication) -> None:
+def test_frametime_checkbox_defaults_to_visible(qapp: QApplication) -> None:
     """Frametime checkbox mirrors the default preset."""
     window = MainWindow()
 
-    assert window._frametime_cb.isChecked() is False
-    assert window._preset_config.rendering.frametime_plot.visible is False
+    assert window._frametime_cb.isChecked() is True
+    assert window._preset_config.rendering.frametime_plot.visible is True
+
+    window.close()
+
+
+def test_profile_checkbox_defaults_to_visible(qapp: QApplication) -> None:
+    """Profile checkbox defaults to enabled."""
+    window = MainWindow()
+
+    assert window._profile_cb.isChecked() is True
 
     window.close()
 
