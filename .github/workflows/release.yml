@@ -19,20 +19,16 @@ jobs:
       - name: Prepare release notes
         run: |
           cat > RELEASE_NOTES.md <<'EOF'
-          ## TRDrop v2.1 Release Notes
+          ## TRDrop v2.1.0-beta.3 Release Notes
 
           ### Major updates
-          - Added YAML preset loading for more flexible configuration management.
-          - Added Duplicate Threshold control in GUI.
-          - Added real-time preview and seek rendering.
-          - Integrated async export flow and profiling output.
-          - Added configurable label font size for FPS/frametime plots.
-          - Reworked HDR→SDR pipeline (including 3D LUT) and added a 5-stage SDR tonemapping flow.
-          - Improved hardware encoder probing to avoid crashes on some AMD setups.
-          - Improved compatibility for streams missing `total_frames` metadata (e.g. some MKV files).
-          - Polished multi-video flow, dark mode behavior, UI layout, and i18n details.
-          - Fixed duplicate output filename display in the main UI (export target remains shown on output buttons).
-          - Improved Windows DPI consistency for overlay/fonts, fixed spinbox click-area interaction, and synced default preset values with the example YAML.
+          - Improved FPS/frametime overlay readability across 1/2/3/4-video layouts.
+          - Fixed multi-video frametime placement so each frametime plot stays within its own video region and no longer overlaps or gets hidden behind the framerate plot.
+          - Fixed frametime plot rendering so the history curve is visible instead of appearing as an empty chart box.
+          - Tuned dense 3/4-video layouts by reducing frametime axis label size and making framerate axes/curves thicker for clearer readability.
+          - Enabled frametime overlay by default and enabled profile generation by default in the main UI/default preset.
+          - Aligned the default test path with CI by excluding GUI-marked tests from `make test` and adding a separate `make test-gui` target.
+          - Improved headless Linux CI stability for PyQt-based tests by adding the required Qt/EGL runtime setup.
 
           ### macOS usage (ZIP-only in this release)
           1. Download and extract `TRDrop-macos-universal.zip`.
@@ -44,20 +40,16 @@ jobs:
 
           ---
 
-          ## TRDrop v2.1 更新说明
+          ## TRDrop v2.1.0-beta.3 更新说明
 
           ### 主要功能更新
-          - 新增 YAML 配置预设加载，配置管理更灵活。
-          - GUI 新增 Duplicate Threshold（重复帧阈值）可调。
-          - 新增实时预览与 seek 渲染能力，交互体验更完整。
-          - 导出链路引入异步运行与性能分析（profiling）集成。
-          - 新增 FPS/frametime 图表标签字号可配置。
-          - 重写 HDR→SDR 转换流程（含 3D LUT），并补充 5 阶段 SDR tonemapping 管线。
-          - 修复硬件编码器探测，避免部分 AMD 设备崩溃。
-          - 增强视频流兼容性（含缺失 total_frames 元数据的 MKV）。
-          - 多视频处理、暗色模式、中文文案与界面布局完成一轮整体打磨。
-          - 修复主界面导出文件名重复显示（输出目标仍在导出按钮上显示）。
-          - 优化 Windows 高 DPI 下字体/叠加文本一致性，修复 SpinBox 点击热区问题，并将默认预设值与示例 YAML 对齐。
+          - 优化了 1/2/3/4 视频布局下 FPS/frametime 图表的可读性。
+          - 修复多视频场景下 frametime 图表位置错误的问题，确保每个 frametime 图都显示在各自视频区域内，不再与 framerate 图重叠或被遮挡。
+          - 修复 frametime 图表“只有框没有曲线”的问题，历史曲线现在可以正常显示。
+          - 针对 3/4 视频密集布局，缩小了 frametime 坐标数字，并加粗了 framerate 坐标线和曲线，显示更清晰。
+          - 主界面与默认预设现在默认开启 frametime 图表，并默认勾选 profile 生成功能。
+          - 让默认测试路径与 CI 保持一致：`make test` 默认排除 GUI 测试，并新增 `make test-gui` 用于单独运行 GUI 测试。
+          - 为无头 Linux 环境下的 PyQt 测试补充了 Qt/EGL 运行依赖，提升 CI 稳定性。
 
           ### macOS 使用说明（本次仅提供 ZIP 包）
           1. 下载 `TRDrop-macos-universal.zip` 并解压。
