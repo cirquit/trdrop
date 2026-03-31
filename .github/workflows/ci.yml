@@ -36,6 +36,8 @@ jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
     strategy:
       fail-fast: false
       matrix:
@@ -52,14 +54,16 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
+      - name: Install Qt runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
+
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests (headless-safe)
-        run: >-
-          uv run pytest tests/ -v --tb=short
-          -m "not gui"
-          --ignore=tests/test_gui_engine.py
+      - name: Run tests
+        run: make test
 
   all-checks-pass:
     name: All Checks Pass

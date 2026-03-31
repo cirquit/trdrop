@@ -18,6 +18,7 @@ def qapp() -> QApplication:
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
+    assert isinstance(app, QApplication)
     return app
 
 
