@@ -49,6 +49,11 @@ def _can_open_encoder(name: str) -> bool:
             _OPEN_ENCODER_CACHE[name] = False
             return False
         ctx = codec.create()
+        # Encoders require valid stream parameters to open successfully
+        ctx.width = 256
+        ctx.height = 256
+        ctx.pix_fmt = "yuv420p"
+        ctx.time_base = Fraction(1, 30)
         ctx.open()
         _OPEN_ENCODER_CACHE[name] = True
         return True
