@@ -68,6 +68,9 @@ class SeekResult:
     fps_histories: tuple[list[float], ...]        # FPS history per video
     frametime_histories: tuple[list[float], ...]  # Frametime history per video
 
+    # Composited frame with overlays (from compositor)
+    composited_frame: np.ndarray | None = None
+
 
 # Callback types for GUI integration
 OnStateChange = Callable[[EngineState], None]

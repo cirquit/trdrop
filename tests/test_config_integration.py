@@ -97,6 +97,54 @@ class TestCompositorWithConfig:
 
         reader.close()
 
+    def test_plot_font_sizes_are_tuned_for_dense_four_up_layouts(self, qapp, test_video):
+        """Verify 4-up keeps framerate text stable while shrinking frametime labels."""
+        reader = PyAVReader(test_video)
+
+        config = PresetConfig()
+        config.rendering.fps_plot.visible = True
+        config.rendering.frametime_plot.visible = True
+
+        single = SimpleCompositor(
+            video_count=1,
+            video_fps=[reader.fps],
+            output_width=1920,
+            output_height=1080,
+            config=config,
+        )
+        four_up = SimpleCompositor(
+            video_count=4,
+            video_fps=[reader.fps] * 4,
+            output_width=1920,
+            output_height=1080,
+            config=config,
+        )
+
+        assert single._framerate_plots is not None
+        assert four_up._framerate_plots is not None
+        assert single._frametime_plots is not None
+        assert four_up._frametime_plots is not None
+
+        assert single._framerate_plots[0]._style.font.pixelSize() == \
+            four_up._framerate_plots[0]._style.font.pixelSize()
+        assert single._framerate_plots[0]._style.title_font is not None
+        assert four_up._framerate_plots[0]._style.title_font is not None
+        assert single._framerate_plots[0]._style.title_font.pixelSize() == \
+            four_up._framerate_plots[0]._style.title_font.pixelSize()
+        assert single._framerate_plots[0]._style.line_width == 5
+        assert four_up._framerate_plots[0]._style.line_width == 5
+
+        assert single._frametime_plots[0]._style.font.pixelSize() > \
+            four_up._frametime_plots[0]._style.font.pixelSize()
+        assert single._frametime_plots[0]._style.title_font is not None
+        assert four_up._frametime_plots[0]._style.title_font is not None
+        assert single._frametime_plots[0]._style.title_font.pixelSize() == \
+            four_up._frametime_plots[0]._style.title_font.pixelSize()
+        assert single._frametime_plots[0]._time_anchor == 1.0
+        assert four_up._frametime_plots[0]._time_anchor == 1.0
+
+        reader.close()
+
     def test_compositor_uses_config_grid_layout(self, qapp, test_video):
         """Verify compositor respects GRID layout from config."""
         reader = PyAVReader(test_video)
@@ -560,3 +608,36 @@ class TestOverlayPositionFromConfig:
             "Default config should render plot at bottom"
 
         source.close()
+
+    def test_multi_video_frametime_bounds_avoid_combined_framerate(
+        self, qapp, test_video
+    ):
+        """Verify separate frametime plots avoid the combined framerate plot."""
+        reader = PyAVReader(test_video)
+
+        for video_count in (2, 3, 4):
+            config = PresetConfig()
+            config.rendering.fps_plot.visible = True
+            config.rendering.frametime_plot.visible = True
+
+            compositor = SimpleCompositor(
+                video_count=video_count,
+                video_fps=[reader.fps] * video_count,
+                output_width=1920,
+                output_height=1080,
+                config=config,
+            )
+
+            combined_fr_bounds = compositor._combined_framerate_plot_bounds()
+
+            for i in range(video_count):
+                bounds = compositor._frametime_plot_bounds(i)
+                video_px, video_py, video_pw, video_ph = compositor._video_pixel_bounds(i)
+
+                assert bounds.left() >= video_px
+                assert bounds.right() <= video_px + video_pw
+                assert bounds.top() >= video_py
+                assert bounds.bottom() <= video_py + video_ph
+                assert not bounds.intersects(combined_fr_bounds)
+
+        reader.close()

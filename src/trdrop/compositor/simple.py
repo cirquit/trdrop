@@ -7,8 +7,8 @@ import time
 from dataclasses import dataclass
 
 import numpy as np
-from PyQt6.QtCore import QPoint, QRect
-from PyQt6.QtGui import QColor, QFont, QImage, QPainter
+from PyQt6.QtCore import QPoint, QPointF, QRect, Qt
+from PyQt6.QtGui import QColor, QFont, QImage, QPainter, QPainterPath, QPen
 
 from trdrop.compositor.base import Compositor
 from trdrop.compositor.overlay.colors import get_video_color
@@ -292,6 +292,7 @@ class SimpleCompositor(Compositor):
         frametime_plots: list[FrametimePlot] | None = None,
         framerate_combined: bool = True,
         frametime_combined: bool = False,
+        video_names: list[str] | None = None,
     ) -> None:
         if video_count != len(video_fps):
             raise ValueError(
@@ -364,10 +365,60 @@ class SimpleCompositor(Compositor):
             self._fps_texts = self._create_fps_texts_from_config()
         if framerate_plots is None and config is not None:
             self._framerate_plots = self._create_framerate_plots_from_config()
+            self._framerate_combined = True
         if frametime_plots is None and config is not None:
             self._frametime_plots = self._create_frametime_plots_from_config()
+            self._frametime_combined = self._video_count == 1
 
         self._frame_index = 0
+        self._video_names = video_names or []
+
+    @staticmethod
+    def _make_pixel_font(family: str, pixel_size: int) -> QFont:
+        """Create a QFont with pixel size (DPI-independent)."""
+        font = QFont(family)
+        font.setPixelSize(pixel_size)
+        return font
+
+    def _plot_font_px(self, relative_size: float) -> int:
+        """Scale plot fonts against the full output frame for stable readability."""
+        return max(10, int(relative_size * self._output_height))
+
+    @staticmethod
+    def _frametime_label_size(relative_size: float, video_count: int) -> float:
+        """Reduce frametime label size in dense 3/4-up layouts to avoid clipping."""
+        if video_count < 3:
+            return relative_size
+        reduced_size = max(relative_size * 0.72, 0.011)
+        return min(relative_size, reduced_size)
+
+    def _make_plot_style(
+        self,
+        *,
+        line_color: QColor,
+        background_color: QColor,
+        grid_color: QColor,
+        label_size: float,
+        line_width: float,
+        show_grid: bool,
+        title_size: float | None = None,
+    ) -> OverlayPlotStyle:
+        """Build a plot style tuned for HUD-like overlays."""
+        font_px = self._plot_font_px(label_size)
+        title_base_px = self._plot_font_px(title_size) if title_size is not None else font_px
+        title_px = max(title_base_px + 2, int(title_base_px * 1.18))
+        return OverlayPlotStyle(
+            line_color=line_color,
+            background_color=background_color,
+            axis_color=QColor(255, 255, 255, 224),
+            grid_color=grid_color,
+            text_color=QColor(255, 255, 255, 245),
+            shadow_color=QColor(0, 0, 0, 235),
+            font=self._make_pixel_font(self._config.rendering.font_family, font_px),
+            title_font=self._make_pixel_font(self._config.rendering.font_family, title_px),
+            line_width=max(2, int(line_width)),
+            show_grid=show_grid,
+        )
 
     def _create_fps_texts_from_config(self) -> list[FPSText]:
         """Create FPS text overlays from config."""
@@ -385,7 +436,8 @@ class SimpleCompositor(Compositor):
                 font_size_px = int(
                     video_cfg.fps_text.font_size * self._output_height
                 )
-                font = QFont(video_cfg.fps_text.font_family, font_size_px)
+                font = QFont(video_cfg.fps_text.font_family)
+                font.setPixelSize(font_size_px)
                 font.setWeight(QFont.Weight.Bold)
 
                 style = TextStyle(
@@ -410,28 +462,30 @@ class SimpleCompositor(Compositor):
         gr, gg, gb, ga = cfg.grid_color
         grid_color = QColor(gr, gg, gb, ga)
 
-        # Use first video's color as line color for combined plot
-        line_color = get_video_color(0)
-
-        style = OverlayPlotStyle(
-            line_color=line_color,
-            background_color=bg_color,
-            axis_color=QColor(236, 236, 236),
-            grid_color=grid_color,
-            text_color=QColor(255, 255, 255),
-            shadow_color=QColor(0, 0, 0),
-            font=QFont(self._config.rendering.font_family, 12),
-            line_width=int(cfg.line_width),
-            show_grid=cfg.show_grid,
-        )
-
-        # Create single combined plot
-        return [FrameratePlot(
-            style,
-            max_fps=max(self._video_fps),
-            show_center_line=True,
-            auto_scale=True,
-        )]
+        plot_count = 1
+        plots: list[FrameratePlot] = []
+        for i in range(plot_count):
+            style = self._make_plot_style(
+                line_color=get_video_color(i),
+                background_color=bg_color,
+                grid_color=grid_color,
+                label_size=cfg.label_font_size,
+                line_width=cfg.line_width + 1.0,
+                show_grid=cfg.show_grid,
+            )
+            plots.append(
+                FrameratePlot(
+                    style,
+                    max_fps=max(self._video_fps),
+                    title="FRAME-RATE (FPS)",
+                    show_center_line=False,
+                    auto_scale=True,
+                    time_anchor=1.0,
+                    show_time_indicator=False,
+                    show_start_marker=False,
+                )
+            )
+        return plots
 
     def _create_frametime_plots_from_config(self) -> list[FrametimePlot]:
         """Create frametime plot overlays from config."""
@@ -446,26 +500,32 @@ class SimpleCompositor(Compositor):
         gr, gg, gb, ga = cfg.grid_color
         grid_color = QColor(gr, gg, gb, ga)
 
-        line_color = get_video_color(0)
-
-        style = OverlayPlotStyle(
-            line_color=line_color,
-            background_color=bg_color,
-            axis_color=QColor(236, 236, 236),
-            grid_color=grid_color,
-            text_color=QColor(255, 255, 255),
-            shadow_color=QColor(0, 0, 0),
-            font=QFont(self._config.rendering.font_family, 12),
-            line_width=int(cfg.line_width),
-            show_grid=cfg.show_grid,
-        )
-
-        return [FrametimePlot(
-            style,
-            max_ms=50.0,
-            auto_scale=True,
-            show_current_value=True,
-        )]
+        plot_count = 1 if self._video_count == 1 else self._video_count
+        plots: list[FrametimePlot] = []
+        label_size = self._frametime_label_size(cfg.label_font_size, self._video_count)
+        for i in range(plot_count):
+            style = self._make_plot_style(
+                line_color=get_video_color(i),
+                background_color=bg_color,
+                grid_color=grid_color,
+                label_size=label_size,
+                line_width=cfg.line_width,
+                show_grid=cfg.show_grid,
+                title_size=cfg.label_font_size,
+            )
+            plots.append(
+                FrametimePlot(
+                    style,
+                    max_ms=50.0,
+                    title="FRAME-TIME (MS)",
+                    auto_scale=True,
+                    time_anchor=1.0,
+                    show_current_value=False,
+                    show_time_indicator=False,
+                    show_start_marker=False,
+                )
+            )
+        return plots
 
     @property
     def layout(self) -> FrameLayout:
@@ -721,6 +781,10 @@ class SimpleCompositor(Compositor):
                             "overlay_fps_text", (time.perf_counter() - t0) * 1000
                         )
 
+            # Draw video file names in top-right of each video region
+            if self._video_names:
+                self._draw_video_names(painter)
+
             # Draw framerate plot(s)
             if self._framerate_plots:
                 t0 = time.perf_counter()
@@ -746,19 +810,133 @@ class SimpleCompositor(Compositor):
         finally:
             painter.end()
 
+    def _draw_video_names(self, painter: QPainter) -> None:
+        """Draw file names in the top-right corner of each video region."""
+        painter.save()
+
+        font_size = max(10, int(self._output_height * 0.018))
+        font = QFont(self._config.rendering.font_family)
+        font.setPixelSize(font_size)
+        font.setBold(True)
+        painter.setFont(font)
+
+        from PyQt6.QtGui import QFontMetrics
+        fm = QFontMetrics(font)
+        padding = font_size // 2
+
+        for i, name in enumerate(self._video_names):
+            if i >= self._video_count:
+                break
+            region = self._layout.get_region(i)
+            # Region pixel bounds
+            rx = int(region.x * self._output_width)
+            ry = int(region.y * self._output_height)
+            rw = int(region.width * self._output_width)
+
+            text_w = fm.horizontalAdvance(name)
+            x = rx + rw - text_w - padding
+            y = ry + fm.ascent() + padding
+
+            color = get_video_color(i)
+
+            # Black outline
+            path = QPainterPath()
+            path.addText(QPointF(x, y), font, name)
+            outline_pen = QPen(QColor(0, 0, 0, 200))
+            outline_pen.setWidthF(max(2.0, font_size / 8.0))
+            outline_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            painter.setPen(outline_pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawPath(path)
+
+            # Fill with video color
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(color)
+            painter.drawPath(path)
+
+        painter.restore()
+
+    def _video_pixel_bounds(self, index: int) -> tuple[int, int, int, int]:
+        """Return pixel bounds for a video region."""
+        region = self._layout.get_region(index)
+        video_px = int(region.x * self._output_width)
+        video_py = int(region.y * self._output_height)
+        video_pw = int(region.width * self._output_width)
+        video_ph = int(region.height * self._output_height)
+        return video_px, video_py, video_pw, video_ph
+
+    def _framerate_plot_bounds(self, index: int) -> QRect:
+        """Compute per-video framerate plot bounds."""
+        video_px, video_py, video_pw, video_ph = self._video_pixel_bounds(index)
+
+        side_margin = max(12, int(video_pw * 0.03))
+        bottom_margin = max(14, int(video_ph * 0.035))
+        plot_w = max(120, video_pw - (side_margin * 2))
+        plot_h = max(72, min(int(video_ph * 0.18), 180))
+        plot_x = video_px + side_margin
+        plot_y = video_py + video_ph - plot_h - bottom_margin
+
+        return QRect(plot_x, plot_y, plot_w, plot_h)
+
+    def _combined_framerate_plot_bounds(self) -> QRect:
+        """Compute global framerate plot bounds from config."""
+        cfg = self._config.rendering.fps_plot
+        px, py = cfg.position.to_pixels(self._layout)
+        pw, ph = cfg.size.to_pixels(self._layout)
+        return QRect(px, py, pw, ph)
+
+    def _combined_frametime_strip_bounds(self, index: int) -> QRect:
+        """Compute frametime box bounds in a row above the combined framerate plot."""
+        fr_bounds = self._combined_framerate_plot_bounds()
+
+        gap = max(12, int(self._output_height * 0.014))
+        plot_h = max(64, min(int(self._output_height * 0.095), 108))
+        slot_w = max(160, fr_bounds.width() // self._video_count)
+        max_fit_w = max(150, slot_w - gap)
+        preferred_w = min(320, int(fr_bounds.width() * 0.16))
+        plot_w = min(preferred_w, max_fit_w)
+        slot_x = fr_bounds.left() + index * slot_w
+        plot_x = slot_x + max(0, (slot_w - plot_w) // 2)
+        plot_y = max(12, fr_bounds.top() - gap - plot_h)
+
+        return QRect(plot_x, plot_y, plot_w, plot_h)
+
+    def _frametime_plot_bounds(self, index: int) -> QRect:
+        """Compute per-video frametime plot bounds as a compact box at lower-left."""
+        video_px, video_py, video_pw, video_ph = self._video_pixel_bounds(index)
+        video_bounds = QRect(video_px, video_py, video_pw, video_ph)
+        fr_bounds = self._framerate_plot_bounds(index)
+
+        left_margin = max(12, int(video_pw * 0.03))
+        gap = max(10, int(video_ph * 0.028))
+        top_margin = max(10, int(video_ph * 0.02))
+        plot_w = max(160, min(int(video_pw * 0.32), 380))
+        plot_h = max(84, min(int(video_ph * 0.15), 132))
+        plot_x = video_px + left_margin
+
+        obstruction_top = fr_bounds.top()
+        if self._framerate_combined and self._framerate_plots:
+            combined_fr_bounds = self._combined_framerate_plot_bounds()
+            if combined_fr_bounds.intersects(video_bounds):
+                obstruction_top = min(obstruction_top, combined_fr_bounds.top())
+                gap = max(gap, max(12, int(self._output_height * 0.02)))
+
+        plot_y = obstruction_top - gap - plot_h
+
+        min_y = video_py + top_margin
+        if plot_y < min_y:
+            plot_y = min_y
+
+        max_w = max(120, video_pw - (left_margin * 2))
+        return QRect(plot_x, plot_y, min(plot_w, max_w), plot_h)
+
     def _draw_framerate_combined(self, painter: QPainter) -> None:
         """Draw a single combined framerate plot with all video series."""
         if not self._framerate_plots:
             return
 
         plot = self._framerate_plots[0]
-        cfg = self._config.rendering.fps_plot
-
-        # Get position and size from config (converts to pixels)
-        px, py = cfg.position.to_pixels(self._layout)
-        pw, ph = cfg.size.to_pixels(self._layout)
-
-        bounds = QRect(px, py, pw, ph)
+        bounds = self._combined_framerate_plot_bounds()
 
         # Build series list with distinct colors per video
         series_list = [
@@ -780,23 +958,8 @@ class SimpleCompositor(Compositor):
             if i >= len(self._framerate_plots):
                 break
 
-            # Get region from layout
-            region = self._layout.get_region(i)
             is_last = (i == self._video_count - 1)
-
-            # Place plot within video region
-            # Use 90% width, 20% height, at bottom of region
-            video_px = int(region.x * self._output_width)
-            video_py = int(region.y * self._output_height)
-            video_pw = int(region.width * self._output_width)
-            video_ph = int(region.height * self._output_height)
-
-            plot_w = int(video_pw * 0.9)
-            plot_h = int(video_ph * 0.20)
-            plot_x = video_px + int(video_pw * 0.05)
-            plot_y = video_py + video_ph - plot_h - int(video_ph * 0.05)
-
-            bounds = QRect(plot_x, plot_y, plot_w, plot_h)
+            bounds = self._framerate_plot_bounds(i)
             self._framerate_plots[i].draw(
                 painter, bounds, state.fps_history,
                 override_show_title=is_last,
@@ -848,23 +1011,7 @@ class SimpleCompositor(Compositor):
             if i >= len(self._frametime_plots):
                 break
 
-            # Get region from layout
-            region = self._layout.get_region(i)
-
-            # Place plot within video region
-            video_px = int(region.x * self._output_width)
-            video_py = int(region.y * self._output_height)
-            video_pw = int(region.width * self._output_width)
-            video_ph = int(region.height * self._output_height)
-
-            ft_plot_w = min(int(video_pw * 0.25), 320)
-            ft_plot_h = min(int(video_ph * 0.10), 80)
-            ft_plot_x = video_px + int(video_pw * 0.05)
-            # Position above the framerate plot area
-            framerate_top = video_py + video_ph - int(video_ph * 0.20) - int(video_ph * 0.05)
-            ft_plot_y = framerate_top - ft_plot_h - int(video_ph * 0.06)
-
-            ft_bounds = QRect(ft_plot_x, ft_plot_y, ft_plot_w, ft_plot_h)
+            ft_bounds = self._frametime_plot_bounds(i)
             self._frametime_plots[i].draw(
                 painter,
                 ft_bounds,
@@ -872,6 +1019,18 @@ class SimpleCompositor(Compositor):
                 current_value=metrics.smoothed_frametime,
                 override_show_title=True,
             )
+
+    def snapshot_video_states(self) -> tuple[VideoStateSnapshot, ...]:
+        """Return immutable snapshots of per-video state.
+
+        Useful for interactive engine seek buffers.
+        """
+        return tuple(state.snapshot() for state in self._video_states)
+
+    def restore_video_states(self, snapshots: tuple[VideoStateSnapshot, ...]) -> None:
+        """Restore per-video state from snapshots (inverse of snapshot)."""
+        for i, snap in enumerate(snapshots):
+            self._video_states[i].restore(snap)
 
     def reset(self) -> None:
         for state in self._video_states:
