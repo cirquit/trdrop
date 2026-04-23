@@ -2,5 +2,5 @@
 
 from __future__ import annotations
 
-__version__ = "2.1.0"
+__version__ = "2.1.0-beta.4"
 __engine_version__ = "0.6"  # Engine optimization version for benchmark tracking

@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
 
     def _setup_ui(self) -> None:
         """Setup the main UI layout."""
-        self.setWindowTitle("TRDrop v2.1")
+        self.setWindowTitle("TRDrop v2.1.0-beta.4")
         self.setMinimumSize(850, 600)
         self.resize(1100, 750)
         self.setStyleSheet(FLUENT_STYLE)
@@ -1014,7 +1014,7 @@ class MainWindow(QMainWindow):
         QMessageBox.about(
             self,
             "About TRDrop",
-            "TRDrop v2.1\n\n"
+            "TRDrop v2.1.0-beta.4\n\n"
             "Video framerate and frametime analysis tool.\n\n"
             "Drop video files to analyze their real framerate.",
         )
