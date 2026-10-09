@@ -341,11 +341,13 @@ class SimpleCompositor(Compositor):
         # Create numpy view into QImage's buffer (zero-copy)
         ptr = self._qimage.bits()
         assert ptr is not None, "QImage.bits() returned None"
-        ptr.setsize(output_height * output_width * 3)
-        self._output_buffer: np.ndarray = np.frombuffer(
-            ptr.asarray(output_height * output_width * 3),  # type: ignore[arg-type]
+        ptr.setsize(self._qimage.sizeInBytes())
+        self._output_buffer: np.ndarray = np.ndarray(
+            (output_height, output_width, 3),
             dtype=np.uint8,
-        ).reshape((output_height, output_width, 3))
+            buffer=ptr.asarray(self._qimage.sizeInBytes()),  # type: ignore[arg-type]
+            strides=(self._qimage.bytesPerLine(), 3, 1),
+        )
 
         # Per-video state: window_size = ~1 second of frames for each video
         self._video_states = [
@@ -542,6 +544,33 @@ class SimpleCompositor(Compositor):
         pairs: list[FramePair],
         results: list[FrameMetrics],
     ) -> CompositorOutput:
+        output = self._render(pairs, results, self._frame_index, advance=True)
+        self._frame_index += 1
+        return output
+
+    def render_snapshot(
+        self,
+        pairs: list[FramePair],
+        results: list[FrameMetrics],
+        snapshots: tuple[VideoStateSnapshot, ...],
+        frame_index: int,
+    ) -> CompositorOutput:
+        """Render cached metrics on a dedicated preview compositor.
+
+        The snapshot already includes this frame's analysis; do not update it
+        again. As with process(), the returned image uses this instance's buffer.
+        """
+        self.restore_video_states(snapshots)
+        return self._render(pairs, results, frame_index, advance=False)
+
+    def _render(
+        self,
+        pairs: list[FramePair],
+        results: list[FrameMetrics],
+        frame_index: int,
+        *,
+        advance: bool,
+    ) -> CompositorOutput:
         if len(pairs) != self._video_count:
             raise ValueError(
                 f"Expected {self._video_count} pairs, got {len(pairs)}"
@@ -558,7 +587,8 @@ class SimpleCompositor(Compositor):
             is_dup = result.is_duplicate or False
             diff = result.diff_ratio or 0.0
 
-            state.update(is_dup)
+            if advance:
+                state.update(is_dup)
 
             container_fps = self._video_fps[i]
             windowed_fps = state.windowed_fps()
@@ -593,11 +623,9 @@ class SimpleCompositor(Compositor):
             profiler.add_timing("compositor_overlay", (time.perf_counter() - t0) * 1000)
 
         aggregated = AggregatedMetrics(
-            frame_index=self._frame_index,
+            frame_index=frame_index,
             videos=tuple(video_metrics),
         )
-
-        self._frame_index += 1
 
         return CompositorOutput(frame=self._output_buffer, metrics=aggregated)
 

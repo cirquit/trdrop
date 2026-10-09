@@ -79,6 +79,8 @@ TRDrop uses YAML preset files to control overlay appearance. Click **"Config..."
 
 See `trdrop_preset.example.yaml` for a fully commented example with all available parameters.
 
+`export.resolution` sets the preview/export canvas size. `export.fps` resamples video frames while preserving playback speed; CSV metrics remain one row per analyzed frame per video. Set it to `null` to keep the source framerate.
+
 ### Key Concepts
 
 - **Coordinates** are normalized 0.0–1.0 (0.5 = center of the frame)
@@ -87,9 +89,9 @@ See `trdrop_preset.example.yaml` for a fully commented example with all availabl
 
 ## HDR Support
 
-TRDrop automatically detects HDR video content (PQ/HLG transfer curves, BT.2020 color primaries) and applies tonemapping to SDR for correct display and export. This includes:
+TRDrop detects HDR using PQ/HLG transfer metadata and applies tonemapping to SDR for display and export. Bit depth or BT.2020 primaries alone do not enable HDR conversion. This includes:
 
-- PQ EOTF (Perceptual Quantizer) decoding
+- PQ EOTF decoding, or HLG decoding using the BT.2100 1000-nit reference display
 - BT.2020 to BT.709 color gamut mapping
 - Reinhard tonemapping
 - BT.709 gamma encoding

@@ -95,6 +95,7 @@ class StreamingVideoExporter(StreamingExporter):
         path: Path | str,
         fps: float,
         *,
+        source_fps: float | None = None,
         codec: str = "auto",
         pix_fmt: str = "yuv420p",
         crf: int = 23,
@@ -106,6 +107,7 @@ class StreamingVideoExporter(StreamingExporter):
         Args:
             path: Output file path.
             fps: Output framerate.
+            source_fps: Input cadence. Resample frames when it differs from fps.
             codec: Video codec. Use "auto" for automatic hardware detection,
                 or specify directly (libx264, h264_videotoolbox, h264_nvenc, etc.)
             pix_fmt: Pixel format (default yuv420p).
@@ -115,6 +117,12 @@ class StreamingVideoExporter(StreamingExporter):
         """
         self._path = Path(path)
         self._fps = fps
+        self._output_rate = Fraction(fps).limit_denominator(10000)
+        self._source_rate = Fraction(
+            source_fps if source_fps is not None else fps
+        ).limit_denominator(10000)
+        if self._output_rate <= 0 or self._source_rate <= 0:
+            raise ValueError("Source and output framerates must be positive")
         self._pix_fmt = pix_fmt
         self._crf = crf
         self._preset = preset
@@ -131,16 +139,26 @@ class StreamingVideoExporter(StreamingExporter):
         self._container: av.OutputContainer | None = None  # type: ignore[name-defined]
         self._stream: av.VideoStream | None = None  # type: ignore[name-defined]
         self._frame_count = 0
+        self._source_frame_count = 0
 
     def open(self) -> None:
         self._container = av.open(str(self._path), mode="w")
         # Stream created on first frame (need dimensions)
         self._stream = None
         self._frame_count = 0
+        self._source_frame_count = 0
 
     def write_frame(self, output: CompositorOutput) -> None:
         if self._container is None:
             raise RuntimeError("Exporter not opened")
+
+        # Fill output timestamps in this input frame's interval. Rational
+        # arithmetic prevents drift for rates such as 30000/1001 -> 60.
+        self._source_frame_count += 1
+        output_end = self._source_frame_count * self._output_rate / self._source_rate
+        target_count = -(-output_end.numerator // output_end.denominator)
+        if self._frame_count >= target_count:
+            return
 
         profiler = get_profiler()
         t_start = time.perf_counter()
@@ -151,8 +169,7 @@ class StreamingVideoExporter(StreamingExporter):
         # Create stream on first frame
         if self._stream is None:
             # PyAV requires Fraction for rate
-            fps_frac = Fraction(self._fps).limit_denominator(10000)
-            stream = self._container.add_stream(self._codec, rate=fps_frac)
+            stream = self._container.add_stream(self._codec, rate=self._output_rate)
             stream.width = width
             stream.height = height
             stream.pix_fmt = self._pix_fmt
@@ -183,17 +200,22 @@ class StreamingVideoExporter(StreamingExporter):
         # Create PyAV frame from numpy array
         t0 = time.perf_counter()
         frame = av.VideoFrame.from_ndarray(frame_data, format="rgb24")
-        frame.pts = self._frame_count
+        # Setting stream metadata alone does not configure swscale's matrix.
+        frame = frame.reformat(format=self._pix_fmt, dst_colorspace="ITU709")
+        frame.colorspace = 1
+        frame.time_base = 1 / self._output_rate
         profiler.add_timing("export_video_convert", (time.perf_counter() - t0) * 1000)
 
         # Encode and write
         t0 = time.perf_counter()
-        for packet in self._stream.encode(frame):  # type: ignore[union-attr]
-            self._container.mux(packet)
+        while self._frame_count < target_count:
+            frame.pts = self._frame_count
+            for packet in self._stream.encode(frame):  # type: ignore[union-attr]
+                self._container.mux(packet)
+            self._frame_count += 1
         profiler.add_timing("export_video_encode", (time.perf_counter() - t0) * 1000)
 
         profiler.add_timing("export_video_total", (time.perf_counter() - t_start) * 1000)
-        self._frame_count += 1
 
     def close(self) -> None:
         if self._container is not None:
