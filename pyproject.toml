@@ -1,6 +1,6 @@
 [project]
 name = "trdrop"
-version = "2.0.0-dev"
+version = "2.1.0-beta.4"
 description = "Video framerate and frametime analysis tool"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -39,4 +39,9 @@ typeCheckingMode = "standard"
 testpaths = ["tests"]
 markers = [
     "gui: marks tests as GUI/interactive engine tests (deselect with '-m \"not gui\"')",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.19.0",
 ]

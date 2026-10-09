@@ -211,6 +211,26 @@ class TestOverlayRendering:
         print(f"Frametime plot region: {ft_bright} bright pixels")
         assert ft_bright > 500
 
+    def test_frametime_bounds_match_framerate_layout(self, qapp, test_video, plot_style):
+        """Frametime plot should stay compact at lower-left and sit above framerate."""
+        compositor = SimpleCompositor(
+            video_count=1,
+            video_fps=[test_video.fps],
+            output_width=1280,
+            output_height=720,
+            framerate_plots=[FrameratePlot(plot_style, max_fps=60.0)],
+            frametime_plots=[FrametimePlot(plot_style, max_ms=50.0)],
+        )
+
+        fr_bounds = compositor._framerate_plot_bounds(0)
+        ft_bounds = compositor._frametime_plot_bounds(0)
+
+        assert ft_bounds.width() < fr_bounds.width() // 2
+        assert ft_bounds.height() <= fr_bounds.height()
+        assert ft_bounds.left() == fr_bounds.left()
+        assert ft_bounds.bottom() < fr_bounds.top()
+        assert ft_bounds.top() >= 0
+
     def test_framerate_plot_modifies_output(self, qapp, test_video, plot_style, text_style):
         """Verify framerate plot actually draws pixels."""
         analyzer = DuplicateDetector()

@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,11 +17,14 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 from trdrop.analysis.duplicate import DuplicateDetector
 from trdrop.compositor.simple import SimpleCompositor, _VideoState
+from trdrop.compositor.types import CompositorOutput
+from trdrop.config import PresetConfig
 from trdrop.engine.buffer import ProcessingBuffer
 from trdrop.engine.protocol import EngineState, SeekResult
 from trdrop.export.streaming_csv import StreamingCSVExporter
 from trdrop.export.streaming_video import StreamingVideoExporter
 from trdrop.source.sequential import SequentialFrameSource
+from trdrop.types.frames import FramePair, FrameView
 from trdrop.types.metrics import FrameMetrics
 from trdrop.video.reader import PyAVReader
 
@@ -65,6 +70,7 @@ class InteractiveEngine(QObject):
     state_changed = pyqtSignal(EngineState)
     progress = pyqtSignal(int, int)  # current_frame, total_frames
     error = pyqtSignal(str)
+    frame_ready = pyqtSignal(object)  # np.ndarray (composited RGB frame)
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -75,13 +81,17 @@ class InteractiveEngine(QObject):
 
         # Video sources
         self._readers: list[PyAVReader] = []
+        self._seek_readers: list[PyAVReader] = []
         self._sources: list[SequentialFrameSource] = []
         self._video_states: list[_VideoState] = []
 
         # Processing components
         self._analyzer = DuplicateDetector()
         self._compositor: SimpleCompositor | None = None
+        self._seek_compositor: SimpleCompositor | None = None
+        self._config = PresetConfig()
         self._buffer: ProcessingBuffer | None = None
+        self._last_output_frame: np.ndarray | None = None
 
         # Export (optional)
         self._video_exporter: StreamingVideoExporter | None = None
@@ -89,6 +99,7 @@ class InteractiveEngine(QObject):
 
         # Threading
         self._processing_thread: threading.Thread | None = None
+        self._frame_lock = threading.RLock()
         self._pause_event = threading.Event()
         self._stop_event = threading.Event()
         self._pause_event.set()  # Not paused initially
@@ -96,6 +107,7 @@ class InteractiveEngine(QObject):
         # Frame tracking
         self._total_frames = 0
         self._current_frame = 0
+        self._last_frame_emit_time = 0.0
 
     # === Properties ===
 
@@ -123,6 +135,7 @@ class InteractiveEngine(QObject):
         video_paths: list[Path | str],
         output_video: Path | str | None = None,
         output_csv: Path | str | None = None,
+        config: PresetConfig | None = None,
     ) -> LoadResult:
         """Load videos and configure exports.
 
@@ -130,6 +143,7 @@ class InteractiveEngine(QObject):
             video_paths: 1-4 video file paths
             output_video: Optional output video path
             output_csv: Optional output CSV path
+            config: Optional overlay preset config (default: PresetConfig())
 
         Returns:
             LoadResult with video information
@@ -161,7 +175,8 @@ class InteractiveEngine(QObject):
 
         # Determine total frames (minimum across all videos)
         frame_counts = [r.total_frames for r in self._readers]
-        self._total_frames = min(frame_counts) - 1  # -1 because we need pairs
+        min_frames = min(frame_counts)
+        self._total_frames = max(0, min_frames - 1)  # -1 because we need pairs, 0 if unknown
 
         if len(set(frame_counts)) > 1:
             logger.warning(
@@ -171,20 +186,34 @@ class InteractiveEngine(QObject):
                 self._total_frames,
             )
 
-        # Initialize video states for compositor
+        # Initialize video states for seek/restore
         self._video_states = [
-            _VideoState(window_size=60, container_fps=r.fps)
+            _VideoState(window_size=round(r.fps), container_fps=r.fps)
             for r in self._readers
         ]
+
+        # Initialize compositor output
+        cfg = deepcopy(config) if config is not None else PresetConfig()
+        self._config = cfg
+        self._compositor = self._create_compositor()
+        self._last_output_frame = None
+
+        # Fix analyzer threshold to match config
+        self._analyzer = DuplicateDetector(duplicate_threshold=cfg.processing.duplicate_threshold)
 
         # Initialize buffer
         self._buffer = ProcessingBuffer(video_count=len(paths))
 
         # Setup exporters if requested
         if output_video:
+            # Determine output fps: use config if valid, else source fps
+            output_fps = self._readers[0].fps
+            if cfg.export.fps is not None and 10 <= cfg.export.fps <= 120:
+                output_fps = cfg.export.fps
             self._video_exporter = StreamingVideoExporter(
                 Path(output_video),
-                fps=self._readers[0].fps,
+                fps=output_fps,
+                source_fps=self._readers[0].fps,
             )
 
         if output_csv:
@@ -220,14 +249,16 @@ class InteractiveEngine(QObject):
         if self._csv_exporter:
             self._csv_exporter.open()
 
+        from trdrop.profiling import get_profiler
+        get_profiler().start_run()
+
         # Start processing thread
         self._processing_thread = threading.Thread(
             target=self._processing_loop,
             daemon=True,
         )
-        self._processing_thread.start()
-
         self._set_state(EngineState.PROCESSING)
+        self._processing_thread.start()
 
     def pause(self) -> None:
         """Pause processing.
@@ -239,7 +270,11 @@ class InteractiveEngine(QObject):
             raise ValueError(f"Cannot pause in state {self._state.name}")
 
         self._pause_event.clear()
-        self._set_state(EngineState.PAUSED)
+        # Finish an in-flight frame before reporting PAUSED. Export runs
+        # outside this lock and may remain in flight while preview seeks.
+        with self._frame_lock:
+            if self._state == EngineState.PROCESSING:
+                self._set_state(EngineState.PAUSED)
 
     def resume(self) -> None:
         """Resume processing.
@@ -281,35 +316,59 @@ class InteractiveEngine(QObject):
         for i, state in enumerate(self._video_states):
             state.restore(snapshot.video_states[i])
 
-        # Seek video readers and get frames
+        # Separate readers keep seeking from changing the processing iterators.
+        if not self._seek_readers:
+            try:
+                for reader in self._readers:
+                    self._seek_readers.append(PyAVReader(reader.path))
+            except Exception:
+                for reader in self._seek_readers:
+                    reader.close()
+                self._seek_readers.clear()
+                raise
+
+        # Seek video readers and get the same pair used by analysis.
         frames: list[np.ndarray] = []
         prev_frames: list[np.ndarray] = []
 
-        for reader in self._readers:
+        for reader in self._seek_readers:
             # Allocate buffers for this reader
             frame_shape = (reader.height, reader.width, 3)
             curr_frame = np.empty(frame_shape, dtype=np.uint8)
             prev_frame = np.empty(frame_shape, dtype=np.uint8)
 
-            # Seek to frame_idx to get current frame
+            # Processed pair N compares source frames N and N+1.
             reader.seek(frame_idx)
-            if not reader.read(curr_frame):
+            if not reader.read(prev_frame):
                 raise RuntimeError(f"Failed to read frame {frame_idx}")
+            if not reader.read(curr_frame):
+                raise RuntimeError(f"Failed to read frame {frame_idx + 1}")
             frames.append(curr_frame)
-
-            # Seek to previous frame for diff visualization
-            if frame_idx > 0:
-                reader.seek(frame_idx - 1)
-                if not reader.read(prev_frame):
-                    prev_frames.append(curr_frame.copy())  # Fallback
-                else:
-                    prev_frames.append(prev_frame)
-            else:
-                prev_frames.append(curr_frame.copy())
+            prev_frames.append(prev_frame)
 
         # Extract plot histories from restored states
         fps_histories = tuple(list(s.fps_history) for s in self._video_states)
         frametime_histories = tuple(list(s.frametime_history) for s in self._video_states)
+
+        # Render composited frame through compositor if available
+        composited_frame: np.ndarray | None = None
+        if self._compositor is not None:
+            if self._seek_compositor is None:
+                self._seek_compositor = self._create_compositor()
+            # Build FramePairs from raw arrays
+            pairs: list[FramePair] = []
+            for i in range(len(frames)):
+                prev_view = FrameView(
+                    _data=prev_frames[i], index=frame_idx, pts=0,
+                )
+                curr_view = FrameView(
+                    _data=frames[i], index=frame_idx + 1, pts=0,
+                )
+                pairs.append(FramePair(prev=prev_view, curr=curr_view))
+            output = self._seek_compositor.render_snapshot(
+                pairs, list(snapshot.metrics), snapshot.video_states, frame_idx,
+            )
+            composited_frame = output.frame.copy()
 
         return SeekResult(
             frame_idx=frame_idx,
@@ -320,6 +379,7 @@ class InteractiveEngine(QObject):
             frametime_values=tuple(s.smoothed_frametime() for s in self._video_states),
             fps_histories=fps_histories,
             frametime_histories=frametime_histories,
+            composited_frame=composited_frame,
         )
 
     def reset(self) -> None:
@@ -346,7 +406,7 @@ class InteractiveEngine(QObject):
             self._csv_exporter = None
 
         # Close readers
-        for reader in self._readers:
+        for reader in self._readers + self._seek_readers:
             try:
                 reader.close()
             except Exception:
@@ -354,14 +414,18 @@ class InteractiveEngine(QObject):
 
         # Clear state
         self._readers = []
+        self._seek_readers = []
         self._sources = []
         self._video_states = []
         self._buffer = None
         self._compositor = None
+        self._seek_compositor = None
         self._processing_thread = None
         self._total_frames = 0
         self._current_frame = 0
         self._error_message = None
+        self._last_output_frame = None
+        self._last_frame_emit_time = 0.0
 
         # Reset events
         self._pause_event.set()
@@ -371,18 +435,58 @@ class InteractiveEngine(QObject):
 
     # === Internal ===
 
+    def _create_compositor(self) -> SimpleCompositor:
+        """Create independent rendering resources using the output preset."""
+        width, height = self._config.export.resolution
+        if width <= 0 or height <= 0:
+            raise ValueError("Export resolution must be positive")
+        return SimpleCompositor(
+            video_count=len(self._readers),
+            video_fps=[reader.fps for reader in self._readers],
+            output_width=width,
+            output_height=height,
+            config=deepcopy(self._config),
+            video_names=[reader.path.stem for reader in self._readers],
+        )
+
     def _set_state(self, new_state: EngineState) -> None:
         """Set state and emit signal."""
         if self._state != new_state:
             self._state = new_state
             self.state_changed.emit(new_state)
 
+    def set_duplicate_threshold(self, threshold: float) -> None:
+        """Update duplicate threshold for analysis."""
+        self._analyzer = DuplicateDetector(duplicate_threshold=threshold)
+
+    def _export_output(self, output: CompositorOutput) -> None:
+        """Export compositor output to configured exporters."""
+        if self._video_exporter is not None:
+            self._video_exporter.write_frame(output)
+        if self._csv_exporter is not None:
+            self._csv_exporter.write_frame(output)
+
     def _processing_loop(self) -> None:
         """Main processing loop (runs in background thread)."""
+        from concurrent.futures import Future, ThreadPoolExecutor
         try:
+            import itertools
             source_iters = [iter(s) for s in self._sources]
+            from trdrop.profiling import get_profiler
+            profiler = get_profiler()
 
-            for frame_idx in range(self._total_frames):
+            pool = ThreadPoolExecutor(max_workers=1)
+            export_future: Future[None] | None = None
+
+            # Process until StopIteration if total_frames is 0/unknown,
+            # otherwise use range.
+            frame_iterator = (
+                range(self._total_frames)
+                if self._total_frames > 0
+                else itertools.count()
+            )
+
+            for frame_idx in frame_iterator:
                 # Check for stop
                 if self._stop_event.is_set():
                     break
@@ -391,6 +495,9 @@ class InteractiveEngine(QObject):
                 self._pause_event.wait()
                 if self._stop_event.is_set():
                     break
+
+                profiler.start_frame(frame_idx)
+                t0_read = time.perf_counter()
 
                 # Read frame pairs from all sources
                 pairs = []
@@ -404,9 +511,13 @@ class InteractiveEngine(QObject):
                 if len(pairs) != len(self._sources):
                     break  # Source exhausted
 
+                profiler.add_timing("read_total", (time.perf_counter() - t0_read) * 1000)
+                profiler.mark_timestamp("read_end")
+                t0_analysis = time.perf_counter()
+
                 # Analyze each video
                 metrics_list: list[FrameMetrics] = []
-                for i, pair in enumerate(pairs):
+                for pair in pairs:
                     result = self._analyzer.map(pair)
                     metrics = FrameMetrics(
                         frame_index=frame_idx,
@@ -415,28 +526,76 @@ class InteractiveEngine(QObject):
                     )
                     metrics_list.append(metrics)
 
-                    # Update video state (is_duplicate is always set by DuplicateDetector)
-                    self._video_states[i].update(result.is_duplicate or False)
+                profiler.add_timing("analysis_total", (time.perf_counter() - t0_analysis) * 1000)
+                profiler.mark_timestamp("analysis_end")
 
-                # Release frame pairs to allow buffer reuse
-                for pair in pairs:
-                    pair.release()
+                # Never hold the frame lock while waiting for an encoder.
+                if export_future is not None:
+                    export_future.result()
 
-                # Store snapshot
-                if self._buffer is not None:
-                    video_snapshots = tuple(s.snapshot() for s in self._video_states)
-                    self._buffer.append(
-                        frame_idx=frame_idx,
-                        metrics=tuple(metrics_list),
-                        video_states=video_snapshots,
-                    )
+                while not self._stop_event.is_set():
+                    self._pause_event.wait()
+                    with self._frame_lock:
+                        if self._stop_event.is_set():
+                            break
+                        if not self._pause_event.is_set():
+                            continue
+                        # Build composited output (also computes aggregated metrics)
+                        video_snapshots = tuple(s.snapshot() for s in self._video_states)
+                        if self._compositor is not None:
+                            t0_comp = time.perf_counter()
+                            output = self._compositor.process(pairs, metrics_list)
+                            profiler.add_timing(
+                                "compositor_total", (time.perf_counter() - t0_comp) * 1000,
+                            )
+                            profiler.mark_timestamp("compositor_end")
+                            self._last_output_frame = output.frame.copy()
 
-                # Export if configured
-                # TODO: Integrate compositor for video export
+                            current_profile = getattr(profiler, 'current_frame', None)
 
-                # Update progress
-                self._current_frame = frame_idx
-                self.progress.emit(frame_idx + 1, self._total_frames)
+                            def _do_export(out, prof):
+                                self._export_output(out)
+                                if prof is not None:
+                                    prof.export_end_ts = time.perf_counter()
+
+                            export_future = pool.submit(_do_export, output, current_profile)
+
+                            video_snapshots = self._compositor.snapshot_video_states()
+
+                            # Emit frame for live preview (~30fps throttle)
+                            now = time.monotonic()
+                            if now - self._last_frame_emit_time >= 0.033:
+                                self.frame_ready.emit(self._last_output_frame)
+                                self._last_frame_emit_time = now
+
+                        # Release frame pairs to allow buffer reuse
+                        for pair in pairs:
+                            pair.release()
+
+                        # Store snapshot
+                        if self._buffer is not None:
+                            self._buffer.append(
+                                frame_idx=frame_idx,
+                                metrics=tuple(metrics_list),
+                                video_states=video_snapshots,
+                            )
+
+                        # Update progress
+                        self._current_frame = frame_idx
+                        self.progress.emit(frame_idx + 1, self._total_frames)
+
+                        profiler.end_frame()
+                        break
+
+                if self._stop_event.is_set():
+                    for pair in pairs:
+                        pair.release()
+                    break
+
+            # Wait for last export
+            if export_future is not None:
+                export_future.result()
+            pool.shutdown(wait=True)
 
             # Processing complete
             if not self._stop_event.is_set():
@@ -461,3 +620,6 @@ class InteractiveEngine(QObject):
                     self._csv_exporter.close()
                 except Exception:
                     pass
+
+            from trdrop.profiling import get_profiler
+            get_profiler().end_run()

@@ -23,7 +23,7 @@ from trdrop.engine import StreamingEngine
 from trdrop.export import (
     StreamingCSVExporter,
     StreamingVideoExporter,
-    get_best_h264_encoder,
+    get_best_encoder,
     is_hardware_encoder,
 )
 from trdrop.profiling.profiler import OverlapStats, Profiler, get_profiler, reset_profiler
@@ -186,7 +186,7 @@ class TestBenchmark:
     def test_benchmark(self, qapp, tmp_path):
         """Consolidated benchmark: scaling + async comparison."""
         # Get encoder info
-        encoder = get_best_h264_encoder()
+        encoder = get_best_encoder()
         hw_tag = "HW" if is_hardware_encoder(encoder) else "SW"
 
         print("\n")

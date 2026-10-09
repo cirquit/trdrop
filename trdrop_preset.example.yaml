@@ -1,0 +1,237 @@
+# ============================================================================
+# TRDrop v2 Preset Configuration
+# ============================================================================
+# This file controls overlay appearance, layout, and export settings.
+# Load it in TRDrop via Config... button, or pass it via command line.
+#
+# Coordinates are normalized 0.0-1.0 (e.g., 0.5 = center).
+# Colors are RGBA arrays [Red, Green, Blue, Alpha], each 0-255.
+# "ref" can be "global" (entire output frame) or "video:N" (video N's region).
+
+# ----------------------------------------------------------------------------
+# Processing parameters
+# ----------------------------------------------------------------------------
+processing:
+  # Threshold for duplicate frame detection (0.0-1.0).
+  # Lower = more sensitive. Frames with diff_ratio below this are marked as duplicates.
+  # 0.02 works well for most capture card footage.
+  duplicate_threshold: 0.02
+
+  # Sliding window size for FPS calculation (in frames).
+  # Larger = smoother FPS reading but slower to react to changes.
+  # 60 means FPS is averaged over the last 60 frames.
+  window_size: 60
+
+# ----------------------------------------------------------------------------
+# Rendering / overlay configuration
+# ----------------------------------------------------------------------------
+rendering:
+
+  # --- Video layout ---
+  layout:
+    # How multiple videos are arranged:
+    #   grid       — automatic grid (1=full, 2=side-by-side, 3-4=2x2)
+    #   horizontal — all videos in a single row
+    #   vertical   — all videos in a single column
+    #   single     — only show first video
+    mode: grid
+
+    # Gap between videos (0.0-1.0, fraction of output size). 0 = no gap.
+    spacing: 0.0
+
+  # --- FPS plot (shown across the bottom of the output) ---
+  fps_plot:
+    position:
+      x: 0.025       # left edge
+      y: 0.83        # vertical position (0=top, 1=bottom)
+      ref: global    # relative to entire output frame
+    size:
+      width: 0.955   # 95.5% of output width
+      height: 0.15   # 15% of output height
+      ref: global
+    visible: true    # set to false to hide the FPS plot
+
+    # Plot drawing style: "filled" (area chart), "line" (line chart), or "bar"
+    style: line
+
+    # Subtle background behind the plot [R, G, B, A]
+    background_color: [0, 0, 0, 24]
+
+    # Grid line color [R, G, B, A]
+    grid_color: [255, 255, 255, 108]
+
+    # Line thickness in pixels
+    line_width: 4.0
+
+    # Font size for axis labels and FPS values (fraction of output height)
+    label_font_size: 0.018
+
+    # Show horizontal grid lines at target FPS intervals
+    show_grid: true
+
+  # --- Frametime plot ---
+  frametime_plot:
+    position:
+      x: 0.025
+      y: 0.69
+      ref: global
+    size:
+      width: 0.18
+      height: 0.10
+      ref: global
+    visible: true
+
+    style: line
+    background_color: [0, 0, 0, 18]
+    grid_color: [255, 255, 255, 108]
+    line_width: 3.0
+    label_font_size: 0.016
+    show_grid: true
+
+  # Font used for all text overlays
+  font_family: monospace
+
+  # Colors for each video's plot line and text [R, G, B, A].
+  # Up to 4 colors for up to 4 videos.
+  video_colors:
+    - [52, 199, 89, 230]    # Video 1 — green
+    - [0, 122, 255, 230]    # Video 2 — blue
+    - [255, 149, 0, 230]    # Video 3 — orange
+    - [255, 59, 48, 230]    # Video 4 — red
+
+# ----------------------------------------------------------------------------
+# Per-video overlay settings
+# ----------------------------------------------------------------------------
+# Configure text overlays for each video slot (0-3).
+# Only define slots you want to customize; others use defaults.
+videos:
+  0:
+    # --- FPS text overlay ---
+    fps_text:
+      position:
+        x: 0.03       # 3% from left edge of this video's region
+        y: 0.08       # 8% from top
+        ref: video:0   # relative to video 0's region
+      anchor: top_left  # text anchor point: top_left, top_center, top_right, etc.
+      visible: true
+      # Font size as fraction of video height (0.035 = 3.5% of video height)
+      font_size: 0.035
+      font_family: monospace
+      color: [255, 255, 255, 230]       # white, slightly transparent
+      shadow: true                       # drop shadow for readability
+      shadow_color: [0, 0, 0, 180]      # dark shadow
+
+    # --- Frametime text overlay (hidden by default) ---
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:0
+      anchor: top_left
+      visible: false    # set to true to show frametime text
+      font_size: 0.04
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+
+    # Whether this video's overlays are shown at all
+    visible: true
+
+  1:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:1
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:1
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    visible: true
+
+  2:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:2
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:2
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    visible: true
+
+  3:
+    fps_text:
+      position:
+        x: 0.03
+        y: 0.08
+        ref: video:3
+      anchor: top_left
+      visible: true
+      font_size: 0.035
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    frametime_text:
+      position:
+        x: 0.03
+        y: 0.11
+        ref: video:3
+      anchor: top_left
+      visible: false
+      font_size: 0.04
+      font_family: monospace
+      color: [255, 255, 255, 230]
+      shadow: true
+      shadow_color: [0, 0, 0, 180]
+    visible: true
+
+# ----------------------------------------------------------------------------
+# Export settings
+# ----------------------------------------------------------------------------
+export:
+  # Output resolution [width, height] in pixels
+  resolution: [1920, 1080]
+
+  # Video codec: h264, h265, vp9, prores
+  # "auto" picks the best available (prefers hardware encoding)
+  codec: h264
+
+  # Bitrate: "auto" for codec default, or specify like "10M", "5000k"
+  bitrate: auto
+
+  # Output framerate. null = use source video FPS. Range: 10-120.
+  fps: 60

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPainter, QPaintEvent
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget
@@ -18,13 +20,22 @@ STATE_COLORS: dict[EngineState, QColor] = {
     EngineState.ERROR: QColor(255, 59, 48),        # Red
 }
 
-STATE_MESSAGES: dict[EngineState, str] = {
+STATE_MESSAGES_EN: dict[EngineState, str] = {
     EngineState.IDLE: "No videos loaded",
     EngineState.READY: "Ready to process",
     EngineState.PROCESSING: "Processing...",
     EngineState.PAUSED: "Paused",
     EngineState.COMPLETED: "Complete",
     EngineState.ERROR: "Error",
+}
+
+STATE_MESSAGES_ZH: dict[EngineState, str] = {
+    EngineState.IDLE: "尚未加载视频",
+    EngineState.READY: "就绪",
+    EngineState.PROCESSING: "处理中...",
+    EngineState.PAUSED: "已暂停",
+    EngineState.COMPLETED: "已完成",
+    EngineState.ERROR: "出错",
 }
 
 
@@ -56,6 +67,7 @@ class StateIndicator(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._state = EngineState.IDLE
+        self._translator: Callable[[str, str], str] | None = None
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(8, 4, 8, 4)
@@ -64,11 +76,20 @@ class StateIndicator(QWidget):
         self._circle = StateCircle()
         layout.addWidget(self._circle)
 
-        self._label = QLabel(STATE_MESSAGES[EngineState.IDLE])
+        self._label = QLabel(STATE_MESSAGES_EN[EngineState.IDLE])
         self._label.setStyleSheet("font-size: 12px;")
         layout.addWidget(self._label)
 
         layout.addStretch()
+
+    def set_translator(self, t: Callable[[str, str], str]) -> None:
+        """Set translation function for bilingual support."""
+        self._translator = t
+
+    def _tr(self, en: str, zh: str) -> str:
+        if self._translator is not None:
+            return self._translator(en, zh)
+        return en
 
     @property
     def state(self) -> EngineState:
@@ -88,4 +109,12 @@ class StateIndicator(QWidget):
         if message is not None:
             self._label.setText(message)
         else:
-            self._label.setText(STATE_MESSAGES.get(state, str(state)))
+            en = STATE_MESSAGES_EN.get(state, str(state))
+            zh = STATE_MESSAGES_ZH.get(state, en)
+            self._label.setText(self._tr(en, zh))
+
+    def retranslate(self) -> None:
+        """Re-apply translation to current default state message."""
+        en = STATE_MESSAGES_EN.get(self._state, str(self._state))
+        zh = STATE_MESSAGES_ZH.get(self._state, en)
+        self._label.setText(self._tr(en, zh))

@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.so
+*.exe
 .venv/
 *.egg-info/
 dist/
@@ -20,3 +21,24 @@ examples/*.csv
 
 # macOS
 .DS_Store
+*.mp4
+*.csv
+
+# User preset (use trdrop_preset.example.yaml as template)
+trdrop_preset.yaml
+
+# AI and planning files
+trdrop_profile.summary.txt
+implementation_plan.md
+task.md
+walkthrough.md
+diff.txt
+head_version.py
+.cursorrules
+.claude/
+
+# transient icon conversion workspace
+a.iconset/
+*.iconset/
+
+!uv.lock

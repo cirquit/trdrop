@@ -14,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from PyQt6.QtWidgets import QApplication
 
 from tests.testkit.config import VideoConfig
 from tests.testkit.generator import VideoGenerator
@@ -21,6 +22,13 @@ from tests.testkit.patterns import PatternType
 from trdrop.engine import EngineState, InteractiveEngine, LoadResult
 
 pytestmark = pytest.mark.gui
+
+
+@pytest.fixture(scope="module", autouse=True)
+def qapp():
+    """Keep Qt's font system alive while the engine renders overlays."""
+    app = QApplication.instance() or QApplication([])
+    return app
 
 
 @pytest.fixture
